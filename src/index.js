@@ -9,7 +9,7 @@ const MenuItem = electron.MenuItem
 let mainWindow;
 
 const sqlite = require('sqlite3').verbose();
-const db = new sqlite.Database("./chuj.db")
+const db = new sqlite.Database("./goals.db")
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
