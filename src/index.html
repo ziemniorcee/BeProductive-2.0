@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="index.css"/>
+    <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
+    <script src="goals.js"></script>
+    <script src="render.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
+</head>
+<body onload="init()">
+<div class="sidebar">
+    <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
+    <div id="mySidenav">
+        <a href="#" id="about"><img src="images/goal01.png" alt="laurels" width="80" height="80"><span>TO DO</span></a>
+        <a href="#" id="blog"><img src="images/habit01.png" alt="laurels" width="80" height="80"><span>Habits</span></a>
+        <a href="#" id="projects"><img src="images/timeline01.png" alt="laurels" width="80"
+                                       height="80"><span>Timeline</span></a>
+        <a href="#" id="contact"><img src="images/strategy.png" alt="laurels" width="80"
+                                      height="80"><span>Strategy</span></a>
+    </div>
+
+</div>
+<div id="main">
+    <div id="header">
+        <button type="button"><img src="images/goals/today.png" width="40" height="40"><span>Today</span></button>
+        <button type="button"><img src="images/goals/tomorrow.png" width="40" height="40"><span>Tomorrow</span></button>
+        <button type="button"><img src="images/goals/other.png" width="40" height="40"><span>Another day</span></button>
+        <p id="date">Friday, September 01, 2023</p>
+        <hr width="250px" size="3" align="left" color="#4655F9">
+    </div>
+    <div id="dragparent">
+
+    </div>
+    <div>
+        <button id="add" onclick="new_goal()"><span>+</span></button>
+        <input type="text" id="entry">
+
+    </div>
+    <script>
+
+    </script>
+
+</div>
+<script>
+
+</script>
+</body>
+</html>
