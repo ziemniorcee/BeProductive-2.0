@@ -11,6 +11,8 @@ let mainWindow;
 const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database("./goals.db")
 
+let id_array = []
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -36,21 +38,50 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
 };
 ipcMain.on('get-data', (event,params) => {
-    console.log(params)
-    db.all("SELECT goal FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+    db.all("SELECT id, goal FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
+            console.log(rows)
+            id_array = rows.map(({id})=>id)
             event.reply('receive-data', rows) // This sends the data to the renderer process
+
         }
     })
 })
 
 ipcMain.on('send-data', (event,params) =>{
-
-    console.log(params)
     db.run("INSERT INTO goals (goal, addDate) VALUES ("+"'"+params.goal_text+"'"+", "+"'"+params.date+"'"+") ")
+
+    db.all("SELECT id FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+        if (err) {
+            console.error(err)
+        } else {
+            id_array = rows.map(({id})=>id)
+        }
+    })
 })
+
+ipcMain.on('pressed-div', (event,params) =>{
+
+    db.run("DELETE FROM goals WHERE id="+id_array[params.del_id]+";")
+    // db.run("INSERT INTO goals (goal, addDate) VALUES ("+"'"+params.goal_text+"'"+", "+"'"+params.date+"'"+") ")
+})
+ipcMain.on('rows-change', (event, params) =>{
+    db.all("SELECT id FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+
+        if (err) {
+            console.error(err)
+        } else {
+            for(let i = 0; i < rows.length; i++)
+            {
+                db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+"WHERE id="+rows[i].id+";")
+            }
+
+        }
+    })
+})
+
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 // This method will be called when Electron has finished
@@ -59,25 +90,15 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 app.on('ready', function(){
     createWindow()
 
-    const template = [
-        {
-            label: 'demo'
-        }
-    ]
-
-    const menu = Menu.buildFromTemplate(template)
-    // Menu.setApplicationMenu(menu)
-
     const ctxMenu = new Menu()
     ctxMenu.append(new MenuItem({
         label: 'Remove',
-        click: function (){
-
-            console.log('menu item clicked')
+        click: () => {
+            mainWindow.webContents.send("remove_task")
         }
     }))
     mainWindow.webContents.on('context-menu', function (e, params){
-        ctxMenu.popup(mainWindow, params.x, params.y)
+        ctxMenu.popup(mainWindow)
     })
 });
 

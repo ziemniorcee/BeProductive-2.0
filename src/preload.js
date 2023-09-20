@@ -7,5 +7,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI2', {
-    sendData: (params) => ipcRenderer.send('send-data',params), // This sends a message to the main process
+    sendData: (params) => ipcRenderer.send('send-data',params),
+})
+
+contextBridge.exposeInMainWorld('electronAPI3', {
+    delete_task: (callback) => ipcRenderer.on("remove_task", callback)
+})
+
+contextBridge.exposeInMainWorld('electronAPI4', {
+    sendData: (params) => ipcRenderer.send('rows-change',params),
+})
+
+contextBridge.exposeInMainWorld('electronAPI5', {
+    sendId: (params) => ipcRenderer.send('pressed-div', params)
 })
