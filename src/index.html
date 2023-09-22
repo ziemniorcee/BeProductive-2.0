@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8"/>
     <title>Hello World!</title>
     <link rel="stylesheet" href="index.css"/>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
-
+    <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="goals.js"></script>
-    <script src="render.js"></script>
-
+    <script type="module" src="date.js"></script>
+    <script type="module" src="render.js"></script>
+    <script>
+        $( function() {
+            $( "#datepicker" ).datepicker();
+        } );
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body onload="init()">
@@ -26,9 +34,11 @@
 </div>
 <div id="main">
     <div id="header">
-        <button type="button" onclick="date_change(0)"><img src="images/goals/today1.png" width="40" height="40"><span>Today</span></button>
-        <button type="button" onclick="date_change(1)"><img src="images/goals/tomorrow.png" width="40" height="40"><span>Tomorrow</span></button>
-        <button type="button" onclick="date_change(2)"><img src="images/goals/other.png" width="40" height="40"><span>Another day</span></button>
+        <button type="button" id="todayBtn"><img src="images/goals/today1.png" id="todayimg" width="40" height="40"><span>Today</span></button>
+        <button type="button" id="tomorrowBtn"><img src="images/goals/tomorrow0.png" id="tomorrowimg" width="40" height="40"><span>Tomorrow</span></button>
+        <button type="button" id="otherDateBtn"><img src="images/goals/other0.png" id="anotherdayimg" width="40" height="40"><span>Another day</span></button>
+        <input type="text" id="datepicker">
+
         <p id="date">Friday, September 01, 2023</p>
         <hr width="250px" size="3" align="left" color="#4655F9">
     </div>
@@ -36,8 +46,8 @@
 
     </div>
     <div>
-        <button id="add" onclick="new_goal()"><span>+</span></button>
-        <input type="text" id="entry">
+        <button id="add"><span>+</span></button>
+        <input type="text" id="entry" spellcheck="false">
 
     </div>
 

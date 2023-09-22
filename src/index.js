@@ -1,4 +1,5 @@
 const electron = require("electron")
+
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 const ipcMain = electron.ipcMain
@@ -12,6 +13,7 @@ const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database("./goals.db")
 
 let id_array = []
+let current_date = null
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -38,11 +40,11 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
 };
 ipcMain.on('get-data', (event,params) => {
+    current_date=params.date
     db.all("SELECT id, goal FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
-            console.log(rows)
             id_array = rows.map(({id})=>id)
             event.reply('receive-data', rows) // This sends the data to the renderer process
 
@@ -68,7 +70,7 @@ ipcMain.on('pressed-div', (event,params) =>{
     // db.run("INSERT INTO goals (goal, addDate) VALUES ("+"'"+params.goal_text+"'"+", "+"'"+params.date+"'"+") ")
 })
 ipcMain.on('rows-change', (event, params) =>{
-    db.all("SELECT id FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+    db.all("SELECT id FROM goals WHERE addDate="+"'"+current_date+"'"+";", (err, rows) => { // This queries the database
 
         if (err) {
             console.error(err)

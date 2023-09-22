@@ -22,6 +22,7 @@
     "interactjs": "^1.10.18",
     "interfacejs": "0.0.1",
     "jquery": "^3.7.1",
+    "js-datepicker": "^5.18.2",
     "npm": "^10.1.0",
     "php": "^1.0.2",
     "sqlite3": "^5.1.6"
