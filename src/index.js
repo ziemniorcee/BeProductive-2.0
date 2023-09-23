@@ -41,7 +41,7 @@ const createWindow = () => {
 };
 ipcMain.on('get-data', (event,params) => {
     current_date=params.date
-    db.all("SELECT id, goal FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+    db.all("SELECT id, goal, check_state FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
@@ -66,18 +66,32 @@ ipcMain.on('send-data', (event,params) =>{
 
 ipcMain.on('pressed-div', (event,params) =>{
 
-    db.run("DELETE FROM goals WHERE id="+id_array[params.del_id]+";")
-    // db.run("INSERT INTO goals (goal, addDate) VALUES ("+"'"+params.goal_text+"'"+", "+"'"+params.date+"'"+") ")
+    db.run("DELETE FROM goals WHERE id="+id_array[params.tasks.length ]+";")
+    console.log(params.tasks)
+    console.log(params.checks)
+    for (let i = 0; i < params.tasks.length; i++){
+        console.log(params.tasks[i], params.checks[i])
+        db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+", check_state = "+"'"+params.checks[i]+"'"+" WHERE id="+id_array[i]+";")
+    }
+})
+
+ipcMain.on('change_checks', (event,params) =>{
+    console.log(params.checks)
+    console.log(id_array)
+    for(let i = 0; i < params.checks.length; i++)
+    {
+        db.run("UPDATE goals SET check_state="+"'"+params.checks[i]+"'"+"WHERE id="+id_array[i]+";")
+    }
+
 })
 ipcMain.on('rows-change', (event, params) =>{
     db.all("SELECT id FROM goals WHERE addDate="+"'"+current_date+"'"+";", (err, rows) => { // This queries the database
-
         if (err) {
             console.error(err)
         } else {
             for(let i = 0; i < rows.length; i++)
             {
-                db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+"WHERE id="+rows[i].id+";")
+                db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+", check_state = "+"'"+params.checks[i]+"'"+" WHERE id="+rows[i].id+";")
             }
 
         }

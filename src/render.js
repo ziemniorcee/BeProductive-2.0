@@ -5,6 +5,7 @@ let data = {};
 let pressed = false
 let selected_div = null
 let tasks = []
+let checks = []
 
 let todo_length = 0
 
@@ -13,26 +14,21 @@ window.electronAPI.getData({date: l_date.sql}) // This calls the exposed method 
 window.electronAPI.receiveData((data) => {
     todo_length = data.length
     let nameString = data.map((elem) => {
-        return load_goals(elem.goal)
+        return load_goals(elem.goal, elem.check_state)
     })
 })
 window.electronAPI3.delete_task((event) => {
     selected_div.remove()
     let elements = document.getElementsByClassName("task")
-    let before = tasks
-    let index_del = elements.length
-
+    let elements_checks = document.getElementsByClassName("check_task")
     tasks = []
-    for (let i = 0; i < elements.length; i++) {
+    checks = []
+    for(let i = 0; i < elements.length; i++){
         tasks.push(elements[i].textContent)
-        if (before[i] !== tasks[i]) {
-
-            index_del = i
-            break
-        }
+        checks.push(Number(elements_checks[i].checked))
     }
 
-    window.electronAPI5.sendId({del_id: index_del, date: l_date.sql})
+    window.electronAPI5.sendId({tasks: tasks, checks:checks, date: l_date.sql})
 })
 
 document.getElementById("add").addEventListener('click', () => {
@@ -40,25 +36,33 @@ document.getElementById("add").addEventListener('click', () => {
 })
 
 
-function load_goals(text){
+function load_goals(text, check) {
     text = text.replace("`@`", "'")
-    document.getElementById("dragparent").innerHTML += "<div class='dragthing'  onmousedown='press()' onmouseup='unpress()'>" +
-        "<input type='checkbox' class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
+    let state = ""
+    if (check) {
+        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+            "<input type='checkbox' checked class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
+    } else {
+        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+            "<input type='checkbox' class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
+
+    }
     tasks.push(text)
+    checks.push(check)
 }
+
 function new_goal() {
     let goal_text = document.getElementById('entry').value
 
-    if (goal_text !== ""){
+    if (goal_text !== "") {
         let text = goal_text.replace("'", "`@`")
         window.electronAPI2.sendData({goal_text: text, date: l_date.sql})
-        document.getElementById("dragparent").innerHTML += "<div class='dragthing'  onmousedown='press()' onmouseup='unpress()'>" +
-            "<input type='checkbox' class='check_task' ><div class='task_text'><span class='task'>" + goal_text + "</span></div></div>"
+        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+            "<input type='checkbox'  class='check_task' ><div class='task_text'><span class='task'>" + goal_text + "</span></div></div>"
         document.getElementById('entry').value = ""
+        tasks.push(goal_text)
+        checks.push(0)
     }
-
-
-
 }
 
 window.addEventListener("DOMContentLoaded", (event) => {
@@ -94,3 +98,11 @@ $("#entry").on('keyup', function (e) {
     }
 });
 
+$(document).on('click', '.check_task', function () {
+    let elements = document.getElementsByClassName("check_task")
+    let array = []
+    for (let i = 0; i < elements.length; i++) {
+        array.push(Number(elements[i].checked))
+    }
+    window.electronAPI6.sendChecks({checks: array})
+});

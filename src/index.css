@@ -128,12 +128,13 @@ body {
     position: relative;
     width: calc(100% - 200px);
     height: calc(100% - 270px);
+    margin-bottom: 5px;
     overflow: hidden;
-
+    overflow-y: scroll;
 }
 
 .dragthing {
-    width: calc(99%);
+    margin-right: 5px;
     min-height: 50px;
     background: #4655F9;
     font-size: 25px;
@@ -199,3 +200,17 @@ body {
     margin-right: 10px;
     word-break: break-word;
 }
+
+#dragparent::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+#dragparent::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+#dragparent::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+}
+

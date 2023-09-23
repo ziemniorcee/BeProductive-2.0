@@ -1,6 +1,9 @@
 function init(){
     dragula([document.querySelector("#dragparent")]);
 }
+
+
+
 let tasks = []
 function press() {
     tasks = []
@@ -31,5 +34,14 @@ function change() {
     for(let i = 0; i < tasks.length; i++){
         tasks[i] = tasks[i].replace("'", "`@`")
     }
-    window.electronAPI4.sendData({tasks: tasks})
+
+    let elements = document.getElementsByClassName("check_task")
+    let array = []
+    for (let i = 0; i < elements.length-1; i++) {
+        array.push(Number(elements[i].checked))
+    }
+    console.log(array)
+
+    window.electronAPI4.sendData({tasks: tasks, checks: array})
 }
+

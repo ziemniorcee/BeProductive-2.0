@@ -23,3 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI4', {
 contextBridge.exposeInMainWorld('electronAPI5', {
     sendId: (params) => ipcRenderer.send('pressed-div', params)
 })
+
+contextBridge.exposeInMainWorld('electronAPI6', {
+    sendChecks: (params) => ipcRenderer.send('change_checks', params)
+})

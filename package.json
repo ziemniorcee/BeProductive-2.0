@@ -18,6 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "dragula": "^3.7.3",
     "electron-squirrel-startup": "^1.0.0",
     "interactjs": "^1.10.18",
     "interfacejs": "0.0.1",
