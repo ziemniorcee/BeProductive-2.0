@@ -6,7 +6,6 @@ const ipcMain = electron.ipcMain
 const path = require('path');
 const Menu = electron.Menu
 const MenuItem = electron.MenuItem
-
 let mainWindow;
 
 const sqlite = require('sqlite3').verbose();
@@ -14,6 +13,7 @@ const db = new sqlite.Database("./goals.db")
 
 let id_array = []
 let current_date = null
+let today_date = null
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -39,81 +39,106 @@ const createWindow = () => {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
 };
-ipcMain.on('get-data', (event,params) => {
-    current_date=params.date
-    db.all("SELECT id, goal, check_state FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+ipcMain.on('get-data', (event, params) => {
+    if(today_date == null){
+        today_date = params.date
+    }
+    current_date = params.date
+    db.all("SELECT id, goal, check_state FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
-            id_array = rows.map(({id})=>id)
-            event.reply('receive-data', rows) // This sends the data to the renderer process
+            id_array = rows.map(({id}) => id)
+            event.reply('receive-data', rows)
 
         }
     })
 })
 
-ipcMain.on('send-data', (event,params) =>{
-    db.run("INSERT INTO goals (goal, addDate) VALUES ("+"'"+params.goal_text+"'"+", "+"'"+params.date+"'"+") ")
+ipcMain.on('send-data', (event, params) => {
+    db.run("INSERT INTO goals (goal, addDate) VALUES (" + "'" + params.goal_text + "'" + ", " + "'" + current_date + "'" + ") ")
 
-    db.all("SELECT id FROM goals WHERE addDate="+"'"+params.date+"'"+";", (err, rows) => { // This queries the database
+    db.all("SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
-            id_array = rows.map(({id})=>id)
+            id_array = rows.map(({id}) => id)
         }
     })
 })
 
-ipcMain.on('pressed-div', (event,params) =>{
-
-    db.run("DELETE FROM goals WHERE id="+id_array[params.tasks.length ]+";")
-    console.log(params.tasks)
-    console.log(params.checks)
-    for (let i = 0; i < params.tasks.length; i++){
-        console.log(params.tasks[i], params.checks[i])
-        db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+", check_state = "+"'"+params.checks[i]+"'"+" WHERE id="+id_array[i]+";")
-    }
-})
-
-ipcMain.on('change_checks', (event,params) =>{
-    console.log(params.checks)
-    console.log(id_array)
-    for(let i = 0; i < params.checks.length; i++)
-    {
-        db.run("UPDATE goals SET check_state="+"'"+params.checks[i]+"'"+"WHERE id="+id_array[i]+";")
-    }
-
-})
-ipcMain.on('rows-change', (event, params) =>{
-    db.all("SELECT id FROM goals WHERE addDate="+"'"+current_date+"'"+";", (err, rows) => { // This queries the database
+ipcMain.on('rows-change', (event, params) => {
+    db.all("SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
         } else {
-            for(let i = 0; i < rows.length; i++)
-            {
-                db.run("UPDATE goals SET goal="+"'"+params.tasks[i]+"'"+", check_state = "+"'"+params.checks[i]+"'"+" WHERE id="+rows[i].id+";")
+            for (let i = 0; i < rows.length; i++) {
+                db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + ", check_state = " + "'" + params.checks[i] + "'" + " WHERE id=" + rows[i].id + ";")
             }
 
         }
     })
 })
 
+ipcMain.on('removeDiv', (event, params) => {
+    db.run("DELETE FROM goals WHERE id=" + id_array[params.tasks.length] + ";")
+    for (let i = 0; i < params.tasks.length; i++) {
+        db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + ", check_state = " + "'" + params.checks[i] + "'" + " WHERE id=" + id_array[i] + ";")
+    }
+})
+
+ipcMain.on('change_checks', (event, params) => {
+    for (let i = 0; i < params.checks.length; i++) {
+        db.run("UPDATE goals SET check_state=" + "'" + params.checks[i] + "'" + "WHERE id=" + id_array[i] + ";")
+    }
+})
+
+ipcMain.on('get-history', (event, params) => {
+
+    let query = "SELECT goal, addDate  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 5) and check_state = 0 ORDER BY  addDate DESC;"
+    db.all(query, (err, rows) => { // This queries the database
+        if (err) {
+            console.error(err)
+        } else {
+            event.reply('receive-history', rows)
+
+        }
+    })
+})
+
+ipcMain.on('removeSidebar', (event, params) => {
+    db.all("SELECT id FROM goals WHERE addDate=" + "'" + params.date + "' and check_state = 0" + ";", (err, rows) => { // This queries the database
+        if (err) {
+            console.error(err)
+        } else {
+            console.log(rows[0].id)
+            db.run("DELETE FROM goals WHERE id=" + rows[params.tasks.length].id + ";")
+            for (let i = 0; i < params.tasks.length; i++) {
+                console.log("XDXDXD")
+                db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + " WHERE id=" + rows[i].id + ";")
+            }
+        }
+    })
+})
+
+
+
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function(){
+app.on('ready', function () {
     createWindow()
 
     const ctxMenu = new Menu()
     ctxMenu.append(new MenuItem({
         label: 'Remove',
         click: () => {
-            mainWindow.webContents.send("remove_task")
+            mainWindow.webContents.send("selectDiv")
         }
     }))
-    mainWindow.webContents.on('context-menu', function (e, params){
+    mainWindow.webContents.on('context-menu', function (e, params) {
         ctxMenu.popup(mainWindow)
     })
 });

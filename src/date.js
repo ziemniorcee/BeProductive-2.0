@@ -1,5 +1,3 @@
-
-
 class CurrentDate{
     constructor() {
         this.d = new Date();
@@ -64,17 +62,7 @@ class CurrentDate{
 export let l_date = new CurrentDate()
 let date = l_date
 
-document.getElementById("todayBtn").addEventListener('click', ()=>{
-    date_change(0)
-})
-document.getElementById("tomorrowBtn").addEventListener('click', ()=>{
-    date_change(1)
-})
-document.getElementById("otherDateBtn").addEventListener('click', ()=>{
-    $(function(){
-        $("#otherDateBtn").datepicker();
-    })
-})
+
 function date_change(option){
     if(option === 0){
         l_date.today()
@@ -93,10 +81,21 @@ function date_change(option){
         while(elements.length > 0){
             elements[0].remove()
         }
-
         window.electronAPI.getData({date: date})
     }
 }
+
+document.getElementById("todayBtn").addEventListener('click', ()=>{
+    date_change(0)
+})
+document.getElementById("tomorrowBtn").addEventListener('click', ()=>{
+    date_change(1)
+})
+document.getElementById("otherDateBtn").addEventListener('click', ()=>{
+    $(function(){
+        $("#otherDateBtn").datepicker();
+    })
+})
 
 $("#datepicker").datepicker({
     onSelect: function() {

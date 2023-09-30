@@ -9,52 +9,65 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
-    <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="goals.js"></script>
     <script type="module" src="date.js"></script>
     <script type="module" src="render.js"></script>
-    <script>
-        $( function() {
-            $( "#datepicker" ).datepicker();
-        } );
-    </script>
+    <script type="module" src="sidebar.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body onload="init()">
-<div class="sidebar">
-    <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
-    <div id="mySidenav">
-        <a href="#" id="about"><img src="images/goal11.png" alt="laurels" width="80" height="80"><span>TO DO</span></a>
-        <a href="#" id="blog"><img src="images/habit01.png" alt="laurels" width="80" height="80"><span>Habits</span></a>
-        <a href="#" id="projects"><img src="images/timeline01.png" alt="laurels" width="80"
-                                       height="80"><span>Timeline</span></a>
-        <a href="#" id="contact"><img src="images/strategy.png" alt="laurels" width="80"
-                                      height="80"><span>Strategy</span></a>
-    </div>
 
+<div id="wrapper">
+    <div id="container">
+        <div id="leftbar">
+            <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
+            <div id="mySidenav">
+                <a id="about"><img src="images/goal11.png" alt="laurels" width="80" height="80"><span>TO DO</span></a>
+                <a id="blog"><img src="images/habit01.png" alt="laurels" width="80" height="80"><span>Habits</span></a>
+                <a id="projects"><img src="images/timeline01.png" alt="laurels" width="80"
+                                      height="80"><span>Timeline</span></a>
+                <a id="contact"><img src="images/strategy.png" alt="laurels" width="80"
+                                     height="80"><span>Strategy</span></a>
+            </div>
+        </div>
+        <div id="main">
+            <div id="header">
+                <button id="todayBtn" class="button_date"><img src="images/goals/today1.png" id="todayimg" width="40"
+                                                               height="40"><span>Today</span></button>
+                <button id="tomorrowBtn" class="button_date"><img src="images/goals/tomorrow0.png" id="tomorrowimg"
+                                                                  width="40"
+                                                                  height="40"><span>Tomorrow</span></button>
+                <button id="otherDateBtn" class="button_date"><img src="images/goals/other0.png" id="anotherdayimg"
+                                                                   width="40"
+                                                                   height="40"><span>Another day</span></button>
+
+
+                <input type="text" id="datepicker">
+                <button id="chooseSide" class="button_date"><img src="images/goals/history.png" width="40"
+                                                                 height="40"></button>
+                <p id="date">Friday, September 01, 2023</p>
+                <hr width="250px" size="3" align="left" color="#4655F9">
+            </div>
+            <div id="dragparent">
+
+            </div>
+            <div>
+                <button id="add"><span>+</span></button>
+                <input type="text" id="entry" spellcheck="false">
+            </div>
+        </div>
+        <div id="resizer"></div>
+        <div id="rightbar">
+            <div id="head">
+                <img src="images/goals/polaura.png" width="25" height="50">
+                <span>History</span>
+                <img src="images/goals/polaura2.png" width="25" height="50">
+            </div>
+            <div id="days">
+            </div>
+        </div>
+    </div>
 </div>
-<div id="main">
-    <div id="header">
-        <button type="button" id="todayBtn"><img src="images/goals/today1.png" id="todayimg" width="40" height="40"><span>Today</span></button>
-        <button type="button" id="tomorrowBtn"><img src="images/goals/tomorrow0.png" id="tomorrowimg" width="40" height="40"><span>Tomorrow</span></button>
-        <button type="button" id="otherDateBtn"><img src="images/goals/other0.png" id="anotherdayimg" width="40" height="40"><span>Another day</span></button>
-        <input type="text" id="datepicker">
-
-        <p id="date">Friday, September 01, 2023</p>
-        <hr width="250px" size="3" align="left" color="#4655F9">
-    </div>
-    <div id="dragparent">
-
-    </div>
-    <div>
-        <button id="add"><span>+</span></button>
-        <input type="text" id="entry" spellcheck="false">
-
-    </div>
-
-</div>
-<script>
-
-</script>
 </body>
 </html>

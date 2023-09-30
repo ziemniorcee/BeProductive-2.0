@@ -1,13 +1,13 @@
-function init(){
+function init() {
     dragula([document.querySelector("#dragparent")]);
 }
 
-
-
 let tasks = []
+let goals_len = 0
+
 function press() {
-    tasks = []
     let elements = document.getElementsByClassName("task")
+    tasks = []
     goals_len = elements.length
     for (let i = 0; i < goals_len; i++) {
         tasks.push(elements[i].textContent)
@@ -27,21 +27,19 @@ function unpress() {
     if (JSON.stringify(before) !== JSON.stringify(tasks)) {
         change()
     }
-
 }
 
 function change() {
-    for(let i = 0; i < tasks.length; i++){
+    for (let i = 0; i < tasks.length; i++) {
         tasks[i] = tasks[i].replace("'", "`@`")
     }
 
     let elements = document.getElementsByClassName("check_task")
-    let array = []
-    for (let i = 0; i < elements.length-1; i++) {
-        array.push(Number(elements[i].checked))
+    let checks = []
+    for (let i = 0; i < elements.length - 1; i++) {
+        checks.push(Number(elements[i].checked))
     }
-    console.log(array)
 
-    window.electronAPI4.sendData({tasks: tasks, checks: array})
+    window.electronAPI4.sendData({tasks: tasks, checks: checks})
 }
 

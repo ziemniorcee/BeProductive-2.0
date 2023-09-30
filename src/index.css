@@ -1,6 +1,11 @@
-
 body {
-    font-family: "Lato", sans-serif;
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    overflow: hidden;
     margin: 0;
     padding: 0;
     -webkit-user-select: none; /* Safari */
@@ -8,29 +13,89 @@ body {
     user-select: none; /* Standard syntax */
 }
 
+#wrapper{
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    overflow: hidden;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
 
-.sidebar {
+#container{
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+#leftbar {
     background: #3B151F;
     height: 100%;
     width: 100px;
-    position: fixed;
     z-index: 2;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+#rightbar{
+    display: block;
+    color: white;
+    right: 0;
+    width: 200px;
+    height: 100%;
+    background: #2D2727;
+    position: relative;
+    margin: 0;
+
+    box-sizing: border-box;
+    border: 4px solid #FFC90E;
+    border-left: none ;
+    min-width: 0;
+
+    padding: 10px;
+}
+
+#resizer{
+    display: flex;
+    flex-basis: 4px;
+
+    position: relative;
+    z-index: 2;
+    cursor: col-resize;
+
+    background: #FFC90E;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 #main {
     height: 100%;
-    width: 100%;
     background-image: linear-gradient(to bottom right, #800020, #307AEA);
-    margin-left: 100px; /* Same as the width of the sidenav */
     font-size: 28px; /* Increased text to enable scrolling */
     z-index: 1;
-    top: 0;
-    left: 0;
+    flex-basis: 0;
+    flex-grow: 1;
+    min-width: 0;
+    flex-direction: row;
+    position: relative;
+    display: block;
+    margin: 0;
     padding: 50px;
-    position: fixed;
-
-
 }
+
 
 #mySidenav a {
     position: absolute;
@@ -91,20 +156,24 @@ body {
     top: 435px;
 }
 
-#header button {
+
+.button_date {
     width: 200px;
     height: 50px;
     background-color: #4655F9;
     border: none;
     color: white;
     align-items: center;
-
     text-decoration: none;
-    display: inline-flex;
     font-size: 24px;
     margin: 0 auto;
     cursor: pointer;
 
+}
+
+#chooseSide{
+    width: 50px;
+    float: right;
 }
 
 #main #header button span {
@@ -125,10 +194,11 @@ body {
 }
 
 #dragparent {
+    clear: both;
     position: relative;
-    width: calc(100% - 200px);
-    height: calc(100% - 270px);
-    margin-bottom: 5px;
+    width: calc(100% );
+    height: calc(100% - 290px);
+    margin-bottom: 25px;
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -147,22 +217,27 @@ body {
 }
 
 .check_task {
+    display: block;
+    margin: 0 10px auto;
+    top: 10px;
     min-width:30px;
     min-height: 30px;
     position: relative;
-    margin: 10px;
 
+    clip-path: circle(46% at 50% 50%);
 }
 
 
+
 #add {
-    margin-top: 5px;
+
     background-color: #4655F9;
     height: 50px;
     width: 50px;
     cursor: pointer;
     font-size: 50px;
     border-radius: 7px;
+
 }
 
 #add span {
@@ -171,8 +246,8 @@ body {
 }
 
 #entry {
-    margin-top: 5px;
-    width: calc(100% - 265px);
+    margin-top: -15px;
+    width: calc(100% - 65px);
     height: 45px;
     position: relative;
     top: -18px;
@@ -180,23 +255,22 @@ body {
     border-radius: 7px;
     color: white;
     font-size: 20px;
+
 }
 
 #datepicker{
+    left: 465px;
+    top: 50px;
+    position: absolute;
+    cursor: pointer;
     width: 192px;
     height: 45px;
-    position: relative;
-    cursor: pointer;
-    right: 207px;
-    bottom: 15px;
     opacity: 0;
 }
-
 
 .task_text{
     margin-top: 10px;
     margin-bottom: 10px;
-
     margin-right: 10px;
     word-break: break-word;
 }
@@ -214,3 +288,83 @@ body {
     outline: 1px solid slategrey;
 }
 
+
+#head{
+    height: 50px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#head span{
+    position: relative;
+    bottom: 15px;
+    font-size: 30px;
+    width: 150px;
+
+}
+
+
+.task_history{
+    width: 100%;
+    border-bottom: solid 1px black;
+    margin-top: 10px;
+    display: flex;
+    padding-bottom: 5px;
+
+}
+.task_history span{
+    word-break: break-word;
+    position: relative;
+
+    bottom: 5px;
+    right: 5px;
+
+}
+
+.hisotry_text{
+    font-size: 20px;
+}
+.task_history div{
+    margin-bottom: auto;
+    margin-top: auto;
+}
+.check_history{
+    display: block;
+    margin-top: 0;
+    margin-bottom: auto;
+    min-width:20px;
+    min-height: 20px;
+    position: relative;
+    top: 10px;
+    margin-right: 10px;
+    clip-path: circle(46% at 50% 50%);
+}
+
+.history_date{
+    border-bottom: solid 2px black;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.tasks_history{
+    margin-top: 20px;
+
+}
+
+.day{
+    margin-top : 20px;
+
+}
+
+.history_add{
+    padding-left: 5px;
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+    cursor: pointer;
+    font-size: 40px;
+
+
+
+}

@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI2', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI3', {
-    delete_task: (callback) => ipcRenderer.on("remove_task", callback)
+    delete_task: (callback) => ipcRenderer.on("selectDiv", callback)
 })
 
 contextBridge.exposeInMainWorld('electronAPI4', {
@@ -21,9 +21,18 @@ contextBridge.exposeInMainWorld('electronAPI4', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI5', {
-    sendId: (params) => ipcRenderer.send('pressed-div', params)
+    sendTasks: (params) => ipcRenderer.send('removeDiv', params)
 })
 
 contextBridge.exposeInMainWorld('electronAPI6', {
     sendChecks: (params) => ipcRenderer.send('change_checks', params)
+})
+
+contextBridge.exposeInMainWorld('electronAPI7', {
+    getData: (params) => ipcRenderer.send('get-history',params), // This sends a message to the main process
+    receiveData: (func) => ipcRenderer.on('receive-history', (event, data) => func(data)) // This receives a message from the main process
+})
+
+contextBridge.exposeInMainWorld('electronAPI8', {
+    sendTasks: (params) => ipcRenderer.send('removeSidebar', params)
 })
