@@ -24,7 +24,6 @@ window.electronAPI7.receiveData((data) => {
     for (let i =0; i < elements.length; i++){
         elements[i].addEventListener('click', (event)=>{
             let task_chosen = event.target.parentNode.childNodes[1].childNodes[0].innerText
-
             let tasks_before = event.target.parentNode.parentNode.children
             let tasks_left = []
 
@@ -121,3 +120,41 @@ function get_goal(text){
         "<input type='checkbox'  class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
 }
 
+
+$(document).on('click', '.check_history', function (event) {
+    setTimeout(function(){
+        if (event.target.parentNode.parentNode.children.length > 1){
+            event.target.parentNode.remove()
+        }
+        else{
+            event.target.parentNode.parentNode.parentNode.remove()
+        }
+
+        console.log(event.target.parentNode.children[1].innerText)
+    }, 1000)
+
+    let task_chosen = event.target.parentNode.childNodes[1].childNodes[0].innerText
+    let tasks_before = event.target.parentNode.parentNode.children
+    let tasks_left = []
+    let id = 0
+    for(let i =0 ; i < tasks_before.length; i++){
+        let task_text = tasks_before[i].children[1].innerText
+        if(task_chosen === task_text){
+            id = i
+            break
+        }
+    }
+
+
+    let date = event.target.parentNode.parentNode.parentNode.children[0].innerText
+    let d = new Date(date)
+    let format_day = d.getDate()
+    let format_month = d.getMonth() + 1
+
+
+    if(format_day < 10){format_day = "0" + format_day}
+    if(format_month < 10){format_month = "0" + format_month}
+    let formated_date = d.getFullYear() +"-"+format_month+"-"+format_day
+
+    window.electronAPI9.sendTasks({index: id, date:formated_date})
+});

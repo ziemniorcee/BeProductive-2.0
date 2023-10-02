@@ -36,3 +36,7 @@ contextBridge.exposeInMainWorld('electronAPI7', {
 contextBridge.exposeInMainWorld('electronAPI8', {
     sendTasks: (params) => ipcRenderer.send('removeSidebar', params)
 })
+
+contextBridge.exposeInMainWorld('electronAPI9', {
+    sendTasks: (params) => ipcRenderer.send('side_check_change', params)
+})

@@ -44,6 +44,7 @@ ipcMain.on('get-data', (event, params) => {
         today_date = params.date
     }
     current_date = params.date
+    console.log(current_date)
     db.all("SELECT id, goal, check_state FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
@@ -121,6 +122,17 @@ ipcMain.on('removeSidebar', (event, params) => {
     })
 })
 
+ipcMain.on('side_check_change', (event, params) => {
+
+    db.all("SELECT id FROM goals WHERE addDate=" + "'" + params.date + "' and check_state = 0" + ";", (err, rows) => { // This queries the database
+        if (err) {
+            console.error(err)
+        } else {
+            db.run("UPDATE goals SET check_state=1 WHERE id=" + rows[params.index].id + ";")
+        }
+    })
+
+})
 
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';

@@ -9,6 +9,8 @@ class CurrentDate{
 
     today(){
         this.d.setDate(this.d_today)
+        console.log(this.d)
+        console.log(this.month)
         this.set_attributes()
         document.getElementById("todayimg").src="images/goals/today1.png"
         document.getElementById("tomorrowimg").src="images/goals/tomorrow0.png"
@@ -16,6 +18,7 @@ class CurrentDate{
     }
     tomorrow(){
         this.d.setDate(this.d_today + 1)
+        console.log(this.d)
         this.set_attributes()
 
         document.getElementById("todayimg").src="images/goals/today0.png"
@@ -24,6 +27,7 @@ class CurrentDate{
     }
 
     set_attributes(){
+        console.log(this.d)
         this.day = this.d.getDate()
         this.weekday = this.d.getDay()
         this.month = this.d.getMonth() + 1
