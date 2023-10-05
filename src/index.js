@@ -44,7 +44,6 @@ ipcMain.on('get-data', (event, params) => {
         today_date = params.date
     }
     current_date = params.date
-    console.log(current_date)
     db.all("SELECT id, goal, check_state FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
@@ -112,10 +111,8 @@ ipcMain.on('removeSidebar', (event, params) => {
         if (err) {
             console.error(err)
         } else {
-            console.log(rows[0].id)
             db.run("DELETE FROM goals WHERE id=" + rows[params.tasks.length].id + ";")
             for (let i = 0; i < params.tasks.length; i++) {
-                console.log("XDXDXD")
                 db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + " WHERE id=" + rows[i].id + ";")
             }
         }

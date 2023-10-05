@@ -18,52 +18,58 @@
 </head>
 <body onload="init()">
 
-<div id="wrapper">
-    <div id="container">
-        <div id="leftbar">
-            <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
-            <a><img src="images/goal11.png" alt="laurels"><span>TO DO</span></a>
-            <a><img src="images/habit01.png" alt="laurels"><span>Habits</span></a>
-            <a><img src="images/timeline01.png" alt="laurels"><span>Timeline</span></a>
-            <a><img src="images/strategy.png" alt="laurels"><span>Strategy</span></a>
-        </div>
-        <div id="main">
-            <div id="header">
-                <button id="todayBtn" class="button_date">
-                    <img src="images/goals/today1.png" id="todayimg" width="40" height="40"><span>Today</span>
-                </button>
-                <button id="tomorrowBtn" class="button_date">
-                    <img src="images/goals/tomorrow0.png" id="tomorrowimg" width="40" height="40"><span>Tomorrow</span>
-                </button>
-                <button id="otherDateBtn" class="button_date">
-                    <img src="images/goals/other0.png" id="anotherdayimg" width="40" height="40">
-                    <span>Another day</span>
-                </button>
 
-                <input type="text" id="datepicker">
-                <button id="chooseSide" class="button_date"><img src="images/goals/history.png" width="40"
-                                                                 height="40"></button>
-                <p id="date">Friday, September 01, 2023</p>
-            </div>
-            <div id="dragparent">
+<div id="container">
+    <div id="leftbar">
+        <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
+        <a><img src="images/goal11.png" alt="laurels"><span>TO DO</span></a>
+        <a><img src="images/habit01.png" alt="laurels"><span>Habits</span></a>
+        <a><img src="images/timeline01.png" alt="laurels"><span>Timeline</span></a>
+        <a><img src="images/strategy.png" alt="laurels"><span>Strategy</span></a>
+    </div>
+    <div id="main">
+        <div id="header">
+            <button id="todayBtn" class="button_date">
+                <img src="images/goals/today1.png" id="todayimg" width="40" height="40"><span>Today</span>
+            </button>
+            <button id="tomorrowBtn" class="button_date">
+                <img src="images/goals/tomorrow0.png" id="tomorrowimg" width="40" height="40"><span>Tomorrow</span>
+            </button>
+            <button id="otherDateBtn" class="button_date">
+                <img src="images/goals/other0.png" id="anotherdayimg" width="40" height="40">
+                <span>Another day</span>
+            </button>
 
+            <input type="text" id="datepicker">
+
+            <div id="chooseSide">
+                <img id="img_main" src="images/goals/history.png" width="40" height="40">
+                <div class="dropdown-content">
+                    <img id="img_second" src="images/goals/idea.png" width="40" height="40">
+                </div>
             </div>
-            <div>
-                <button id="add"><span>+</span></button>
-                <input type="text" id="entry" spellcheck="false">
-            </div>
+
+            <p id="date">Friday, September 01, 2023</p>
         </div>
-        <div id="resizer"></div>
-        <div id="rightbar">
-            <div id="head">
-                <img src="images/goals/polaura.png" width="25" height="50">
-                <span>History</span>
-                <img src="images/goals/polaura2.png" width="25" height="50">
-            </div>
-            <div id="days">
-            </div>
+        <div id="dragparent">
+
+        </div>
+        <div>
+            <button id="add"><span>+</span></button>
+            <input type="text" id="entry" spellcheck="false">
         </div>
     </div>
-
+    <div id="resizer"></div>
+    <div id="rightbar">
+        <div id="head">
+            <img src="images/goals/polaura.png" width="25" height="50">
+            <span id="head_text">History</span>
+            <img src="images/goals/polaura2.png" width="25" height="50">
+        </div>
+        <div id="days">
+        </div>
+    </div>
+</div>
+</div>
 </body>
 </html>

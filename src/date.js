@@ -1,64 +1,51 @@
 class CurrentDate{
     constructor() {
-        this.d = new Date();
-        this.d_today = this.d.getDate()
-        this.weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        this.month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        this.today = new Date();
+        this.now = new Date(this.today)
+
         this.set_attributes()
     }
 
-    today(){
-        this.d.setDate(this.d_today)
-        console.log(this.d)
-        console.log(this.month)
+    get_today(){
+        this.today.setDate(this.now.getDate())
+        this.today.setMonth(this.now.getMonth())
+
         this.set_attributes()
         document.getElementById("todayimg").src="images/goals/today1.png"
         document.getElementById("tomorrowimg").src="images/goals/tomorrow0.png"
         document.getElementById("anotherdayimg").src="images/goals/other0.png"
     }
     tomorrow(){
-        this.d.setDate(this.d_today + 1)
-        console.log(this.d)
-        this.set_attributes()
+        this.today.setMonth(this.now.getMonth())
+        this.today.setDate(this.now.getDate() + 1)
 
+        this.set_attributes()
         document.getElementById("todayimg").src="images/goals/today0.png"
         document.getElementById("tomorrowimg").src="images/goals/tomorrow1.png"
         document.getElementById("anotherdayimg").src="images/goals/other0.png"
     }
 
     set_attributes(){
-        console.log(this.d)
-        this.day = this.d.getDate()
-        this.weekday = this.d.getDay()
-        this.month = this.d.getMonth() + 1
-        this.year = this.d.getFullYear()
-        this.format_day = this.day
-        this.format_month = this.month
-
         this.sql = this.sql_format()
         this.display = this.display_format()
-
     }
     sql_format(){
-        this.format_day = this.day
-        this.format_month = this.month
+        let format_day = this.today.getDate()
+        let format_month = this.today.getMonth() + 1
 
-        if(this.month < 10){
-            this.format_month = "0" + this.month
-        }
+        if(format_month < 10){format_month = "0" + format_month}
+        if(format_day < 10){format_day = "0" + format_day}
 
-        if(this.day < 10){
-            this.format_day = "0" + this.day
-        }
-        return this.year + "-" + this.format_month + "-" + this.format_day;
+        return this.today.getFullYear() + "-" + format_month + "-" + format_day;
     }
 
     display_format(){
-        this.format_day = this.day
-        if(this.day < 10){
-            this.format_day = "0" + this.day
-        }
-        return this.weekdays[this.weekday]+", "+this.month_names[this.month-1]+" "+this.format_day+", "+this.year;
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        let format_day = this.today.getDate()
+        if(format_day < 10){format_day = "0" + format_day}
+        return weekdays[this.today.getDay()]+", "+month_names[this.today.getMonth()]+" "+format_day+", "+this.today.getFullYear();
     }
 }
 
@@ -69,7 +56,7 @@ let date = l_date
 
 function date_change(option){
     if(option === 0){
-        l_date.today()
+        l_date.get_today()
     }
     else if(option === 1){
         l_date.tomorrow()
@@ -104,7 +91,7 @@ document.getElementById("otherDateBtn").addEventListener('click', ()=>{
 $("#datepicker").datepicker({
     onSelect: function() {
         let dateObject = $(this).datepicker('getDate');
-        l_date.d.setFullYear(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate())
+        l_date.today.setFullYear(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate())
         l_date.set_attributes()
         date_change(2)
 
