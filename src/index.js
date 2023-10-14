@@ -6,7 +6,7 @@ const ipcMain = electron.ipcMain
 const path = require('path');
 const Menu = electron.Menu
 const MenuItem = electron.MenuItem
-let mainWindow;
+
 
 const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database("./goals.db")
@@ -93,9 +93,9 @@ ipcMain.on('change_checks', (event, params) => {
     }
 })
 
-ipcMain.on('get-history', (event, params) => {
+ipcMain.on('get-history', (event) => {
 
-    let query = "SELECT goal, addDate  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 5) and check_state = 0 ORDER BY  addDate DESC;"
+    let query = "SELECT goal, addDate  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC;"
     db.all(query, (err, rows) => { // This queries the database
         if (err) {
             console.error(err)
@@ -107,27 +107,12 @@ ipcMain.on('get-history', (event, params) => {
 })
 
 ipcMain.on('removeSidebar', (event, params) => {
-    db.all("SELECT id FROM goals WHERE addDate=" + "'" + params.date + "' and check_state = 0" + ";", (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
-            db.run("DELETE FROM goals WHERE id=" + rows[params.tasks.length].id + ";")
-            for (let i = 0; i < params.tasks.length; i++) {
-                db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + " WHERE id=" + rows[i].id + ";")
-            }
-        }
-    })
+    db.run("DELETE FROM goals WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<"+ "'" + today_date + "'" +" and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET "+params.id+");")
 })
 
 ipcMain.on('side_check_change', (event, params) => {
+    db.run("UPDATE goals SET check_state=1 WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<"+ "'" + today_date + "'" +" and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET "+params.id+");")
 
-    db.all("SELECT id FROM goals WHERE addDate=" + "'" + params.date + "' and check_state = 0" + ";", (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
-            db.run("UPDATE goals SET check_state=1 WHERE id=" + rows[params.index].id + ";")
-        }
-    })
 
 })
 

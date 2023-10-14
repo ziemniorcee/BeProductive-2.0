@@ -9,6 +9,7 @@ body {
     overflow: hidden;
     height: 100%;
     width: 100%;
+
 }
 
 #container {
@@ -74,8 +75,7 @@ body {
     box-sizing: border-box;
     border: 4px solid #FFC90E;
     border-left: none;
-    padding: 10px;
-
+    padding: 10px 10px 100px;
 }
 
 #resizer {
@@ -86,6 +86,7 @@ body {
 }
 
 #main {
+    flex:0;
     height: 100%;
     background-image: linear-gradient(to bottom right, #800020, #307AEA);
     font-size: 28px;
@@ -103,12 +104,13 @@ body {
     cursor: pointer;
 }
 
-.button_date span{
+.button_date span {
     margin-left: 5px;
     position: relative;
     bottom: 10px;
 }
-.button_date img{
+
+.button_date img {
     position: relative;
     left: 0;
 }
@@ -122,12 +124,13 @@ body {
     border: 1px solid gold;
 }
 
-#chooseSide img{
+#chooseSide img {
     position: relative;
     top: 5px;
     left: 5px;
 }
-.dropdown-content{
+
+.dropdown-content {
     display: none;
     height: 50px;
     background-color: #4655F9;
@@ -136,6 +139,7 @@ body {
     width: 50px;
 
 }
+
 #chooseSide:hover .dropdown-content {
     display: block;
 }
@@ -148,6 +152,7 @@ body {
 }
 
 #dragparent {
+
     clear: both;
     position: relative;
     height: calc(100% - 290px);
@@ -166,7 +171,6 @@ body {
     border: 3px solid #666;
     display: flex;
     cursor: default;
-
 }
 
 .check_task {
@@ -181,8 +185,7 @@ body {
 }
 
 
-#add {
-
+.add_but {
     background-color: #4655F9;
     height: 50px;
     width: 50px;
@@ -192,12 +195,12 @@ body {
 
 }
 
-#add span {
+.add_but span {
     position: relative;
     top: -5px;
 }
 
-#entry {
+.add_entry {
     margin-top: -15px;
     width: calc(100% - 65px);
     height: 45px;
@@ -225,6 +228,8 @@ body {
     margin-bottom: 10px;
     margin-right: 10px;
     word-break: break-word;
+    width: auto;
+    overflow-x: hidden ;
 }
 
 #dragparent::-webkit-scrollbar {
@@ -307,13 +312,18 @@ body {
 
 }
 
+.task{
+    width: 90%;
+}
 .day {
     margin-top: 20px;
 
 }
-#days{
+
+#days {
     overflow-y: scroll;
-    height: 92%;
+    height: 100%;
+
 }
 
 .history_add {
@@ -331,7 +341,6 @@ body {
 
 #days::-webkit-scrollbar-track {
     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-
 }
 
 #days::-webkit-scrollbar-thumb {
@@ -339,3 +348,32 @@ body {
     outline: 1px solid slategrey;
 }
 
+#ideas::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+#ideas::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+#ideas::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+}
+
+#ideas{
+    clear: both;
+    position: relative;
+    height: calc(100% - 105px);
+    margin-bottom: 25px;
+    overflow: hidden;
+    overflow-y: scroll;
+
+}
+
+.idea{
+    position: relative;
+    font-size: 20px;
+    top: 10px;
+    left: 10px;
+}
