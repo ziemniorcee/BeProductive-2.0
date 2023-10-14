@@ -11,7 +11,6 @@ const MenuItem = electron.MenuItem
 const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database("./goals.db")
 
-let id_array = []
 let current_date = null
 let today_date = null
 
@@ -39,81 +38,52 @@ const createWindow = () => {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
 };
-ipcMain.on('get-data', (event, params) => {
-    if(today_date == null){
-        today_date = params.date
-    }
+ipcMain.on('ask-goals', (event, params) => {
+    if (today_date == null) today_date = params.date
     current_date = params.date
     db.all("SELECT id, goal, check_state FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
-            id_array = rows.map(({id}) => id)
-            event.reply('receive-data', rows)
-
-        }
+        if (err) console.error(err)
+        else event.reply('get-goals', rows)
     })
 })
 
-ipcMain.on('send-data', (event, params) => {
+ipcMain.on('new-goal', (event, params) => {
     db.run("INSERT INTO goals (goal, addDate) VALUES (" + "'" + params.goal_text + "'" + ", " + "'" + current_date + "'" + ") ")
-
-    db.all("SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
-            id_array = rows.map(({id}) => id)
-        }
-    })
 })
 
 ipcMain.on('rows-change', (event, params) => {
     db.all("SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
+        if (err) console.error(err)
+        else {
             for (let i = 0; i < rows.length; i++) {
                 db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + ", check_state = " + "'" + params.checks[i] + "'" + " WHERE id=" + rows[i].id + ";")
             }
-
         }
     })
 })
 
-ipcMain.on('removeDiv', (event, params) => {
-    db.run("DELETE FROM goals WHERE id=" + id_array[params.tasks.length] + ";")
-    for (let i = 0; i < params.tasks.length; i++) {
-        db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + ", check_state = " + "'" + params.checks[i] + "'" + " WHERE id=" + id_array[i] + ";")
-    }
+ipcMain.on('goal-removed', (event, params) => {
+    db.run("DELETE FROM goals WHERE id IN (SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + " LIMIT 1 OFFSET " + params.id + ");")
 })
 
-ipcMain.on('change_checks', (event, params) => {
-    for (let i = 0; i < params.checks.length; i++) {
-        db.run("UPDATE goals SET check_state=" + "'" + params.checks[i] + "'" + "WHERE id=" + id_array[i] + ";")
-    }
+ipcMain.on('change-checks', (event, params) => {
+    db.run("UPDATE goals SET check_state=" + params.state + " WHERE id IN(SELECT id FROM goals where addDate=" + "'" + current_date + "'" + " LIMIT 1 OFFSET " + params.id + ");")
 })
 
-ipcMain.on('get-history', (event) => {
-
+ipcMain.on('ask-history', (event) => {
     let query = "SELECT goal, addDate  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC;"
     db.all(query, (err, rows) => { // This queries the database
-        if (err) {
-            console.error(err)
-        } else {
-            event.reply('receive-history', rows)
-
-        }
+        if (err) console.error(err)
+        else event.reply('get-history', rows)
     })
 })
 
-ipcMain.on('removeSidebar', (event, params) => {
-    db.run("DELETE FROM goals WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<"+ "'" + today_date + "'" +" and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET "+params.id+");")
+ipcMain.on('import-history', (event, params) => {
+    db.run("DELETE FROM goals WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
 })
 
-ipcMain.on('side_check_change', (event, params) => {
-    db.run("UPDATE goals SET check_state=1 WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<"+ "'" + today_date + "'" +" and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET "+params.id+");")
-
-
+ipcMain.on('side-check-change', (event, params) => {
+    db.run("UPDATE goals SET check_state=1 WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
 })
 
 
@@ -129,7 +99,7 @@ app.on('ready', function () {
     ctxMenu.append(new MenuItem({
         label: 'Remove',
         click: () => {
-            mainWindow.webContents.send("selectDiv")
+            mainWindow.webContents.send("removing-goal")
         }
     }))
     mainWindow.webContents.on('context-menu', function (e, params) {

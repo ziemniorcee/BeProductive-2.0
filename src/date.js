@@ -72,7 +72,8 @@ function date_change(option){
         while(elements.length > 0){
             elements[0].remove()
         }
-        window.electronAPI.getData({date: date})
+        console.log(date)
+        window.goalsAPI.askGoals({date: date})
     }
 }
 

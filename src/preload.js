@@ -3,40 +3,20 @@
 
 const {contextBridge, ipcRenderer} = require('electron')
 
-contextBridge.exposeInMainWorld('electronAPI', {
-    getData: (params) => ipcRenderer.send('get-data',params), // This sends a message to the main process
-    receiveData: (func) => ipcRenderer.on('receive-data', (event, data) => func(data)) // This receives a message from the main process
+contextBridge.exposeInMainWorld('goalsAPI', {
+    askGoals: (params) => ipcRenderer.send('ask-goals',params),
+    getGoals: (func) => ipcRenderer.on('get-goals', (event, data) => func(data)),
+    newGoal: (params) => ipcRenderer.send('new-goal',params),
+    removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
+    goalRemoved : (params) => ipcRenderer.send('goal-removed', params),
+    rowsChange: (params) => ipcRenderer.send('rows-change',params),
+    changeChecks: (params) => ipcRenderer.send('change-checks', params)
 })
 
-contextBridge.exposeInMainWorld('electronAPI2', {
-    sendData: (params) => ipcRenderer.send('send-data',params),
-})
 
-contextBridge.exposeInMainWorld('electronAPI3', {
-    delete_task: (callback) => ipcRenderer.on("selectDiv", callback)
-})
-
-contextBridge.exposeInMainWorld('electronAPI4', {
-    sendData: (params) => ipcRenderer.send('rows-change',params),
-})
-
-contextBridge.exposeInMainWorld('electronAPI5', {
-    sendTasks: (params) => ipcRenderer.send('removeDiv', params)
-})
-
-contextBridge.exposeInMainWorld('electronAPI6', {
-    sendChecks: (params) => ipcRenderer.send('change_checks', params)
-})
-
-contextBridge.exposeInMainWorld('electronAPI7', {
-    getData: (params) => ipcRenderer.send('get-history',params), // This sends a message to the main process
-    receiveData: (func) => ipcRenderer.on('receive-history', (event, data) => func(data)) // This receives a message from the main process
-})
-
-contextBridge.exposeInMainWorld('electronAPI8', {
-    sendTasks: (params) => ipcRenderer.send('removeSidebar', params)
-})
-
-contextBridge.exposeInMainWorld('electronAPI9', {
-    sendTasks: (params) => ipcRenderer.send('side_check_change', params)
+contextBridge.exposeInMainWorld('sidebarAPI', {
+    askHistory: (params) => ipcRenderer.send('ask-history',params),
+    getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
+    importHistory: (params) => ipcRenderer.send('import-history', params),
+    changeChecks: (params) => ipcRenderer.send('side-check-change', params),
 })

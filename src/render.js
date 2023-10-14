@@ -4,48 +4,39 @@ let pressed = false
 let selected_div = null
 
 
-window.electronAPI.getData({date: l_date.sql}) // This calls the exposed method from the preload script
-window.electronAPI.receiveData((data) => {
-    let nameString = data.map((elem) => {
-        return load_goals(elem.goal, elem.check_state)
-    })
-})
-window.electronAPI3.delete_task((event) => {
+window.goalsAPI.askGoals({date: l_date.sql})
+window.goalsAPI.getGoals((data) => data.map((elem) => {
+    if (elem.check_state) build_goal(elem.goal.replace("`@`", "'"), "checked")
+    else  build_goal(elem.goal.replace("`@`", "'"))
+}))
+
+
+window.goalsAPI.removingGoal((event) => {
+    window.goalsAPI.goalRemoved({id: $('.dragthing').index(selected_div), date: l_date.sql})
     selected_div.remove()
-    let elements = document.getElementsByClassName("task")
-    let elements_checks = document.getElementsByClassName("check_task")
-    let tasks = []
-    let checks = []
-    for (let i = 0; i < elements.length; i++) {
-        tasks.push(elements[i].textContent)
-        checks.push(Number(elements_checks[i].checked))
-    }
-    window.electronAPI5.sendTasks({tasks: tasks, checks: checks})
 })
 
-function load_goals(text, check) {
-    text = text.replace("`@`", "'")
+document.getElementById("add").addEventListener('click', () => new_goal())
 
-    if (check) {
-        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
-            "<input type='checkbox' checked class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
-    } else {
-        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
-            "<input type='checkbox' class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
-
-    }
-}
+$("#entry").on('keyup', function (e) {
+    if (e.key === 'Enter' || e.keyCode === 13) new_goal()
+});
 
 function new_goal() {
     let goal_text = document.getElementById('entry').value
-
     if (goal_text !== "") {
-        let text = goal_text.replace("'", "`@`")
-        window.electronAPI2.sendData({goal_text: text})
-        document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
-            "<input type='checkbox'  class='check_task' ><div class='task_text'><span class='task'>" + goal_text + "</span></div></div>"
+        window.goalsAPI.newGoal({goal_text: goal_text.replace("'", "`@`")})
+        build_goal(goal_text)
         document.getElementById('entry').value = ""
     }
+}
+
+function build_goal(goal_text, checked = "") {
+    document.getElementById("dragparent").innerHTML +=
+        "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+        "   <input type='checkbox' " + checked + " class='check_task' >" +
+        "   <div class='task_text'><span class='task'>" + goal_text + "</span></div>" +
+        "</div>"
 }
 
 window.addEventListener("DOMContentLoaded", (event) => {
@@ -74,21 +65,10 @@ window.oncontextmenu = function () {
     }
 }
 
-document.getElementById("add").addEventListener('click', () => {
-    new_goal()
-})
-$("#entry").on('keyup', function (e) {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-        new_goal()
-    }
-});
 
 $(document).on('click', '.check_task', function () {
-    let elements = document.getElementsByClassName("check_task")
-    let array = []
-    for (let i = 0; i < elements.length; i++) {
-        array.push(Number(elements[i].checked))
-    }
-    window.electronAPI6.sendChecks({checks: array})
+    let id = $('.check_task').index(this)
+    let state = Number(document.getElementsByClassName("check_task")[id].checked)
+    window.goalsAPI.changeChecks({id: id, state: state, date: l_date.sql})
 });
 

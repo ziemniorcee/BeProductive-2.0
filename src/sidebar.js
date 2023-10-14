@@ -1,5 +1,3 @@
-import {l_date} from "./date.js";
-
 let weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 let month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -28,17 +26,13 @@ document.getElementById("img_main").addEventListener('click', () => {
 
 document.getElementById("img_second").addEventListener('click', () => {
     let overflows = ["scroll", "hidden"]
-    console.log("huj")
     current_sidebar = !current_sidebar
     document.getElementById("days").innerHTML = displays[Number(current_sidebar)]
     document.getElementById("head_text").innerText = categories[Number(current_sidebar)]
     document.getElementById("days").style.overflowY = overflows[Number(current_sidebar)]
 
-    if (!current_sidebar) {
-        enchance_history()
-    } else {
-        enchance_ideas()
-    }
+    if (!current_sidebar) enchance_history()
+    else enchance_ideas()
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]
     document.getElementById("img_second").src = images[Number(!current_sidebar)]
@@ -46,8 +40,8 @@ document.getElementById("img_second").addEventListener('click', () => {
 
 load_ideas()
 
-window.electronAPI7.getData()
-window.electronAPI7.receiveData((data) => {
+window.sidebarAPI.askHistory()
+window.sidebarAPI.getHistory((data) => {
     let date = data[0].addDate
     let goals = []
 
@@ -58,7 +52,6 @@ window.electronAPI7.receiveData((data) => {
             date = data[i].addDate
         }
         goals.push(data[i].goal)
-
     }
     load_history(goals, date)
     enchance_history()
@@ -67,9 +60,7 @@ window.electronAPI7.receiveData((data) => {
 function load_history(array, date) {
     let d = new Date(date)
     let format_day = d.getDate()
-    if (format_day < 10) {
-        format_day = "0" + format_day
-    }
+    if (format_day < 10) format_day = "0" + format_day
 
     let display = weekdays[d.getDay()] + ", " + month_names[d.getMonth()] + " " + format_day + ", " + d.getFullYear();
 
@@ -90,13 +81,11 @@ function enchance_history() {
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
-            if (event.target.parentNode.parentNode.children.length > 1) {
-                event.target.parentNode.remove()
-            } else {
-                event.target.parentNode.parentNode.parentNode.remove()
-            }
+            if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
+            else event.target.parentNode.parentNode.parentNode.remove()
+
             displays[0] = document.getElementById("days").outerHTML
-            window.electronAPI8.sendTasks({id: i})
+            window.sidebarAPI.importHistory({id: i})
             get_goal(event.target.parentNode.childNodes[1].childNodes[0].innerText)
 
         })
@@ -105,7 +94,7 @@ function enchance_history() {
 }
 
 function get_goal(text) {
-    window.electronAPI2.sendData({goal_text: text.replace("'", "`@`")})
+    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
     document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
         "<input type='checkbox'  class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
 }
@@ -119,11 +108,11 @@ function load_ideas() {
     }
 
     displays[1] =
-        '<div id="ideas">' + ideas_formatted + '</div>' +
-        '<div id="input_2">' +
-        '   <button class="add_but" id="add2"><span>+</span></button>' +
-        '   <input class="add_entry" type="text" id="entry2" spellcheck="false">' +
-        '</div>'
+        "<div id='ideas'>" + ideas_formatted + "</div>" +
+        "<div id='input_2'>" +
+        "   <button class='add_but' id='add2'><span>+</span></button>" +
+        "   <input class='add_entry' type='text' id='entry2' spellcheck='false'>" +
+        "</div>"
 }
 
 
@@ -139,30 +128,14 @@ function enchance_ideas() {
 
 $(document).on('click', '.check_history', function (event) {
     setTimeout(function () {
-        if (event.target.parentNode.parentNode.children.length > 1) {
-            event.target.parentNode.remove()
-        } else {
-            event.target.parentNode.parentNode.parentNode.remove()
-        }
+        if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
+        else event.target.parentNode.parentNode.parentNode.remove()
+
         displays[0] = document.getElementById("days").outerHTML
     }, 1000)
 
-    window.electronAPI9.sendTasks({id: $('.check_history').index(this)})
+    window.sidebarAPI.changeChecks({id: $('.check_history').index(this)})
 });
-
-function format_date(date) {
-    let d = new Date(date)
-    let format_day = d.getDate()
-    let format_month = d.getMonth() + 1
-    if (format_day < 10) {
-        format_day = "0" + format_day
-    }
-    if (format_month < 10) {
-        format_month = "0" + format_month
-    }
-    return d.getFullYear() + "-" + format_month + "-" + format_day
-}
-
 
 function resize(e) {
     let width = document.getElementById('container').offsetWidth
