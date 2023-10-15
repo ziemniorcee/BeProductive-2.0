@@ -72,13 +72,13 @@ ipcMain.on('change-checks', (event, params) => {
 
 ipcMain.on('ask-history', (event) => {
     let query = "SELECT goal, addDate  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC;"
-    db.all(query, (err, rows) => { // This queries the database
+    db.all(query, (err, rows) => {
         if (err) console.error(err)
         else event.reply('get-history', rows)
     })
 })
 
-ipcMain.on('import-history', (event, params) => {
+ipcMain.on('delete-history', (event, params) => {
     db.run("DELETE FROM goals WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
 })
 
@@ -86,6 +86,21 @@ ipcMain.on('side-check-change', (event, params) => {
     db.run("UPDATE goals SET check_state=1 WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
 })
 
+ipcMain.on('ask-ideas', (event) => {
+    db.all("SELECT idea FROM ideas ORDER BY id DESC LIMIT 50;", (err, rows) => {
+        if (err) console.error(err)
+        else event.reply('get-ideas', rows)
+    })
+})
+
+ipcMain.on('delete-ideas', (event, params) => {
+    db.run("DELETE FROM ideas where id IN (SELECT id FROM ideas LIMIT 1 OFFSET " + params.id + ");")
+})
+
+
+ipcMain.on('new-idea', (event, params) => {
+    db.run("INSERT INTO ideas (idea) VALUES(" + "'" + params.text + "');")
+})
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 

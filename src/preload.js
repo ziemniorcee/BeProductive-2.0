@@ -17,6 +17,11 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 contextBridge.exposeInMainWorld('sidebarAPI', {
     askHistory: (params) => ipcRenderer.send('ask-history',params),
     getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
-    importHistory: (params) => ipcRenderer.send('import-history', params),
+    deleteHistory: (params) => ipcRenderer.send('delete-history', params),
     changeChecks: (params) => ipcRenderer.send('side-check-change', params),
+
+    askIdeas: (params) => ipcRenderer.send('ask-ideas',params),
+    getIdeas: (func) => ipcRenderer.on('get-ideas', (event, data) => func(data)),
+    deleteIdea: (params) => ipcRenderer.send('delete-ideas', params),
+    newIdea: (params) => ipcRenderer.send('new-idea',params),
 })

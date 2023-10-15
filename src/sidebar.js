@@ -32,13 +32,15 @@ document.getElementById("img_second").addEventListener('click', () => {
     document.getElementById("days").style.overflowY = overflows[Number(current_sidebar)]
 
     if (!current_sidebar) enchance_history()
-    else enchance_ideas()
+    else {
+        enchance_ideas()
+        document.getElementById("addIdeas").addEventListener('click', () => new_idea())
+    }
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]
     document.getElementById("img_second").src = images[Number(!current_sidebar)]
 })
 
-load_ideas()
 
 window.sidebarAPI.askHistory()
 window.sidebarAPI.getHistory((data) => {
@@ -61,15 +63,15 @@ function load_history(array, date) {
     let d = new Date(date)
     let format_day = d.getDate()
     if (format_day < 10) format_day = "0" + format_day
-
     let display = weekdays[d.getDay()] + ", " + month_names[d.getMonth()] + " " + format_day + ", " + d.getFullYear();
-
     let stringhtml = "<div class='day'><span class='history_date'>" + display + "</span><div class='tasks_history'>"
 
-
     for (let i = 0; i < array.length; i++) {
-        stringhtml += "<div class='task_history'><input type='checkbox' " +
-            "class='check_history'><div><span>" + array[i].replace("`@`", "'") + "</span></div><span class='history_add'>+</span></div>"
+        stringhtml +=
+            "<div class='task_history'>" +
+            "   <input type='checkbox' class='check_history'>" +
+            "   <div><span>" + array[i].replace("`@`", "'") + "</span></div><span class='history_add'>+</span>" +
+            "</div>"
     }
     stringhtml += "</div></div>"
     displays[0] += stringhtml
@@ -77,63 +79,82 @@ function load_history(array, date) {
 }
 
 function enchance_history() {
-
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
+            get_goal(event.target.parentNode.children[1].children[0].innerText)
             if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
             else event.target.parentNode.parentNode.parentNode.remove()
-
             displays[0] = document.getElementById("days").outerHTML
-            window.sidebarAPI.importHistory({id: i})
-            get_goal(event.target.parentNode.childNodes[1].childNodes[0].innerText)
+            window.sidebarAPI.deleteHistory({id: i})
 
         })
-
     }
 }
 
-function get_goal(text) {
-    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
-    document.getElementById("dragparent").innerHTML += "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
-        "<input type='checkbox'  class='check_task' ><div class='task_text'><span class='task'>" + text + "</span></div></div>"
-}
 
-function load_ideas() {
-    let data = ["xdd1", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2", "xdd2"]
+window.sidebarAPI.askIdeas()
+window.sidebarAPI.getIdeas((data) => {
     let ideas_formatted = ""
-
     for (let i = 0; i < data.length; i++) {
-        ideas_formatted += '<div class="task_history"><span class="idea">' + data[i] + '</span><span class="history_add">+</span></div>'
+        ideas_formatted +=
+            '<div class="task_history">' +
+            '   <span class="idea">' + data[i].idea + '</span><span class="history_add">+</span>' +
+            '</div>'
     }
 
     displays[1] =
         "<div id='ideas'>" + ideas_formatted + "</div>" +
         "<div id='input_2'>" +
-        "   <button class='add_but' id='add2'><span>+</span></button>" +
-        "   <input class='add_entry' type='text' id='entry2' spellcheck='false'>" +
+        "   <button class='add_but' id='addIdeas'><span>+</span></button>" +
+        "   <input class='add_entry' type='text' id='entryIdeas' spellcheck='false'>" +
         "</div>"
-}
+})
 
 
 function enchance_ideas() {
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
-            console.log(i)
+            get_goal(event.target.parentNode.children[0].innerText)
+            event.target.parentNode.remove()
+            displays[1] = document.getElementById('days').outerHTML
+            window.sidebarAPI.deleteIdea({id: i})
         })
     }
 }
 
 
+function new_idea() {
+    let text = document.getElementById('entryIdeas').value
+    if (text !== "") {
+        window.sidebarAPI.newIdea({text: text.replace("'", "`@`")})
+        let idea_formatted =
+            '<div class="task_history">' +
+            '   <span class="idea">' + text + '</span><span class="history_add">+</span>' +
+            '</div>'
+        document.getElementById("ideas").innerHTML = idea_formatted + document.getElementById("ideas").outerHTML
+        displays[1] = document.getElementById("days").outerHTML
+        document.getElementById('entryIdeas').value = ""
+        enchance_ideas()
+    }
+}
+
+function get_goal(text) {
+    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
+    document.getElementById("dragparent").innerHTML +=
+        "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+        "   <input type='checkbox'  class='check_task' >" +
+        "   <div class='task_text'><span class='task'>" + text + "</span></div>" +
+        "</div>"
+}
+
 $(document).on('click', '.check_history', function (event) {
     setTimeout(function () {
         if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
         else event.target.parentNode.parentNode.parentNode.remove()
-
         displays[0] = document.getElementById("days").outerHTML
     }, 1000)
-
     window.sidebarAPI.changeChecks({id: $('.check_history').index(this)})
 });
 
