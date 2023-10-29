@@ -18,10 +18,24 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     askHistory: (params) => ipcRenderer.send('ask-history',params),
     getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
     deleteHistory: (params) => ipcRenderer.send('delete-history', params),
-    changeChecks: (params) => ipcRenderer.send('side-check-change', params),
+    sideChangeChecks: (params) => ipcRenderer.send('side-check-change', params),
+    removingHistory: (callback) => ipcRenderer.on("removing-history", callback),
+    historyRemoved: (params) => ipcRenderer.send('history-removed', params),
 
     askIdeas: (params) => ipcRenderer.send('ask-ideas',params),
     getIdeas: (func) => ipcRenderer.on('get-ideas', (event, data) => func(data)),
     deleteIdea: (params) => ipcRenderer.send('delete-ideas', params),
     newIdea: (params) => ipcRenderer.send('new-idea',params),
+    removingIdea: (callback) => ipcRenderer.on("removing-idea", callback),
+    ideaRemoved: (params) => ipcRenderer.send('idea-removed', params),
+})
+
+contextBridge.exposeInMainWorld('appAPI',{
+    changeWindow: (params) => ipcRenderer.send('change_window',params),
+    startPosChange: (params)=> ipcRenderer.send('start_pos_change',params),
+    stopPosChange: (params) => ipcRenderer.send('stop_pos_change',params),
+
+    showFloatbarMenu: (params) => ipcRenderer.send('show_floatbar_menu',params),
+    showGoals: (params) => ipcRenderer.send('show_goals',params),
+    returnState: (func) => ipcRenderer.on('return_state', (event, data) => func(data)),
 })

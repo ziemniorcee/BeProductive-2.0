@@ -1,0 +1,26 @@
+body{
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#menu {
+    background: #3B151F;
+    width: 100px;
+}
+#options{
+    background-color: #9B082D;
+}
+#options img{
+    width: 85px;
+    height: 85px;
+    left: 8px;
+    position: relative;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+#options div{
+    border-bottom: 1px solid #F4CA3E;
+
+}

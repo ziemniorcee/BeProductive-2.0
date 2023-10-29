@@ -21,30 +21,31 @@
 
 <div id="container">
     <div id="leftbar">
-        <img src="images/laura2.png" alt="laurels" , width="100" , height="100">
-        <a><img src="images/goal11.png" alt="laurels"><span>TO DO</span></a>
-        <a><img src="images/habit01.png" alt="laurels"><span>Habits</span></a>
-        <a><img src="images/timeline01.png" alt="laurels"><span>Timeline</span></a>
-        <a><img src="images/strategy.png" alt="laurels"><span>Strategy</span></a>
+        <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" , width="100" , height="100">
+        <a><img src="images/goal1.png" draggable="false" alt="laurels"><span>TO DO</span></a>
+        <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
+        <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
+        <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
     </div>
     <div id="main">
         <div id="header">
             <button id="todayBtn" class="button_date">
-                <img src="images/goals/today1.png" id="todayimg" width="40" height="40"><span>Today</span>
+                <img src="images/goals/today1.png" id="todayimg" draggable="false" width="40"
+                     height="40"><span>Today</span>
             </button>
             <button id="tomorrowBtn" class="button_date">
-                <img src="images/goals/tomorrow0.png" id="tomorrowimg" width="40" height="40"><span>Tomorrow</span>
+                <img src="images/goals/tomorrow0.png" id="tomorrowimg" draggable="false" width="40" height="40"><span>Tomorrow</span>
             </button>
             <button id="otherDateBtn" class="button_date">
-                <img src="images/goals/other0.png" id="anotherdayimg" width="40" height="40">
+                <img src="images/goals/other0.png" id="anotherdayimg" draggable="false" width="40" height="40">
                 <span>Another day</span>
             </button>
 
             <input type="text" id="datepicker">
 
-            <div id="chooseSide">
+            <div id="sidebarType">
                 <img id="img_main" src="images/goals/history.png" width="40" height="40">
-                <div class="dropdown-content">
+                <div class="sideBars">
                     <img id="img_second" src="images/goals/idea.png" width="40" height="40">
                 </div>
             </div>
@@ -54,9 +55,11 @@
         <div id="dragparent">
 
         </div>
-        <div>
-            <button class="add_but" id="add"><span>+</span></button>
-            <input class="add_entry" type="text" id="entry" spellcheck="false">
+        <div id="adding">
+            <button class="b_add" id="add"><span>+</span></button>
+            <div id="entry_bg">
+                <input class="e_add" type="text" id="entry" spellcheck="false">
+            </div>
         </div>
     </div>
     <div id="resizer"></div>

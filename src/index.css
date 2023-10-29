@@ -9,7 +9,6 @@ body {
     overflow: hidden;
     height: 100%;
     width: 100%;
-
 }
 
 #container {
@@ -34,7 +33,6 @@ body {
     transition: 0.3s;
     width: 85px;
     height: 85px;
-    text-decoration: none;
     color: white;
     border-radius: 15px;
     background-color: #9B082D;
@@ -48,8 +46,6 @@ body {
     left: 2px;
     top: 2px;
     margin-right: 5px;
-    display: block;
-    width: 80px;
     height: 80px;
 }
 
@@ -68,6 +64,21 @@ body {
     width: 300px;
 }
 
+#main {
+    display: flex;
+    flex-direction: column;
+    flex: 0;
+    background-image: linear-gradient(to bottom right, #800020, #307AEA);
+    font-size: 28px;
+    flex-grow: 1;
+    padding: 50px;
+}
+
+#resizer {
+    flex-basis: 4px;
+    cursor: col-resize;
+    background: #FFC90E;
+}
 
 #rightbar {
     color: white;
@@ -76,22 +87,6 @@ body {
     border: 4px solid #FFC90E;
     border-left: none;
     padding: 10px 10px 100px;
-}
-
-#resizer {
-    flex-basis: 4px;
-    z-index: 2;
-    cursor: col-resize;
-    background: #FFC90E;
-}
-
-#main {
-    flex:0;
-    height: 100%;
-    background-image: linear-gradient(to bottom right, #800020, #307AEA);
-    font-size: 28px;
-    flex-grow: 1;
-    padding: 50px;
 }
 
 .button_date {
@@ -115,7 +110,17 @@ body {
     left: 0;
 }
 
-#chooseSide {
+#datepicker {
+    left: 565px;
+    top: 50px;
+    position: absolute;
+    cursor: pointer;
+    width: 192px;
+    height: 45px;
+    opacity: 0;
+}
+
+#sidebarType {
     width: 50px;
     float: right;
     position: relative;
@@ -124,13 +129,13 @@ body {
     border: 1px solid gold;
 }
 
-#chooseSide img {
+#sidebarType img {
     position: relative;
     top: 5px;
     left: 5px;
 }
 
-.dropdown-content {
+.sideBars {
     display: none;
     height: 50px;
     background-color: #4655F9;
@@ -140,7 +145,7 @@ body {
 
 }
 
-#chooseSide:hover .dropdown-content {
+#sidebarType:hover .sideBars {
     display: block;
 }
 
@@ -152,13 +157,18 @@ body {
 }
 
 #dragparent {
-
-    clear: both;
-    position: relative;
-    height: calc(100% - 290px);
-    margin-bottom: 25px;
-    overflow: hidden;
+    margin-bottom: 20px;
     overflow-y: scroll;
+}
+
+#dragparent::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+
+#dragparent::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
 }
 
 .dragthing {
@@ -184,44 +194,45 @@ body {
     clip-path: circle(46% at 50% 50%);
 }
 
+#adding {
+    margin-top: auto;
+    display: flex;
+    width: 100%;
+}
 
-.add_but {
+.b_add {
+    float: left;
     background-color: #4655F9;
     height: 50px;
     width: 50px;
     cursor: pointer;
     font-size: 50px;
     border-radius: 7px;
-
+    vertical-align: top;
+    margin-right: 10px;
 }
 
-.add_but span {
+.b_add span {
     position: relative;
     top: -5px;
 }
 
-.add_entry {
-    margin-top: -15px;
-    width: calc(100% - 65px);
+.e_add {
+    width: 100%;
     height: 45px;
-    position: relative;
-    top: -18px;
     background: #343638;
     border-radius: 7px;
     color: white;
     font-size: 20px;
-
 }
 
-#datepicker {
-    left: 565px;
-    top: 50px;
-    position: absolute;
-    cursor: pointer;
-    width: 192px;
-    height: 45px;
-    opacity: 0;
+#entry_bg {
+    float: right;
+    background: yellow;
+    height: 100px;
+    width: 100%;
 }
+
 
 .task_text {
     margin-top: 10px;
@@ -229,20 +240,7 @@ body {
     margin-right: 10px;
     word-break: break-word;
     width: auto;
-    overflow-x: hidden ;
-}
-
-#dragparent::-webkit-scrollbar {
-    width: 0.2em;
-}
-
-#dragparent::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-#dragparent::-webkit-scrollbar-thumb {
-    background-color: darkgrey;
-    outline: 1px solid slategrey;
+    overflow-x: hidden;
 }
 
 
@@ -312,19 +310,15 @@ body {
 
 }
 
-.task{
+.task {
     width: 90%;
 }
+
 .day {
     margin-top: 20px;
 
 }
 
-#days {
-    overflow-y: scroll;
-    height: 100%;
-
-}
 
 .history_add {
     padding-left: 5px;
@@ -339,10 +333,6 @@ body {
     width: 0.2em;
 }
 
-#days::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
 #days::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     outline: 1px solid slategrey;
@@ -352,16 +342,20 @@ body {
     width: 0.2em;
 }
 
-#ideas::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
 #ideas::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     outline: 1px solid slategrey;
 }
 
-#ideas{
+#days {
+    clear: both;
+    position: relative;
+    overflow: hidden;
+    overflow-y: scroll;
+    height: 100%;
+}
+
+#ideas {
     clear: both;
     position: relative;
     height: calc(100% - 105px);
@@ -371,7 +365,7 @@ body {
 
 }
 
-.idea{
+.idea {
     position: relative;
     font-size: 20px;
     top: 10px;

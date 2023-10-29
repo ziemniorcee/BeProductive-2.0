@@ -1,3 +1,4 @@
+
 let weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 let month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -5,6 +6,9 @@ let images = ["images/goals/history.png", "images/goals/idea.png"]
 let displays = ["", ""]
 let current_sidebar = 0
 let categories = ["History", "Ideas"]
+
+let pressed = false
+let selected_div = null
 
 const resizer = document.querySelector("#resizer");
 const sidebar = document.querySelector("#rightbar");
@@ -26,6 +30,7 @@ document.getElementById("img_main").addEventListener('click', () => {
 
 document.getElementById("img_second").addEventListener('click', () => {
     let overflows = ["scroll", "hidden"]
+    displays[Number(current_sidebar)] = document.getElementById("days").innerHTML
     current_sidebar = !current_sidebar
     document.getElementById("days").innerHTML = displays[Number(current_sidebar)]
     document.getElementById("head_text").innerText = categories[Number(current_sidebar)]
@@ -35,6 +40,9 @@ document.getElementById("img_second").addEventListener('click', () => {
     else {
         enchance_ideas()
         document.getElementById("addIdeas").addEventListener('click', () => new_idea())
+        $("#entryIdeas").on('keyup', function (e) {
+            if (e.key === 'Enter' || e.keyCode === 13) new_idea()
+        });
     }
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]
@@ -106,8 +114,8 @@ window.sidebarAPI.getIdeas((data) => {
     displays[1] =
         "<div id='ideas'>" + ideas_formatted + "</div>" +
         "<div id='input_2'>" +
-        "   <button class='add_but' id='addIdeas'><span>+</span></button>" +
-        "   <input class='add_entry' type='text' id='entryIdeas' spellcheck='false'>" +
+        "   <button class='b_add' id='addIdeas'><span>+</span></button>" +
+        "   <input class='e_add' type='text' id='entryIdeas' spellcheck='false'>" +
         "</div>"
 })
 
@@ -133,12 +141,13 @@ function new_idea() {
             '<div class="task_history">' +
             '   <span class="idea">' + text + '</span><span class="history_add">+</span>' +
             '</div>'
-        document.getElementById("ideas").innerHTML = idea_formatted + document.getElementById("ideas").outerHTML
+        document.getElementById("ideas").innerHTML = idea_formatted + document.getElementById("ideas").innerHTML
         displays[1] = document.getElementById("days").outerHTML
         document.getElementById('entryIdeas').value = ""
         enchance_ideas()
     }
 }
+
 
 function get_goal(text) {
     window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
@@ -155,7 +164,7 @@ $(document).on('click', '.check_history', function (event) {
         else event.target.parentNode.parentNode.parentNode.remove()
         displays[0] = document.getElementById("days").outerHTML
     }, 1000)
-    window.sidebarAPI.changeChecks({id: $('.check_history').index(this)})
+    window.sidebarAPI.sideChangeChecks({id: $('.check_history').index(this)})
 });
 
 function resize(e) {
@@ -169,3 +178,4 @@ resizer.addEventListener("mousedown", (event) => {
         document.removeEventListener("mousemove", resize, false);
     }, false);
 });
+

@@ -72,17 +72,12 @@ function date_change(option){
         while(elements.length > 0){
             elements[0].remove()
         }
-        console.log(date)
         window.goalsAPI.askGoals({date: date})
     }
 }
 
-document.getElementById("todayBtn").addEventListener('click', ()=>{
-    date_change(0)
-})
-document.getElementById("tomorrowBtn").addEventListener('click', ()=>{
-    date_change(1)
-})
+document.getElementById("todayBtn").addEventListener('click', ()=>date_change(0))
+document.getElementById("tomorrowBtn").addEventListener('click', ()=>date_change(1))
 document.getElementById("otherDateBtn").addEventListener('click', ()=>{
     $(function(){
         $("#otherDateBtn").datepicker();
