@@ -14,20 +14,20 @@ window.goalsAPI.getGoals((data) => data.map((elem) => {
 
 window.goalsAPI.removingGoal((event) => {
     if(press_state === 0){
-        window.goalsAPI.goalRemoved({id: $('.dragthing').index(selected_div), date: l_date.sql})
+        window.goalsAPI.goalRemoved({id: $('.todo').index(selected_div), date: l_date.sql})
         selected_div.remove()
     }
 })
 window.sidebarAPI.removingHistory((event) => {
     if(press_state===1){
-        window.sidebarAPI.historyRemoved({id: $('.task_history').index(selected_div)})
+        window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
     }
 })
 
 window.sidebarAPI.removingIdea((event) => {
     if(press_state===2){
-        window.sidebarAPI.ideaRemoved({id: $('.task_history').index(selected_div)})
+        window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
     }
 })
@@ -48,8 +48,8 @@ function new_goal() {
 }
 
 function build_goal(goal_text, checked = "") {
-    document.getElementById("dragparent").innerHTML +=
-        "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+    document.getElementById("todosArea").innerHTML +=
+        "<div class='todo' onmousedown='press()' onmouseup='unpress()'>" +
         "   <input type='checkbox' " + checked + " class='check_task' >" +
         "   <div class='task_text'><span class='task'>" + goal_text + "</span></div>" +
         "</div>"
@@ -57,7 +57,7 @@ function build_goal(goal_text, checked = "") {
 
 window.addEventListener("DOMContentLoaded", (event) => {
     document.getElementById("date").innerHTML = l_date.display
-    const goals = document.getElementById('dragparent');
+    const goals = document.getElementById('todosArea');
     const history = document.getElementById("days")
     if (goals) {
         goals.addEventListener('contextmenu', function handleClick(event) {
@@ -138,10 +138,7 @@ $(document).on('click', '.check_task', function () {
 
 document.getElementById("entry").addEventListener('click', () => {
     document.getElementById("entry_bg").style.height="300px"
-    document.getElementById("entry_bg").style.height="300px"
 })
-
-// Float bar
 
 document.getElementById("laurels").addEventListener('click', () => {
     window.appAPI.changeWindow()

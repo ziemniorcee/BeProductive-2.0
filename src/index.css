@@ -135,7 +135,7 @@ body {
     left: 5px;
 }
 
-.sideBars {
+.sidebars {
     display: none;
     height: 50px;
     background-color: #4655F9;
@@ -145,7 +145,7 @@ body {
 
 }
 
-#sidebarType:hover .sideBars {
+#sidebarType:hover .sidebars {
     display: block;
 }
 
@@ -156,22 +156,22 @@ body {
     border-bottom: solid 3px #4655F9;
 }
 
-#dragparent {
+#todosArea {
     margin-bottom: 20px;
     overflow-y: scroll;
 }
 
-#dragparent::-webkit-scrollbar {
+#todosArea::-webkit-scrollbar {
     width: 0.2em;
 }
 
 
-#dragparent::-webkit-scrollbar-thumb {
+#todosArea::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     outline: 1px solid slategrey;
 }
 
-.dragthing {
+.todo {
     margin-right: 5px;
     min-height: 50px;
     background: #4655F9;
@@ -194,13 +194,15 @@ body {
     clip-path: circle(46% at 50% 50%);
 }
 
-#adding {
+#inputTodo {
     margin-top: auto;
     display: flex;
     width: 100%;
+    color: white;
+
 }
 
-.b_add {
+.b_todo {
     float: left;
     background-color: #4655F9;
     height: 50px;
@@ -212,25 +214,108 @@ body {
     margin-right: 10px;
 }
 
-.b_add span {
+.b_todo span {
     position: relative;
     top: -5px;
 }
 
-.e_add {
+#entry_bg {
+    float: right;
+    background: #232319;
+    width: 100%;
+    padding-right: 8px;
+    border-radius: 7px;
+    height: 50px;
+    overflow: hidden;
+
+}
+
+#entry1{
+
+}
+
+#entry2{
+    display: flex;
+}
+.e_todo {
+    color: white;
     width: 100%;
     height: 45px;
     background: #343638;
     border-radius: 7px;
-    color: white;
     font-size: 20px;
 }
+#steps{
+    width: 60%;
+    height: 250px;
+    position: relative;
+    display: block;
+    float: left;
+    flex-grow: 1;
+}
 
-#entry_bg {
-    float: right;
-    background: yellow;
-    height: 100px;
-    width: 100%;
+#goal_settings{
+    height: 250px;
+    white-space : nowrap; /* this does the trick */
+    position: relative;
+    width: 200px;
+    right: 70px;
+}
+
+.r_todo{
+    display: inline-block;
+    width: 200px;
+    margin-top: 110px;
+    margin-left: 0;
+    transform: rotate(270deg);
+    -webkit-appearance: none;
+    height: 25px;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    position: relative;
+}
+
+.r_todo:hover {
+    opacity: 1;
+}
+
+.r_todo::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+}
+
+.r_todo::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+}
+
+#range1{
+    left: 20px;
+}
+#range2{
+    right: 150px;
+}
+
+.l_todo{
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    position: relative;
+    top: 50px;
+}
+
+#label1{
+    left: 100px;
+}
+#label2{
+    right: 70px;
 }
 
 
@@ -242,7 +327,6 @@ body {
     width: auto;
     overflow-x: hidden;
 }
-
 
 #head {
     height: 50px;
@@ -259,8 +343,7 @@ body {
 
 }
 
-
-.task_history {
+.sidebarTask {
     width: 100%;
     border-bottom: solid 1px black;
     margin-top: 10px;
@@ -269,7 +352,7 @@ body {
 
 }
 
-.task_history span {
+.sidebarTask span {
     word-break: break-word;
     position: relative;
 
@@ -278,16 +361,12 @@ body {
 
 }
 
-.hisotry_text {
-    font-size: 20px;
-}
-
-.task_history div {
+.sidebarTask div {
     margin-bottom: auto;
     margin-top: auto;
 }
 
-.check_history {
+.historyCheck {
     display: block;
     margin-top: 0;
     margin-bottom: auto;
@@ -299,7 +378,7 @@ body {
     clip-path: circle(46% at 50% 50%);
 }
 
-.history_date {
+.historyDate {
     border-bottom: solid 2px black;
     position: relative;
     padding-bottom: 5px;
@@ -307,24 +386,17 @@ body {
 
 .tasks_history {
     margin-top: 20px;
-
-}
-
-.task {
-    width: 90%;
 }
 
 .day {
     margin-top: 20px;
-
 }
-
 
 .history_add {
     padding-left: 5px;
     display: block;
     margin-left: auto;
-    margin-right: 0;
+    margin-right: 5px;
     cursor: pointer;
     font-size: 40px;
 }
@@ -362,7 +434,6 @@ body {
     margin-bottom: 25px;
     overflow: hidden;
     overflow-y: scroll;
-
 }
 
 .idea {
@@ -370,4 +441,8 @@ body {
     font-size: 20px;
     top: 10px;
     left: 10px;
+}
+
+#inputIdeas{
+    display: flex;
 }

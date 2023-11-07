@@ -45,20 +45,33 @@
 
             <div id="sidebarType">
                 <img id="img_main" src="images/goals/history.png" width="40" height="40">
-                <div class="sideBars">
+                <div class="sidebars">
                     <img id="img_second" src="images/goals/idea.png" width="40" height="40">
                 </div>
             </div>
 
             <p id="date">Friday, September 01, 2023</p>
         </div>
-        <div id="dragparent">
+        <div id="todosArea">
 
         </div>
-        <div id="adding">
-            <button class="b_add" id="add"><span>+</span></button>
+        <div id="inputTodo">
+            <button class="b_todo" id="add"><span>+</span></button>
             <div id="entry_bg">
-                <input class="e_add" type="text" id="entry" spellcheck="false">
+                <div id="entry1">
+                    <input class="e_todo" type="text" id="entry" spellcheck="false">
+                </div>
+                <div id="entry2">
+                    <div id="steps">
+                        xxxxxxxx xxxxxxxx
+                    </div>
+                    <div id="goal_settings">
+                        <span class="l_todo" id="label1">Difficulty</span>
+                        <input type="range" class="r_todo" id="range1">
+                        <span class="l_todo" id="label2">Importance</span>
+                        <input type="range" class="r_todo" id="range2">
+                    </div>
+                </div>
             </div>
         </div>
     </div>

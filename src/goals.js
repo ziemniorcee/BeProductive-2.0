@@ -1,5 +1,5 @@
 function init() {
-    dragula([document.querySelector("#dragparent")]);
+    dragula([document.querySelector("#todosArea")]);
 }
 
 let tasks = []

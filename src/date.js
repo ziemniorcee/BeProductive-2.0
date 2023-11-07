@@ -66,7 +66,7 @@ function date_change(option){
         date = l_date.sql
         document.getElementById("date").innerHTML = l_date.display
 
-        let elements = document.getElementsByClassName("dragthing")
+        let elements = document.getElementsByClassName("todo")
         let length = elements.length
 
         while(elements.length > 0){

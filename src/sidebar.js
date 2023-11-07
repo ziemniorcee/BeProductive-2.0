@@ -72,12 +72,12 @@ function load_history(array, date) {
     let format_day = d.getDate()
     if (format_day < 10) format_day = "0" + format_day
     let display = weekdays[d.getDay()] + ", " + month_names[d.getMonth()] + " " + format_day + ", " + d.getFullYear();
-    let stringhtml = "<div class='day'><span class='history_date'>" + display + "</span><div class='tasks_history'>"
+    let stringhtml = "<div class='day'><span class='historyDate'>" + display + "</span><div class='tasks_history'>"
 
     for (let i = 0; i < array.length; i++) {
         stringhtml +=
-            "<div class='task_history'>" +
-            "   <input type='checkbox' class='check_history'>" +
+            "<div class='sidebarTask'>" +
+            "   <input type='checkbox' class='historyCheck'>" +
             "   <div><span>" + array[i].replace("`@`", "'") + "</span></div><span class='history_add'>+</span>" +
             "</div>"
     }
@@ -106,16 +106,16 @@ window.sidebarAPI.getIdeas((data) => {
     let ideas_formatted = ""
     for (let i = 0; i < data.length; i++) {
         ideas_formatted +=
-            '<div class="task_history">' +
+            '<div class="sidebarTask">' +
             '   <span class="idea">' + data[i].idea + '</span><span class="history_add">+</span>' +
             '</div>'
     }
 
     displays[1] =
         "<div id='ideas'>" + ideas_formatted + "</div>" +
-        "<div id='input_2'>" +
-        "   <button class='b_add' id='addIdeas'><span>+</span></button>" +
-        "   <input class='e_add' type='text' id='entryIdeas' spellcheck='false'>" +
+        "<div id='inputIdeas'>" +
+        "   <button class='b_todo' id='addIdeas'><span>+</span></button>" +
+        "   <input class='e_todo' type='text' id='entryIdeas' spellcheck='false'>" +
         "</div>"
 })
 
@@ -138,7 +138,7 @@ function new_idea() {
     if (text !== "") {
         window.sidebarAPI.newIdea({text: text.replace("'", "`@`")})
         let idea_formatted =
-            '<div class="task_history">' +
+            '<div class="sidebarTask">' +
             '   <span class="idea">' + text + '</span><span class="history_add">+</span>' +
             '</div>'
         document.getElementById("ideas").innerHTML = idea_formatted + document.getElementById("ideas").innerHTML
@@ -151,8 +151,8 @@ function new_idea() {
 
 function get_goal(text) {
     window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
-    document.getElementById("dragparent").innerHTML +=
-        "<div class='dragthing' onmousedown='press()' onmouseup='unpress()'>" +
+    document.getElementById("todosArea").innerHTML +=
+        "<div class='todo' onmousedown='press()' onmouseup='unpress()'>" +
         "   <input type='checkbox'  class='check_task' >" +
         "   <div class='task_text'><span class='task'>" + text + "</span></div>" +
         "</div>"
@@ -164,7 +164,7 @@ $(document).on('click', '.check_history', function (event) {
         else event.target.parentNode.parentNode.parentNode.remove()
         displays[0] = document.getElementById("days").outerHTML
     }, 1000)
-    window.sidebarAPI.sideChangeChecks({id: $('.check_history').index(this)})
+    window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(this)})
 });
 
 function resize(e) {
