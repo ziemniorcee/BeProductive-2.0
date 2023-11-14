@@ -28,7 +28,6 @@ function unpress() {
 }
 
 function change() {
-    console.log("XD")
     let elements = document.getElementsByClassName("check_task")
     let checks = []
     for (let i = 0; i < elements.length - 1; i++) {

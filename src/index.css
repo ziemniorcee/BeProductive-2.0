@@ -174,13 +174,17 @@ body {
 .todo {
     margin-right: 5px;
     min-height: 50px;
-    background: #4655F9;
+    background: #343638;
     font-size: 25px;
     color: white;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
     border: 3px solid #666;
     display: flex;
     cursor: default;
+}
+
+.todoCheck{
+    background: #4655F9;
 }
 
 .check_task {
@@ -190,9 +194,10 @@ body {
     min-width: 30px;
     min-height: 30px;
     position: relative;
-
     clip-path: circle(46% at 50% 50%);
+    accent-color: #343638;
 }
+
 
 #inputTodo {
     margin-top: auto;
@@ -202,23 +207,42 @@ body {
 
 }
 
-.b_todo {
-    float: left;
+#todo_buttons{
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    overflow: hidden;
+    transition: 0.5s;
+}
+
+.b_add {
     background-color: #4655F9;
     height: 50px;
-    width: 50px;
     cursor: pointer;
     font-size: 50px;
     border-radius: 7px;
-    vertical-align: top;
-    margin-right: 10px;
+    line-height: 50px;
+    margin-bottom: 10px;
 }
 
-.b_todo span {
+.b_add span {
     position: relative;
-    top: -5px;
+    bottom: 3px;
 }
 
+#todoHide{
+    height: 50px;
+    background-color: transparent;
+    border: transparent;
+    cursor: pointer;
+}
+
+#todoHide img{
+    position: relative;
+    bottom: 4px;
+    width: 30px;
+    height: 30px;
+}
 #entry_bg {
     float: right;
     background: #232319;
@@ -227,15 +251,14 @@ body {
     border-radius: 7px;
     height: 50px;
     overflow: hidden;
-
+    transition: 0.5s;
 }
 
-#entry1{
-
-}
 
 #entry2{
     display: flex;
+    height: 250px;
+
 }
 .e_todo {
     color: white;
@@ -245,14 +268,54 @@ body {
     border-radius: 7px;
     font-size: 20px;
 }
-#steps{
-    width: 60%;
-    height: 250px;
+#newSteps{
     position: relative;
-    display: block;
     float: left;
     flex-grow: 1;
+    padding: 20px;
+    width: 100%;
+    overflow-y: auto;
 }
+
+#newSteps {
+    overflow-y: scroll;
+}
+
+#newSteps::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+
+#newSteps::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+    margin-top: 10px;
+}
+
+#newStep{
+    color: #FFC90E;
+    cursor: pointer;
+    width: max-content;
+}
+#stepText{
+    display: flex;
+}
+
+.stepEntry{
+    background: transparent;
+    /*background: black;*/
+    color: white;
+    height: 30px;
+    border: transparent;
+    position: relative;
+    outline: none;
+    font-size: 25px;
+    width: 100%;
+    margin-left: 10px;
+
+}
+
+
 
 #goal_settings{
     height: 250px;
@@ -260,6 +323,7 @@ body {
     position: relative;
     width: 200px;
     right: 70px;
+
 }
 
 .r_todo{
@@ -319,13 +383,48 @@ body {
 }
 
 
+
 .task_text {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
+    margin: 10px;
     word-break: break-word;
     width: auto;
     overflow-x: hidden;
+}
+
+.task{
+
+}
+
+.stepsShow{
+    padding-top:1px;
+    padding-bottom: 1px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    background: #4655F9;
+    display: block;
+    width: max-content;
+    padding-right: 5px;
+
+}
+
+.stepsShow img{
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+
+.steps{
+    display: block;
+}
+.step{
+    font-size: 20px;
+}
+.stepCheck{
+    width: 20px;
+    height: 20px;
+    position: relative;
+    top: 3px;
 }
 
 #head {

@@ -114,7 +114,7 @@ window.sidebarAPI.getIdeas((data) => {
     displays[1] =
         "<div id='ideas'>" + ideas_formatted + "</div>" +
         "<div id='inputIdeas'>" +
-        "   <button class='b_todo' id='addIdeas'><span>+</span></button>" +
+        "   <button class='b_add' id='addIdeas'><span>+</span></button>" +
         "   <input class='e_todo' type='text' id='entryIdeas' spellcheck='false'>" +
         "</div>"
 })
@@ -158,7 +158,8 @@ function get_goal(text) {
         "</div>"
 }
 
-$(document).on('click', '.check_history', function (event) {
+$(document).on('click', '.historyCheck', function (event) {
+    console.log("XDXD")
     setTimeout(function () {
         if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
         else event.target.parentNode.parentNode.parentNode.remove()
