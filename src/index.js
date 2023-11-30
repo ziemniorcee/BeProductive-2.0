@@ -14,6 +14,10 @@ const db = new sqlite.Database("./goals.db")
 let current_date = null
 let today_date = null
 
+let goal_ids = []
+let step_ids = []
+let current_goal_pos = 0
+
 let mainWindow
 let floatMenuWindow
 let floatContentWindow
@@ -85,33 +89,90 @@ const createFloatbar = () => {
 ipcMain.on('ask-goals', (event, params) => {
     if (today_date == null) today_date = params.date
     current_date = params.date
-    db.all("SELECT id, goal, check_state FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
-        if (err) console.error(err)
-        else event.reply('get-goals', rows)
-    })
-})
 
-ipcMain.on('new-goal', (event, params) => {
-    db.run("INSERT INTO goals (goal, addDate) VALUES (" + "'" + params.goal_text + "'" + ", " + "'" + current_date + "'" + ") ")
-})
-
-ipcMain.on('rows-change', (event, params) => {
-    db.all("SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + ";", (err, rows) => { // This queries the database
+    db.all(`SELECT id, goal, check_state, goal_pos
+            FROM goals
+            WHERE addDate = "${current_date}"
+            ORDER BY goal_pos`, (err, rows) => {
         if (err) console.error(err)
         else {
-            for (let i = 0; i < rows.length; i++) {
-                db.run("UPDATE goals SET goal=" + "'" + params.tasks[i] + "'" + ", check_state = " + "'" + params.checks[i] + "'" + " WHERE id=" + rows[i].id + ";")
-            }
+            let positions = rows.map((goal) => Number(goal.goal_pos))
+            if(positions.length > 0) current_goal_pos = Math.max.apply(Math, positions)
+            else current_goal_pos = 0
+
+            goal_ids = rows.map((goal) => goal.id)
+            let ids_string = `( ${goal_ids} )`
+            db.all(`SELECT id, goal_id, step_text, step_check
+                    FROM steps
+                    WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                if (err2) console.error(err2)
+                else {
+                    step_ids = steps.map((step) => step.id)
+                    event.reply('get-goals', rows, steps)
+                }
+            })
         }
     })
 })
 
-ipcMain.on('goal-removed', (event, params) => {
-    db.run("DELETE FROM goals WHERE id IN (SELECT id FROM goals WHERE addDate=" + "'" + current_date + "'" + " LIMIT 1 OFFSET " + params.id + ");")
+ipcMain.on('new-goal', (event, params) => {
+    db.run(`INSERT INTO goals (goal, addDate, goal_pos)
+            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos})`)
+    db.all(`SELECT id
+            FROM goals
+            WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
+        goal_ids.push(rows[0].id)
+        for (let i = 0; i < params.steps.length; i++) {
+            db.run(`INSERT INTO steps (step_text, goal_id)
+                    VALUES ("${params.steps[i]}", ${rows[0].id})`)
+        }
+        db.all(`SELECT id
+                FROM steps
+                WHERE goal_id = ${rows[0].id}`, (err, rows2) => {
+            for (let i = 0; i < rows2.length; i++) {
+                step_ids.push(rows2[i].id)
+            }
+        })
+    })
+    current_goal_pos++
 })
 
-ipcMain.on('change-checks', (event, params) => {
-    db.run("UPDATE goals SET check_state=" + params.state + " WHERE id IN(SELECT id FROM goals where addDate=" + "'" + current_date + "'" + " LIMIT 1 OFFSET " + params.id + ");")
+ipcMain.on('rows-change', (event, params) => {
+    for (let i = 0; i < goal_ids.length; i++) {
+        db.run(`UPDATE goals
+                SET goal_pos=${i + 1}
+                WHERE id = ${goal_ids[params.after[i]]}`)
+    }
+})
+
+ipcMain.on('goal-removed', (event, params) => {
+    db.run(`DELETE
+            FROM goals
+            WHERE id = ${goal_ids[params.id]}`)
+    db.run(`DELETE
+            FROM steps
+            WHERE goal_id = ${goal_ids[params.id]}`)
+
+    goal_ids.splice(params.id, 1)
+    let ids_string = `( ${goal_ids} )`
+
+    db.all(`SELECT id
+            FROM steps
+            WHERE goal_id IN ${ids_string}`, (err, steps) => {
+        step_ids = steps.map((step) => step.id)
+    })
+})
+
+ipcMain.on('change-checks-goal', (event, params) => {
+    db.run(`UPDATE goals
+            SET check_state="${params.state}"
+            WHERE id = ${goal_ids[params.id]}`)
+})
+
+ipcMain.on('change-checks-step', (event, params) => {
+    db.run(`UPDATE steps
+            SET step_check="${params.state}"
+            WHERE id = ${step_ids[params.id]}`)
 })
 
 ipcMain.on('ask-history', (event) => {
@@ -141,7 +202,7 @@ ipcMain.on('ask-ideas', (event) => {
     })
 })
 
-ipcMain.on('delete-ideas', (event, params) => {
+ipcMain.on('delete-idea', (event, params) => {
     db.run("DELETE FROM ideas where id IN (SELECT id FROM ideas LIMIT 1 OFFSET " + params.id + ");")
 })
 
@@ -151,7 +212,7 @@ ipcMain.on('new-idea', (event, params) => {
 })
 
 ipcMain.on('idea-removed', (event, params) => {
-    db.run("DELETE FROM ideas WHERE id IN (SELECT id FROM ideas ORDER BY id DESC LIMIT 1 OFFSET "+params.id+")")
+    db.run("DELETE FROM ideas WHERE id IN (SELECT id FROM ideas ORDER BY id DESC LIMIT 1 OFFSET " + params.id + ")")
 })
 
 ipcMain.on('change_window', (event, params) => {

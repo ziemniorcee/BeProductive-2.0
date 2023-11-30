@@ -70,17 +70,19 @@ window.sidebarAPI.getHistory((data) => {
 function load_history(array, date) {
     let d = new Date(date)
     let format_day = d.getDate()
-    if (format_day < 10) format_day = "0" + format_day
+    if (format_day < 10) format_day = `0${format_day}`
     let display = weekdays[d.getDay()] + ", " + month_names[d.getMonth()] + " " + format_day + ", " + d.getFullYear();
-    let stringhtml = "<div class='day'><span class='historyDate'>" + display + "</span><div class='tasks_history'>"
+    let stringhtml = `<div class='day'><span class='historyDate'>${display}</span><div class='tasks_history'>`
+
 
     for (let i = 0; i < array.length; i++) {
-        stringhtml +=
-            "<div class='sidebarTask'>" +
-            "   <input type='checkbox' class='historyCheck'>" +
-            "   <div><span>" + array[i].replace("`@`", "'") + "</span></div><span class='history_add'>+</span>" +
-            "</div>"
+        stringhtml += `
+        <div class='sidebarTask'>
+            <input type='checkbox' class='historyCheck'>
+            <div><span>${array[i].replace("`@`", "'")}</span></div><span class='history_add'>+</span>
+        </div>`
     }
+
     stringhtml += "</div></div>"
     displays[0] += stringhtml
     document.getElementById("days").innerHTML = displays[0]
@@ -93,6 +95,7 @@ function enchance_history() {
             get_goal(event.target.parentNode.children[1].children[0].innerText)
             if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
             else event.target.parentNode.parentNode.parentNode.remove()
+
             displays[0] = document.getElementById("days").outerHTML
             window.sidebarAPI.deleteHistory({id: i})
 
@@ -110,13 +113,12 @@ window.sidebarAPI.getIdeas((data) => {
             '   <span class="idea">' + data[i].idea + '</span><span class="history_add">+</span>' +
             '</div>'
     }
-
     displays[1] =
-        "<div id='ideas'>" + ideas_formatted + "</div>" +
-        "<div id='inputIdeas'>" +
-        "   <button class='b_add' id='addIdeas'><span>+</span></button>" +
-        "   <input class='e_todo' type='text' id='entryIdeas' spellcheck='false'>" +
-        "</div>"
+        `<div id='ideas'>${ideas_formatted}</div>
+        <div id='inputIdeas'>
+            <button class='b_add' id='addIdeas'><span>+</span></button>
+            <input class='e_todo' type='text' id='entryIdeas' spellcheck='false'>
+        </div>`
 })
 
 
@@ -150,16 +152,19 @@ function new_idea() {
 
 
 function get_goal(text) {
-    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`")})
+    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`"), steps: []})
+
+    let goals = document.getElementsByClassName("goal_id")
+
     document.getElementById("todosArea").innerHTML +=
-        "<div class='todo' onmousedown='press()' onmouseup='unpress()'>" +
-        "   <input type='checkbox'  class='check_task' >" +
-        "   <div class='task_text'><span class='task'>" + text + "</span></div>" +
-        "</div>"
+        `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
+            <div class="goal_id">${goals.length}</div>
+            <div class='todoCheck'><input type='checkbox' class='check_task'></div>
+            <div class='task_text'><span class='task'> ${text} </span></div>
+        </div>`
 }
 
 $(document).on('click', '.historyCheck', function (event) {
-    console.log("XDXD")
     setTimeout(function () {
         if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
         else event.target.parentNode.parentNode.parentNode.remove()

@@ -183,6 +183,9 @@ body {
     cursor: default;
 }
 
+.goal_id{
+    display: none;
+}
 .todoCheck{
     background: #4655F9;
 }
@@ -404,14 +407,20 @@ body {
     display: block;
     width: max-content;
     padding-right: 5px;
+    font-size: 20px;
 
 }
 
 .stepsShow img{
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     margin-right: 10px;
-    margin-left: 5px;
+    margin-left: 8px;
+    pointer-events: none;
+}
+
+.stepsShow span{
+    pointer-events: none;
 }
 
 .steps{
@@ -454,10 +463,8 @@ body {
 .sidebarTask span {
     word-break: break-word;
     position: relative;
-
     bottom: 5px;
     right: 5px;
-
 }
 
 .sidebarTask div {

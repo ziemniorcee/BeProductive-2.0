@@ -5,12 +5,13 @@ const {contextBridge, ipcRenderer} = require('electron')
 
 contextBridge.exposeInMainWorld('goalsAPI', {
     askGoals: (params) => ipcRenderer.send('ask-goals',params),
-    getGoals: (func) => ipcRenderer.on('get-goals', (event, data) => func(data)),
+    getGoals: (func) => ipcRenderer.on('get-goals', (event, goals, steps) => func(goals, steps)),
     newGoal: (params) => ipcRenderer.send('new-goal',params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
     goalRemoved : (params) => ipcRenderer.send('goal-removed', params),
     rowsChange: (params) => ipcRenderer.send('rows-change',params),
-    changeChecks: (params) => ipcRenderer.send('change-checks', params)
+    changeChecksGoal: (params) => ipcRenderer.send('change-checks-goal', params),
+    changeChecksStep: (params) => ipcRenderer.send('change-checks-step', params),
 })
 
 
@@ -24,7 +25,7 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
 
     askIdeas: (params) => ipcRenderer.send('ask-ideas',params),
     getIdeas: (func) => ipcRenderer.on('get-ideas', (event, data) => func(data)),
-    deleteIdea: (params) => ipcRenderer.send('delete-ideas', params),
+    deleteIdea: (params) => ipcRenderer.send('delete-idea', params),
     newIdea: (params) => ipcRenderer.send('new-idea',params),
     removingIdea: (callback) => ipcRenderer.on("removing-idea", callback),
     ideaRemoved: (params) => ipcRenderer.send('idea-removed', params),

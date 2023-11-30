@@ -3,36 +3,26 @@ function init() {
 }
 
 let tasks = []
-let goals_len = 0
 
 function press() {
-    let elements = document.getElementsByClassName("task")
+    let elements = document.getElementsByClassName("goal_id")
+
     tasks = []
-    goals_len = elements.length
-    for (let i = 0; i < goals_len; i++) {
-        tasks.push(elements[i].textContent.replace("'", "`@`"))
+    for (let i = 0; i < elements.length; i++) {
+        tasks.push(elements[i].textContent)
     }
 }
 
 function unpress() {
-    let elements = document.getElementsByClassName("task")
-    let before = tasks
-    tasks = []
-    for (let i = 0; i < goals_len; i++) {
-        tasks.push(elements[i].textContent.replace("'", "`@`"))
-    }
+    let elements = document.getElementsByClassName("goal_id")
+    let new_tasks = []
 
-    if (JSON.stringify(before) !== JSON.stringify(tasks)) {
-        change()
+    if (tasks.length < elements.length){
+        for (let i = 0; i < elements.length-1; i++) {
+            new_tasks.push(elements[i].textContent)
+        }
+        if (JSON.stringify(tasks) !== JSON.stringify(new_tasks)) {
+            window.goalsAPI.rowsChange({after: new_tasks})
+        }
     }
 }
-
-function change() {
-    let elements = document.getElementsByClassName("check_task")
-    let checks = []
-    for (let i = 0; i < elements.length - 1; i++) {
-        checks.push(Number(elements[i].checked))
-    }
-    window.goalsAPI.rowsChange({tasks: tasks, checks: checks})
-}
-
