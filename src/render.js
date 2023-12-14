@@ -131,10 +131,6 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
         steps_show[i].addEventListener('click', (event) => show_steps(event))
         steps_show[i].parentNode.children[2].style.display = "block"
     }
-
-    // let goals = document.getElementsByClassName("todo")
-    // console.log(goals)
-    // goals[goals.length-1].addEventListener('click', (event) => goal_edit(event))
 }
 
 function show_steps(event1) {
@@ -147,9 +143,6 @@ function show_steps(event1) {
     }
 }
 
-function goal_edit(event1) {
-    console.log("XDXD")
-}
 
 function step_clicked(event1) {
     event1.target.remove()

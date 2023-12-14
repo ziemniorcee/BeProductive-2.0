@@ -6,21 +6,19 @@ let displays = ["", ""]
 let current_sidebar = 0
 let categories = ["History", "Ideas"]
 
-let pressed = false
-let selected_div = null
 
 const resizer = document.querySelector("#resizer");
 const sidebar = document.querySelector("#rightbar");
 let sidebar_state = true
 sidebar.style.flexBasis = '500px';
 
-let steps_pressed = false
 let goal_pressed = false
-
 let saved_sidebar = ""
 
 const mainContent = document.querySelector("#main-content");
-document.getElementById("img_main").addEventListener('click', () => {
+document.getElementById("img_main").addEventListener('click', () => show_hide_sidebar())
+
+function show_hide_sidebar() {
     sidebar_state = !sidebar_state
     if (sidebar_state) {
         sidebar.style.display = 'block'
@@ -29,12 +27,15 @@ document.getElementById("img_main").addEventListener('click', () => {
         sidebar.style.display = 'none'
         resizer.style.display = 'none'
     }
-})
-
+}
 
 document.getElementById("img_second").addEventListener('click', () => {
     let overflows = ["scroll", "hidden"]
-    displays[Number(current_sidebar)] = document.getElementById("days").innerHTML
+    if (goal_pressed) {
+        goal_pressed = false
+        document.getElementById("rightbar").innerHTML = saved_sidebar
+    } else displays[Number(current_sidebar)] = document.getElementById("days").innerHTML
+
     current_sidebar = !current_sidebar
     document.getElementById("days").innerHTML = displays[Number(current_sidebar)]
     document.getElementById("head_text").innerText = categories[Number(current_sidebar)]
@@ -51,8 +52,6 @@ document.getElementById("img_second").addEventListener('click', () => {
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]
     document.getElementById("img_second").src = images[Number(!current_sidebar)]
-
-
 })
 
 
@@ -71,8 +70,6 @@ window.sidebarAPI.getHistory((data) => {
     }
     load_history(goals, date)
     enchance_history()
-
-
 })
 
 function load_history(array, date) {
@@ -106,7 +103,6 @@ function enchance_history() {
 
             displays[0] = document.getElementById("days").outerHTML
             window.sidebarAPI.deleteHistory({id: i})
-
         })
     }
 }
@@ -195,12 +191,13 @@ resizer.addEventListener("mousedown", (event) => {
 
 $(document).on('click', '.todo', function (event) {
     saved_sidebar = document.getElementById("rightbar").innerHTML
+    displays[Number(current_sidebar)] = document.getElementById("days").innerHTML
 
+    if (sidebar_state === false) show_hide_sidebar()
     if (event.target.children.length !== 0 && event.target.children.length !== 2) {
         let base = event.target
         if (event.target.children.length === 1) base = event.target.parentNode
 
-        console.log(base.children.length)
         let main_goal = base.children[2].children[0].innerText
         let steps_html = ""
         if (base.children[2].children.length > 1) {
@@ -212,7 +209,6 @@ $(document).on('click', '.todo', function (event) {
                     </div>`
             }
         }
-
         document.getElementById("rightbar").innerHTML =
             `<div id="closeEdit">⨉</div>
                 <div id="todoEdit">
@@ -226,9 +222,9 @@ $(document).on('click', '.todo', function (event) {
                         </div>
                     </div>
                 </div>`
+        document.getElementById("closeEdit").addEventListener('click', () => show_hide_sidebar())
         goal_pressed = true
     }
-
 });
 
 document.getElementById("main").addEventListener('click', () => {

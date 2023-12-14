@@ -563,7 +563,9 @@ body {
     right: 0;
     margin-left: auto;
     margin-right: 10px;
+    cursor: pointer;
 }
+
 
 #closeEdit:hover{
     background: #403737;
