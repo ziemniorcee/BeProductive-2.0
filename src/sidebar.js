@@ -1,4 +1,3 @@
-
 let weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 let month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -14,6 +13,11 @@ const resizer = document.querySelector("#resizer");
 const sidebar = document.querySelector("#rightbar");
 let sidebar_state = true
 sidebar.style.flexBasis = '500px';
+
+let steps_pressed = false
+let goal_pressed = false
+
+let saved_sidebar = ""
 
 const mainContent = document.querySelector("#main-content");
 document.getElementById("img_main").addEventListener('click', () => {
@@ -47,6 +51,8 @@ document.getElementById("img_second").addEventListener('click', () => {
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]
     document.getElementById("img_second").src = images[Number(!current_sidebar)]
+
+
 })
 
 
@@ -65,6 +71,8 @@ window.sidebarAPI.getHistory((data) => {
     }
     load_history(goals, date)
     enchance_history()
+
+
 })
 
 function load_history(array, date) {
@@ -185,3 +193,55 @@ resizer.addEventListener("mousedown", (event) => {
     }, false);
 });
 
+$(document).on('click', '.todo', function (event) {
+    saved_sidebar = document.getElementById("rightbar").innerHTML
+
+    if (event.target.children.length !== 0 && event.target.children.length !== 2) {
+        let base = event.target
+        if (event.target.children.length === 1) base = event.target.parentNode
+
+        console.log(base.children.length)
+        let main_goal = base.children[2].children[0].innerText
+        let steps_html = ""
+        if (base.children[2].children.length > 1) {
+            let array = base.children[2].children[2].children
+            for (let i = 0; i < array.length; i++) {
+                steps_html += `
+                    <div class="editStep">
+                        <input type="checkbox" class="editCheckStep"><input type="text" class="editTextStep" value="${array[i].innerText.trim()}">
+                    </div>`
+            }
+        }
+
+        document.getElementById("rightbar").innerHTML =
+            `<div id="closeEdit">⨉</div>
+                <div id="todoEdit">
+                    <div id="editMain">
+                        <input type="checkbox" id="editCheck"><input type="text" id="editText"  value="${main_goal}">
+                    </div>
+                    <div id="editSteps">
+                        ${steps_html}
+                        <div id="editNewStep">
+                            <span>+</span>New Step
+                        </div>
+                    </div>
+                </div>`
+        goal_pressed = true
+    }
+
+});
+
+document.getElementById("main").addEventListener('click', () => {
+    if (goal_pressed === true) {
+        goal_pressed = false
+        document.getElementById("rightbar").innerHTML = saved_sidebar
+        if (!current_sidebar) enchance_history()
+        else {
+            enchance_ideas()
+            document.getElementById("addIdeas").addEventListener('click', () => new_idea())
+            $("#entryIdeas").on('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) new_idea()
+            });
+        }
+    } else goal_pressed = false
+})

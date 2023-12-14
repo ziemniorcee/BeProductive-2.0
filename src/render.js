@@ -9,6 +9,7 @@ let press_state = 0
 let current_step = 1
 let steps = []
 
+
 window.goalsAPI.askGoals({date: l_date.sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
@@ -92,7 +93,7 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
 
     if (steps.length > 0) {
         let checks_counter = `0/${steps.length}`
-        if(step_checks.length !== 0) checks_counter = `${step_checks.reduce((a, b) => a+b)}/${step_checks.length}`
+        if (step_checks.length !== 0) checks_counter = `${step_checks.reduce((a, b) => a + b)}/${step_checks.length}`
 
         steps_HTML =
             `<div class='stepsShow'><img src='images/goals/up.png'><span class="check_counter">${checks_counter}</span></div>
@@ -130,6 +131,10 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
         steps_show[i].addEventListener('click', (event) => show_steps(event))
         steps_show[i].parentNode.children[2].style.display = "block"
     }
+
+    // let goals = document.getElementsByClassName("todo")
+    // console.log(goals)
+    // goals[goals.length-1].addEventListener('click', (event) => goal_edit(event))
 }
 
 function show_steps(event1) {
@@ -140,6 +145,10 @@ function show_steps(event1) {
         event1.target.parentNode.children[2].style.display = 'block'
         event1.target.parentNode.children[1].children[0].src = 'images/goals/up.png'
     }
+}
+
+function goal_edit(event1) {
+    console.log("XDXD")
 }
 
 function step_clicked(event1) {
@@ -159,7 +168,6 @@ function step_clicked(event1) {
     array = document.getElementsByClassName('stepEntry')
     for (let i = 0; i < array.length - 1; i++) array[i].value = steps[i]
     array[array.length - 1].focus()
-
 }
 
 document.getElementById("newStep").addEventListener('click', (event) => step_clicked(event))
@@ -272,4 +280,7 @@ $(document).on('click', '.stepCheck', function (event) {
 document.getElementById("laurels").addEventListener('click', () => {
     window.appAPI.changeWindow()
 })
+
+
+
 

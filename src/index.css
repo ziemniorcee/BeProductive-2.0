@@ -428,6 +428,7 @@ body {
 }
 .step{
     font-size: 20px;
+
 }
 .stepCheck{
     width: 20px;
@@ -551,4 +552,91 @@ body {
 
 #inputIdeas{
     display: flex;
+}
+
+#closeEdit{
+    background: transparent;
+    font-size: 30px;
+    width: 30px;
+    text-align: center;
+    display: block;
+    right: 0;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+#closeEdit:hover{
+    background: #403737;
+}
+#todoEdit{
+    background: #403737;
+    margin: 10px;
+    font-size: 25px;
+    padding: 10px;
+
+}
+
+#editMain{
+    display: flex;
+    margin-bottom: 10px;
+}
+#editCheck{
+    display: block;
+    margin: 0 10px auto;
+    min-width: 30px;
+    min-height: 30px;
+    clip-path: circle(46% at 50% 50%);
+    accent-color: #343638;
+}
+#editText{
+    color: white;
+    width: 100%;
+    background: #403737;
+    border-radius: 7px;
+    font-size: 25px;
+    border: transparent;
+    outline: none;
+}
+
+
+.editStep{
+    display: flex;
+    margin-bottom: 5px;
+    padding-top: 5px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #595b5f;
+
+}
+
+.editCheckStep{
+    display: block;
+    margin-left: 15px;
+
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.editTextStep{
+    color: #b9b4b4;
+    width: 100%;
+    background: #403737;
+    border-radius: 7px;
+    font-size: 20px;
+    border: transparent;
+    outline: none;
+}
+
+#editNewStep span{
+    font-size: 30px;
+    margin-left: 15px;
+    margin-right: 10px;
+    position: relative;
+    top: 3px;
+}
+
+#editNewStep{
+    color: #FFC90E;
+    font-size: 20px;
+    position: relative;
+    bottom: 2px;
 }
