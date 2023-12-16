@@ -105,7 +105,7 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
 
             steps_HTML +=
                 `<div class='step'>
-                    <input type='checkbox' ${step_check} class='stepCheck'> ${steps[i]}
+                    <input type='checkbox' ${step_check} class='stepCheck'> <span class="step_text">${steps[i]}</span>
                 </div>`
         }
         steps_HTML += "</div>"

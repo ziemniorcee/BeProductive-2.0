@@ -87,6 +87,7 @@ body {
     border: 4px solid #FFC90E;
     border-left: none;
     padding: 10px 10px 100px;
+    flex-basis: 500px;
 }
 
 .button_date {
@@ -188,6 +189,7 @@ body {
 }
 .todoCheck{
     background: #4655F9;
+    pointer-events: none;
 }
 
 .check_task {
@@ -199,6 +201,7 @@ body {
     position: relative;
     clip-path: circle(46% at 50% 50%);
     accent-color: #343638;
+    pointer-events: all;
 }
 
 
@@ -392,6 +395,7 @@ body {
     word-break: break-word;
     width: auto;
     overflow-x: hidden;
+    pointer-events: none;
 }
 
 .task{
@@ -408,7 +412,7 @@ body {
     width: max-content;
     padding-right: 5px;
     font-size: 20px;
-
+    pointer-events: all;
 }
 
 .stepsShow img{
@@ -425,16 +429,23 @@ body {
 
 .steps{
     display: block;
+    pointer-events: none;
 }
 .step{
     font-size: 20px;
-
+    pointer-events: none;
 }
+
+.step_text{
+    pointer-events: none;
+}
+
 .stepCheck{
     width: 20px;
     height: 20px;
     position: relative;
     top: 3px;
+    pointer-events: all;
 }
 
 #head {
@@ -641,4 +652,5 @@ body {
     font-size: 20px;
     position: relative;
     bottom: 2px;
+    cursor: pointer;
 }
