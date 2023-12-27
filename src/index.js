@@ -15,7 +15,7 @@ let current_date = null
 let today_date = null
 
 let goal_ids = []
-let step_ids = []
+let step_ids = {}
 let current_goal_pos = 0
 
 let mainWindow
@@ -97,7 +97,7 @@ ipcMain.on('ask-goals', (event, params) => {
         if (err) console.error(err)
         else {
             let positions = rows.map((goal) => Number(goal.goal_pos))
-            if(positions.length > 0) current_goal_pos = Math.max.apply(Math, positions)
+            if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions)
             else current_goal_pos = 0
 
             goal_ids = rows.map((goal) => goal.id)
@@ -107,7 +107,10 @@ ipcMain.on('ask-goals', (event, params) => {
                     WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                 if (err2) console.error(err2)
                 else {
-                    step_ids = steps.map((step) => step.id)
+                    for (let i = 0; i<steps.length; i++){
+                        if(steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
+                        else step_ids[steps[i].goal_id] = [steps[i].id]
+                    }
                     event.reply('get-goals', rows, steps)
                 }
             })
@@ -129,8 +132,10 @@ ipcMain.on('new-goal', (event, params) => {
         db.all(`SELECT id
                 FROM steps
                 WHERE goal_id = ${rows[0].id}`, (err, rows2) => {
-            for (let i = 0; i < rows2.length; i++) {
-                step_ids.push(rows2[i].id)
+            if(rows2.length > 0) step_ids[rows[0].id] = [rows2[0].id]
+            else step_ids[rows[0].id] = []
+            for (let i = 1; i < rows2.length; i++) {
+                step_ids[rows[0].id].push(rows2[i].id)
             }
         })
     })
@@ -153,14 +158,8 @@ ipcMain.on('goal-removed', (event, params) => {
             FROM steps
             WHERE goal_id = ${goal_ids[params.id]}`)
 
+    delete step_ids[goal_ids[params.id]]
     goal_ids.splice(params.id, 1)
-    let ids_string = `( ${goal_ids} )`
-
-    db.all(`SELECT id
-            FROM steps
-            WHERE goal_id IN ${ids_string}`, (err, steps) => {
-        step_ids = steps.map((step) => step.id)
-    })
 })
 
 ipcMain.on('change-checks-goal', (event, params) => {
@@ -172,7 +171,31 @@ ipcMain.on('change-checks-goal', (event, params) => {
 ipcMain.on('change-checks-step', (event, params) => {
     db.run(`UPDATE steps
             SET step_check="${params.state}"
-            WHERE id = ${step_ids[params.id]}`)
+            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
+})
+
+ipcMain.on('change-text-goal', (event, params) => {
+    db.run(`UPDATE goals
+            SET goal="${params.input}"
+            WHERE id=${goal_ids[params.id]}`)
+})
+
+ipcMain.on('add-step', (event, params) => {
+    db.run(`INSERT INTO steps (step_text, goal_id)
+            VALUES ("${params.input}", ${goal_ids[params.id]})`)
+
+    db.all(`SELECT id
+            from steps
+            ORDER BY id DESC LIMIT 1`, (err, rows) => {
+        if (err) console.error(err)
+        else step_ids[goal_ids[params.id]].push(rows[0].id)
+    })
+})
+
+ipcMain.on('change-step', (event, params) => {
+    db.run(`UPDATE steps
+            SET step_text="${params.input}"
+            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
 })
 
 ipcMain.on('ask-history', (event) => {

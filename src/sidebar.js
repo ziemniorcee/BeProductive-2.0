@@ -137,7 +137,6 @@ $(document).on('click', '.historyCheck', function (event) {
 $(document).on('click', '.todo', function (event) {
     saved_sidebar = document.getElementById("rightbar").innerHTML
     displays[Number(current_sidebar)] = document.getElementById("days").innerHTML
-    let selected_todo = event.target
 
     if (sidebar_state === false) show_hide_sidebar()
     if (event.target.children.length !== 0 && event.target.children.length !== 2) {
@@ -146,7 +145,7 @@ $(document).on('click', '.todo', function (event) {
 
         let steps_html = build_edit_steps(base)
         show_goal_edit(steps_html, base)
-        enchance_edit(steps_html, selected_todo)
+        enchance_edit(steps_html, base)
         goal_pressed = true
     }
 });
@@ -156,10 +155,14 @@ function build_edit_steps(base) {
     let steps_html = ""
     if (base.children[2].children.length > 1) {
         let array = base.children[2].children[2].children
+
         for (let i = 0; i < array.length; i++) {
+            let check_state = ""
+            if (array[i].children[0].checked === true) check_state = "checked"
+
             steps_html += `
                 <div class="editStep">
-                    <input type="checkbox" class="editCheckStep"><input type="text" class="editTextStep" value="${array[i].innerText.trim()}" spellcheck="false">
+                    <input type="checkbox" ${check_state} class="editCheckStep"><input type="text" class="editTextStep" value="${array[i].innerText.trim()}" spellcheck="false">
                 </div>`
         }
     }
@@ -169,12 +172,14 @@ function build_edit_steps(base) {
 
 function show_goal_edit(steps_html, base) {
     let main_goal = base.children[2].children[0].innerText
+    let check_state = ""
+    if (base.children[1].children[0].checked === true) check_state = "checked"
 
     document.getElementById("rightbar").innerHTML =
         `<div id="closeEdit">⨉</div>
         <div id="todoEdit">
             <div id="editMain">
-                <input type="checkbox" id="editCheck"><input type="text" id="editText"  value="${main_goal}" spellcheck="false">
+                <input type="checkbox" id="editCheck" ${check_state}><input type="text" id="editText" value="${main_goal}" spellcheck="false">
             </div>
             <div id="editSteps">
                 ${steps_html}
@@ -183,29 +188,62 @@ function show_goal_edit(steps_html, base) {
                 </div>
             </div>
         </div>`
+
+    let goal_id = Number(base.children[0].innerText)
+    document.getElementById("editCheck").addEventListener('click', ()=>{
+        let state = Number(document.getElementById("editCheck").checked)
+        base.children[1].children[0].checked = state
+        window.goalsAPI.changeChecksGoal({id: goal_id, state: state})
+    })
+
+
+    let steps = document.getElementById("editSteps").children
+    for (let i = 0; i < steps.length-1; i++){
+        steps[i].children[0].addEventListener("click", () => {
+            let state = Number(steps[i].children[0].checked)
+            base.children[2].children[2].children[i].children[0].checked = state
+            window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: i, state: state})
+        })
+    }
+
 }
 
 
-function enchance_edit(steps_html, selected_todo) {
+function enchance_edit(steps_html, base) {
     document.getElementById("editText").addEventListener("blur", () => {
-        selected_todo.children[2].children[0].innerText = document.getElementById("editText").value
+        let input = document.getElementById("editText").value
+        if (base.children[2].children[0].innerText !== input){
+            base.children[2].children[0].innerText = input
+            window.goalsAPI.changeTextGoal({input: input, id: Number(base.children[0].innerText)})
+        }
+
     })
     let edit_steps = document.getElementsByClassName("editTextStep")
 
     for (let i = 0; i < edit_steps.length; i++) {
-        console.log(edit_steps[i])
-        edit_steps[i].addEventListener("blur", () => {
-            selected_todo.children[2].children[2].children[0].children[1].innerText = document.getElementsByClassName("editTextStep")[i].value
+        edit_steps[i].addEventListener("blur", (event) => {
+            let input = document.getElementsByClassName("editTextStep")[i].value
+            change_step(i, base, input)
         })
     }
 
     document.getElementById("closeEdit").addEventListener('click', () => show_hide_sidebar())
-    add_step_edit(steps_html)
+    add_step_edit(base)
 }
 
+function show_steps(event1) {
+    if (event1.target.parentNode.children[2].style.display === "block") {
+        event1.target.parentNode.children[2].style.display = 'none'
+        event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
+    } else {
+        event1.target.parentNode.children[2].style.display = 'block'
+        event1.target.parentNode.children[1].children[0].src = 'images/goals/up.png'
+    }
+}
 
-function add_step_edit(steps_html) {
+function add_step_edit(base) {
     document.getElementById("editNewStep").addEventListener('click', () => {
+        let steps_html = build_edit_steps(base)
         steps_html +=
             `<div class="editStep">
                 <input type="checkbox" class="editCheckStep"><input type="text" class="editTextStep"  spellcheck="false">
@@ -216,9 +254,63 @@ function add_step_edit(steps_html) {
             <div id="editNewStep">
                 <span>+</span>New Step
             </div>`
-        add_step_edit(steps_html)
+
+        let edit_steps = document.getElementsByClassName("editTextStep")
+
+        edit_steps[edit_steps.length - 1].addEventListener("blur", () => {
+            let input = document.getElementsByClassName("editTextStep")[edit_steps.length - 1].value
+            if (base.children[2].children.length === 1) {
+                base.children[2].innerHTML +=
+                    `<div class='stepsShow'><img src='images/goals/up.png'><span class="check_counter">0/1</span></div>
+                    <div class='steps'></div>`
+                base.children[2].children[1].addEventListener('click', (event) => show_steps(event))
+
+            }
+            let how_many_steps = base.children[2].children[2].children.length
+            if (how_many_steps < edit_steps.length) {
+                if (input !== "") {
+                    base.children[2].children[2].innerHTML +=
+                        `<div class='step'>
+                            <input type='checkbox'  class='stepCheck'> <span class="step_text">${input}</span>
+                        </div>`
+                    let check_counter = base.children[2].children[1].children[1].innerHTML.split('/').map(Number)
+                    base.children[2].children[1].children[1].innerHTML = `${check_counter[0]}/${check_counter[1]}`
+                    window.goalsAPI.addStep({input: input, id: Number(base.children[0].innerText)})
+                }
+            } else change_step(edit_steps.length - 1, base, input)
+        })
+
+        for (let i = 0; i < edit_steps.length - 1; i++) {
+            edit_steps[i].addEventListener("blur", () => {
+                let input = document.getElementsByClassName("editTextStep")[i].value
+                change_step(i, base, input)
+            })
+        }
+        add_step_edit(base)
     })
 }
+
+
+function change_step(index, base, value) {
+    if (value !== "") {
+        base.children[2].children[2].children[index].children[1].innerText = value
+        window.goalsAPI.changeStep({input: value, goal_id: Number(base.children[0].innerText), step_id: index})
+    }
+    else {
+        let check_counter = base.children[2].children[1].children[1].innerHTML.split('/').map(Number)
+        if (base.children[2].children[2].children[index].children[0].checked) check_counter[0]--
+        base.children[2].children[1].children[1].innerHTML = `${check_counter[0]}/${check_counter[1] - 1}`
+
+        if (base.children[2].children[2].children.length === 1) {
+            base.children[2].children[1].remove()
+            base.children[2].children[1].remove()
+        } else base.children[2].children[2].children[index].remove()
+        document.getElementsByClassName("editStep")[index].remove()
+    }
+}
+
+
+
 
 
 document.getElementById("main").addEventListener('click', () => {
