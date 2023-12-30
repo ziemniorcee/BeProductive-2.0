@@ -1,3 +1,7 @@
+import {build_goal} from "./render.mjs";
+import {l_date} from './date.js'
+import {show_steps} from "./render.mjs";
+
 let displays = ["", ""]
 let current_sidebar = 0
 let sidebar_state = true
@@ -52,12 +56,21 @@ function enchance_history() {
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
-            get_goal(event.target.parentNode.children[1].children[0].innerText)
+            let goal_text = event.target.parentNode.children[1].children[0].innerText
             if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
             else event.target.parentNode.parentNode.parentNode.remove()
 
             displays[0] = document.getElementById("days").outerHTML
             window.sidebarAPI.deleteHistory({id: i})
+            window.sidebarAPI.historyToGoal((data) => {
+                let step_texts = []
+                let step_checks = []
+                for (let i = 0; i < data.length; i++) {
+                    step_texts.push(data[i].step_text)
+                    step_checks.push(data[i].step_check)
+                }
+                build_goal(goal_text, step_texts, 0, step_checks)
+            })
         })
     }
 }
@@ -85,10 +98,12 @@ function enchance_ideas() {
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
-            get_goal(event.target.parentNode.children[0].innerText)
+            let goal_text = event.target.parentNode.children[0].innerText
+            build_goal(goal_text)
+
             event.target.parentNode.remove()
             displays[1] = document.getElementById('days').outerHTML
-            window.sidebarAPI.deleteIdea({id: i})
+            window.sidebarAPI.deleteIdea({id: i, goal_text: goal_text})
         })
     }
 }
@@ -107,20 +122,6 @@ function new_idea() {
         document.getElementById('entryIdeas').value = ""
         enchance_ideas()
     }
-}
-
-
-function get_goal(text) {
-    window.goalsAPI.newGoal({goal_text: text.replace("'", "`@`"), steps: []})
-
-    let goals = document.getElementsByClassName("goal_id")
-
-    document.getElementById("todosArea").innerHTML +=
-        `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
-            <div class="goal_id">${goals.length}</div>
-            <div class='todoCheck'><input type='checkbox' class='check_task'></div>
-            <div class='task_text'><span class='task'> ${text} </span></div>
-        </div>`
 }
 
 
@@ -179,7 +180,8 @@ function show_goal_edit(steps_html, base) {
         `<div id="closeEdit">⨉</div>
         <div id="todoEdit">
             <div id="editMain">
-                <input type="checkbox" id="editCheck" ${check_state}><input type="text" id="editText" value="${main_goal}" spellcheck="false">
+                <input type="checkbox" id="editCheck" ${check_state}>
+                <input type="text" id="editText" value="${main_goal}" spellcheck="false">
             </div>
             <div id="editSteps">
                 ${steps_html}
@@ -190,7 +192,7 @@ function show_goal_edit(steps_html, base) {
         </div>`
 
     let goal_id = Number(base.children[0].innerText)
-    document.getElementById("editCheck").addEventListener('click', ()=>{
+    document.getElementById("editCheck").addEventListener('click', () => {
         let state = Number(document.getElementById("editCheck").checked)
         base.children[1].children[0].checked = state
         window.goalsAPI.changeChecksGoal({id: goal_id, state: state})
@@ -198,10 +200,20 @@ function show_goal_edit(steps_html, base) {
 
 
     let steps = document.getElementById("editSteps").children
-    for (let i = 0; i < steps.length-1; i++){
+    for (let i = 0; i < steps.length - 1; i++) {
         steps[i].children[0].addEventListener("click", () => {
             let state = Number(steps[i].children[0].checked)
             base.children[2].children[2].children[i].children[0].checked = state
+            let counter = base.children[2].children[1].children[1].children[0]
+
+            if (state) {
+                base.children[2].children[2].children[i].children[0] = "<input type='checkbox' checked class='stepCheck'>"
+                counter.innerText = Number(counter.innerText) + 1
+            } else {
+                base.children[2].children[2].children[i].children[0] = "<input type='checkbox' class='stepCheck'>"
+                counter.innerText = Number(counter.innerText) - 1
+            }
+
             window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: i, state: state})
         })
     }
@@ -212,7 +224,7 @@ function show_goal_edit(steps_html, base) {
 function enchance_edit(steps_html, base) {
     document.getElementById("editText").addEventListener("blur", () => {
         let input = document.getElementById("editText").value
-        if (base.children[2].children[0].innerText !== input){
+        if (base.children[2].children[0].innerText !== input) {
             base.children[2].children[0].innerText = input
             window.goalsAPI.changeTextGoal({input: input, id: Number(base.children[0].innerText)})
         }
@@ -231,15 +243,6 @@ function enchance_edit(steps_html, base) {
     add_step_edit(base)
 }
 
-function show_steps(event1) {
-    if (event1.target.parentNode.children[2].style.display === "block") {
-        event1.target.parentNode.children[2].style.display = 'none'
-        event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
-    } else {
-        event1.target.parentNode.children[2].style.display = 'block'
-        event1.target.parentNode.children[1].children[0].src = 'images/goals/up.png'
-    }
-}
 
 function add_step_edit(base) {
     document.getElementById("editNewStep").addEventListener('click', () => {
@@ -261,10 +264,13 @@ function add_step_edit(base) {
             let input = document.getElementsByClassName("editTextStep")[edit_steps.length - 1].value
             if (base.children[2].children.length === 1) {
                 base.children[2].innerHTML +=
-                    `<div class='stepsShow'><img src='images/goals/up.png'><span class="check_counter">0/1</span></div>
+                    `<div class='stepsShow'><img src='images/goals/up.png'>
+                        <span class="check_counter">
+                            <span class="counter">${0}</span>/<span class="maxCounter">${0}</span>
+                        </span>
+                    </div>
                     <div class='steps'></div>`
                 base.children[2].children[1].addEventListener('click', (event) => show_steps(event))
-
             }
             let how_many_steps = base.children[2].children[2].children.length
             if (how_many_steps < edit_steps.length) {
@@ -273,9 +279,10 @@ function add_step_edit(base) {
                         `<div class='step'>
                             <input type='checkbox'  class='stepCheck'> <span class="step_text">${input}</span>
                         </div>`
-                    let check_counter = base.children[2].children[1].children[1].innerHTML.split('/').map(Number)
-                    base.children[2].children[1].children[1].innerHTML = `${check_counter[0]}/${check_counter[1]}`
                     window.goalsAPI.addStep({input: input, id: Number(base.children[0].innerText)})
+
+                    let max_counter = base.children[2].children[1].children[1].children[1]
+                    max_counter.innerText = Number(max_counter.innerText) + 1
                 }
             } else change_step(edit_steps.length - 1, base, input)
         })
@@ -295,8 +302,7 @@ function change_step(index, base, value) {
     if (value !== "") {
         base.children[2].children[2].children[index].children[1].innerText = value
         window.goalsAPI.changeStep({input: value, goal_id: Number(base.children[0].innerText), step_id: index})
-    }
-    else {
+    } else {
         let check_counter = base.children[2].children[1].children[1].innerHTML.split('/').map(Number)
         if (base.children[2].children[2].children[index].children[0].checked) check_counter[0]--
         base.children[2].children[1].children[1].innerHTML = `${check_counter[0]}/${check_counter[1] - 1}`
@@ -308,9 +314,6 @@ function change_step(index, base, value) {
         document.getElementsByClassName("editStep")[index].remove()
     }
 }
-
-
-
 
 
 document.getElementById("main").addEventListener('click', () => {

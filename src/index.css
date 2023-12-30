@@ -68,7 +68,7 @@ body {
     display: flex;
     flex-direction: column;
     flex: 0;
-    background-image: linear-gradient(to bottom right, #800020, #307AEA);
+    background: #1E1E1E;
     font-size: 28px;
     flex-grow: 1;
     padding: 50px;
@@ -82,7 +82,7 @@ body {
 
 #rightbar {
     color: white;
-    background: #2D2727;
+    background: #272727;
     box-sizing: border-box;
     border: 4px solid #FFC90E;
     border-left: none;
@@ -93,7 +93,7 @@ body {
 .button_date {
     width: 200px;
     height: 50px;
-    background-color: #4655F9;
+    background-color: #3B151F;
     border: none;
     color: white;
     font-size: 24px;
@@ -126,7 +126,7 @@ body {
     float: right;
     position: relative;
     height: 50px;
-    background-color: #4655F9;
+    background-color: #3B151F;
     border: 1px solid gold;
 }
 
@@ -139,7 +139,7 @@ body {
 .sidebars {
     display: none;
     height: 50px;
-    background-color: #4655F9;
+    background-color: #3B151F;
     position: relative;
     top: 4px;
     width: 50px;
@@ -154,7 +154,7 @@ body {
     width: max-content;
     color: white;
     font-size: 20px;
-    border-bottom: solid 3px #4655F9;
+    border-bottom: solid 3px #3B151F;
 }
 
 #todosArea {
@@ -175,11 +175,11 @@ body {
 .todo {
     margin-right: 5px;
     min-height: 50px;
-    background: #343638;
+    background: #363636;
     font-size: 25px;
     color: white;
     margin-bottom: 7px;
-    border: 3px solid #666;
+    border: 1px solid #666;
     display: flex;
     cursor: default;
 }
@@ -188,7 +188,7 @@ body {
     display: none;
 }
 .todoCheck{
-    background: #4655F9;
+    background: #3B151F;
     pointer-events: none;
 }
 
@@ -222,7 +222,7 @@ body {
 }
 
 .b_add {
-    background-color: #4655F9;
+    background-color: #3B151F;
     height: 50px;
     cursor: pointer;
     font-size: 50px;
@@ -251,7 +251,7 @@ body {
 }
 #entry_bg {
     float: right;
-    background: #232319;
+    background: #282828;
     width: 100%;
     padding-right: 8px;
     border-radius: 7px;
@@ -270,7 +270,7 @@ body {
     color: white;
     width: 100%;
     height: 45px;
-    background: #343638;
+    background: #282828;
     border-radius: 7px;
     font-size: 20px;
 }
@@ -407,7 +407,7 @@ body {
     padding-bottom: 1px;
     margin-top: 10px;
     margin-bottom: 5px;
-    background: #4655F9;
+    background: #3B151F;
     display: block;
     width: max-content;
     padding-right: 5px;
@@ -579,10 +579,10 @@ body {
 
 
 #closeEdit:hover{
-    background: #403737;
+    background: #323232;
 }
 #todoEdit{
-    background: #403737;
+    background: #323232;
     margin: 10px;
     font-size: 25px;
     padding: 10px;
@@ -604,7 +604,7 @@ body {
 #editText{
     color: white;
     width: 100%;
-    background: #403737;
+    background: #323232;
     border-radius: 7px;
     font-size: 25px;
     border: transparent;
@@ -617,7 +617,7 @@ body {
     margin-bottom: 5px;
     padding-top: 5px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #595b5f;
+    border-bottom: 1px solid #323232;
 
 }
 
@@ -632,7 +632,7 @@ body {
 .editTextStep{
     color: #b9b4b4;
     width: 100%;
-    background: #403737;
+    background: #323232;
     border-radius: 7px;
     font-size: 20px;
     border: transparent;

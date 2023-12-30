@@ -9,7 +9,9 @@ let press_state = 0
 let current_step = 1
 let steps = []
 
-
+export function xdd(){
+    console.log("dziala")
+}
 window.goalsAPI.askGoals({date: l_date.sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
@@ -86,17 +88,21 @@ function new_goal() {
     }
 }
 
-function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
+export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks = []) {
     let check_state = ""
-    if (checked === 1) check_state = "checked"
+    if (goal_checked === 1) check_state = "checked"
     let steps_HTML = ""
 
     if (steps.length > 0) {
-        let checks_counter = `0/${steps.length}`
-        if (step_checks.length !== 0) checks_counter = `${step_checks.reduce((a, b) => a + b)}/${step_checks.length}`
-
+        let checks_counter = 0
+        if (step_checks.length !== 0) checks_counter = step_checks.reduce((a, b) => a + b)
         steps_HTML =
-            `<div class='stepsShow'><img src='images/goals/up.png'><span class="check_counter">${checks_counter}</span></div>
+            `<div class='stepsShow'>
+                <img src='images/goals/up.png'>
+                <span class="check_counter">
+                    <span class="counter">${checks_counter}</span>/<span class="maxCounter">${steps.length}</span>
+                </span>
+            </div>
             <div class='steps'>`
 
         for (let i = 0; i < steps.length; i++) {
@@ -112,7 +118,7 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
 
         if (current_step > 1) {
             document.getElementById("newSteps").innerHTML = "<div id='newStep'>Step 1</div>"
-            document.getElementById("newStep").addEventListener('click', (event) => step_clicked(event))
+            document.getElementById("newStep").addEventListener('click', (event) => new_step(event))
             current_step = 1
         }
 
@@ -133,7 +139,7 @@ function build_goal(goal_text, steps = [], checked = 0, step_checks = []) {
     }
 }
 
-function show_steps(event1) {
+export function show_steps(event1) {
     if (event1.target.parentNode.children[2].style.display === "block") {
         event1.target.parentNode.children[2].style.display = 'none'
         event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
@@ -143,7 +149,7 @@ function show_steps(event1) {
     }
 }
 
-function step_clicked(event1) {
+function new_step(event1) {
     event1.target.remove()
     let array = document.getElementsByClassName('stepEntry')
     steps = []
@@ -154,7 +160,7 @@ function step_clicked(event1) {
         <div id='newStep'>Step ${current_step + 1} </div>`
 
 
-    document.getElementById("newStep").addEventListener('click', (event) => step_clicked(event))
+    document.getElementById("newStep").addEventListener('click', (event) => new_step(event))
     current_step += 1
 
     array = document.getElementsByClassName('stepEntry')
@@ -162,7 +168,7 @@ function step_clicked(event1) {
     array[array.length - 1].focus()
 }
 
-document.getElementById("newStep").addEventListener('click', (event) => step_clicked(event))
+document.getElementById("newStep").addEventListener('click', (event) => new_step(event))
 
 window.addEventListener("DOMContentLoaded", (event) => {
     document.getElementById("date").innerHTML = l_date.display
@@ -248,36 +254,33 @@ $(document).on('click', '.check_task', function () {
 });
 
 $(document).on('click', '.stepCheck', function () {
-    let id = $('.stepCheck').index(this)
+    let step_id_unrel = $('.stepCheck').index(this)
 
-    let step_id = 0
+    let step_id_rel = 0
     let goal_id = Number(this.parentNode.parentNode.parentNode.parentNode.children[0].innerHTML)
 
     for (let i = 0; i < this.parentNode.parentNode.children.length; i++) {
         if (this.parentNode.parentNode.children[i] === this.parentNode) {
-            step_id = i
+            step_id_rel = i
             break
         }
     }
 
-    let state = Number(document.getElementsByClassName("stepCheck")[id].checked)
-
-    let counter_html = this.parentNode.parentNode.parentNode.children[1].children[1]
-    let counter = counter_html.innerHTML.split('/').map(Number)
+    let state = Number(document.getElementsByClassName("stepCheck")[step_id_unrel].checked)
+    let counter_html = this.parentNode.parentNode.parentNode.children[1].children[1].children[0]
 
     if (state) {
-        document.getElementsByClassName("stepCheck")[id].outerHTML =
+        document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
             "<input type='checkbox' checked class='stepCheck'>"
-        counter[0]++
+        counter_html.innerText = Number(counter_html.innerText) + 1
 
     } else {
-        document.getElementsByClassName("stepCheck")[id].outerHTML =
+        document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
             "<input type='checkbox' class='stepCheck'>"
-        counter[0]--
+        counter_html.innerText = Number(counter_html.innerText) - 1
     }
 
-    counter_html.innerHTML = `${counter[0]}/${counter[1]}`
-    window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id, state: state})
+    window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: state})
 });
 
 document.getElementById("laurels").addEventListener('click', () => {
