@@ -31,7 +31,7 @@ window.goalsAPI.getGoals((goals, steps) => {
 })
 
 
-window.goalsAPI.removingGoal((event) => {
+window.goalsAPI.removingGoal(() => {
     if (press_state === 0) {
 
         window.goalsAPI.goalRemoved({id: $('.todo').index(selected_div), date: l_date.sql})
@@ -41,14 +41,14 @@ window.goalsAPI.removingGoal((event) => {
         current_id--
     }
 })
-window.sidebarAPI.removingHistory((event) => {
+window.sidebarAPI.removingHistory(() => {
     if (press_state === 1) {
         window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
     }
 })
 
-window.sidebarAPI.removingIdea((event) => {
+window.sidebarAPI.removingIdea(() => {
     if (press_state === 2) {
         window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
@@ -170,7 +170,7 @@ function new_step(event1) {
 
 document.getElementById("newStep").addEventListener('click', (event) => new_step(event))
 
-window.addEventListener("DOMContentLoaded", (event) => {
+window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("date").innerHTML = l_date.display
     const goals = document.getElementById('todosArea');
     const history = document.getElementById("days")

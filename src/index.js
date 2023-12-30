@@ -288,7 +288,7 @@ ipcMain.on('idea-removed', (event, params) => {
     db.run("DELETE FROM ideas WHERE id IN (SELECT id FROM ideas ORDER BY id DESC LIMIT 1 OFFSET " + params.id + ")")
 })
 
-ipcMain.on('change_window', (event, params) => {
+ipcMain.on('change_window', () => {
     mainWindow_state = !mainWindow_state
     if (mainWindow_state) {
         mainWindow.show()
@@ -304,14 +304,14 @@ let move_flag = false
 let middle = []
 
 
-ipcMain.on('start_pos_change', (event, params) => {
+ipcMain.on('start_pos_change', () => {
     move_flag = true
     let pos_before = floatMenuWindow.getPosition()
     let mouse_pos = electron.screen.getCursorScreenPoint()
     middle = [mouse_pos.x - pos_before[0], mouse_pos.y - pos_before[1]]
     floatbar_refresh()
 })
-ipcMain.on('stop_pos_change', (event, params) => {
+ipcMain.on('stop_pos_change', () => {
     move_flag = false
 })
 
@@ -330,7 +330,7 @@ let menu_sizes = [100, 200]
 
 let goals_state = false
 
-ipcMain.on('show_floatbar_menu', (event, params) => {
+ipcMain.on('show_floatbar_menu', () => {
     menu_state = !menu_state
     floatMenuWindow.setSize(100, menu_sizes[Number(menu_state)])
     if (menu_state === false) {
@@ -340,7 +340,7 @@ ipcMain.on('show_floatbar_menu', (event, params) => {
 })
 
 
-ipcMain.on('show_goals', (event, params) => {
+ipcMain.on('show_goals', (event) => {
     goals_state = !goals_state
     if (goals_state) floatContentWindow.show()
     else floatContentWindow.hide()
@@ -365,7 +365,7 @@ app.on('ready', function () {
             mainWindow.webContents.send("removing-idea")
         }
     }))
-    mainWindow.webContents.on('context-menu', function (e, params) {
+    mainWindow.webContents.on('context-menu', function () {
         ctxMenu.popup(mainWindow)
     })
 });

@@ -1,5 +1,4 @@
 import {build_goal} from "./render.mjs";
-import {l_date} from './date.js'
 import {show_steps} from "./render.mjs";
 
 let displays = ["", ""]
@@ -233,7 +232,7 @@ function enchance_edit(steps_html, base) {
     let edit_steps = document.getElementsByClassName("editTextStep")
 
     for (let i = 0; i < edit_steps.length; i++) {
-        edit_steps[i].addEventListener("blur", (event) => {
+        edit_steps[i].addEventListener("blur", () => {
             let input = document.getElementsByClassName("editTextStep")[i].value
             change_step(i, base, input)
         })
@@ -264,7 +263,7 @@ function add_step_edit(base) {
             let input = document.getElementsByClassName("editTextStep")[edit_steps.length - 1].value
             if (base.children[2].children.length === 1) {
                 base.children[2].innerHTML +=
-                    `<div class='stepsShow'><img src='images/goals/up.png'>
+                    `<div class='stepsShow'><img src='images/goals/up.png' alt="up">
                         <span class="check_counter">
                             <span class="counter">${0}</span>/<span class="maxCounter">${0}</span>
                         </span>
@@ -386,7 +385,7 @@ function resize(e) {
 }
 
 
-document.querySelector("#resizer").addEventListener("mousedown", (event) => {
+document.querySelector("#resizer").addEventListener("mousedown", () => {
     document.addEventListener("mousemove", resize, false);
     document.addEventListener("mouseup", () => {
         document.removeEventListener("mousemove", resize, false);
