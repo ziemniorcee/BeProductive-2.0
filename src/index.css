@@ -157,17 +157,22 @@ body {
     border-bottom: solid 3px #3B151F;
 }
 
-#todosArea {
-    margin-bottom: 20px;
+#todosAll{
     overflow-y: scroll;
+    margin-bottom: 10px;
 }
 
-#todosArea::-webkit-scrollbar {
+#todosFinished .task{
+    text-decoration: line-through;
+    color: grey;
+
+}
+
+#todosAll::-webkit-scrollbar {
     width: 0.2em;
 }
 
-
-#todosArea::-webkit-scrollbar-thumb {
+#todosAll::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     outline: 1px solid slategrey;
 }
@@ -204,6 +209,32 @@ body {
     pointer-events: all;
 }
 
+#buttonFinished{
+    background-color:#363636 ;
+    color: white;
+    width: max-content;
+    font-size: 20px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    display: block;
+    pointer-events: all;
+    padding: 3px 8px;
+}
+
+#buttonFinished img{
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+
+    pointer-events: none;
+}
+
+
+
+
+#buttonFinished span{
+    pointer-events: none;
+}
 
 #inputTodo {
     margin-top: auto;

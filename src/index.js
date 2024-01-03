@@ -12,7 +12,6 @@ const sqlite = require('sqlite3').verbose();
 const db = new sqlite.Database("./goals.db")
 
 let current_date = null
-let today_date = null
 
 let goal_ids = []
 let step_ids = {}
@@ -89,7 +88,6 @@ const createFloatbar = () => {
 }
 
 ipcMain.on('ask-goals', (event, params) => {
-    if (today_date == null) today_date = params.date
     current_date = params.date
 
     db.all(`SELECT id, goal, check_state, goal_pos
@@ -166,7 +164,7 @@ ipcMain.on('goal-removed', (event, params) => {
 
 ipcMain.on('change-checks-goal', (event, params) => {
     db.run(`UPDATE goals
-            SET check_state="${params.state}"
+            SET check_state="${Number(params.state)}"
             WHERE id = ${goal_ids[params.id]}`)
 })
 
@@ -191,6 +189,7 @@ ipcMain.on('add-step', (event, params) => {
             ORDER BY id DESC LIMIT 1`, (err, rows) => {
         if (err) console.error(err)
         else {
+            if (!(goal_ids[params.id] in step_ids)) step_ids[goal_ids[params.id]] = [rows[0].id]
             step_ids[goal_ids[params.id]].push(rows[0].id)
         }
     })
@@ -202,12 +201,12 @@ ipcMain.on('change-step', (event, params) => {
             WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
 })
 
-ipcMain.on('ask-history', (event) => {
+ipcMain.on('ask-history', (event, params) => {
     let query = `SELECT id, goal, addDate
                  FROM goals
                  WHERE addDate IN (SELECT addDate
                                    FROM goals
-                                   WHERE addDate < "${today_date}"
+                                   WHERE addDate < "${params.date}"
                                      and check_state = 0
                                    GROUP BY addDate
                                    ORDER BY addDate DESC

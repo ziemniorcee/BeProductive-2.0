@@ -1,4 +1,5 @@
 import {l_date} from './date.js'
+import {close_edit} from "./sidebar.mjs";
 
 let current_id = 0
 
@@ -9,9 +10,6 @@ let press_state = 0
 let current_step = 1
 let steps = []
 
-export function xdd(){
-    console.log("dziala")
-}
 window.goalsAPI.askGoals({date: l_date.sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
@@ -26,6 +24,7 @@ window.goalsAPI.getGoals((goals, steps) => {
                 steps_checks.push(steps[j].step_check)
             }
         }
+
         build_goal(goals[i].goal, goal_steps, goals[i].check_state, steps_checks)
     }
 })
@@ -33,14 +32,17 @@ window.goalsAPI.getGoals((goals, steps) => {
 
 window.goalsAPI.removingGoal(() => {
     if (press_state === 0) {
-
-        window.goalsAPI.goalRemoved({id: $('.todo').index(selected_div), date: l_date.sql})
+        let id = Number(document.getElementsByClassName("goal_id")[$('.todo').index(selected_div)].innerHTML)
+        window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
         selected_div.remove()
         let goals = document.getElementsByClassName("goal_id")
         for (let i = 0; i < goals.length; i++) goals[i].innerHTML = i
         current_id--
+        close_edit()
     }
 })
+
+
 window.sidebarAPI.removingHistory(() => {
     if (press_state === 1) {
         window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
@@ -90,8 +92,13 @@ function new_goal() {
 
 export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks = []) {
     let check_state = ""
-    if (goal_checked === 1) check_state = "checked"
+    let todo_area = "todosArea"
+    if (goal_checked) {
+        check_state = "checked"
+        todo_area = "todosFinished"
+    }
     let steps_HTML = ""
+
 
     if (steps.length > 0) {
         let checks_counter = 0
@@ -123,23 +130,26 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
         }
 
     }
-    document.getElementById("todosArea").innerHTML +=
+    document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
             <div class="goal_id">${current_id}</div>
             <div class='todoCheck'><input type='checkbox' class='check_task' ${check_state}></div>
             <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
-
     current_id++
 
-    let steps_show = document.getElementsByClassName("stepsShow")
+    let steps_show = document.getElementById(todo_area).getElementsByClassName("stepsShow")
+
+    if (steps_HTML !== ""){
+        steps_show[steps_show.length-1].parentNode.children[2].style.display = "block"
+    }
     for (let i = 0; i < steps_show.length; i++) {
         steps_show[i].addEventListener('click', (event) => show_steps(event))
-        steps_show[i].parentNode.children[2].style.display = "block"
     }
 }
 
 export function show_steps(event1) {
+
     if (event1.target.parentNode.children[2].style.display === "block") {
         event1.target.parentNode.children[2].style.display = 'none'
         event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
@@ -227,7 +237,6 @@ document.getElementById("img_second").addEventListener('click', () => {
                 }
             })
         }
-
     }, 1)
 })
 
@@ -242,16 +251,37 @@ window.oncontextmenu = function () {
 
 $(document).on('click', '.check_task', function () {
     let id = $('.check_task').index(this)
+    let areas = ["todosArea", "todosFinished"]
+    let checks = ["","checked"]
+    let array_id = Number(document.getElementsByClassName("goal_id")[id].innerHTML)
     let state = Number(document.getElementsByClassName("check_task")[id].checked)
-    if (state) {
-        document.getElementsByClassName("check_task")[id].outerHTML =
-            "<input type='checkbox' checked class='check_task'>"
-    } else {
-        document.getElementsByClassName("check_task")[id].outerHTML =
-            "<input type='checkbox' class='check_task'>"
+
+    document.getElementsByClassName("check_task")[id].outerHTML =
+        `<input type='checkbox' ${checks[state]} class='check_task'>`
+
+    let todo = document.getElementsByClassName("todo")[id].outerHTML
+    document.getElementsByClassName("todo")[id].remove()
+    document.getElementById(areas[state]).innerHTML += todo
+
+    let steps_show = document.getElementById(areas[state]).getElementsByClassName("stepsShow")
+
+    for (let i = 0; i < steps_show.length; i++) {
+        steps_show[i].addEventListener('click', (event) => show_steps(event))
     }
-    window.goalsAPI.changeChecksGoal({id: id, state: state})
+
+    window.goalsAPI.changeChecksGoal({id: array_id, state: state})
+
+    let elements = document.getElementsByClassName("goal_id")
+    let new_tasks = []
+    for (let i = 0; i < elements.length; i++) {
+        new_tasks.push(elements[i].textContent)
+    }
+    window.goalsAPI.rowsChange({after: new_tasks})
 });
+
+function change_check(){
+
+}
 
 $(document).on('click', '.stepCheck', function () {
     let step_id_unrel = $('.stepCheck').index(this)

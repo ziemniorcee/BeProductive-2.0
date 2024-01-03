@@ -13,7 +13,7 @@
     <script src="goals.js"></script>
     <script type="module" src="date.js"></script>
     <script type="module" src="render.mjs"></script>
-    <script type="module" src="sidebar.js"></script>
+    <script type="module" src="sidebar.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body onload="init()">
@@ -21,7 +21,7 @@
 
 <div id="container">
     <div id="leftbar">
-        <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels"  width="100"  height="100">
+        <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
         <a><img src="images/goal1.png" draggable="false" alt="laurels"><span>TO DO</span></a>
         <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
         <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
@@ -34,10 +34,12 @@
                      height="40"><span>Today</span>
             </button>
             <button id="tomorrowBtn" class="button_date">
-                <img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowimg" draggable="false" width="40" height="40"><span>Tomorrow</span>
+                <img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowimg" draggable="false" width="40"
+                     height="40"><span>Tomorrow</span>
             </button>
             <button id="otherDateBtn" class="button_date">
-                <img src="images/goals/other0.png" alt="another" id="anotherdayimg" draggable="false" width="40" height="40">
+                <img src="images/goals/other0.png" alt="another" id="anotherdayimg" draggable="false" width="40"
+                     height="40">
                 <span>Another day</span>
             </button>
 
@@ -52,8 +54,16 @@
 
             <p id="date">Friday, September 01, 2023</p>
         </div>
-        <div id="todosArea">
+        <div id="todosAll">
+            <div id="todosArea">
 
+            </div>
+            <div id="buttonFinished">
+                <img src="images/goals/up.png" alt="up"><span>Finished: 1</span>
+            </div>
+            <div id="todosFinished">
+
+            </div>
         </div>
         <div id="inputTodo">
             <div id="todo_buttons">

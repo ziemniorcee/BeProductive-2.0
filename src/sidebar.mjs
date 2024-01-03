@@ -1,5 +1,6 @@
 import {build_goal} from "./render.mjs";
 import {show_steps} from "./render.mjs";
+import {l_date} from './date.js'
 
 let displays = ["", ""]
 let current_sidebar = 0
@@ -9,7 +10,7 @@ let goal_pressed = false
 let saved_sidebar = ""
 
 
-window.sidebarAPI.askHistory()
+window.sidebarAPI.askHistory({date: l_date.sql})
 window.sidebarAPI.getHistory((data) => {
     let date = data[0].addDate
     let goals = []
@@ -315,7 +316,9 @@ function change_step(index, base, value) {
 }
 
 
-document.getElementById("main").addEventListener('click', () => {
+document.getElementById("main").addEventListener('click', () => close_edit())
+
+export function close_edit(){
     if (goal_pressed === true) {
         goal_pressed = false
         document.getElementById("rightbar").innerHTML = saved_sidebar
@@ -328,8 +331,7 @@ document.getElementById("main").addEventListener('click', () => {
             });
         }
     } else goal_pressed = false
-})
-
+}
 
 document.getElementById("img_main").addEventListener('click', () => show_hide_sidebar())
 
