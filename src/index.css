@@ -162,6 +162,11 @@ body {
     margin-bottom: 10px;
 }
 
+#todosFinished{
+    display: block;
+
+}
+
 #todosFinished .task{
     text-decoration: line-through;
     color: grey;
@@ -215,8 +220,8 @@ body {
     width: max-content;
     font-size: 20px;
     margin-top: 10px;
-    margin-bottom: 5px;
-    display: block;
+    margin-bottom: 10px;
+    display: none;
     pointer-events: all;
     padding: 3px 8px;
 }

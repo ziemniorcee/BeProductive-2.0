@@ -1,5 +1,4 @@
-import {build_goal} from "./render.mjs";
-import {show_steps} from "./render.mjs";
+import {build_goal, show_steps, change_check} from "./render.mjs";
 import {l_date} from './date.js'
 
 let displays = ["", ""]
@@ -8,6 +7,9 @@ let sidebar_state = true
 
 let goal_pressed = false
 let saved_sidebar = ""
+
+
+
 
 
 window.sidebarAPI.askHistory({date: l_date.sql})
@@ -146,10 +148,12 @@ $(document).on('click', '.todo', function (event) {
 
         let steps_html = build_edit_steps(base)
         show_goal_edit(steps_html, base)
-        enchance_edit(steps_html, base)
+        enchance_edit(base)
+        document.getElementById("closeEdit").addEventListener('click', () => show_hide_sidebar())
         goal_pressed = true
     }
 });
+
 
 
 function build_edit_steps(base) {
@@ -190,14 +194,25 @@ function show_goal_edit(steps_html, base) {
                 </div>
             </div>
         </div>`
+    let goals = document.getElementsByClassName("todo")
+    let goal_id = 0
+    for (let i = 0; i < goals.length; i++) {
+        if (goals[i] === base) goal_id = i
+    }
 
-    let goal_id = Number(base.children[0].innerText)
     document.getElementById("editCheck").addEventListener('click', () => {
         let state = Number(document.getElementById("editCheck").checked)
         base.children[1].children[0].checked = state
-        window.goalsAPI.changeChecksGoal({id: goal_id, state: state})
-    })
+        change_check(goal_id)
 
+        if (state) {
+            goal_id = document.getElementsByClassName("todo").length - 1
+        } else goal_id = document.getElementById("todosArea").children.length - 1
+
+        base = document.getElementsByClassName("todo")[goal_id]
+        add_step_edit(base)
+        enchance_edit(base)
+    })
 
     let steps = document.getElementById("editSteps").children
     for (let i = 0; i < steps.length - 1; i++) {
@@ -221,14 +236,13 @@ function show_goal_edit(steps_html, base) {
 }
 
 
-function enchance_edit(steps_html, base) {
+function enchance_edit(base) {
     document.getElementById("editText").addEventListener("blur", () => {
         let input = document.getElementById("editText").value
         if (base.children[2].children[0].innerText !== input) {
             base.children[2].children[0].innerText = input
             window.goalsAPI.changeTextGoal({input: input, id: Number(base.children[0].innerText)})
         }
-
     })
     let edit_steps = document.getElementsByClassName("editTextStep")
 
@@ -238,8 +252,6 @@ function enchance_edit(steps_html, base) {
             change_step(i, base, input)
         })
     }
-
-    document.getElementById("closeEdit").addEventListener('click', () => show_hide_sidebar())
     add_step_edit(base)
 }
 
@@ -318,7 +330,7 @@ function change_step(index, base, value) {
 
 document.getElementById("main").addEventListener('click', () => close_edit())
 
-export function close_edit(){
+export function close_edit() {
     if (goal_pressed === true) {
         goal_pressed = false
         document.getElementById("rightbar").innerHTML = saved_sidebar

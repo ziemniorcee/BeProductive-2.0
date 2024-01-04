@@ -8,12 +8,14 @@ let selected_div = null
 let press_state = 0
 
 let current_step = 1
-let steps = []
+let finished_count = 0
+let show_finished = true
 
 window.goalsAPI.askGoals({date: l_date.sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
     current_id = 0
+    finished_count = 0
     for (let i = 0; i < goals.length; i++) {
         let goal_steps = []
         let steps_checks = []
@@ -27,6 +29,13 @@ window.goalsAPI.getGoals((goals, steps) => {
 
         build_goal(goals[i].goal, goal_steps, goals[i].check_state, steps_checks)
     }
+    if (finished_count) {
+        document.getElementById("buttonFinished").style.display = "block"
+        document.getElementById("finishedCount").innerHTML = finished_count
+    } else{
+        document.getElementById("buttonFinished").style.display = "none"
+    }
+
 })
 
 
@@ -96,6 +105,7 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
     if (goal_checked) {
         check_state = "checked"
         todo_area = "todosFinished"
+        finished_count++
     }
     let steps_HTML = ""
 
@@ -140,8 +150,8 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
 
     let steps_show = document.getElementById(todo_area).getElementsByClassName("stepsShow")
 
-    if (steps_HTML !== ""){
-        steps_show[steps_show.length-1].parentNode.children[2].style.display = "block"
+    if (steps_HTML !== "") {
+        steps_show[steps_show.length - 1].parentNode.children[2].style.display = "block"
     }
     for (let i = 0; i < steps_show.length; i++) {
         steps_show[i].addEventListener('click', (event) => show_steps(event))
@@ -149,7 +159,6 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
 }
 
 export function show_steps(event1) {
-
     if (event1.target.parentNode.children[2].style.display === "block") {
         event1.target.parentNode.children[2].style.display = 'none'
         event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
@@ -162,7 +171,7 @@ export function show_steps(event1) {
 function new_step(event1) {
     event1.target.remove()
     let array = document.getElementsByClassName('stepEntry')
-    steps = []
+    let steps = []
     for (let i = 0; i < array.length; i++) steps.push(array[i].value)
 
     document.getElementById("newSteps").innerHTML +=
@@ -214,6 +223,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
 })
 
+
+document.getElementById("buttonFinished").addEventListener('click', () => {
+    show_finished = !show_finished
+    let styles = ["none", "block"]
+    let images = ["images/goals/down.png", "images/goals/up.png"]
+
+    document.getElementById("todosFinished").style.display = styles[Number(show_finished)]
+    document.getElementById("finishedImg").src = images[Number(show_finished)]
+})
+
 document.getElementById("img_second").addEventListener('click', () => {
     setTimeout(function () {
         const history = document.getElementById("days")
@@ -251,8 +270,12 @@ window.oncontextmenu = function () {
 
 $(document).on('click', '.check_task', function () {
     let id = $('.check_task').index(this)
+    change_check(id)
+});
+
+export function change_check(id) {
     let areas = ["todosArea", "todosFinished"]
-    let checks = ["","checked"]
+    let checks = ["", "checked"]
     let array_id = Number(document.getElementsByClassName("goal_id")[id].innerHTML)
     let state = Number(document.getElementsByClassName("check_task")[id].checked)
 
@@ -277,10 +300,14 @@ $(document).on('click', '.check_task', function () {
         new_tasks.push(elements[i].textContent)
     }
     window.goalsAPI.rowsChange({after: new_tasks})
-});
 
-function change_check(){
+    if (state) finished_count++
+    else finished_count--
 
+    if (finished_count) document.getElementById("buttonFinished").style.display = "block"
+    else document.getElementById("buttonFinished").style.display = "none"
+
+    document.getElementById("finishedCount").innerHTML = finished_count
 }
 
 $(document).on('click', '.stepCheck', function () {
