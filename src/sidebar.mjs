@@ -315,15 +315,21 @@ function change_step(index, base, value) {
         base.children[2].children[2].children[index].children[1].innerText = value
         window.goalsAPI.changeStep({input: value, goal_id: Number(base.children[0].innerText), step_id: index})
     } else {
-        let check_counter = base.children[2].children[1].children[1].innerHTML.split('/').map(Number)
-        if (base.children[2].children[2].children[index].children[0].checked) check_counter[0]--
-        base.children[2].children[1].children[1].innerHTML = `${check_counter[0]}/${check_counter[1] - 1}`
+        let max_counter_html = base.getElementsByClassName("maxCounter")[0]
+        max_counter_html.innerHTML = Number(max_counter_html.innerHTML) - 1
+
+        let counter_html = base.getElementsByClassName("counter")[0]
+        if (base.children[2].children[2].children[index].children[0].checked) {
+            counter_html.innerHTML = Number(counter_html.innerHTML) - 1
+        }
 
         if (base.children[2].children[2].children.length === 1) {
             base.children[2].children[1].remove()
             base.children[2].children[1].remove()
         } else base.children[2].children[2].children[index].remove()
         document.getElementsByClassName("editStep")[index].remove()
+
+        window.goalsAPI.removeStep({goal_id: Number(base.children[0].innerText), step_id: index})
     }
 }
 

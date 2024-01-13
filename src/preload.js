@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeTextGoal:  (params) => ipcRenderer.send('change-text-goal', params),
     addStep:  (params) => ipcRenderer.send('add-step', params),
     changeStep:  (params) => ipcRenderer.send('change-step', params),
+    removeStep: (params) => ipcRenderer.send('remove-step', params),
 })
 
 

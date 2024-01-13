@@ -9,6 +9,7 @@ body {
     overflow: hidden;
     height: 100%;
     width: 100%;
+    font-family: Arial, serif;
 }
 
 #container {
@@ -39,6 +40,8 @@ body {
     white-space: nowrap;
     overflow: hidden;
     display: flex;
+    border: solid 1px black;
+    box-shadow: 0 2px 6px 0 black;
 }
 
 #leftbar a img {
@@ -94,21 +97,38 @@ body {
     width: 200px;
     height: 50px;
     background-color: #3B151F;
-    border: none;
     color: white;
     font-size: 24px;
     cursor: pointer;
+    border-radius: 10px;
+    border: 1px black solid;
+    box-shadow: 0 2px 6px 0 black;
 }
 
-.button_date span {
-    margin-left: 5px;
+.button_date:active {
+    box-shadow: 0 0 0 0 black;
+}
+
+.button_date_left {
+    float: left;
     position: relative;
-    bottom: 10px;
+    left: 5px;
+}
+
+.button_date_right {
+    position: relative;
+    top: 7px;
 }
 
 .button_date img {
     position: relative;
     left: 0;
+    width: 40px;
+    height: 40px;
+}
+
+#otherDateBtn .button_date_right {
+    left: 5px;
 }
 
 #datepicker {
@@ -157,17 +177,17 @@ body {
     border-bottom: solid 3px #3B151F;
 }
 
-#todosAll{
+#todosAll {
     overflow-y: scroll;
     margin-bottom: 10px;
 }
 
-#todosFinished{
+#todosFinished {
     display: block;
 
 }
 
-#todosFinished .task{
+#todosFinished .task {
     text-decoration: line-through;
     color: grey;
 
@@ -194,10 +214,11 @@ body {
     cursor: default;
 }
 
-.goal_id{
+.goal_id {
     display: none;
 }
-.todoCheck{
+
+.todoCheck {
     background: #3B151F;
     pointer-events: none;
 }
@@ -214,8 +235,8 @@ body {
     pointer-events: all;
 }
 
-#buttonFinished{
-    background-color:#363636 ;
+#buttonFinished {
+    background-color: #363636;
     color: white;
     width: max-content;
     font-size: 20px;
@@ -224,9 +245,17 @@ body {
     display: none;
     pointer-events: all;
     padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid black;
+    box-shadow: 0 2px 6px 0 black;
+    cursor: pointer;
 }
 
-#buttonFinished img{
+#buttonFinished:active {
+    box-shadow: 0 0 0 0 black;
+}
+
+#buttonFinished img {
     width: 15px;
     height: 15px;
     margin-right: 10px;
@@ -235,21 +264,17 @@ body {
 }
 
 
-
-
-#buttonFinished span{
+#buttonFinished span {
     pointer-events: none;
 }
 
 #inputTodo {
     margin-top: auto;
-    display: flex;
     width: 100%;
     color: white;
-
 }
 
-#todo_buttons{
+#todo_buttons {
     width: 50px;
     height: 50px;
     margin-right: 10px;
@@ -272,36 +297,58 @@ body {
     bottom: 3px;
 }
 
-#todoHide{
+#todoHide {
     height: 50px;
     background-color: transparent;
     border: transparent;
     cursor: pointer;
 }
 
-#todoHide img{
+#todoHide img {
     position: relative;
     bottom: 4px;
     width: 30px;
     height: 30px;
 }
-#entry_bg {
-    float: right;
-    background: #282828;
-    width: 100%;
-    padding-right: 8px;
-    border-radius: 7px;
+
+
+#entry1 {
     height: 50px;
-    overflow: hidden;
-    transition: 0.5s;
-}
-
-
-#entry2{
+    width: 100%;
+    background: #282828;
     display: flex;
+}
+
+#entry2 {
+    background: #282828;
+    display: none;
     height: 250px;
+    border-top:#FFC90E 1px solid;
 
 }
+
+#e_todo {
+    color: white;
+    width: calc(100% - 65px);
+    margin-left: 10px;
+    height: 48px;
+    background: #282828;
+    font-size: 20px;
+    border: none;
+    outline: none;
+}
+
+#todoAdd{
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    font-size: 50px;
+    border-radius: 7px;
+    line-height: 50px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
 .e_todo {
     color: white;
     width: 100%;
@@ -310,18 +357,14 @@ body {
     border-radius: 7px;
     font-size: 20px;
 }
-#newSteps{
-    position: relative;
-    float: left;
-    flex-grow: 1;
-    padding: 20px;
-    width: 100%;
-    overflow-y: auto;
-}
 
 #newSteps {
+    float: left;
+    flex-grow: 1;
+    padding: 10px;
     overflow-y: scroll;
 }
+
 
 #newSteps::-webkit-scrollbar {
     width: 0.2em;
@@ -334,65 +377,60 @@ body {
     margin-top: 10px;
 }
 
-#newStep{
+#newStep {
     color: #FFC90E;
     cursor: pointer;
     width: max-content;
 }
-#stepText{
+
+.stepText {
     display: flex;
 }
 
-.stepEntry{
+.stepEntry {
     background: transparent;
-    /*background: black;*/
     color: white;
     height: 30px;
     border: transparent;
     position: relative;
     outline: none;
-    font-size: 25px;
+    font-size: 20px;
     width: 100%;
-    margin-left: 10px;
 
 }
 
 
-
-#goal_settings{
+#goal_settings {
     height: 250px;
-    white-space : nowrap; /* this does the trick */
-    position: relative;
     width: 200px;
-    right: 70px;
+    white-space: nowrap; /* this does the trick */
+    text-align: center;
+    padding-right: 20px;
+}
+
+
+
+#selectCategory{
+    background: #3B151F;
+    width: 200px;
 
 }
 
-.r_todo{
-    display: inline-block;
-    width: 200px;
-    margin-top: 110px;
-    margin-left: 0;
-    transform: rotate(270deg);
+.r_todo {
+    width: 198px;
     -webkit-appearance: none;
     height: 25px;
     outline: none;
-    opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-    position: relative;
+
 }
 
-.r_todo:hover {
-    opacity: 1;
-}
 
 .r_todo::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 25px;
     height: 25px;
-    background: #04AA6D;
+    background: #3B151F;
     cursor: pointer;
 }
 
@@ -403,28 +441,9 @@ body {
     cursor: pointer;
 }
 
-#range1{
-    left: 20px;
-}
-#range2{
-    right: 150px;
-}
-
 .l_todo{
-    writing-mode: vertical-lr;
-    transform: rotate(180deg);
-    position: relative;
-    top: 50px;
+    margin-top: 10px;
 }
-
-#label1{
-    left: 100px;
-}
-#label2{
-    right: 70px;
-}
-
-
 
 .task_text {
     margin: 10px;
@@ -434,12 +453,8 @@ body {
     pointer-events: none;
 }
 
-.task{
-
-}
-
-.stepsShow{
-    padding-top:1px;
+.stepsShow {
+    padding-top: 1px;
     padding-bottom: 1px;
     margin-top: 10px;
     margin-bottom: 5px;
@@ -449,9 +464,17 @@ body {
     padding-right: 5px;
     font-size: 20px;
     pointer-events: all;
+    border-radius: 5px;
+    border: 1px solid black;
+    box-shadow: 0 2px 5px 0 black;
+    cursor: pointer;
 }
 
-.stepsShow img{
+.stepsShow:active {
+    box-shadow: 0 0 0 0 black;
+}
+
+.stepsShow img {
     width: 15px;
     height: 15px;
     margin-right: 10px;
@@ -459,24 +482,25 @@ body {
     pointer-events: none;
 }
 
-.stepsShow span{
+.stepsShow span {
     pointer-events: none;
 }
 
-.steps{
+.steps {
     display: block;
     pointer-events: none;
 }
-.step{
+
+.step {
     font-size: 20px;
     pointer-events: none;
 }
 
-.step_text{
+.step_text {
     pointer-events: none;
 }
 
-.stepCheck{
+.stepCheck {
     width: 20px;
     height: 20px;
     position: relative;
@@ -597,11 +621,11 @@ body {
     left: 10px;
 }
 
-#inputIdeas{
+#inputIdeas {
     display: flex;
 }
 
-#closeEdit{
+#closeEdit {
     background: transparent;
     font-size: 30px;
     width: 30px;
@@ -614,10 +638,11 @@ body {
 }
 
 
-#closeEdit:hover{
+#closeEdit:hover {
     background: #323232;
 }
-#todoEdit{
+
+#todoEdit {
     background: #323232;
     margin: 10px;
     font-size: 25px;
@@ -625,11 +650,12 @@ body {
 
 }
 
-#editMain{
+#editMain {
     display: flex;
     margin-bottom: 10px;
 }
-#editCheck{
+
+#editCheck {
     display: block;
     margin: 0 10px auto;
     min-width: 30px;
@@ -637,7 +663,8 @@ body {
     clip-path: circle(46% at 50% 50%);
     accent-color: #343638;
 }
-#editText{
+
+#editText {
     color: white;
     width: 100%;
     background: #323232;
@@ -648,7 +675,7 @@ body {
 }
 
 
-.editStep{
+.editStep {
     display: flex;
     margin-bottom: 5px;
     padding-top: 5px;
@@ -657,7 +684,7 @@ body {
 
 }
 
-.editCheckStep{
+.editCheckStep {
     display: block;
     margin-left: 15px;
 
@@ -665,7 +692,7 @@ body {
     min-height: 20px;
 }
 
-.editTextStep{
+.editTextStep {
     color: #b9b4b4;
     width: 100%;
     background: #323232;
@@ -675,7 +702,7 @@ body {
     outline: none;
 }
 
-#editNewStep span{
+#editNewStep span {
     font-size: 30px;
     margin-left: 15px;
     margin-right: 10px;
@@ -683,7 +710,7 @@ body {
     top: 3px;
 }
 
-#editNewStep{
+#editNewStep {
     color: #FFC90E;
     font-size: 20px;
     position: relative;

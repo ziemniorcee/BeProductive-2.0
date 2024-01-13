@@ -201,6 +201,13 @@ ipcMain.on('change-step', (event, params) => {
             WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
 })
 
+ipcMain.on('remove-step', (event, params) => {
+    db.run(`DELETE
+            FROM steps
+            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
+    step_ids[goal_ids[params.goal_id]].splice(params.step_id, 1)
+})
+
 ipcMain.on('ask-history', (event, params) => {
     let query = `SELECT id, goal, addDate
                  FROM goals
@@ -263,7 +270,9 @@ ipcMain.on('ask-ideas', (event) => {
 })
 
 ipcMain.on('delete-idea', (event, params) => {
-    db.run(`DELETE FROM ideas where id = ${idea_ids[params.id]}`)
+    db.run(`DELETE
+            FROM ideas
+            where id = ${idea_ids[params.id]}`)
     db.run(`INSERT INTO goals (goal, addDate, goal_pos)
             VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos})`)
 

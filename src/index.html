@@ -30,17 +30,19 @@
     <div id="main">
         <div id="header">
             <button id="todayBtn" class="button_date">
-                <img src="images/goals/today1.png" alt="today" id="todayimg" draggable="false" width="40"
-                     height="40"><span>Today</span>
+                <span class="button_date_left"><img src="images/goals/today1.png" alt="today" id="todayimg"
+                                                    draggable="false"></span>
+                <span class="button_date_right">Today</span>
             </button>
             <button id="tomorrowBtn" class="button_date">
-                <img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowimg" draggable="false" width="40"
-                     height="40"><span>Tomorrow</span>
+                <span class="button_date_left"><img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowimg"
+                                                    draggable="false"></span>
+                <span class="button_date_right">Tomorrow</span>
             </button>
             <button id="otherDateBtn" class="button_date">
-                <img src="images/goals/other0.png" alt="another" id="anotherdayimg" draggable="false" width="40"
-                     height="40">
-                <span>Another day</span>
+                <span class="button_date_left"><img src="images/goals/other0.png" alt="another" id="anotherdayimg"
+                                                    draggable="false"></span>
+                <span class="button_date_right">Another day</span>
             </button>
 
             <input type="text" id="datepicker">
@@ -59,34 +61,31 @@
 
             </div>
             <div id="buttonFinished">
-                <img id="finishedImg" src="images/goals/up.png" alt="up"><span>Finished: </span><span id="finishedCount">0</span>
+                <img id="finishedImg" src="images/goals/down.png" alt="up"><span>Finished: </span><span
+                    id="finishedCount">0</span>
             </div>
             <div id="todosFinished">
 
             </div>
         </div>
         <div id="inputTodo">
-            <div id="todo_buttons">
-                <button class="b_add" id="todoAdd"><span>+</span></button>
-                <button id="todoHide"><img src="images/goals/up.png" alt="up"></button>
+            <div id="entry1">
+                <input id="e_todo" type="text" spellcheck="false" placeholder="Result">
+                <div id="todoAdd">+</div>
             </div>
-            <div id="entry_bg">
-                <div id="entry1">
-                    <input class="e_todo" type="text" id="entry" spellcheck="false">
+            <div id="entry2">
+                <div id="newSteps">
                 </div>
-                <div id="entry2">
-                    <div id="newSteps">
-                        <div id="newStep">Step 1</div>
-
-                    </div>
-                    <div id="goal_settings">
-                        <span class="l_todo" id="label1">Difficulty</span>
+                <div id="goal_settings">
+                        <div class="l_todo">Category</div>
+                        <div id="selectCategory">None</div>
+                        <div class="l_todo" id="label1">Difficulty</div>
                         <input type="range" class="r_todo" id="range1">
-                        <span class="l_todo" id="label2">Importance</span>
+                        <div class="l_todo" id="label2">Importance</div>
                         <input type="range" class="r_todo" id="range2">
-                    </div>
                 </div>
             </div>
+
         </div>
     </div>
     <div id="resizer"></div>
