@@ -1,4 +1,4 @@
-import {build_goal, show_steps, change_check} from "./render.mjs";
+import {build_goal, show_steps, change_check, current_id} from "./render.mjs";
 import {l_date} from './date.js'
 
 let displays = ["", ""]
@@ -7,9 +7,6 @@ let sidebar_state = true
 
 let goal_pressed = false
 let saved_sidebar = ""
-
-
-
 
 
 window.sidebarAPI.askHistory({date: l_date.sql})
@@ -53,30 +50,31 @@ function load_history(array, date) {
     document.getElementById("days").innerHTML = displays[0]
 }
 
-
+let goal_text = ""
 function enchance_history() {
     let elements = document.getElementsByClassName('history_add');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', (event) => {
-            let goal_text = event.target.parentNode.children[1].children[0].innerText
+            goal_text = event.target.parentNode.children[1].children[0].innerText
             if (event.target.parentNode.parentNode.children.length > 1) event.target.parentNode.remove()
             else event.target.parentNode.parentNode.parentNode.remove()
 
             displays[0] = document.getElementById("days").outerHTML
             window.sidebarAPI.deleteHistory({id: i})
-            window.sidebarAPI.historyToGoal((data) => {
-                let step_texts = []
-                let step_checks = []
-                for (let i = 0; i < data.length; i++) {
-                    step_texts.push(data[i].step_text)
-                    step_checks.push(data[i].step_check)
-                }
-                build_goal(goal_text, step_texts, 0, step_checks)
-            })
+            console.log(current_id)
         })
     }
 }
 
+window.sidebarAPI.historyToGoal((steps, category) => {
+    let step_texts = []
+    let step_checks = []
+    for (let j = 0; j < steps.length; j++) {
+        step_texts.push(steps[j].step_text)
+        step_checks.push(steps[j].step_check)
+    }
+    build_goal(goal_text, step_texts,category , 0, step_checks)
+})
 
 window.sidebarAPI.askIdeas()
 window.sidebarAPI.getIdeas((data) => {

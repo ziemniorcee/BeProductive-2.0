@@ -413,15 +413,47 @@ body {
 #selectCategory{
     background: #3B151F;
     width: 200px;
-
+    border: 1px solid #FFC90E;
 }
+
+#categoryPicker{
+    width: 180px;
+    height: 130px;
+    position: relative;
+    bottom: 152px;
+    background: #272727;
+    border: 1px solid #FFC90E;
+    padding: 10px;
+    display: none;
+}
+
+.category{
+    float: left;
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+#categoryPicker .categoryButton{
+    width: 20px;
+    height: 20px;
+    background: #3B151F;
+    border: 1px solid black;
+    display: inline-block;
+}
+
+#categoryPicker .categoryName{
+    font-size: 20px;
+    position: relative;
+    bottom: 5px
+}
+
 
 .r_todo {
     width: 198px;
     -webkit-appearance: none;
     height: 25px;
     outline: none;
-
 }
 
 

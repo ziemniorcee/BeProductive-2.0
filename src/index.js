@@ -90,14 +90,14 @@ const createFloatbar = () => {
 ipcMain.on('ask-goals', (event, params) => {
     current_date = params.date
 
-    db.all(`SELECT id, goal, check_state, goal_pos
+    db.all(`SELECT id, goal, check_state, goal_pos, category
             FROM goals
             WHERE addDate = "${current_date}"
             ORDER BY goal_pos`, (err, rows) => {
         if (err) console.error(err)
         else {
             let positions = rows.map((goal) => Number(goal.goal_pos))
-            if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions)
+            if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions) + 1
             else current_goal_pos = 0
 
             goal_ids = rows.map((goal) => goal.id)
@@ -119,8 +119,8 @@ ipcMain.on('ask-goals', (event, params) => {
 })
 
 ipcMain.on('new-goal', (event, params) => {
-    db.run(`INSERT INTO goals (goal, addDate, goal_pos)
-            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos})`)
+    db.run(`INSERT INTO goals (goal, addDate, goal_pos, category)
+            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, ${params.category})`)
     db.all(`SELECT id
             FROM goals
             WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
@@ -230,9 +230,18 @@ ipcMain.on('ask-history', (event, params) => {
 })
 
 ipcMain.on('delete-history', (event, params) => {
+    let category = 1
     db.run(`UPDATE goals
-            SET addDate="${current_date}"
+            SET addDate="${current_date}", goal_pos=${current_goal_pos}
             WHERE id = ${history_ids[params.id]}`)
+
+    db.all(`SELECT category FROM goals WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
+        if (err2) console.error(err2)
+        else {
+            category = goal[0].category
+        }
+    })
+
     db.all(`SELECT id, goal_id, step_text, step_check
             FROM steps
             WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
@@ -247,16 +256,21 @@ ipcMain.on('delete-history', (event, params) => {
         history_ids.splice(params.id, 1)
         event.reply('history-to-goal', steps)
     })
-
-
+    current_goal_pos++
 })
 
 ipcMain.on('side-check-change', (event, params) => {
-    db.run("UPDATE goals SET check_state=1 WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
+    db.run(`UPDATE goals
+            SET check_state=1
+            WHERE id = ${history_ids[params.id]}`)
+    history_ids.splice(params.id, 1)
 })
 
 ipcMain.on('history-removed', (event, params) => {
-    db.run("DELETE FROM goals WHERE id IN(SELECT id  FROM goals WHERE addDate IN (SELECT addDate  FROM goals WHERE addDate<" + "'" + today_date + "'" + " and check_state = 0 GROUP BY addDate ORDER BY addDate DESC LIMIT 10) and check_state = 0 ORDER BY  addDate DESC LIMIT 1 OFFSET " + params.id + ");")
+    db.run(`DELETE
+            FROM goals
+            WHERE id = ${history_ids[params.id]}`)
+    history_ids.splice(params.id, 1)
 })
 
 ipcMain.on('ask-ideas', (event) => {
@@ -273,6 +287,8 @@ ipcMain.on('delete-idea', (event, params) => {
     db.run(`DELETE
             FROM ideas
             where id = ${idea_ids[params.id]}`)
+    idea_ids.splice(params.id, 1)
+
     db.run(`INSERT INTO goals (goal, addDate, goal_pos)
             VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos})`)
 
@@ -285,15 +301,22 @@ ipcMain.on('delete-idea', (event, params) => {
             step_ids[rows[0].id] = []
         }
     })
+
 })
 
 
 ipcMain.on('new-idea', (event, params) => {
     db.run("INSERT INTO ideas (idea) VALUES(" + "'" + params.text + "');")
+
+    db.all("SELECT id  FROM ideas ORDER BY id DESC LIMIT 1;", (err, rows) => {
+        if (err) console.error(err)
+        else idea_ids.unshift(rows[0].id)
+    })
 })
 
 ipcMain.on('idea-removed', (event, params) => {
-    db.run("DELETE FROM ideas WHERE id IN (SELECT id FROM ideas ORDER BY id DESC LIMIT 1 OFFSET " + params.id + ")")
+    db.run(`DELETE FROM ideas WHERE id=${idea_ids[params.id]}`)
+    idea_ids.splice(params.id, 1)
 })
 
 ipcMain.on('change_window', () => {

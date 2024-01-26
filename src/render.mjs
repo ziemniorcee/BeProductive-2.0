@@ -1,15 +1,17 @@
 import {l_date} from './date.js'
 import {close_edit} from "./sidebar.mjs";
 
-let current_id = 0
+let categories = {1: "#3B151F", 2: "#32174D", 3: "#002244", 4: "#023020"}
+export let current_id = 0
 
-let pressed = false
+let r_pressed = false
 let selected_div = null
 let press_state = 0
+let max_pos = 0;
 
 let finished_count = 0
-let show_finished = true
 
+let new_category = 1
 
 
 window.goalsAPI.askGoals({date: l_date.sql})
@@ -17,10 +19,11 @@ window.goalsAPI.askGoals({date: l_date.sql})
 window.goalsAPI.getGoals((goals, steps) => {
     current_id = 0
     finished_count = 0
+    new_category = 1
+
     for (let i = 0; i < goals.length; i++) {
         let goal_steps = []
         let steps_checks = []
-
         for (let j = 0; j < steps.length; j++) {
             if (goals[i].id === steps[j].goal_id) {
                 goal_steps.push(steps[j].step_text)
@@ -28,7 +31,7 @@ window.goalsAPI.getGoals((goals, steps) => {
             }
         }
 
-        build_goal(goals[i].goal, goal_steps, goals[i].check_state, steps_checks)
+        build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].check_state, steps_checks)
     }
     if (finished_count) {
         document.getElementById("buttonFinished").style.display = "block"
@@ -43,9 +46,18 @@ window.goalsAPI.removingGoal(() => {
     if (press_state === 0) {
         let id = Number(document.getElementsByClassName("goal_id")[$('.todo').index(selected_div)].innerHTML)
         window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
+        if (selected_div.parentNode === document.getElementById("todosFinished")) {
+            finished_count--
+            if (finished_count) document.getElementById("buttonFinished").style.display = "block"
+            else document.getElementById("buttonFinished").style.display = "none"
+            document.getElementById("finishedCount").innerHTML = finished_count
+        }
         selected_div.remove()
         let goals = document.getElementsByClassName("goal_id")
-        for (let i = 0; i < goals.length; i++) goals[i].innerHTML = i
+        for (let i = 0; i < goals.length; i++) {
+            if (goals[i].innerHTML > id) goals[i].innerHTML = Number(goals[i].innerHTML) - 1
+
+        }
         current_id--
         close_edit()
     }
@@ -81,20 +93,53 @@ function new_goal() {
             let step_value = steps_elements[i].value
             if (step_value !== "") steps.push(step_value)
         }
-        build_goal(goal_text, steps)
-        window.goalsAPI.newGoal({goal_text: goal_text.replace("'", "`@`"), steps: steps})
+        build_goal(goal_text, steps, new_category)
+        window.goalsAPI.newGoal({goal_text: goal_text.replace("'", "`@`"), steps: steps, category: new_category})
         document.getElementById('e_todo').value = ""
     }
 }
 
-document.getElementById("todoAdd").addEventListener('click', () => new_goal())
 
+document.getElementById("todoAdd").addEventListener('click', () => new_goal());
+
+(function () {
+    let show = false
+    let displays = ["none", "block"]
+
+    document.getElementById("selectCategory").addEventListener('click', () => {
+        show = !show
+        document.getElementById("categoryPicker").style.display = displays[Number(show)]
+        if (show === true) {
+            let array = document.getElementsByClassName("category")
+            for (let i = 0; i < array.length; i++) {
+                array[i].addEventListener('click', (event) => {
+                    let text = document.getElementsByClassName("categoryName")[i].innerHTML
+                    new_category = i + 1
+                    document.getElementById("selectCategory").innerText = text;
+                    document.getElementById("selectCategory").style.background = categories[new_category];
+                })
+            }
+        }
+    })
+})();
+
+
+(function () {
+    let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FFF200", "#ED1C24"]
+    document.getElementById("range2").oninput = function () {
+        let x = Math.floor(document.getElementById("range2").value / 20)
+
+        document.getElementById("range2").style.background = backgrounds[x]
+    }
+})();
 
 $("#entry").on('keyup', function (e) {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
 });
 
-export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks = []) {
+
+export function build_goal(goal_text, steps = [], category, goal_checked = 0, step_checks = [] = "") {
+    let category_color = categories[category]
     let check_state = ""
     let todo_area = "todosArea"
     if (goal_checked) {
@@ -109,7 +154,7 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
         let checks_counter = 0
         if (step_checks.length !== 0) checks_counter = step_checks.reduce((a, b) => a + b)
         steps_HTML =
-            `<div class='stepsShow'>
+            `<div class='stepsShow' style="background: ${category_color}">
                 <img src='images/goals/down.png'>
                 <span class="check_counter">
                     <span class="counter">${checks_counter}</span>/<span class="maxCounter">${steps.length}</span>
@@ -131,7 +176,7 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
     document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
             <div class="goal_id">${current_id}</div>
-            <div class='todoCheck'><input type='checkbox' class='check_task' ${check_state}></div>
+            <div class='todoCheck' style="background: ${category_color}"><input type='checkbox' class='check_task' ${check_state}></div>
             <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
     current_id++
@@ -147,11 +192,8 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
 }
 
 
-
-
 (function () {
     let input_count = 0
-
     new_step()
 
     function new_step() {
@@ -181,20 +223,16 @@ export function build_goal(goal_text, steps = [], goal_checked = 0, step_checks 
 window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("date").innerHTML = l_date.display
     const goals = document.getElementById('todosArea');
+    const finished = document.getElementById('todosFinished');
     const history = document.getElementById("days")
-    if (goals) {
-        goals.addEventListener('contextmenu', function handleClick(event) {
-            press_state = 0
-            if (event.target.classList.contains("todo")) {
-                selected_div = event.target
-                pressed = true
-            }
-            if (event.target.classList.contains("task")) {
-                selected_div = event.target.parentNode.parentNode
-                pressed = true
-            }
-        })
-    }
+    goals.addEventListener('contextmenu', function handleClick(event) {
+        remove_goal(event)
+    })
+    finished.addEventListener('contextmenu', function handleClick(event) {
+        remove_goal(event)
+
+    })
+
 
     if (history) {
         history.addEventListener('contextmenu', function handleClick(event) {
@@ -203,23 +241,36 @@ window.addEventListener("DOMContentLoaded", () => {
                 if (event.target.classList.contains("sidebarTask")) {
                     if (event.target.parentNode.children.length === 1) selected_div = event.target.parentNode.parentNode
                     else selected_div = event.target
-                    pressed = true
+                    r_pressed = true
                 }
             }
-
         })
     }
+});
 
-})
+function remove_goal(event) {
+    press_state = 0
+    if (event.target.classList.contains("todo")) {
+        selected_div = event.target
+        r_pressed = true
+    }
+    if (event.target.classList.contains("task")) {
+        selected_div = event.target.parentNode.parentNode
+        r_pressed = true
+    }
+}
 
-
-document.getElementById("buttonFinished").addEventListener('click', () => {
-    show_finished = !show_finished
+(function () {
+    let show = true
     let styles = ["none", "block"]
     let images = ["images/goals/up.png", "images/goals/down.png"]
-    document.getElementById("todosFinished").style.display = styles[Number(show_finished)]
-    document.getElementById("finishedImg").src = images[Number(show_finished)]
-})
+
+    document.getElementById("buttonFinished").addEventListener('click', () => {
+        show = !show
+        document.getElementById("todosFinished").style.display = styles[Number(show)]
+        document.getElementById("finishedImg").src = images[Number(show)]
+    })
+})();
 
 document.getElementById("img_second").addEventListener('click', () => {
     setTimeout(function () {
@@ -230,7 +281,7 @@ document.getElementById("img_second").addEventListener('click', () => {
                 press_state = 1
                 if (event.target.classList.contains("task_history")) {
                     selected_div = event.target
-                    pressed = true
+                    r_pressed = true
                 }
             })
         }
@@ -240,7 +291,7 @@ document.getElementById("img_second").addEventListener('click', () => {
                 press_state = 2
                 if (event.target.classList.contains("sidebarTask")) {
                     selected_div = event.target
-                    pressed = true
+                    r_pressed = true
                 }
             })
         }
@@ -249,9 +300,9 @@ document.getElementById("img_second").addEventListener('click', () => {
 
 window.oncontextmenu = function () {
     try {
-        return pressed;
+        return r_pressed;
     } finally {
-        pressed = false
+        r_pressed = false
     }
 }
 
@@ -327,14 +378,6 @@ $(document).on('click', '.stepCheck', function () {
 
     window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: state})
 });
-
-
-
-
-
-
-
-
 
 
 export function show_steps(event1) {

@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     askHistory: (params) => ipcRenderer.send('ask-history',params),
     getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
     deleteHistory: (params) => ipcRenderer.send('delete-history', params),
-    historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, data) => func(data)),
+    historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, steps) => func(steps)),
     sideChangeChecks: (params) => ipcRenderer.send('side-check-change', params),
     removingHistory: (callback) => ipcRenderer.on("removing-history", callback),
     historyRemoved: (params) => ipcRenderer.send('history-removed', params),
