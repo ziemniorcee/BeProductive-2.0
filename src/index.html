@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="goals.js"></script>
     <script type="module" src="date.js"></script>
+    <script type="module" src="edit.mjs"></script>
     <script type="module" src="render.mjs"></script>
     <script type="module" src="sidebar.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
@@ -78,13 +79,13 @@
                 </div>
                 <div id="goal_settings">
                     <div class="l_todo">Category</div>
-                    <div id="selectCategory">None</div>
+                    <div id="selectCategory" class="selectCategory">None</div>
                     <div class="l_todo" id="label1">Difficulty</div>
                     <input type="range" class="r_todo" id="range1" max="99">
                     <div class="l_todo" id="label2">Importance</div>
-                    <input type="range" class="r_todo" id="range2">
+                    <input type="range" class="r_todo" id="range2" max="99">
 
-                    <div id="categoryPicker">
+                    <div class="categoryPicker" id="categoryPicker">
                         <div class="category">
                             <span class="categoryButton"></span>
                             <span class="categoryName">None</span>

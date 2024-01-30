@@ -90,7 +90,7 @@ const createFloatbar = () => {
 ipcMain.on('ask-goals', (event, params) => {
     current_date = params.date
 
-    db.all(`SELECT id, goal, check_state, goal_pos, category
+    db.all(`SELECT id, goal, check_state, goal_pos, category, difficulty, importance
             FROM goals
             WHERE addDate = "${current_date}"
             ORDER BY goal_pos`, (err, rows) => {
@@ -119,8 +119,8 @@ ipcMain.on('ask-goals', (event, params) => {
 })
 
 ipcMain.on('new-goal', (event, params) => {
-    db.run(`INSERT INTO goals (goal, addDate, goal_pos, category)
-            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, ${params.category})`)
+    db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
+            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, ${params.category}, ${params.difficulty}, ${params.importance})`)
     db.all(`SELECT id
             FROM goals
             WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {

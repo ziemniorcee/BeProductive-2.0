@@ -22,7 +22,7 @@ body {
 
 #leftbar {
     background: #3B151F;
-    z-index: 2;
+    z-index: 10;
     width: 100px;
 }
 
@@ -219,10 +219,33 @@ body {
 }
 
 .todoCheck {
-    background: #3B151F;
     pointer-events: none;
+    position: relative;
+    background: #3B151F url("images/goals/Frame 8.svg") no-repeat;
 }
+.dot{
+    height: 28px;
+    width: 28px;
 
+    border-radius: 50%;
+    right: 9px;
+    top: 9px;
+    display: inline-block;
+    position: absolute;
+    z-index: 1;
+    border: 2px red solid;
+    background: #1E1E1E  no-repeat center;
+
+}
+#line{
+    background: #FFC90E;
+    width: 2px;
+    bottom:1px;
+    left: 1px;
+    height: 100px;
+    position: absolute;
+    transform: rotate(45deg);
+}
 .check_task {
     display: block;
     margin: 0 10px auto;
@@ -410,13 +433,13 @@ body {
 
 
 
-#selectCategory{
+.selectCategory{
     background: #3B151F;
     width: 200px;
     border: 1px solid #FFC90E;
 }
 
-#categoryPicker{
+.categoryPicker{
     width: 180px;
     height: 130px;
     position: relative;
@@ -427,6 +450,11 @@ body {
     display: none;
 }
 
+#categoryPicker2{
+    top: 41px;
+    position: absolute;
+    height: 110px;
+}
 .category{
     float: left;
     display: block;
@@ -434,7 +462,7 @@ body {
     text-align: left;
     cursor: pointer;
 }
-#categoryPicker .categoryButton{
+.categoryPicker .categoryButton{
     width: 20px;
     height: 20px;
     background: #3B151F;
@@ -442,7 +470,7 @@ body {
     display: inline-block;
 }
 
-#categoryPicker .categoryName{
+.categoryPicker .categoryName{
     font-size: 20px;
     position: relative;
     bottom: 5px
@@ -680,6 +708,35 @@ body {
     font-size: 25px;
     padding: 10px;
 
+}
+
+#editOptions{
+    background: #323232;
+    margin: 10px;
+    font-size: 25px;
+    padding: 10px;
+    display: flex;
+    position: relative;
+}
+
+
+
+#optionsNames{
+    flex-grow: 1;
+    text-align: center;
+}
+
+#optionsNames div{
+    margin-bottom: 15px;
+}
+#optionsConfig{
+    width: 200px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+#optionsConfig #selectCategory2, #optionsConfig input[type="range"]{
+    margin-bottom: 15px;
 }
 
 #editMain {

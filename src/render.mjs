@@ -1,7 +1,7 @@
 import {l_date} from './date.js'
-import {close_edit} from "./sidebar.mjs";
+import {close_edit} from "./edit.mjs";
 
-let categories = {1: "#3B151F", 2: "#32174D", 3: "#002244", 4: "#023020"}
+export let categories = {1: "#3B151F", 2: "#32174D", 3: "#002244", 4: "#023020"}
 export let current_id = 0
 
 let r_pressed = false
@@ -30,8 +30,7 @@ window.goalsAPI.getGoals((goals, steps) => {
                 steps_checks.push(steps[j].step_check)
             }
         }
-
-        build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].check_state, steps_checks)
+        build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
     }
     if (finished_count) {
         document.getElementById("buttonFinished").style.display = "block"
@@ -85,6 +84,8 @@ document.getElementById("entry1").addEventListener('click', () => {
 
 function new_goal() {
     let goal_text = document.getElementById('e_todo').value
+    let importance = Math.floor(document.getElementById("range2").value / 20)
+    let difficulty = Math.floor(document.getElementById("range1").value / 20)
 
     if (goal_text !== "") {
         let steps = []
@@ -93,8 +94,14 @@ function new_goal() {
             let step_value = steps_elements[i].value
             if (step_value !== "") steps.push(step_value)
         }
-        build_goal(goal_text, steps, new_category)
-        window.goalsAPI.newGoal({goal_text: goal_text.replace("'", "`@`"), steps: steps, category: new_category})
+        build_goal(goal_text, steps, new_category, importance, difficulty)
+        window.goalsAPI.newGoal({
+            goal_text: goal_text.replace("'", "`@`"),
+            steps: steps,
+            category: new_category,
+            difficulty: difficulty,
+            importance: importance,
+        })
         document.getElementById('e_todo').value = ""
     }
 }
@@ -103,6 +110,7 @@ function new_goal() {
 document.getElementById("todoAdd").addEventListener('click', () => new_goal());
 
 (function () {
+
     let show = false
     let displays = ["none", "block"]
 
@@ -124,6 +132,7 @@ document.getElementById("todoAdd").addEventListener('click', () => new_goal());
 })();
 
 
+
 (function () {
     let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FFF200", "#ED1C24"]
     document.getElementById("range2").oninput = function () {
@@ -138,14 +147,17 @@ $("#entry").on('keyup', function (e) {
 });
 
 
-export function build_goal(goal_text, steps = [], category, goal_checked = 0, step_checks = [] = "") {
+export function build_goal(goal_text, steps = [], category, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] = "") {
     let category_color = categories[category]
     let check_state = ""
     let todo_area = "todosArea"
+    let check_bg = ""
+    let check_border = ["#0075FF", "#24FF00", "#FFC90E", "#FF5C00", "#FF0000"]
     if (goal_checked) {
         check_state = "checked"
         todo_area = "todosFinished"
         finished_count++
+        check_bg = "url('images/goals/check.png')"
     }
     let steps_HTML = ""
 
@@ -173,10 +185,15 @@ export function build_goal(goal_text, steps = [], category, goal_checked = 0, st
         }
         steps_HTML += "</div>"
     }
+
+    let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
             <div class="goal_id">${current_id}</div>
-            <div class='todoCheck' style="background: ${category_color}"><input type='checkbox' class='check_task' ${check_state}></div>
+            <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
+                <div class="dot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
+                <input type='checkbox' class='check_task' ${check_state}>
+            </div>
             <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
     current_id++
@@ -315,11 +332,16 @@ $(document).on('click', '.check_task', function () {
 export function change_check(id) {
     let areas = ["todosArea", "todosFinished"]
     let checks = ["", "checked"]
+    let check_bg = ["", "url('images/goals/check.png')"]
+
     let array_id = Number(document.getElementsByClassName("goal_id")[id].innerHTML)
     let state = Number(document.getElementsByClassName("check_task")[id].checked)
 
     document.getElementsByClassName("check_task")[id].outerHTML =
         `<input type='checkbox' ${checks[state]} class='check_task'>`
+    let category_color = document.getElementsByClassName("dot")[id].style.borderColor
+    document.getElementsByClassName("dot")[id].outerHTML =
+        `<div class="dot" style="background-image: ${check_bg[state]}; border-color:${category_color}">`
 
     let todo = document.getElementsByClassName("todo")[id].outerHTML
     document.getElementsByClassName("todo")[id].remove()
