@@ -7,6 +7,7 @@ class CurrentDate{
     }
 
     get_today(){
+        this.today.setDate(this.now.getDate()) // bad solution
         this.today.setDate(this.now.getDate())
         this.today.setMonth(this.now.getMonth())
 

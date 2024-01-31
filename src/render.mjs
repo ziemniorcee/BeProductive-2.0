@@ -1,7 +1,15 @@
 import {l_date} from './date.js'
-import {close_edit} from "./edit.mjs";
+import {close_edit, change_category, goal_pressed, saved_sidebar} from "./edit.mjs";
+import {current_sidebar, enchance_history, enchance_ideas} from "./sidebar.mjs";
 
-export let categories = {1: "#3B151F", 2: "#32174D", 3: "#002244", 4: "#023020"}
+export let categories = {
+    1: ["rgb(59, 21, 31)", "None"],
+    2: ["rgb(50, 23, 77)", "Work"],
+    3: ["rgb(0, 34, 68)", "School"],
+    4: ["rgb(2, 48, 32)", "House"]
+}
+// Try to get color of selected goal and set up category button in edit
+// Need to get category name
 export let current_id = 0
 
 let r_pressed = false
@@ -13,6 +21,7 @@ let finished_count = 0
 
 let new_category = 1
 
+select_category()
 
 window.goalsAPI.askGoals({date: l_date.sql})
 
@@ -78,14 +87,26 @@ window.sidebarAPI.removingIdea(() => {
 })
 
 
-document.getElementById("entry1").addEventListener('click', () => {
-    document.getElementById("entry2").style.display = "flex"
+
+$(document).on('click', '#inputTodo', function(event){// weak point
+    document.getElementById("entry2").style.height = "250px"
+    document.getElementById("entry2").style.visibility = "visible"
+    // document.getElementById("newSteps").style.overflowY = "scroll"
+
 })
+document.getElementById("main").addEventListener('click', (event) => close_input(event))
+
+
+function close_input(event){ // weak point
+     document.getElementById("entry2").style.height = "0"
+     document.getElementById("entry2").style.visibility = "hidden"
+     // document.getElementById("newSteps").style.overflowY = "hidden"
+}
 
 function new_goal() {
     let goal_text = document.getElementById('e_todo').value
-    let importance = Math.floor(document.getElementById("range2").value / 20)
-    let difficulty = Math.floor(document.getElementById("range1").value / 20)
+    let importance = document.getElementById("range2").value
+    let difficulty = document.getElementById("range1").value
 
     if (goal_text !== "") {
         let steps = []
@@ -94,6 +115,11 @@ function new_goal() {
             let step_value = steps_elements[i].value
             if (step_value !== "") steps.push(step_value)
         }
+        if (steps.length !== 0){
+            document.getElementById("newSteps").outerHTML = `<div id="newSteps" style="overflow-y: hidden;">
+                <div class="stepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
+        }
+
         build_goal(goal_text, steps, new_category, importance, difficulty)
         window.goalsAPI.newGoal({
             goal_text: goal_text.replace("'", "`@`"),
@@ -106,49 +132,55 @@ function new_goal() {
     }
 }
 
-
 document.getElementById("todoAdd").addEventListener('click', () => new_goal());
 
-(function () {
 
-    let show = false
+export function select_category(option = "") {
     let displays = ["none", "block"]
+    let show = false
+    let category_button = document.getElementById(`selectCategory${option}`)
+    let category_display = document.getElementById(`categoryPicker${option}`)
 
-    document.getElementById("selectCategory").addEventListener('click', () => {
-        show = !show
-        document.getElementById("categoryPicker").style.display = displays[Number(show)]
+    category_button.addEventListener('click', () => {
+        show = category_display.style.display === "" || category_display.style.display === "none";
+        category_display.style.display = displays[Number(show)]
         if (show === true) {
-            let array = document.getElementsByClassName("category")
+            let array = category_display.getElementsByClassName("category")
             for (let i = 0; i < array.length; i++) {
                 array[i].addEventListener('click', (event) => {
-                    let text = document.getElementsByClassName("categoryName")[i].innerHTML
+                    category_button.innerText = category_display.getElementsByClassName("categoryName")[i].innerHTML;
+                    category_button.style.background = categories[i + 1][0];
                     new_category = i + 1
-                    document.getElementById("selectCategory").innerText = text;
-                    document.getElementById("selectCategory").style.background = categories[new_category];
+                    if (option !== "") change_category(new_category)
                 })
             }
         }
     })
-})();
-
-
+}
 
 (function () {
-    let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FFF200", "#ED1C24"]
-    document.getElementById("range2").oninput = function () {
-        let x = Math.floor(document.getElementById("range2").value / 20)
+    let backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
+    document.getElementById("range1").oninput = function () {
+        let x = document.getElementById("range1").value
+        document.getElementById("range1").style.background = backgrounds[x]
+    }
+})();
 
+(function () {
+    let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
+    document.getElementById("range2").oninput = function () {
+        let x = document.getElementById("range2").value
         document.getElementById("range2").style.background = backgrounds[x]
     }
 })();
 
-$("#entry").on('keyup', function (e) {
+$("#entry1").on('keyup', function (e) {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
 });
 
 
-export function build_goal(goal_text, steps = [], category, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] = "") {
-    let category_color = categories[category]
+export function build_goal(goal_text, steps = [], category=1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] = "") {
+    let category_color = categories[category][0]
     let check_state = ""
     let todo_area = "todosArea"
     let check_bg = ""
@@ -209,9 +241,16 @@ export function build_goal(goal_text, steps = [], category, importance = 2, diff
 }
 
 
+
+
+
+
+
+
 (function () {
     let input_count = 0
     new_step()
+
 
     function new_step() {
         let array = document.getElementsByClassName('stepEntry')
@@ -225,12 +264,17 @@ export function build_goal(goal_text, steps = [], category, importance = 2, diff
         for (let i = 0; i < array.length - 1; i++) array[i].value = steps[i]
 
         let entry = $('.stepEntry')
+
         entry.change(function () {
             if (entry.index(this) === input_count) {
+
                 if (event.target.value === "") {
                 } else {
+
                     input_count += 1
                     new_step()
+                    console.log(entry)
+                    document.getElementsByClassName('stepEntry')[input_count].focus()
                 }
             }
         })

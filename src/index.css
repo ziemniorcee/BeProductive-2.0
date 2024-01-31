@@ -75,6 +75,7 @@ body {
     font-size: 28px;
     flex-grow: 1;
     padding: 50px;
+
 }
 
 #resizer {
@@ -344,10 +345,12 @@ body {
 
 #entry2 {
     background: #282828;
-    display: none;
-    height: 250px;
+    display: flex;
+    height: 0;
+    transition: 0.5s;
     border-top:#FFC90E 1px solid;
-
+    visibility: hidden;
+    overflow: hidden;
 }
 
 #e_todo {
@@ -768,7 +771,7 @@ body {
     display: flex;
     margin-bottom: 5px;
     padding-top: 5px;
-    padding-bottom: 15px;
+
     border-bottom: 1px solid #323232;
 
 }

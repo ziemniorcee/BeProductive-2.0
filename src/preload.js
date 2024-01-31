@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     addStep:  (params) => ipcRenderer.send('add-step', params),
     changeStep:  (params) => ipcRenderer.send('change-step', params),
     removeStep: (params) => ipcRenderer.send('remove-step', params),
+    changeCategory: (params) => ipcRenderer.send('change-category', params),
+    changeDifficulty: (params) => ipcRenderer.send('change-difficulty', params),
+    changeImportance: (params) => ipcRenderer.send('change-importance', params),
 })
 
 
@@ -24,7 +27,7 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     askHistory: (params) => ipcRenderer.send('ask-history',params),
     getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
     deleteHistory: (params) => ipcRenderer.send('delete-history', params),
-    historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, steps) => func(steps)),
+    historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, steps, parameters) => func(steps, parameters)),
     sideChangeChecks: (params) => ipcRenderer.send('side-check-change', params),
     removingHistory: (callback) => ipcRenderer.on("removing-history", callback),
     historyRemoved: (params) => ipcRenderer.send('history-removed', params),

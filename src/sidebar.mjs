@@ -63,14 +63,14 @@ export function enchance_history() {
     }
 }
 
-window.sidebarAPI.historyToGoal((steps, category) => {
+window.sidebarAPI.historyToGoal((steps, parameters) => {
     let step_texts = []
     let step_checks = []
     for (let j = 0; j < steps.length; j++) {
         step_texts.push(steps[j].step_text)
         step_checks.push(steps[j].step_check)
     }
-    build_goal(goal_text, step_texts,category , 0, step_checks)
+    build_goal(goal_text, step_texts ,parameters[0], parameters[1], parameters[2], 0, step_checks)
 })
 
 window.sidebarAPI.askIdeas()
@@ -103,6 +103,10 @@ export function enchance_ideas() {
             window.sidebarAPI.deleteIdea({id: i, goal_text: goal_text})
         })
     }
+    document.getElementById("addIdeas").addEventListener('click', () => new_idea())
+    $("#entryIdeas").on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) new_idea()
+    });
 }
 
 
@@ -166,10 +170,7 @@ document.getElementById("img_second").addEventListener('click', () => {
     if (!current_sidebar) enchance_history()
     else {
         enchance_ideas()
-        document.getElementById("addIdeas").addEventListener('click', () => new_idea())
-        $("#entryIdeas").on('keyup', function (e) {
-            if (e.key === 'Enter' || e.keyCode === 13) new_idea()
-        });
+
     }
 
     document.getElementById("img_main").src = images[Number(current_sidebar)]

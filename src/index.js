@@ -208,6 +208,24 @@ ipcMain.on('remove-step', (event, params) => {
     step_ids[goal_ids[params.goal_id]].splice(params.step_id, 1)
 })
 
+ipcMain.on('change-category', (event, params) => {
+    db.run(`UPDATE goals
+            SET category="${params.new_category}"
+            WHERE id = ${goal_ids[params.goal_id]}`)
+})
+
+ipcMain.on('change-difficulty', (event, params) => {
+    db.run(`UPDATE goals
+            SET Difficulty="${params.difficulty}"
+            WHERE id = ${goal_ids[params.goal_id]}`)
+})
+
+ipcMain.on('change-importance', (event, params) => {
+    db.run(`UPDATE goals
+            SET Importance="${params.importance}"
+            WHERE id = ${goal_ids[params.goal_id]}`)
+})
+
 ipcMain.on('ask-history', (event, params) => {
     let query = `SELECT id, goal, addDate
                  FROM goals
@@ -230,15 +248,18 @@ ipcMain.on('ask-history', (event, params) => {
 })
 
 ipcMain.on('delete-history', (event, params) => {
-    let category = 1
+    let parameters = [1, 2, 2]
+
     db.run(`UPDATE goals
             SET addDate="${current_date}", goal_pos=${current_goal_pos}
             WHERE id = ${history_ids[params.id]}`)
 
-    db.all(`SELECT category FROM goals WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
+    db.all(`SELECT category, Difficulty, Importance FROM goals WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
         if (err2) console.error(err2)
         else {
-            category = goal[0].category
+            parameters[0] = goal[0].category
+            parameters[1] = goal[0].Importance
+            parameters[2] = goal[0].Difficulty
         }
     })
 
@@ -254,7 +275,7 @@ ipcMain.on('delete-history', (event, params) => {
         }
         goal_ids.push(history_ids[params.id])
         history_ids.splice(params.id, 1)
-        event.reply('history-to-goal', steps)
+        event.reply('history-to-goal', steps, parameters)
     })
     current_goal_pos++
 })
@@ -289,8 +310,8 @@ ipcMain.on('delete-idea', (event, params) => {
             where id = ${idea_ids[params.id]}`)
     idea_ids.splice(params.id, 1)
 
-    db.run(`INSERT INTO goals (goal, addDate, goal_pos)
-            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos})`)
+    db.run(`INSERT INTO goals (goal, addDate, goal_pos, category)
+            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, 1)`)
 
     db.all(`SELECT id
             from goals

@@ -1,29 +1,41 @@
 import {sidebar_state, show_hide_sidebar, current_sidebar, enchance_ideas, enchance_history} from "./sidebar.mjs";
-import {todo_html} from "./premade.mjs";
-import {categories, change_check, show_steps} from "./render.mjs";
+import {categories, change_check, select_category} from "./render.mjs";
 
 export let saved_sidebar = ""
 export let goal_pressed = false
 
 let base = null
+let goal_id = 0
 
-$(document).on('click', '.todo', function (event) {
+
+$(document).on('click', '.todo', function (event) { //weak point
     saved_sidebar = document.getElementById("rightbar").innerHTML
+    goal_id = $('.todo').index(this)
 
     if (sidebar_state === false) show_hide_sidebar()
-    if (event.target.children.length !== 0 && event.target.children.length !== 2) {
-        let base = event.target
+    if (event.target.children.length !== 0 && event.target.children.length !== 2) {//weak point
+        base = event.target
         if (event.target.children.length === 1) base = event.target.parentNode
+        show_goal_edit()
 
-        let steps_html = build_edit_steps(base)
-        show_goal_edit(steps_html, base)
-        enchance_edit(base)
         document.getElementById("closeEdit").addEventListener('click', () => show_hide_sidebar())
         goal_pressed = true
     }
 });
 
-function build_edit_steps(base) {
+
+function show_goal_edit() {
+    document.getElementById("rightbar").innerHTML = todo_html()
+
+    _main_check()
+    _steps_checks()
+    _inputs()
+    select_category("2")
+    change_difficulty()
+    change_importance()
+}
+
+function get_steps_html() {
     let steps_html = ""
     if (base.children[2].children.length > 1) {
         let array = base.children[2].children[2].children
@@ -41,18 +53,8 @@ function build_edit_steps(base) {
     return steps_html
 }
 
-function show_goal_edit(steps_html, base) {
-    let main_goal = base.children[2].children[0].innerText
-    let check_state = ""
-    if (base.getElementsByClassName("check_task")[0].checked === true) check_state = "checked"
 
-    document.getElementById("rightbar").innerHTML = todo_html(main_goal, check_state, steps_html)
-    enchance_edit(base)
-
-    let goals = document.getElementsByClassName("todo")
-    let goal_id = 0
-    for (let i = 0; i < goals.length; i++) if (goals[i] === base) goal_id = i
-
+function _main_check(){
     document.getElementById("editCheck").addEventListener('click', () => {
         let state = Number(document.getElementById("editCheck").checked)
         base.getElementsByClassName("check_task")[0].checked = state
@@ -62,7 +64,28 @@ function show_goal_edit(steps_html, base) {
         else goal_id = document.getElementById("todosArea").children.length - 1
         base = document.getElementsByClassName("todo")[goal_id]
     })
+}
 
+function _inputs() {
+    document.getElementById("editText").addEventListener("blur", () => {
+        let input = document.getElementById("editText").value
+        if (base.children[2].children[0].innerText !== input) {
+            base.children[2].children[0].innerText = input
+            window.goalsAPI.changeTextGoal({input: input, id: Number(base.children[0].innerText)})
+        }
+    })
+    let edit_steps = document.getElementsByClassName("editTextStep")
+
+    for (let i = 0; i < edit_steps.length; i++) {
+        edit_steps[i].addEventListener("blur", () => {
+            let input = document.getElementsByClassName("editTextStep")[i].value
+            change_step(i, input)
+        })
+    }
+    add_step_edit(base)
+}
+
+function _steps_checks(){
     let steps = document.getElementById("editSteps").children
     for (let i = 0; i < steps.length - 1; i++) {
         steps[i].children[0].addEventListener("click", () => {
@@ -78,58 +101,14 @@ function show_goal_edit(steps_html, base) {
                 counter.innerText = Number(counter.innerText) - 1
             }
 
-            window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: i, state: state})
+            window.goalsAPI.changeChecksStep({goal_id: Number(base.children[0].innerText), step_id: i, state: state})
         })
     }
-
-
-    let new_category = 1;
-    (function () {
-        let show = false
-        let displays = ["none", "block"]
-
-        document.getElementById("selectCategory2").addEventListener('click', () => {
-            show = !show
-            document.getElementById("categoryPicker2").style.display = displays[Number(show)]
-            if (show === true) {
-                let array = document.getElementsByClassName("category")
-                for (let i = 0; i < array.length; i++) {
-                    array[i].addEventListener('click', (event) => {
-                        let text = document.getElementsByClassName("categoryName")[i].innerHTML
-                        new_category = i + 1
-                        document.getElementById("selectCategory2").innerText = text;
-                        document.getElementById("selectCategory2").style.background = categories[new_category];
-                    })
-                }
-            }
-        })
-    })();
 }
 
-
-function enchance_edit(base) {
-    document.getElementById("editText").addEventListener("blur", () => {
-        let input = document.getElementById("editText").value
-        if (base.children[2].children[0].innerText !== input) {
-            base.children[2].children[0].innerText = input
-            window.goalsAPI.changeTextGoal({input: input, id: Number(base.children[0].innerText)})
-        }
-    })
-    let edit_steps = document.getElementsByClassName("editTextStep")
-
-    for (let i = 0; i < edit_steps.length; i++) {
-        edit_steps[i].addEventListener("blur", () => {
-            let input = document.getElementsByClassName("editTextStep")[i].value
-            change_step(i, base, input)
-        })
-    }
-    add_step_edit(base)
-}
-
-
-function add_step_edit(base) {
+function add_step_edit() {
     document.getElementById("editNewStep").addEventListener('click', () => {
-        let steps_html = build_edit_steps(base)
+        let steps_html = get_steps_html()
         steps_html +=
             `<div class="editStep">
                 <input type="checkbox" class="editCheckStep"><input type="text" class="editTextStep"  spellcheck="false">
@@ -167,20 +146,20 @@ function add_step_edit(base) {
                     let max_counter = base.children[2].children[1].children[1].children[1]
                     max_counter.innerText = Number(max_counter.innerText) + 1
                 }
-            } else change_step(edit_steps.length - 1, base, input)
+            } else change_step(edit_steps.length - 1, input)
         })
 
         for (let i = 0; i < edit_steps.length - 1; i++) {
             edit_steps[i].addEventListener("blur", () => {
                 let input = document.getElementsByClassName("editTextStep")[i].value
-                change_step(i, base, input)
+                change_step(i, input)
             })
         }
         add_step_edit(base)
     })
 }
 
-function change_step(index, base, value) {
+function change_step(index, value) {
     if (value !== "") {
         base.children[2].children[2].children[index].children[1].innerText = value
         window.goalsAPI.changeStep({input: value, goal_id: Number(base.children[0].innerText), step_id: index})
@@ -203,23 +182,110 @@ function change_step(index, base, value) {
     }
 }
 
+export function change_category(new_category){
+    if (base.getElementsByClassName("stepsShow")[0]){
+        base.getElementsByClassName("stepsShow")[0].style.backgroundColor = categories[new_category][0]
+    }
+    document.getElementsByClassName("todoCheck")[goal_id].style.backgroundColor = categories[new_category][0]
+    window.goalsAPI.changeCategory({goal_id: Number(base.children[0].innerText), new_category: new_category})
+}
 document.getElementById("main").addEventListener('click', () => close_edit())
 
-export function close_edit() {
+
+function change_difficulty(){
+    document.getElementById("editDiff").addEventListener('click',  () =>{
+        let difficulty = document.getElementById("editDiff").value
+        let url = `images/goals/rank${difficulty}.svg`
+        document.getElementsByClassName("todoCheck")[goal_id].style.backgroundImage = `url("${url}")`
+        window.goalsAPI.changeDifficulty({goal_id: Number(base.children[0].innerText), difficulty: difficulty})
+    })
+}
+
+function change_importance(){
+    let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
+    document.getElementById("editImportance").addEventListener('click',  () =>{
+        let importance = document.getElementById("editImportance").value
+        document.getElementsByClassName("dot")[goal_id].style.borderColor = check_border[importance]
+        window.goalsAPI.changeImportance({goal_id: Number(base.children[0].innerText), importance: importance})
+    })
+}
+
+export function close_edit() { //weak point
     if (goal_pressed === true) {
         goal_pressed = false
         document.getElementById("rightbar").innerHTML = saved_sidebar
         if (!current_sidebar) enchance_history()
-        else {
-            enchance_ideas()
-            document.getElementById("addIdeas").addEventListener('click', () => new_idea())
-            $("#entryIdeas").on('keyup', function (e) {
-                if (e.key === 'Enter' || e.keyCode === 13) new_idea()
-            });
-        }
+        else enchance_ideas()
     } else goal_pressed = false
+
+
 }
 
 export function goal_pressed_false(){
     goal_pressed = false
+}
+
+function getIdByColor(dict, color) {
+    for (let id in dict) {
+        if (dict[id].includes(color)) {
+            return id;
+        }
+    }
+    return null;
+}
+
+
+function todo_html (){
+    let main_goal = base.children[2].children[0].innerText
+    let steps_html = get_steps_html()
+    let check_state = document.getElementsByClassName("check_task")[goal_id].checked === true ? "checked" : "";
+    let category_id = getIdByColor(categories, document.getElementsByClassName("todoCheck")[goal_id].style.backgroundColor)
+    let difficulty = document.getElementsByClassName("todoCheck")[goal_id].style.backgroundImage[22]//weak point
+
+    let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
+    let importance = check_border.indexOf(document.getElementsByClassName("dot")[goal_id].style.borderColor)
+
+    return `<div id="closeEdit">⨉</div>
+        <div id="todoEdit">
+            <div id="editMain">
+                <input type="checkbox" id="editCheck" ${check_state}>
+                <input type="text" id="editText" value="${main_goal}" spellcheck="false">
+            </div>
+            <div id="editSteps">
+                ${steps_html}
+                <div id="editNewStep">
+                    <span>+</span>New Step
+                </div>
+            </div>
+        </div>
+        <div id="editOptions">
+            <div id="optionsNames">
+                <div>Category</div>
+                <div>Difficulty</div>
+                <div>Importance</div>
+            </div>
+            <div id="optionsConfig">
+                <div id="selectCategory2" class="selectCategory" style="background: ${categories[category_id][0]}">${categories[category_id][1]}</div>
+                <input type="range" class="r_todo" id="editDiff" min="0" max="4" value="${difficulty}">
+                <input type="range" class="r_todo" id="editImportance" min="0" max="4" value="${importance}">
+                <div class="categoryPicker" id="categoryPicker2">
+                    <div class="category">
+                        <span class="categoryButton"></span>
+                        <span class="categoryName">None</span>
+                    </div>
+                    <div class="category">
+                        <span class="categoryButton" style="background: #32174D"></span>
+                        <span class="categoryName">Work</span>
+                    </div>
+                    <div class="category">
+                        <span class="categoryButton" style="background: #002244"></span>
+                        <span class="categoryName">School</span>
+                    </div>
+                    <div class="category">
+                        <span class="categoryButton" style="background: #023020"></span>
+                        <span class="categoryName">House</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
 }
