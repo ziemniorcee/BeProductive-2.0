@@ -4,6 +4,7 @@
 const {contextBridge, ipcRenderer} = require('electron')
 
 contextBridge.exposeInMainWorld('goalsAPI', {
+    test: (params) => ipcRenderer.send('test', params),
     askGoals: (params) => ipcRenderer.send('ask-goals',params),
     getGoals: (func) => ipcRenderer.on('get-goals', (event, goals, steps) => func(goals, steps)),
     newGoal: (params) => ipcRenderer.send('new-goal',params),

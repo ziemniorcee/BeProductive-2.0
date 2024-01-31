@@ -1,5 +1,5 @@
 import {sidebar_state, show_hide_sidebar, current_sidebar, enchance_ideas, enchance_history} from "./sidebar.mjs";
-import {categories, change_check, select_category} from "./render.mjs";
+import {categories, change_check, select_category, show_steps} from "./render.mjs";
 
 export let saved_sidebar = ""
 export let goal_pressed = false

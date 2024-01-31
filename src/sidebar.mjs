@@ -1,4 +1,4 @@
-import {build_goal, show_steps, change_check, current_id, categories} from "./render.mjs";
+import {build_goal} from "./render.mjs";
 import {l_date} from './date.js'
 import {goal_pressed, goal_pressed_false, saved_sidebar} from "./edit.mjs";
 

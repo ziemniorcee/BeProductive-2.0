@@ -1,6 +1,8 @@
 import {l_date} from './date.js'
-import {close_edit, change_category, goal_pressed, saved_sidebar} from "./edit.mjs";
-import {current_sidebar, enchance_history, enchance_ideas} from "./sidebar.mjs";
+
+import {close_edit, change_category} from "./edit.mjs";
+
+window.goalsAPI.test({input: "XPP"})
 
 export let categories = {
     1: ["rgb(59, 21, 31)", "None"],
@@ -15,7 +17,6 @@ export let current_id = 0
 let r_pressed = false
 let selected_div = null
 let press_state = 0
-let max_pos = 0;
 
 let finished_count = 0
 
@@ -88,7 +89,7 @@ window.sidebarAPI.removingIdea(() => {
 
 
 
-$(document).on('click', '#inputTodo', function(event){// weak point
+$(document).on('click', '#inputTodo', function(){// weak point
     document.getElementById("entry2").style.height = "250px"
     document.getElementById("entry2").style.visibility = "visible"
     // document.getElementById("newSteps").style.overflowY = "scroll"
@@ -97,7 +98,7 @@ $(document).on('click', '#inputTodo', function(event){// weak point
 document.getElementById("main").addEventListener('click', (event) => close_input(event))
 
 
-function close_input(event){ // weak point
+function close_input(){ // weak point
      document.getElementById("entry2").style.height = "0"
      document.getElementById("entry2").style.visibility = "hidden"
      // document.getElementById("newSteps").style.overflowY = "hidden"
@@ -147,7 +148,7 @@ export function select_category(option = "") {
         if (show === true) {
             let array = category_display.getElementsByClassName("category")
             for (let i = 0; i < array.length; i++) {
-                array[i].addEventListener('click', (event) => {
+                array[i].addEventListener('click', () => {
                     category_button.innerText = category_display.getElementsByClassName("categoryName")[i].innerHTML;
                     category_button.style.background = categories[i + 1][0];
                     new_category = i + 1
@@ -179,7 +180,7 @@ $("#entry1").on('keyup', function (e) {
 });
 
 
-export function build_goal(goal_text, steps = [], category=1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] = "") {
+export function build_goal(goal_text, steps = [], category=1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] ) {
     let category_color = categories[category][0]
     let check_state = ""
     let todo_area = "todosArea"
@@ -199,7 +200,7 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
         if (step_checks.length !== 0) checks_counter = step_checks.reduce((a, b) => a + b)
         steps_HTML =
             `<div class='stepsShow' style="background: ${category_color}">
-                <img src='images/goals/down.png'>
+                <img src='images/goals/down.png' alt="">
                 <span class="check_counter">
                     <span class="counter">${checks_counter}</span>/<span class="maxCounter">${steps.length}</span>
                 </span>
@@ -239,11 +240,6 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
         steps_show[i].addEventListener('click', (event) => show_steps(event))
     }
 }
-
-
-
-
-
 
 
 
