@@ -1,39 +1,21 @@
 import {l_date} from './date.js'
-
+import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
 
-window.goalsAPI.test({input: "XPP"})
 
-export let categories = {
-    1: ["rgb(59, 21, 31)", "None"],
-    2: ["rgb(50, 23, 77)", "Work"],
-    3: ["rgb(0, 34, 68)", "School"],
-    4: ["rgb(2, 48, 32)", "House"]
-}
-// Try to get color of selected goal and set up category button in edit
-// Need to get category name
-export let current_id = 0
+window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("date").innerHTML = l_date.display
+    select_category()
+});
 
-let r_pressed = false
-let selected_div = null
-let press_state = 0
-
-let finished_count = 0
-
-let new_category = 1
-
-select_category()
 
 window.goalsAPI.askGoals({date: l_date.sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
-    current_id = 0
-    finished_count = 0
-    new_category = 1
-
     for (let i = 0; i < goals.length; i++) {
         let goal_steps = []
         let steps_checks = []
+
         for (let j = 0; j < steps.length; j++) {
             if (goals[i].id === steps[j].goal_id) {
                 goal_steps.push(steps[j].step_text)
@@ -42,6 +24,8 @@ window.goalsAPI.getGoals((goals, steps) => {
         }
         build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
     }
+    let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
+
     if (finished_count) {
         document.getElementById("buttonFinished").style.display = "block"
         document.getElementById("finishedCount").innerHTML = finished_count
@@ -51,72 +35,40 @@ window.goalsAPI.getGoals((goals, steps) => {
 })
 
 
-window.goalsAPI.removingGoal(() => {
-    if (press_state === 0) {
-        let id = Number(document.getElementsByClassName("goal_id")[$('.todo').index(selected_div)].innerHTML)
-        window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
-        if (selected_div.parentNode === document.getElementById("todosFinished")) {
-            finished_count--
-            if (finished_count) document.getElementById("buttonFinished").style.display = "block"
-            else document.getElementById("buttonFinished").style.display = "none"
-            document.getElementById("finishedCount").innerHTML = finished_count
-        }
-        selected_div.remove()
-        let goals = document.getElementsByClassName("goal_id")
-        for (let i = 0; i < goals.length; i++) {
-            if (goals[i].innerHTML > id) goals[i].innerHTML = Number(goals[i].innerHTML) - 1
-
-        }
-        current_id--
-        close_edit()
-    }
-})
-
-
-window.sidebarAPI.removingHistory(() => {
-    if (press_state === 1) {
-        window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
-        selected_div.remove()
-    }
-})
-
-window.sidebarAPI.removingIdea(() => {
-    if (press_state === 2) {
-        window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
-        selected_div.remove()
-    }
-})
-
-
-
-$(document).on('click', '#inputTodo', function(){// weak point
+$(document).on('click', '#inputTodo', function () {// weak point
     document.getElementById("entry2").style.height = "250px"
     document.getElementById("entry2").style.visibility = "visible"
-    // document.getElementById("newSteps").style.overflowY = "scroll"
-
 })
-document.getElementById("main").addEventListener('click', (event) => close_input(event))
+
+document.getElementById("main").addEventListener('click', () => {
+    document.getElementById("entry2").style.height = "0"
+    document.getElementById("entry2").style.visibility = "hidden"
+})
 
 
-function close_input(){ // weak point
-     document.getElementById("entry2").style.height = "0"
-     document.getElementById("entry2").style.visibility = "hidden"
-     // document.getElementById("newSteps").style.overflowY = "hidden"
-}
+document.getElementById("todoAdd").addEventListener('click', () => new_goal());
+
+$("#entry1").on('keyup', function (e) {
+    if (e.key === 'Enter' || e.keyCode === 13) new_goal()
+});
 
 function new_goal() {
     let goal_text = document.getElementById('e_todo').value
-    let importance = document.getElementById("range2").value
-    let difficulty = document.getElementById("range1").value
 
     if (goal_text !== "") {
+        let importance = document.getElementById("range2").value
+        let difficulty = document.getElementById("range1").value
+        let new_category = getIdByColor(categories, document.getElementById("selectCategory").style.backgroundColor)
         let steps = []
+
         let steps_elements = document.getElementsByClassName("stepEntry")
         for (let i = 0; i < steps_elements.length; i++) {
             let step_value = steps_elements[i].value
             if (step_value !== "") steps.push(step_value)
         }
-        if (steps.length !== 0){
+
+        document.getElementById('e_todo').value = ""
+        if (steps.length !== 0) {
             document.getElementById("newSteps").outerHTML = `<div id="newSteps" style="overflow-y: hidden;">
                 <div class="stepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
         }
@@ -129,11 +81,8 @@ function new_goal() {
             difficulty: difficulty,
             importance: importance,
         })
-        document.getElementById('e_todo').value = ""
     }
 }
-
-document.getElementById("todoAdd").addEventListener('click', () => new_goal());
 
 
 export function select_category(option = "") {
@@ -151,8 +100,7 @@ export function select_category(option = "") {
                 array[i].addEventListener('click', () => {
                     category_button.innerText = category_display.getElementsByClassName("categoryName")[i].innerHTML;
                     category_button.style.background = categories[i + 1][0];
-                    new_category = i + 1
-                    if (option !== "") change_category(new_category)
+                    if (option !== "") change_category()
                 })
             }
         }
@@ -175,21 +123,18 @@ export function select_category(option = "") {
     }
 })();
 
-$("#entry1").on('keyup', function (e) {
-    if (e.key === 'Enter' || e.keyCode === 13) new_goal()
-});
 
-
-export function build_goal(goal_text, steps = [], category=1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = [] ) {
+export function build_goal(goal_text, steps = [], category = 1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = []) {
     let category_color = categories[category][0]
+
     let check_state = ""
     let todo_area = "todosArea"
     let check_bg = ""
     let check_border = ["#0075FF", "#24FF00", "#FFC90E", "#FF5C00", "#FF0000"]
+
     if (goal_checked) {
         check_state = "checked"
         todo_area = "todosFinished"
-        finished_count++
         check_bg = "url('images/goals/check.png')"
     }
     let steps_HTML = ""
@@ -219,6 +164,8 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
         steps_HTML += "</div>"
     }
 
+    let current_id = document.getElementsByClassName("todo").length
+
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
@@ -229,7 +176,6 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
             </div>
             <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
-    current_id++
 
     let steps_show = document.getElementById(todo_area).getElementsByClassName("stepsShow")
 
@@ -240,7 +186,6 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
         steps_show[i].addEventListener('click', (event) => show_steps(event))
     }
 }
-
 
 
 (function () {
@@ -263,13 +208,10 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
 
         entry.change(function () {
             if (entry.index(this) === input_count) {
-
                 if (event.target.value === "") {
                 } else {
-
                     input_count += 1
                     new_step()
-                    console.log(entry)
                     document.getElementsByClassName('stepEntry')[input_count].focus()
                 }
             }
@@ -277,91 +219,70 @@ export function build_goal(goal_text, steps = [], category=1, importance = 2, di
     }
 })();
 
-window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("date").innerHTML = l_date.display
-    const goals = document.getElementById('todosArea');
-    const finished = document.getElementById('todosFinished');
-    const history = document.getElementById("days")
-    goals.addEventListener('contextmenu', function handleClick(event) {
-        remove_goal(event)
-    })
-    finished.addEventListener('contextmenu', function handleClick(event) {
-        remove_goal(event)
-
-    })
-
-
-    if (history) {
-        history.addEventListener('contextmenu', function handleClick(event) {
-            if (document.getElementById("ideas") === null) {
-                press_state = 1
-                if (event.target.classList.contains("sidebarTask")) {
-                    if (event.target.parentNode.children.length === 1) selected_div = event.target.parentNode.parentNode
-                    else selected_div = event.target
-                    r_pressed = true
-                }
-            }
-        })
-    }
-});
-
-function remove_goal(event) {
-    press_state = 0
-    if (event.target.classList.contains("todo")) {
-        selected_div = event.target
-        r_pressed = true
-    }
-    if (event.target.classList.contains("task")) {
-        selected_div = event.target.parentNode.parentNode
-        r_pressed = true
-    }
-}
 
 (function () {
-    let show = true
-    let styles = ["none", "block"]
-    let images = ["images/goals/up.png", "images/goals/down.png"]
+    let selected_div = null
+    let is_r_pressed = false
+    let r_press_state = 0
 
-    document.getElementById("buttonFinished").addEventListener('click', () => {
-        show = !show
-        document.getElementById("todosFinished").style.display = styles[Number(show)]
-        document.getElementById("finishedImg").src = images[Number(show)]
+    $(document).on('contextmenu', '.todo', function (event) {
+        r_press_state = 0
+        selected_div = event.target
+        is_r_pressed = true
     })
-})();
 
-document.getElementById("img_second").addEventListener('click', () => {
-    setTimeout(function () {
-        const history = document.getElementById("days")
-        const ideas = document.getElementById("ideas")
-        if (history && !ideas) {
-            history.addEventListener('contextmenu', function handleClick(event) {
-                press_state = 1
-                if (event.target.classList.contains("task_history")) {
-                    selected_div = event.target
-                    r_pressed = true
-                }
-            })
+    $(document).on('contextmenu', '.sidebarTask', function (event) {
+        selected_div = event.target
+        is_r_pressed = true
+        if ($(this).parents('.tasks_history').length) r_press_state = 1
+        else r_press_state = 2
+    })
+
+    window.goalsAPI.removingGoal(() => {
+        if (r_press_state === 0) {
+            let id = selected_div.getElementsByClassName("goal_id")[0].innerText
+            window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
+
+            if (selected_div.getElementsByClassName('check_task')[0].checked) {
+                selected_div.remove()
+                let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
+                if (!finished_count) document.getElementById("buttonFinished").style.display = "none"
+                document.getElementById("finishedCount").innerHTML = finished_count
+            }
+
+            let goals = document.getElementsByClassName("goal_id")
+            for (let i = 0; i < goals.length; i++) {
+                if (goals[i].innerHTML > id) goals[i].innerText = goals[i].innerText - 1
+            }
+            close_edit()
         }
+    })
 
-        if (ideas) {
-            ideas.addEventListener('contextmenu', function handleClick(event) {
-                press_state = 2
-                if (event.target.classList.contains("sidebarTask")) {
-                    selected_div = event.target
-                    r_pressed = true
-                }
-            })
+    window.sidebarAPI.removingHistory(() => {
+        if (r_press_state === 1) {
+            window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
+            if (selected_div.parentNode.children.length === 1) {
+                selected_div = selected_div.parentNode.parentNode
+            }
+            selected_div.remove()
         }
-    }, 1)
-})
+    })
 
-window.oncontextmenu = function () {
-    try {
-        return r_pressed;
-    } finally {
-        r_pressed = false
+    window.sidebarAPI.removingIdea(() => {
+        if (r_press_state === 2) {
+            window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
+            selected_div.remove()
+        }
+    })
+
+    window.oncontextmenu = function () {
+        try {
+            return is_r_pressed;
+        } finally {
+            is_r_pressed = false
+        }
     }
-}
+})();
 
 
 $(document).on('click', '.check_task', function () {
@@ -402,8 +323,7 @@ export function change_check(id) {
     }
     window.goalsAPI.rowsChange({after: new_tasks})
 
-    if (state) finished_count++
-    else finished_count--
+    let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
 
     if (finished_count) document.getElementById("buttonFinished").style.display = "block"
     else document.getElementById("buttonFinished").style.display = "none"
@@ -411,51 +331,51 @@ export function change_check(id) {
     document.getElementById("finishedCount").innerHTML = finished_count
 }
 
+
 $(document).on('click', '.stepCheck', function () {
+    let step_id_rel = $(this).closest('.step').index()
+    let goal_id = $(this).closest('.todo').find('.goal_id').text()
+
     let step_id_unrel = $('.stepCheck').index(this)
-
-    let step_id_rel = 0
-    let goal_id = Number(this.parentNode.parentNode.parentNode.parentNode.children[0].innerHTML)
-
-    for (let i = 0; i < this.parentNode.parentNode.children.length; i++) {
-        if (this.parentNode.parentNode.children[i] === this.parentNode) {
-            step_id_rel = i
-            break
-        }
-    }
-
-    let state = Number(document.getElementsByClassName("stepCheck")[step_id_unrel].checked)
-    let counter_html = this.parentNode.parentNode.parentNode.children[1].children[1].children[0]
-
-    if (state) {
+    let counter_html = $(this).closest(".todo").find('.counter').get(0)
+    if (this.checked) {
         document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
             "<input type='checkbox' checked class='stepCheck'>"
         counter_html.innerText = Number(counter_html.innerText) + 1
-
     } else {
         document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
             "<input type='checkbox' class='stepCheck'>"
         counter_html.innerText = Number(counter_html.innerText) - 1
     }
 
-    window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: state})
+    window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: Number(this.checked)})
 });
+
+
+(function () {
+    let show = true
+    let styles = ["none", "block"]
+    let images = ["images/goals/up.png", "images/goals/down.png"]
+
+    document.getElementById("buttonFinished").addEventListener('click', () => {
+        show = !show
+        document.getElementById("todosFinished").style.display = styles[Number(show)]
+        document.getElementById("finishedImg").src = images[Number(show)]
+    })
+})();
 
 
 export function show_steps(event1) {
     if (event1.target.parentNode.children[2].style.display === "block") {
         event1.target.parentNode.children[2].style.display = 'none'
-        event1.target.parentNode.children[1].children[0].src = 'images/goals/up.png'
+        event1.target.children[0].src = 'images/goals/up.png'
     } else {
         event1.target.parentNode.children[2].style.display = 'block'
-        event1.target.parentNode.children[1].children[0].src = 'images/goals/down.png'
+        event1.target.children[0].src = 'images/goals/down.png'
     }
 }
+
 
 document.getElementById("laurels").addEventListener('click', () => {
     window.appAPI.changeWindow()
 })
-
-
-
-

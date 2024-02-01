@@ -442,6 +442,10 @@ body {
     border: 1px solid #FFC90E;
 }
 
+#selectCategory{
+    background-color: #3B151F
+}
+
 .categoryPicker{
     width: 180px;
     height: 130px;
@@ -605,6 +609,7 @@ body {
 .sidebarTask div {
     margin-bottom: auto;
     margin-top: auto;
+    pointer-events: none;
 }
 
 .historyCheck {
@@ -682,6 +687,7 @@ body {
     font-size: 20px;
     top: 10px;
     left: 10px;
+    pointer-events: none;
 }
 
 #inputIdeas {

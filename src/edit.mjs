@@ -1,6 +1,6 @@
 import {sidebar_state, show_hide_sidebar, current_sidebar, enchance_ideas, enchance_history} from "./sidebar.mjs";
-import {categories, change_check, select_category, show_steps} from "./render.mjs";
-
+import { change_check, select_category, show_steps} from "./render.mjs";
+import {categories, getIdByColor} from "./data.mjs";
 export let saved_sidebar = ""
 export let goal_pressed = false
 
@@ -182,7 +182,8 @@ function change_step(index, value) {
     }
 }
 
-export function change_category(new_category){
+export function change_category(){
+    let new_category = getIdByColor(categories, document.getElementById("selectCategory2").style.backgroundColor)
     if (base.getElementsByClassName("stepsShow")[0]){
         base.getElementsByClassName("stepsShow")[0].style.backgroundColor = categories[new_category][0]
     }
@@ -225,14 +226,7 @@ export function goal_pressed_false(){
     goal_pressed = false
 }
 
-function getIdByColor(dict, color) {
-    for (let id in dict) {
-        if (dict[id].includes(color)) {
-            return id;
-        }
-    }
-    return null;
-}
+
 
 
 function todo_html (){
