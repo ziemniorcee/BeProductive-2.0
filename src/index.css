@@ -638,7 +638,7 @@ body {
     margin-top: 20px;
 }
 
-.history_add {
+.history_add, .ideasAdd {
     padding-left: 5px;
     display: block;
     margin-left: auto;
@@ -646,6 +646,8 @@ body {
     cursor: pointer;
     font-size: 40px;
 }
+
+
 
 #days::-webkit-scrollbar {
     width: 0.2em;

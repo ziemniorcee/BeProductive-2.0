@@ -46,40 +46,40 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
 };
 
-const createFloatbar = () => {
-
-    floatMenuWindow = new BrowserWindow({
-        show: false,
-        width: 100,
-        height: 100,
-        webPreferences: {
-            preload: path.join(__dirname, './preload.js'),
-            nodeIntegration: true,
-            contextIsolation: true,
-        },
-        titleBarStyle: 'hidden'
-    })
-    let menu_pos = floatMenuWindow.getPosition()
-// floatWindow.webContents.openDevTools();
-
-
-    floatMenuWindow.loadFile(path.join(__dirname, 'floatbar.html'));
-    floatContentWindow = new BrowserWindow({
-        show: false,
-        width: 400,
-        height: 400,
-        webPreferences: {
-            preload: path.join(__dirname, './preload.js'),
-            nodeIntegration: true,
-            contextIsolation: true,
-        },
-        titleBarStyle: 'hidden'
-    })
-    floatContentWindow.setPosition(menu_pos[0] - 400, menu_pos[1])
-    // floatWindow.setAlwaysOnTop(true);
-
-
-}
+// const createFloatbar = () => {
+//
+//     floatMenuWindow = new BrowserWindow({
+//         show: false,
+//         width: 100,
+//         height: 100,
+//         webPreferences: {
+//             preload: path.join(__dirname, './preload.js'),
+//             nodeIntegration: true,
+//             contextIsolation: true,
+//         },
+//         titleBarStyle: 'hidden'
+//     })
+//     let menu_pos = floatMenuWindow.getPosition()
+// // floatWindow.webContents.openDevTools();
+//
+//
+//     floatMenuWindow.loadFile(path.join(__dirname, 'floatbar.html'));
+//     floatContentWindow = new BrowserWindow({
+//         show: false,
+//         width: 400,
+//         height: 400,
+//         webPreferences: {
+//             preload: path.join(__dirname, './preload.js'),
+//             nodeIntegration: true,
+//             contextIsolation: true,
+//         },
+//         titleBarStyle: 'hidden'
+//     })
+//     floatContentWindow.setPosition(menu_pos[0] - 400, menu_pos[1])
+//     // floatWindow.setAlwaysOnTop(true);
+//
+//
+// }
 
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
@@ -89,8 +89,6 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
     createWindow()
-    createFloatbar()
-
     const ctxMenu = new Menu()
     ctxMenu.append(new MenuItem({
         label: 'Remove',
@@ -112,6 +110,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+
 });
 
 app.on('activate', () => {

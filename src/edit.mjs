@@ -1,4 +1,4 @@
-import {sidebar_state, show_hide_sidebar, current_sidebar, enchance_ideas, enchance_history} from "./sidebar.mjs";
+import { show_hide_sidebar } from "./sidebar.mjs";
 import { change_check, select_category, show_steps} from "./render.mjs";
 import {categories, getIdByColor} from "./data.mjs";
 export let saved_sidebar = ""
@@ -12,7 +12,7 @@ $(document).on('click', '.todo', function (event) { //weak point
     saved_sidebar = document.getElementById("rightbar").innerHTML
     goal_id = $('.todo').index(this)
 
-    if (sidebar_state === false) show_hide_sidebar()
+    if ($('#rightbar').css('display') === 'none') show_hide_sidebar()
     if (event.target.children.length !== 0 && event.target.children.length !== 2) {//weak point
         base = event.target
         if (event.target.children.length === 1) base = event.target.parentNode
@@ -213,10 +213,10 @@ function change_importance(){
 
 export function close_edit() { //weak point
     if (goal_pressed === true) {
+        console.log("CHUJ")
         goal_pressed = false
+
         document.getElementById("rightbar").innerHTML = saved_sidebar
-        if (!current_sidebar) enchance_history()
-        else enchance_ideas()
     } else goal_pressed = false
 
 
@@ -225,8 +225,6 @@ export function close_edit() { //weak point
 export function goal_pressed_false(){
     goal_pressed = false
 }
-
-
 
 
 function todo_html (){

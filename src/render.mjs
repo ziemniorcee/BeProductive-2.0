@@ -2,7 +2,6 @@ import {l_date} from './date.js'
 import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
 
-
 window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("date").innerHTML = l_date.display
     select_category()
@@ -244,12 +243,11 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
             window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
 
             if (selected_div.getElementsByClassName('check_task')[0].checked) {
-                selected_div.remove()
                 let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
                 if (!finished_count) document.getElementById("buttonFinished").style.display = "none"
-                document.getElementById("finishedCount").innerHTML = finished_count
+                document.getElementById("finishedCount").innerHTML = finished_count - 1
             }
-
+            selected_div.remove()
             let goals = document.getElementsByClassName("goal_id")
             for (let i = 0; i < goals.length; i++) {
                 if (goals[i].innerHTML > id) goals[i].innerText = goals[i].innerText - 1
