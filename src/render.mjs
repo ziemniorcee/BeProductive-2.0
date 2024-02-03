@@ -3,7 +3,7 @@ import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
 
 window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("date").innerHTML = l_date.display
+    $('#date').html(l_date.display)
     select_category()
 });
 
@@ -23,53 +23,53 @@ window.goalsAPI.getGoals((goals, steps) => {
         }
         build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
     }
-    let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
 
-    if (finished_count) {
-        document.getElementById("buttonFinished").style.display = "block"
-        document.getElementById("finishedCount").innerHTML = finished_count
-    } else {
-        document.getElementById("buttonFinished").style.display = "none"
-    }
+    let finished_count = $('#todosFinished .todo').length
+    $('#buttonFinished').css('display', finished_count ? "block" : "none")
+    if (finished_count) $("#finishedCount").html(finished_count);
 })
 
 
-$(document).on('click', '#inputTodo', function () {// weak point
-    document.getElementById("entry2").style.height = "250px"
-    document.getElementById("entry2").style.visibility = "visible"
+$(document).on('click', '#inputTodo', (event) => {
+    event.stopPropagation()
+    $("#entry2").css({"height": "250px", "visibility": "visible"});
 })
 
-document.getElementById("main").addEventListener('click', () => {
-    document.getElementById("entry2").style.height = "0"
-    document.getElementById("entry2").style.visibility = "hidden"
+$(document).on('click', '#main', () => {
+    $("#entry2").css({"height": "0", "visibility": "hidden"});
 })
 
 
-document.getElementById("todoAdd").addEventListener('click', () => new_goal());
+$(document).on('click', '#todoAdd', () => new_goal())
 
-$("#entry1").on('keyup', function (e) {
+$(document).on('keyup', '#entry1', (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
-});
+})
+
 
 function new_goal() {
-    let goal_text = document.getElementById('e_todo').value
+    let e_todo = $('#e_todo')
+    let goal_text = e_todo.val()
 
     if (goal_text !== "") {
-        let importance = document.getElementById("range2").value
-        let difficulty = document.getElementById("range1").value
-        let new_category = getIdByColor(categories, document.getElementById("selectCategory").style.backgroundColor)
+        let difficulty = $('#range1').val()
+        let importance = $('#range2').val()
+
+        let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
         let steps = []
 
-        let steps_elements = document.getElementsByClassName("stepEntry")
+        let steps_elements = $('.stepEntry')
         for (let i = 0; i < steps_elements.length; i++) {
             let step_value = steps_elements[i].value
             if (step_value !== "") steps.push(step_value)
         }
 
-        document.getElementById('e_todo').value = ""
+        e_todo.val('')
         if (steps.length !== 0) {
-            document.getElementById("newSteps").outerHTML = `<div id="newSteps" style="overflow-y: hidden;">
+            $('#newSteps').replaceWith(
+                `<div id="newSteps" style="overflow-y: hidden;">
                 <div class="stepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
+            )
         }
 
         build_goal(goal_text, steps, new_category, importance, difficulty)
@@ -87,39 +87,39 @@ function new_goal() {
 export function select_category(option = "") {
     let displays = ["none", "block"]
     let show = false
-    let category_button = document.getElementById(`selectCategory${option}`)
-    let category_display = document.getElementById(`categoryPicker${option}`)
+    let category_button = $(`#selectCategory${option}`)
+    let category_display = $(`#categoryPicker${option}`)
 
-    category_button.addEventListener('click', () => {
-        show = category_display.style.display === "" || category_display.style.display === "none";
-        category_display.style.display = displays[Number(show)]
+    category_button.on('click', () => {
+        show = category_display.css('display') === "" || category_display.css('display') === "none";
+        category_display.css('display', displays[Number(show)])
         if (show === true) {
-            let array = category_display.getElementsByClassName("category")
-            for (let i = 0; i < array.length; i++) {
-                array[i].addEventListener('click', () => {
-                    category_button.innerText = category_display.getElementsByClassName("categoryName")[i].innerHTML;
-                    category_button.style.background = categories[i + 1][0];
-                    if (option !== "") change_category()
-                })
-            }
+            $(document).on('click', '.category', function () {
+                let i = category_display.find('.category').index(this)
+                category_button.text($('.categoryName').eq(i).text())
+                category_button.css('background', categories[i + 1][0])
+                if (option !== "") change_category()
+            })
         }
     })
 }
 
 (function () {
     let backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
-    document.getElementById("range1").oninput = function () {
-        let x = document.getElementById("range1").value
-        document.getElementById("range1").style.background = backgrounds[x]
-    }
+
+    $(document).on('input', '#range1', function () {
+        let x = this.value
+        $(this).css('background', backgrounds[x])
+    })
 })();
 
 (function () {
     let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
-    document.getElementById("range2").oninput = function () {
-        let x = document.getElementById("range2").value
-        document.getElementById("range2").style.background = backgrounds[x]
-    }
+
+    $(document).on('input', '#range2', function () {
+        let x = this.value
+        $(this).css('background', backgrounds[x])
+    })
 })();
 
 
@@ -144,7 +144,7 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
         if (step_checks.length !== 0) checks_counter = step_checks.reduce((a, b) => a + b)
         steps_HTML =
             `<div class='stepsShow' style="background: ${category_color}">
-                <img src='images/goals/down.png' alt="">
+                <img class='showImg' src='images/goals/down.png' alt="">
                 <span class="check_counter">
                     <span class="counter">${checks_counter}</span>/<span class="maxCounter">${steps.length}</span>
                 </span>
@@ -163,12 +163,11 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
         steps_HTML += "</div>"
     }
 
-    let current_id = document.getElementsByClassName("todo").length
 
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
-            <div class="goal_id">${current_id}</div>
+            <div class="goal_id">${$('.todo').length}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="dot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
                 <input type='checkbox' class='check_task' ${check_state}>
@@ -176,43 +175,25 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
             <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
 
-    let steps_show = document.getElementById(todo_area).getElementsByClassName("stepsShow")
-
-    if (steps_HTML !== "") {
-        steps_show[steps_show.length - 1].parentNode.children[2].style.display = "block"
-    }
-    for (let i = 0; i < steps_show.length; i++) {
-        steps_show[i].addEventListener('click', (event) => show_steps(event))
-    }
+    $('.steps:last').css('display', 'block')
 }
 
+$(document).on('click', '.stepsShow', (event) => show_steps(event));
 
 (function () {
     let input_count = 0
     new_step()
 
-
     function new_step() {
-        let array = document.getElementsByClassName('stepEntry')
-        let steps = []
-        for (let i = 0; i < array.length; i++) steps.push(array[i].value)
-
-        document.getElementById("newSteps").innerHTML +=
-            `<div class="stepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`
-
-        array = document.getElementsByClassName('stepEntry')
-        for (let i = 0; i < array.length - 1; i++) array[i].value = steps[i]
+        $('#newSteps').append(`<div class="stepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
 
         let entry = $('.stepEntry')
 
         entry.change(function () {
             if (entry.index(this) === input_count) {
-                if (event.target.value === "") {
-                } else {
-                    input_count += 1
-                    new_step()
-                    document.getElementsByClassName('stepEntry')[input_count].focus()
-                }
+                input_count += 1
+                new_step()
+                document.getElementsByClassName('stepEntry')[input_count].focus()
             }
         })
     }
@@ -239,18 +220,19 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
 
     window.goalsAPI.removingGoal(() => {
         if (r_press_state === 0) {
-            let id = selected_div.getElementsByClassName("goal_id")[0].innerText
+            let id = $(selected_div).find('.goal_id').text()
             window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
 
-            if (selected_div.getElementsByClassName('check_task')[0].checked) {
-                let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
-                if (!finished_count) document.getElementById("buttonFinished").style.display = "none"
-                document.getElementById("finishedCount").innerHTML = finished_count - 1
+            if ($(selected_div).find('.check_task').prop('checked')) {
+                let finished_count = $('#todosFinished .todo').length
+                if (finished_count === 1) $('#buttonFinished').css('display', 'none')
+                $('#finishedCount').html(finished_count - 1)
             }
             selected_div.remove()
-            let goals = document.getElementsByClassName("goal_id")
+
+            let goals = $('.goal_id')
             for (let i = 0; i < goals.length; i++) {
-                if (goals[i].innerHTML > id) goals[i].innerText = goals[i].innerText - 1
+                if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
             }
             close_edit()
         }
@@ -259,8 +241,8 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
     window.sidebarAPI.removingHistory(() => {
         if (r_press_state === 1) {
             window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
-            if (selected_div.parentNode.children.length === 1) {
-                selected_div = selected_div.parentNode.parentNode
+            if ($(selected_div).closest('.tasks_history').children().length === 1) {
+                selected_div = $(selected_div).closest('.day')
             }
             selected_div.remove()
         }
@@ -289,91 +271,69 @@ $(document).on('click', '.check_task', function () {
 });
 
 export function change_check(id) {
-    let areas = ["todosArea", "todosFinished"]
-    let checks = ["", "checked"]
-    let check_bg = ["", "url('images/goals/check.png')"]
+    const check_task = $('.check_task').eq(id)
+    const dot = $('.dot').eq(id)
+    const todo = $('.todo')
+    const goal_id = $('.goal_id')
 
-    let array_id = Number(document.getElementsByClassName("goal_id")[id].innerHTML)
-    let state = Number(document.getElementsByClassName("check_task")[id].checked)
+    let array_id = Number(goal_id.eq(id).html())
+    let state = Number(check_task.prop('checked'))
 
-    document.getElementsByClassName("check_task")[id].outerHTML =
-        `<input type='checkbox' ${checks[state]} class='check_task'>`
-    let category_color = document.getElementsByClassName("dot")[id].style.borderColor
-    document.getElementsByClassName("dot")[id].outerHTML =
-        `<div class="dot" style="background-image: ${check_bg[state]}; border-color:${category_color}">`
+    check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
 
-    let todo = document.getElementsByClassName("todo")[id].outerHTML
-    document.getElementsByClassName("todo")[id].remove()
-    document.getElementById(areas[state]).innerHTML += todo
+    let category_color = $(dot).css('borderColor')
+    $(dot).replaceWith(`<div class="dot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
 
-    let steps_show = document.getElementById(areas[state]).getElementsByClassName("stepsShow")
+    todo.eq(id).remove()
+    $(state ? "#todosFinished" : "#todosArea").append(todo.eq(id).prop("outerHTML"))
 
-    for (let i = 0; i < steps_show.length; i++) {
-        steps_show[i].addEventListener('click', (event) => show_steps(event))
-    }
+    let new_tasks = goal_id.map(function () {
+        return $(this).text();
+    }).get()
 
     window.goalsAPI.changeChecksGoal({id: array_id, state: state})
-
-    let elements = document.getElementsByClassName("goal_id")
-    let new_tasks = []
-    for (let i = 0; i < elements.length; i++) {
-        new_tasks.push(elements[i].textContent)
-    }
     window.goalsAPI.rowsChange({after: new_tasks})
 
-    let finished_count = document.getElementById("todosFinished").getElementsByClassName("todo").length
-
-    if (finished_count) document.getElementById("buttonFinished").style.display = "block"
-    else document.getElementById("buttonFinished").style.display = "none"
-
-    document.getElementById("finishedCount").innerHTML = finished_count
+    let finished_count = $('#todosFinished .todo').length
+    $("#buttonFinished").css('display', finished_count ? "block" : "none");
+    $('#finishedCount').html(finished_count)
 }
 
 
 $(document).on('click', '.stepCheck', function () {
+    const step_check = $('.stepCheck')
     let step_id_rel = $(this).closest('.step').index()
     let goal_id = $(this).closest('.todo').find('.goal_id').text()
 
-    let step_id_unrel = $('.stepCheck').index(this)
+    let step_id_unrel = step_check.index(this)
     let counter_html = $(this).closest(".todo").find('.counter').get(0)
     if (this.checked) {
-        document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
-            "<input type='checkbox' checked class='stepCheck'>"
+        step_check.eq(step_id_unrel).replaceWith("<input type='checkbox' checked class='stepCheck'>")
         counter_html.innerText = Number(counter_html.innerText) + 1
     } else {
-        document.getElementsByClassName("stepCheck")[step_id_unrel].outerHTML =
-            "<input type='checkbox' class='stepCheck'>"
+        step_check.eq(step_id_unrel).replaceWith("<input type='checkbox' class='stepCheck'>")
         counter_html.innerText = Number(counter_html.innerText) - 1
     }
 
     window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: Number(this.checked)})
 });
 
-
-(function () {
-    let show = true
-    let styles = ["none", "block"]
-    let images = ["images/goals/up.png", "images/goals/down.png"]
-
-    document.getElementById("buttonFinished").addEventListener('click', () => {
-        show = !show
-        document.getElementById("todosFinished").style.display = styles[Number(show)]
-        document.getElementById("finishedImg").src = images[Number(show)]
-    })
-})();
+$(document).on('click', '#buttonFinished', () => {
+    const finished_img = $('#finishedImg')
+    let show = finished_img.attr('src') === "images/goals/up.png"
+    $('#todosFinished').css('display', show ? "block" : "none")
+    finished_img.attr('src', show ? "images/goals/down.png" : "images/goals/up.png")
+})
 
 
 export function show_steps(event1) {
-    if (event1.target.parentNode.children[2].style.display === "block") {
-        event1.target.parentNode.children[2].style.display = 'none'
-        event1.target.children[0].src = 'images/goals/up.png'
-    } else {
-        event1.target.parentNode.children[2].style.display = 'block'
-        event1.target.children[0].src = 'images/goals/down.png'
-    }
+    const steps = $(event1.target).closest(".task_text").find('.steps')
+    let show = steps.css("display") === "block"
+    steps.css("display", show ? 'none' : 'block')
+    $(event1.target).find('.showImg').attr('src', show ? 'images/goals/up.png' : 'images/goals/down.png')
 }
 
 
-document.getElementById("laurels").addEventListener('click', () => {
-    window.appAPI.changeWindow()
-})
+// document.getElementById("laurels").addEventListener('click', () => {
+//     window.appAPI.changeWindow()
+// })
