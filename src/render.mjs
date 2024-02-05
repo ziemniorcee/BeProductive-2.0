@@ -4,7 +4,6 @@ import {close_edit, change_category} from "./edit.mjs";
 
 window.addEventListener("DOMContentLoaded", () => {
     $('#date').html(l_date.display)
-    select_category()
 });
 
 
@@ -84,25 +83,25 @@ function new_goal() {
 }
 
 
-export function select_category(option = "") {
-    let displays = ["none", "block"]
-    let show = false
-    let category_button = $(`#selectCategory${option}`)
-    let category_display = $(`#categoryPicker${option}`)
+$(document).on('click', '.selectCategory', function (){
+    if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
+    else $('#categoryPicker2').toggle()
+});
 
-    category_button.on('click', () => {
-        show = category_display.css('display') === "" || category_display.css('display') === "none";
-        category_display.css('display', displays[Number(show)])
-        if (show === true) {
-            $(document).on('click', '.category', function () {
-                let i = category_display.find('.category').index(this)
-                category_button.text($('.categoryName').eq(i).text())
-                category_button.css('background', categories[i + 1][0])
-                if (option !== "") change_category()
-            })
-        }
-    })
-}
+$(document).on('click', '.category', function (){
+    let index = $(this).closest('.categoryPicker').find('.category').index(this) + 1
+    let select_category =  $('#selectCategory')
+
+    if ($(this).closest('.categoryPicker').attr('id') === "categoryPicker2"){
+        select_category = $('#selectCategory2')
+
+        change_category(index)
+    }
+
+    select_category.css('background', categories[index][0])
+    select_category.text(categories[index][1])
+
+});
 
 (function () {
     let backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]

@@ -124,32 +124,32 @@ function todoHandlers(db) {
     ipcMain.on('change-step', (event, params) => {
         db.run(`UPDATE steps
             SET step_text="${params.input}"
-            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
+            WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('remove-step', (event, params) => {
         db.run(`DELETE
             FROM steps
-            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
-        step_ids[goal_ids[params.goal_id]].splice(params.step_id, 1)
+            WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
+        step_ids[goal_ids[params.id]].splice(params.step_id, 1)
     })
 
     ipcMain.on('change-category', (event, params) => {
         db.run(`UPDATE goals
             SET category="${params.new_category}"
-            WHERE id = ${goal_ids[params.goal_id]}`)
+            WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('change-difficulty', (event, params) => {
         db.run(`UPDATE goals
             SET Difficulty="${params.difficulty}"
-            WHERE id = ${goal_ids[params.goal_id]}`)
+            WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('change-importance', (event, params) => {
         db.run(`UPDATE goals
             SET Importance="${params.importance}"
-            WHERE id = ${goal_ids[params.goal_id]}`)
+            WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('ask-history', (event, params) => {

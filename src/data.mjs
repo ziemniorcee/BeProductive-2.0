@@ -5,6 +5,8 @@ export const categories = {
     4: ["rgb(2, 48, 32)", "House"]
 }
 
+export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
+
 export function getIdByColor(dict, color) {
     for (let id in dict) {
         if (dict[id].includes(color)) {
@@ -16,3 +18,4 @@ export function getIdByColor(dict, color) {
 
 export const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
