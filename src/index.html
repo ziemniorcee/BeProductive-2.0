@@ -30,38 +30,46 @@
     </div>
     <div id="main">
         <div id="header">
-            <button id="todayBtn" class="button_date">
-                <span class="button_date_left"><img src="images/goals/today1.png" alt="today" id="todayimg"
-                                                    draggable="false"></span>
-                <span class="button_date_right">Today</span>
+            <button id="todayButton" class="dateButton">
+                <span class="dateButtonImg"><img src="images/goals/today1.png" alt="today" id="todayImg"
+                                                 draggable="false"></span>
+                <span class="dateButtonText">Today</span>
             </button>
-            <button id="tomorrowBtn" class="button_date">
-                <span class="button_date_left"><img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowimg"
-                                                    draggable="false"></span>
-                <span class="button_date_right">Tomorrow</span>
+            <button id="tomorrowButton" class="dateButton">
+                <span class="dateButtonImg"><img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowImg"
+                                                 draggable="false"></span>
+                <span class="dateButtonText">Tomorrow</span>
             </button>
-            <button id="otherDateBtn" class="button_date">
-                <span class="button_date_left"><img src="images/goals/other0.png" alt="another" id="anotherdayimg"
-                                                    draggable="false"></span>
-                <span class="button_date_right">Another day</span>
+            <button id="otherButton" class="dateButton">
+                <span class="dateButtonImg"><img src="images/goals/other0.png" alt="another" id="otherImg"
+                                                 draggable="false"></span>
+                <span class="dateButtonText">Another day</span>
             </button>
 
-            <input type="text" id="datepicker">
+            <input type="text" id="datePicker">
 
             <div id="sidebarType">
-                <img id="img_main" src="images/goals/history.png" alt="main" width="40" height="40">
+                <img id="imgMain" src="images/goals/history.png" alt="main" width="40" height="40">
                 <div class="sidebars">
-                    <img id="img_second" src="images/goals/idea.png" alt="second" width="40" height="40">
+                    <img id="imgSecond" src="images/goals/idea.png" alt="second" width="40" height="40">
                 </div>
             </div>
 
-            <p id="date"></p>
+            <div id="subHeader">
+                <span id="date"></span>
+                <div id="viewContainer">
+                    <span id="viewText">View:</span>
+                    <span class="viewOption" id="viewDay"><img src="images/goals/dayview.png">Day</span>
+                    <span class="viewOption" id="viewWeek"><img src="images/goals/weekview.png">Week</span>
+                    <span class="viewOption" id="viewMonth"><img src="images/goals/monthview.png">Month</span>
+                </div>
+            </div>
         </div>
         <div id="todosAll">
             <div id="todosArea">
 
             </div>
-            <div id="buttonFinished">
+            <div id="finishedButton">
                 <img id="finishedImg" src="images/goals/down.png" alt="up"><span>Finished: </span><span
                     id="finishedCount">0</span>
             </div>
@@ -69,21 +77,21 @@
 
             </div>
         </div>
-        <div id="inputTodo">
-            <div id="entry1">
-                <input id="e_todo" type="text" spellcheck="false" placeholder="Result">
+        <div id="todoInput">
+            <div id="todoEntrySimple">
+                <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
                 <div id="todoAdd">+</div>
             </div>
-            <div id="entry2">
+            <div id="todoEntryComplex">
                 <div id="newSteps">
                 </div>
-                <div id="goal_settings">
-                    <div class="l_todo">Category</div>
+                <div id="todoSettings">
+                    <div class="todoLabel">Category</div>
                     <div id="selectCategory" class="selectCategory">None</div>
-                    <div class="l_todo" id="label1">Difficulty</div>
-                    <input type="range" class="r_todo" id="range1" min="0" max="4">
-                    <div class="l_todo" id="label2">Importance</div>
-                    <input type="range" class="r_todo" id="range2" min="0" max="4">
+                    <div class="todoLabel" id="label1">Difficulty</div>
+                    <input type="range" class="todoRange" id="range1" min="0" max="4">
+                    <div class="todoLabel" id="label2">Importance</div>
+                    <input type="range" class="todoRange" id="range2" min="0" max="4">
 
                     <div class="categoryPicker" id="categoryPicker">
                         <div class="category">
@@ -118,7 +126,6 @@
         <div id="days">
 
         </div>
-
     </div>
 </div>
 

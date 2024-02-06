@@ -27,13 +27,13 @@ function load_history(array, date) {
     let format_day = d.getDate()
     if (format_day < 10) format_day = `0${format_day}`
     let display = weekdays[d.getDay()] + ", " + month_names[d.getMonth()] + " " + format_day + ", " + d.getFullYear();
-    let stringhtml = `<div class='day'><span class='historyDate'>${display}</span><div class='tasks_history'>`
+    let stringhtml = `<div class='day'><span class='historyDate'>${display}</span><div class='historyTasks'>`
 
     for (let i = 0; i < array.length; i++) {
         stringhtml += `
         <div class='sidebarTask'>
             <input type='checkbox' class='historyCheck'>
-            <div><span>${array[i].replace("`@`", "'")}</span></div><span class='history_add'>+</span>
+            <div><span>${array[i].replace("`@`", "'")}</span></div><span class='historyAdd'>+</span>
         </div>`
     }
 
@@ -42,10 +42,10 @@ function load_history(array, date) {
     document.getElementById("days").innerHTML = displays[0]
 }
 
-$(document).on('click', '.history_add', function () {
-    window.sidebarAPI.deleteHistory({id: $('.history_add').index(this)})
+$(document).on('click', '.historyAdd', function () {
+    window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(this)})
 
-    if ($(this).closest('.tasks_history').children().length > 1) $(this).closest('.sidebarTask').remove()
+    if ($(this).closest('.historyTasks').children().length > 1) $(this).closest('.sidebarTask').remove()
     else $(this).closest('.day').remove()
 })
 
@@ -56,13 +56,13 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         step_texts.push(steps[j].step_text)
         step_checks.push(steps[j].step_check)
     }
-    build_goal(parameters[0], step_texts, parameters[1], parameters[2], parameters[3], 0, step_checks)
+    build_goal(parameters[0].replace("`@`", "'"), step_texts, parameters[1], parameters[2], parameters[3], 0, step_checks)
 })
 
 $(document).on('click', '.historyCheck', function () {
     let that = this
     setTimeout(function () {
-        if ($(that).closest('.tasks_history').children().length > 1) $(that).closest('.sidebarTask').remove()
+        if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
         else $(that).closest('.day').remove()
     }, 1000)
     window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(this)})
@@ -75,14 +75,14 @@ window.sidebarAPI.getIdeas((data) => {
     for (let i = 0; i < data.length; i++) {
         ideas_formatted += `
             <div class="sidebarTask">
-                <span class="idea">${data[i].idea}</span><span class="ideasAdd">+</span>
+                <span class="idea">${data[i].idea.replace("`@`", "`")}</span><span class="ideasAdd">+</span>
             </div>`
     }
     displays[1] =
         `<div id='ideas'>${ideas_formatted}</div>
-        <div id='inputIdeas'>
-            <button class='b_add' id='addIdeas'><span>+</span></button>
-            <input class='e_todo' type='text' id='entryIdeas' spellcheck='false'>
+        <div id='ideasInput'>
+            <input class='e_todo' type='text' id='ideasEntry' spellcheck='false'>
+            <div class='b_add' id='ideasAdd'>+</div>
         </div>`
 })
 
@@ -95,14 +95,14 @@ $(document).on('click', '.ideasAdd', function () {
     $('.sidebarTask').eq(id).remove()
 })
 
-$(document).on('click', '#addIdeas', () => new_idea())
+$(document).on('click', '#ideasAdd', () => new_idea())
 
-$(document).on('keyup', '#entryIdeas',  (e)=> {
+$(document).on('keyup', '#ideasEntry',  (e)=> {
     if (e.key === 'Enter' || e.keyCode === 13) new_idea()
 });
 
 function new_idea() {
-    let entry = $('#entryIdeas')
+    let entry = $('#ideasEntry')
     let text = entry.val()
 
     if (text !== "") {
@@ -120,7 +120,7 @@ function new_idea() {
 }
 
 
-$(document).on('click', '#img_main', () => show_hide_sidebar())
+$(document).on('click', '#imgMain', () => show_hide_sidebar())
 
 export function show_hide_sidebar() {
     let sidebar = $('#rightbar')
@@ -130,9 +130,9 @@ export function show_hide_sidebar() {
 }
 
 
-$(document).on('click', '#img_second', () =>{
+$(document).on('click', '#imgSecond', () =>{
     const days = $('#days')
-    const img_main =  $('#img_main')
+    const img_main =  $('#imgMain')
     let current_sidebar = img_main.attr('src') === 'images/goals/idea.png'
 
     if (goal_pressed) {
@@ -144,8 +144,9 @@ $(document).on('click', '#img_second', () =>{
     $('#head_text').html(current_sidebar ? "History" : "Ideas")
     days.css('overflow',current_sidebar ? "scroll" : "hidden")
 
+
     img_main.attr('src', `images/goals/${current_sidebar ? "history" : "idea"}.png`)
-    $('#img_second').attr('src', `images/goals/${current_sidebar ? "idea" : "history"}.png`)
+    $('#imgSecond').attr('src', `images/goals/${current_sidebar ? "idea" : "history"}.png`)
 })
 
 
@@ -161,3 +162,4 @@ function resize(e) {
     let width = document.getElementById('container').offsetWidth
     sidebar.style.flexBasis = `${width - e.x}px`;
 }
+

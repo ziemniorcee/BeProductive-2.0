@@ -94,7 +94,7 @@ body {
     flex-basis: 500px;
 }
 
-.button_date {
+.dateButton {
     width: 200px;
     height: 50px;
     background-color: #3B151F;
@@ -106,33 +106,34 @@ body {
     box-shadow: 0 2px 6px 0 black;
 }
 
-.button_date:active {
+.dateButton:active {
     box-shadow: 0 0 0 0 black;
 }
 
-.button_date_left {
-    float: left;
-    position: relative;
-    left: 5px;
-}
-
-.button_date_right {
-    position: relative;
-    top: 7px;
-}
-
-.button_date img {
+.dateButton img {
     position: relative;
     left: 0;
     width: 40px;
     height: 40px;
 }
 
-#otherDateBtn .button_date_right {
+.dateButtonImg {
+    float: left;
+    position: relative;
     left: 5px;
 }
 
-#datepicker {
+.dateButtonText {
+    position: relative;
+    top: 7px;
+}
+
+
+#otherDateBtn .dateButtonText {
+    left: 5px;
+}
+
+#datePicker {
     left: 565px;
     top: 50px;
     position: absolute;
@@ -171,11 +172,45 @@ body {
     display: block;
 }
 
-#date {
-    width: max-content;
+#subHeader{
+    width: 615px;
     color: white;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#date {
     font-size: 20px;
+    width: max-content;
     border-bottom: solid 3px #3B151F;
+}
+
+#viewContainer{
+    display: inline;
+    position: absolute;
+    right: 0;
+}
+
+#viewText{
+    font-size: 15px;
+    padding-left: 10px;
+}
+.viewOption{
+    font-size: 14px;
+    display: inline-flex;
+    padding: 2px 12px 3px 8px;
+    align-items: center;
+    gap: 10px;
+
+    border-radius: 5px;
+    border: 1px solid black;
+    background: #3B151F;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+#viewDay{
+    border-color:#FFC90E ;
 }
 
 #todosAll {
@@ -215,7 +250,7 @@ body {
     cursor: default;
 }
 
-.goal_id {
+.todoId {
     display: none;
 }
 
@@ -224,7 +259,8 @@ body {
     position: relative;
     background: #3B151F url("images/goals/Frame 8.svg") no-repeat;
 }
-.dot{
+
+.checkDot {
     height: 28px;
     width: 28px;
 
@@ -235,18 +271,10 @@ body {
     position: absolute;
     z-index: 1;
     border: 2px red solid;
-    background: #1E1E1E  no-repeat center;
+    background: #1E1E1E no-repeat center;
 
 }
-#line{
-    background: #FFC90E;
-    width: 2px;
-    bottom:1px;
-    left: 1px;
-    height: 100px;
-    position: absolute;
-    transform: rotate(45deg);
-}
+
 .check_task {
     display: block;
     margin: 0 10px auto;
@@ -259,7 +287,7 @@ body {
     pointer-events: all;
 }
 
-#buttonFinished {
+#finishedButton {
     background-color: #363636;
     color: white;
     width: max-content;
@@ -275,11 +303,11 @@ body {
     cursor: pointer;
 }
 
-#buttonFinished:active {
+#finishedButton:active {
     box-shadow: 0 0 0 0 black;
 }
 
-#buttonFinished img {
+#finishedButton img {
     width: 15px;
     height: 15px;
     margin-right: 10px;
@@ -288,72 +316,35 @@ body {
 }
 
 
-#buttonFinished span {
+#finishedButton span {
     pointer-events: none;
 }
 
-#inputTodo {
+#todoInput {
     margin-top: auto;
     width: 100%;
     color: white;
 }
 
-#todo_buttons {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    overflow: hidden;
-    transition: 0.5s;
-}
 
-.b_add {
-    background-color: #3B151F;
-    height: 50px;
-    cursor: pointer;
-    font-size: 50px;
-    border-radius: 7px;
-    line-height: 50px;
-    margin-bottom: 10px;
-}
-
-.b_add span {
-    position: relative;
-    bottom: 3px;
-}
-
-#todoHide {
-    height: 50px;
-    background-color: transparent;
-    border: transparent;
-    cursor: pointer;
-}
-
-#todoHide img {
-    position: relative;
-    bottom: 4px;
-    width: 30px;
-    height: 30px;
-}
-
-
-#entry1 {
+#todoEntrySimple {
     height: 50px;
     width: 100%;
     background: #282828;
     display: flex;
 }
 
-#entry2 {
+#todoEntryComplex {
     background: #282828;
     display: flex;
     height: 0;
     transition: 0.5s;
-    border-top:#FFC90E 1px solid;
+    border-top: #FFC90E 1px solid;
     visibility: hidden;
     overflow: hidden;
 }
 
-#e_todo {
+#todoEntryGet {
     color: white;
     width: calc(100% - 65px);
     margin-left: 10px;
@@ -364,7 +355,7 @@ body {
     outline: none;
 }
 
-#todoAdd{
+#todoAdd {
     height: 50px;
     width: 50px;
     cursor: pointer;
@@ -375,14 +366,6 @@ body {
     text-align: center;
 }
 
-.e_todo {
-    color: white;
-    width: 100%;
-    height: 45px;
-    background: #282828;
-    border-radius: 7px;
-    font-size: 20px;
-}
 
 #newSteps {
     float: left;
@@ -409,7 +392,7 @@ body {
     width: max-content;
 }
 
-.stepText {
+.newStepText {
     display: flex;
 }
 
@@ -422,31 +405,29 @@ body {
     outline: none;
     font-size: 20px;
     width: 100%;
-
 }
 
 
-#goal_settings {
+#todoSettings {
     height: 250px;
     width: 200px;
-    white-space: nowrap; /* this does the trick */
+    white-space: nowrap;
     text-align: center;
     padding-right: 20px;
 }
 
 
-
-.selectCategory{
+.selectCategory {
     background: #3B151F;
     width: 200px;
     border: 1px solid #FFC90E;
 }
 
-#selectCategory{
+#selectCategory {
     background-color: #3B151F
 }
 
-.categoryPicker{
+.categoryPicker {
     width: 180px;
     height: 130px;
     position: relative;
@@ -458,19 +439,21 @@ body {
 }
 
 
-#categoryPicker2{
+#categoryPicker2 {
     top: 41px;
     position: absolute;
     height: 110px;
 }
-.category{
+
+.category {
     float: left;
     display: block;
     width: 100%;
     text-align: left;
     cursor: pointer;
 }
-.categoryPicker .categoryButton{
+
+.categoryPicker .categoryButton {
     width: 20px;
     height: 20px;
     background: #3B151F;
@@ -478,14 +461,14 @@ body {
     display: inline-block;
 }
 
-.categoryPicker .categoryName{
+.categoryPicker .categoryName {
     font-size: 20px;
     position: relative;
     bottom: 5px
 }
 
 
-.r_todo {
+.todoRange {
     width: 198px;
     -webkit-appearance: none;
     height: 25px;
@@ -493,7 +476,7 @@ body {
 }
 
 
-.r_todo::-webkit-slider-thumb {
+.todoRange::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 25px;
@@ -502,18 +485,18 @@ body {
     cursor: pointer;
 }
 
-.r_todo::-moz-range-thumb {
+.todoRange::-moz-range-thumb {
     width: 25px;
     height: 25px;
     background: #04AA6D;
     cursor: pointer;
 }
 
-.l_todo{
+.todoLabel {
     margin-top: 10px;
 }
 
-.task_text {
+.taskText {
     margin: 10px;
     word-break: break-word;
     width: auto;
@@ -631,7 +614,7 @@ body {
     padding-bottom: 5px;
 }
 
-.tasks_history {
+.historyTasks {
     margin-top: 20px;
 }
 
@@ -639,7 +622,7 @@ body {
     margin-top: 20px;
 }
 
-.history_add, .ideasAdd {
+.historyAdd, .ideasAdd {
     padding-left: 5px;
     display: block;
     margin-left: auto;
@@ -647,7 +630,6 @@ body {
     cursor: pointer;
     font-size: 40px;
 }
-
 
 
 #days::-webkit-scrollbar {
@@ -693,11 +675,38 @@ body {
     pointer-events: none;
 }
 
-#inputIdeas {
+#ideasInput {
     display: flex;
+    height: 50px;
+    width: 100%;
+    background: #282828;
 }
 
-#closeEdit {
+#ideasAdd {
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    font-size: 50px;
+    border-radius: 7px;
+    line-height: 50px;
+    margin-bottom: 10px;
+    text-align: center;
+    background: #1E1E1E;
+}
+
+
+#ideasEntry {
+    color: white;
+    width: calc(100% - 65px);
+    margin-left: 10px;
+    height: 48px;
+    background: #1E1E1E;
+    font-size: 20px;
+    border: none;
+    outline: none;
+}
+
+#editClose {
     background: transparent;
     font-size: 30px;
     width: 30px;
@@ -710,11 +719,11 @@ body {
 }
 
 
-#closeEdit:hover {
+#editClose:hover {
     background: #323232;
 }
 
-#todoEdit {
+#editTodo {
     background: #323232;
     margin: 10px;
     font-size: 25px;
@@ -722,7 +731,7 @@ body {
 
 }
 
-#editOptions{
+#editOptions {
     background: #323232;
     margin: 10px;
     font-size: 25px;
@@ -732,22 +741,22 @@ body {
 }
 
 
-
-#optionsNames{
+#optionsNames {
     flex-grow: 1;
     text-align: center;
 }
 
-#optionsNames div{
+#optionsNames div {
     margin-bottom: 15px;
 }
-#optionsConfig{
+
+#optionsConfig {
     width: 200px;
     text-align: center;
     margin-right: 10px;
 }
 
-#optionsConfig #selectCategory2, #optionsConfig input[type="range"]{
+#optionsConfig #selectCategory2, #optionsConfig input[type="range"] {
     margin-bottom: 15px;
 }
 

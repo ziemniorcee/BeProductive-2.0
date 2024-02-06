@@ -20,34 +20,34 @@ window.goalsAPI.getGoals((goals, steps) => {
                 steps_checks.push(steps[j].step_check)
             }
         }
-        build_goal(goals[i].goal, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
+        build_goal(goals[i].goal.replace("`@`", "`"), goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
     }
 
     let finished_count = $('#todosFinished .todo').length
-    $('#buttonFinished').css('display', finished_count ? "block" : "none")
+    $('#finishedButton').css('display', finished_count ? "block" : "none")
     if (finished_count) $("#finishedCount").html(finished_count);
 })
 
 
-$(document).on('click', '#inputTodo', (event) => {
+$(document).on('click', '#todoInput', (event) => {
     event.stopPropagation()
-    $("#entry2").css({"height": "250px", "visibility": "visible"});
+    $("#todoEntryComplex").css({"height": "250px", "visibility": "visible"});
 })
 
 $(document).on('click', '#main', () => {
-    $("#entry2").css({"height": "0", "visibility": "hidden"});
+    $("#todoEntryComplex").css({"height": "0", "visibility": "hidden"});
 })
 
 
 $(document).on('click', '#todoAdd', () => new_goal())
 
-$(document).on('keyup', '#entry1', (e) => {
+$(document).on('keyup', '#todoEntrySimple', (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
 })
 
 
 function new_goal() {
-    let e_todo = $('#e_todo')
+    let e_todo = $('#todoEntryGet')
     let goal_text = e_todo.val()
 
     if (goal_text !== "") {
@@ -67,7 +67,7 @@ function new_goal() {
         if (steps.length !== 0) {
             $('#newSteps').replaceWith(
                 `<div id="newSteps" style="overflow-y: hidden;">
-                <div class="stepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
+                <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
             )
         }
 
@@ -166,12 +166,12 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
         `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
-            <div class="goal_id">${$('.todo').length}</div>
+            <div class="todoId">${$('.todo').length}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
-                <div class="dot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
+                <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
                 <input type='checkbox' class='check_task' ${check_state}>
             </div>
-            <div class='task_text'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
+            <div class='taskText'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
         </div>`
 
     $('.steps:last').css('display', 'block')
@@ -184,7 +184,7 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
     new_step()
 
     function new_step() {
-        $('#newSteps').append(`<div class="stepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
+        $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
 
         let entry = $('.stepEntry')
 
@@ -213,23 +213,23 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
     $(document).on('contextmenu', '.sidebarTask', function (event) {
         selected_div = event.target
         is_r_pressed = true
-        if ($(this).parents('.tasks_history').length) r_press_state = 1
+        if ($(this).parents('.historyTasks').length) r_press_state = 1
         else r_press_state = 2
     })
 
     window.goalsAPI.removingGoal(() => {
         if (r_press_state === 0) {
-            let id = $(selected_div).find('.goal_id').text()
+            let id = $(selected_div).find('.todoId').text()
             window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
 
             if ($(selected_div).find('.check_task').prop('checked')) {
                 let finished_count = $('#todosFinished .todo').length
-                if (finished_count === 1) $('#buttonFinished').css('display', 'none')
+                if (finished_count === 1) $('#finishedButton').css('display', 'none')
                 $('#finishedCount').html(finished_count - 1)
             }
             selected_div.remove()
 
-            let goals = $('.goal_id')
+            let goals = $('.todoId')
             for (let i = 0; i < goals.length; i++) {
                 if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
             }
@@ -240,7 +240,7 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
     window.sidebarAPI.removingHistory(() => {
         if (r_press_state === 1) {
             window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
-            if ($(selected_div).closest('.tasks_history').children().length === 1) {
+            if ($(selected_div).closest('.historyTasks').children().length === 1) {
                 selected_div = $(selected_div).closest('.day')
             }
             selected_div.remove()
@@ -271,9 +271,9 @@ $(document).on('click', '.check_task', function () {
 
 export function change_check(id) {
     const check_task = $('.check_task').eq(id)
-    const dot = $('.dot').eq(id)
+    const dot = $('.checkDot').eq(id)
     const todo = $('.todo')
-    const goal_id = $('.goal_id')
+    const goal_id = $('.todoId')
 
     let array_id = Number(goal_id.eq(id).html())
     let state = Number(check_task.prop('checked'))
@@ -281,7 +281,7 @@ export function change_check(id) {
     check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
 
     let category_color = $(dot).css('borderColor')
-    $(dot).replaceWith(`<div class="dot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
+    $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
 
     todo.eq(id).remove()
     $(state ? "#todosFinished" : "#todosArea").append(todo.eq(id).prop("outerHTML"))
@@ -294,7 +294,7 @@ export function change_check(id) {
     window.goalsAPI.rowsChange({after: new_tasks})
 
     let finished_count = $('#todosFinished .todo').length
-    $("#buttonFinished").css('display', finished_count ? "block" : "none");
+    $("#finishedButton").css('display', finished_count ? "block" : "none");
     $('#finishedCount').html(finished_count)
 }
 
@@ -302,7 +302,7 @@ export function change_check(id) {
 $(document).on('click', '.stepCheck', function () {
     const step_check = $('.stepCheck')
     let step_id_rel = $(this).closest('.step').index()
-    let goal_id = $(this).closest('.todo').find('.goal_id').text()
+    let goal_id = $(this).closest('.todo').find('.todoId').text()
 
     let step_id_unrel = step_check.index(this)
     let counter_html = $(this).closest(".todo").find('.counter').get(0)
@@ -317,7 +317,7 @@ $(document).on('click', '.stepCheck', function () {
     window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: Number(this.checked)})
 });
 
-$(document).on('click', '#buttonFinished', () => {
+$(document).on('click', '#finishedButton', () => {
     const finished_img = $('#finishedImg')
     let show = finished_img.attr('src') === "images/goals/up.png"
     $('#todosFinished').css('display', show ? "block" : "none")
@@ -326,7 +326,7 @@ $(document).on('click', '#buttonFinished', () => {
 
 
 export function show_steps(event1) {
-    const steps = $(event1.target).closest(".task_text").find('.steps')
+    const steps = $(event1.target).closest(".taskText").find('.steps')
     let show = steps.css("display") === "block"
     steps.css("display", show ? 'none' : 'block')
     $(event1.target).find('.showImg').attr('src', show ? 'images/goals/up.png' : 'images/goals/down.png')

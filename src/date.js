@@ -12,18 +12,18 @@ class CurrentDate{
         this.today.setMonth(this.now.getMonth())
 
         this.set_attributes()
-        document.getElementById("todayimg").src="images/goals/today1.png"
-        document.getElementById("tomorrowimg").src="images/goals/tomorrow0.png"
-        document.getElementById("anotherdayimg").src="images/goals/other0.png"
+        document.getElementById("todayImg").src="images/goals/today1.png"
+        document.getElementById("tomorrowImg").src="images/goals/tomorrow0.png"
+        document.getElementById("otherImg").src="images/goals/other0.png"
     }
     tomorrow(){
         this.today.setMonth(this.now.getMonth())
         this.today.setDate(this.now.getDate() + 1)
 
         this.set_attributes()
-        document.getElementById("todayimg").src="images/goals/today0.png"
-        document.getElementById("tomorrowimg").src="images/goals/tomorrow1.png"
-        document.getElementById("anotherdayimg").src="images/goals/other0.png"
+        document.getElementById("todayImg").src="images/goals/today0.png"
+        document.getElementById("tomorrowImg").src="images/goals/tomorrow1.png"
+        document.getElementById("otherImg").src="images/goals/other0.png"
     }
 
     set_attributes(){
@@ -68,7 +68,6 @@ function date_change(option){
         document.getElementById("date").innerHTML = l_date.display
 
         let elements = document.getElementsByClassName("todo")
-        let length = elements.length
 
         while(elements.length > 0){
             elements[0].remove()
@@ -77,15 +76,15 @@ function date_change(option){
     }
 }
 
-document.getElementById("todayBtn").addEventListener('click', ()=>date_change(0))
-document.getElementById("tomorrowBtn").addEventListener('click', ()=>date_change(1))
-document.getElementById("otherDateBtn").addEventListener('click', ()=>{
+document.getElementById("todayButton").addEventListener('click', ()=>date_change(0))
+document.getElementById("tomorrowButton").addEventListener('click', ()=>date_change(1))
+document.getElementById("otherButton").addEventListener('click', ()=>{
     $(function(){
         $("#otherDateBtn").datepicker();
     })
 })
 
-$("#datepicker").datepicker({
+$("#datePicker").datepicker({
     onSelect: function() {
         let dateObject = $(this).datepicker('getDate');
         l_date.today.setFullYear(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate())

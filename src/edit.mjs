@@ -12,7 +12,7 @@ let goal_id = 0
 $(document).on('click', '.todo', function (event) {
     event.stopPropagation()
     let right_bar = $('#rightbar')
-    if ($('#closeEdit').length === 0) saved_sidebar = right_bar.html()
+    if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
 
 
     goal_id = $('.todo').index(this)
@@ -34,9 +34,7 @@ $(document).on('click', '.todo > *', function (event) {
 
 $(document).on('click', '#main', () => close_edit())
 
-$(document).on('click', '#closeEdit', () => show_hide_sidebar())
-
-
+$(document).on('click', '#editClose', () => show_hide_sidebar())
 
 
 $(document).on('click', '#editCheck', () => {
@@ -47,12 +45,8 @@ $(document).on('click', '#editCheck', () => {
 
     if (state) goal_id = $('.todo').length - 1
     else goal_id = $('#todosArea').children().length - 1
-    // let base2 = $('.todo').eq(goal_id)
 
     base = document.getElementsByClassName("todo")[goal_id] // to change
-
-    console.log(base)
-    console.log(base2)
 })
 
 
@@ -61,7 +55,8 @@ $(document).on('blur', '#editText', () => {
 
     if ($(base).find('.task').text() !== input) {
         $(base).find('.task').text(input)
-        window.goalsAPI.changeTextGoal({input: input, id: Number($(base).find('.goal_id').text())})
+
+        window.goalsAPI.changeTextGoal({input: input, id: Number($(base).find('.todoId').text())})
     }
 })
 
@@ -73,7 +68,7 @@ $(document).on('blur', '.editTextStep', function () {
     let category_id = getIdByColor(categories, $(base).find('.todoCheck').css('backgroundColor'))
 
     if (!$(base).find('.stepsShow').length) {
-        $(base).find('.task_text').append(
+        $(base).find('.taskText').append(
             `<div class='stepsShow' style="background: ${categories[category_id][0]}"><img src='images/goals/down.png' alt="up" class="showImg">
                 <span class="check_counter">
                     <span class="counter">${0}</span>/<span class="maxCounter">${0}</span>
@@ -92,7 +87,7 @@ $(document).on('blur', '.editTextStep', function () {
             let max_counter = $(base).find('.maxCounter')
             max_counter.text(Number(max_counter.text()) + 1)
 
-            window.goalsAPI.addStep({input: input, id: Number($(base).find('.goal_id').text())})
+            window.goalsAPI.addStep({input: input, id: Number($(base).find('.todoId').text())})
         }
     } else change_step(index, input)
 })
@@ -101,13 +96,14 @@ $(document).on('blur', '.editTextStep', function () {
 function change_step(index, value) {
     if (value !== "") {
         $(base).find('.step_text').eq(index).text(value)
-        window.goalsAPI.changeStep({input: value, id: Number($(base).find('.goal_id').text()), step_id: index})
+
+        window.goalsAPI.changeStep({input: value, id: Number($(base).find('.todoId').text()), step_id: index})
     } else {
         let max_counter_html = $(base).find('.maxCounter')
         let counter_html = $(base).find('.counter')
 
         max_counter_html.text(Number(max_counter_html.text()) - 1)
-        if ($(base).find('.stepCheck').eq(index).prop('checked'))  counter_html.text(Number(counter_html.text()) - 1)
+        if ($(base).find('.stepCheck').eq(index).prop('checked')) counter_html.text(Number(counter_html.text()) - 1)
 
         if ($(base).find('.step').length === 1) {
             $(base).find('.stepsShow').remove()
@@ -116,7 +112,8 @@ function change_step(index, value) {
 
         $('.editStep').eq(index).remove()
 
-        window.goalsAPI.removeStep({id: Number($(base).find('.goal_id').text()), step_id: index})
+
+        window.goalsAPI.removeStep({id: Number($(base).find('.todoId').text()), step_id: index})
     }
 }
 
@@ -136,8 +133,7 @@ $(document).on('click', '.editCheckStep', function () {
         step_check.replaceWith("<input type='checkbox' class='stepCheck'>")
         counter.text(Number(counter.text()) - 1)
     }
-
-    window.goalsAPI.changeChecksStep({goal_id: Number($(base).find('.goal_id').text()), step_id: index, state: state})
+    window.goalsAPI.changeChecksStep({goal_id: Number($(base).find('.todoId').text()), step_id: index, state: state})
 })
 
 $(document).on('click', '#editNewStep', () => {
@@ -156,15 +152,13 @@ $(document).on('click', '#editNewStep', () => {
 })
 
 
-
-
 export function change_category(category_id) {
     $(base).find('.todoCheck').css('backgroundColor', categories[category_id][0])
 
     if ($(base).find('.stepsShow')) {
         $(base).find('.stepsShow').css('background', categories[category_id][0])
     }
-    window.goalsAPI.changeCategory({id: Number($(base).find('.goal_id').text()), new_category: category_id})
+    window.goalsAPI.changeCategory({id: Number($(base).find('.todoId').text()), new_category: category_id})
 }
 
 
@@ -172,16 +166,15 @@ $(document).on('click', '#editDiff', () => {
     let difficulty = $('#editDiff').val()
     let url = `images/goals/rank${difficulty}.svg`
     $('.todoCheck').eq(goal_id).css('backgroundImage', `url("${url}")`)
-    window.goalsAPI.changeDifficulty({id: Number($(base).find('.goal_id').text()), difficulty: difficulty})
+    window.goalsAPI.changeDifficulty({id: Number($(base).find('.todoId').text()), difficulty: difficulty})
 })
-
 
 
 $(document).on('click', '#editImportance', () => {
 
     let importance = $('#editImportance').val()
-    $('.dot').eq(goal_id).css('borderColor', check_border[importance])
-    window.goalsAPI.changeImportance({id: Number($(base).find('.goal_id').text()), importance: importance})
+    $('.checkDot').eq(goal_id).css('borderColor', check_border[importance])
+    window.goalsAPI.changeImportance({id: Number($(base).find('.todoId').text()), importance: importance})
 })
 
 export function close_edit() {
@@ -217,7 +210,7 @@ function _get_steps_html() {
 
 
 function todo_html() {
-    let main_goal = $(base).find('.task_text').text()
+    let main_goal = $(base).find('.task').text().trim()
     let steps_html = _get_steps_html()
 
     let check_state = $(base).find('.check_task').prop('checked') === true ? "checked" : "";
@@ -225,10 +218,10 @@ function todo_html() {
     let category_id = getIdByColor(categories, $(base).find('.todoCheck').css('backgroundColor'))
     let difficulty = document.getElementsByClassName("todoCheck")[goal_id].style.backgroundImage[22]//weak point
 
-    let importance = check_border.indexOf($(base).find('.dot').css('borderColor'))
+    let importance = check_border.indexOf($(base).find('.checkDot').css('borderColor'))
 
-    return `<div id="closeEdit">⨉</div>
-        <div id="todoEdit">
+    return `<div id="editClose">⨉</div>
+        <div id="editTodo">
             <div id="editMain">
                 <input type="checkbox" id="editCheck" ${check_state}>
                 <input type="text" id="editText" value="${main_goal}" spellcheck="false">
@@ -248,8 +241,8 @@ function todo_html() {
             </div>
             <div id="optionsConfig">
                 <div id="selectCategory2" class="selectCategory" style="background: ${categories[category_id][0]}">${categories[category_id][1]}</div>
-                <input type="range" class="r_todo" id="editDiff" min="0" max="4" value="${difficulty}">
-                <input type="range" class="r_todo" id="editImportance" min="0" max="4" value="${importance}">
+                <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${difficulty}">
+                <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${importance}">
                 <div class="categoryPicker" id="categoryPicker2">
                     <div class="category">
                         <span class="categoryButton"></span>
