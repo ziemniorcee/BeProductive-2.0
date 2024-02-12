@@ -6,7 +6,7 @@ import {weekdays, month_names} from "./data.mjs";
 let displays = ["", ""]
 
 
-window.sidebarAPI.askHistory({date: l_date.sql})
+window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
     let date = data[0].addDate
     let goals = []

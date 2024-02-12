@@ -43,6 +43,45 @@ function todoHandlers(db) {
         })
     })
 
+    ipcMain.on('ask-week-goals', (event, params) => {
+        const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
+
+        db.all(`SELECT id, goal, addDate, check_state, goal_pos, category, difficulty, importance
+                FROM goals
+                WHERE addDate between "${params.dates[0]}" and  "${params.dates[6]}"
+                ORDER BY addDate, goal_pos`, (err, goals) => {
+            if (err) console.error(err)
+            else {
+                goal_ids = []
+
+                for(let i = 0; i < 4; i++){
+                    for(let j = 0; j < weekdays[i].length; j++){
+                        let filtred = goals.filter(record => record.addDate === params.dates[i + j * 3])
+                        let ids = filtred.map(record => record.id)
+                        goal_ids.push(...ids)
+                    }
+                }
+
+
+                event.reply('get-week-goals', goals)
+            }
+        })
+    })
+
+
+    ipcMain.on('change-date', (event, params) => {
+        db.run(`UPDATE goals
+            SET addDate="${params.date}"
+            WHERE id = ${goal_ids[params.id]}`)
+
+        for (let i = 0; i < params.order.length; i++) {
+            db.run(`UPDATE goals
+                    SET goal_pos=${i + 1}
+                    WHERE id = ${goal_ids[params.order[i]]}`)
+        }
+    })
+
+
     ipcMain.on('new-goal', (event, params) => {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
                 VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, ${params.category},

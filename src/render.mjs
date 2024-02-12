@@ -1,13 +1,14 @@
 import {l_date} from './date.js'
 import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
+import {show_hide_sidebar} from "./sidebar.mjs";
 
 window.addEventListener("DOMContentLoaded", () => {
     $('#date').html(l_date.display)
 });
 
 
-window.goalsAPI.askGoals({date: l_date.sql})
+window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
     for (let i = 0; i < goals.length; i++) {
@@ -32,10 +33,13 @@ window.goalsAPI.getGoals((goals, steps) => {
 $(document).on('click', '#todoInput', (event) => {
     event.stopPropagation()
     $("#todoEntryComplex").css({"height": "250px", "visibility": "visible"});
+    $("#todosAll").css({"height": "calc(100% - 315px)"});
+
 })
 
 $(document).on('click', '#main', () => {
     $("#todoEntryComplex").css({"height": "0", "visibility": "hidden"});
+    $("#todosAll").css({"height": "calc(100% - 65px)"});
 })
 
 
@@ -165,7 +169,7 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
 
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
-        `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
+        `<div class='todo'>
             <div class="todoId">${$('.todo').length}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
@@ -220,7 +224,7 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
     window.goalsAPI.removingGoal(() => {
         if (r_press_state === 0) {
             let id = $(selected_div).find('.todoId').text()
-            window.goalsAPI.goalRemoved({id: id, date: l_date.sql})
+            window.goalsAPI.goalRemoved({id: id, date: l_date.day_sql})
 
             if ($(selected_div).find('.check_task').prop('checked')) {
                 let finished_count = $('#todosFinished .todo').length
@@ -332,6 +336,15 @@ export function show_steps(event1) {
     $(event1.target).find('.showImg').attr('src', show ? 'images/goals/up.png' : 'images/goals/down.png')
 }
 
+
+$(document).on('click', '.viewOption', function (){
+    $('.viewOption').css('borderColor', "black")
+    $(this).css('borderColor', "#FFC90E")
+})
+
+$(document).on('click', '#viewDay', function () {
+    console.log("XPP")
+})
 
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()

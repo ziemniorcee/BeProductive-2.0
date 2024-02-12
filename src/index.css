@@ -16,7 +16,6 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    flex-shrink: 0;
     display: flex;
 }
 
@@ -67,16 +66,39 @@ body {
     width: 300px;
 }
 
+
 #main {
     display: flex;
     flex-direction: column;
-    flex: 0;
     background: #1E1E1E;
     font-size: 28px;
-    flex-grow: 1;
     padding: 50px;
+    flex: 0;
+    flex-grow: 1;
 
 }
+
+#todosAll {
+    overflow-y: scroll;
+    height: calc(100% - 65px);
+    transition: 0.5s;
+}
+
+#todoInput {
+    width: 100%;
+    color: white;
+    position: absolute;
+    bottom: 0;
+
+}
+
+#content{
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 120px);
+    position: relative;
+}
+
 
 #resizer {
     flex-basis: 4px;
@@ -213,10 +235,7 @@ body {
     border-color:#FFC90E ;
 }
 
-#todosAll {
-    overflow-y: scroll;
-    margin-bottom: 10px;
-}
+
 
 #todosFinished {
     display: block;
@@ -320,11 +339,7 @@ body {
     pointer-events: none;
 }
 
-#todoInput {
-    margin-top: auto;
-    width: 100%;
-    color: white;
-}
+
 
 
 #todoEntrySimple {
@@ -390,6 +405,7 @@ body {
     color: #FFC90E;
     cursor: pointer;
     width: max-content;
+
 }
 
 .newStepText {
@@ -502,6 +518,8 @@ body {
     width: auto;
     overflow-x: hidden;
     pointer-events: none;
+
+
 }
 
 .stepsShow {

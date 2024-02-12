@@ -1,0 +1,66 @@
+.weekViewColumn{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.weekViewColumn + .weekViewColumn{
+    margin-left: 20px;
+}
+.weekDay{
+    height: 100%;
+    color: white;
+    overflow-y: hidden;
+}
+
+.weekDayText{
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.weekDayGoals{
+    border-radius: 10px;
+    border: 2px solid #FFC90E;
+    height: calc(100% - 50px);
+    padding-top: 10px;
+    overflow-y: scroll;
+}
+
+.weekDayGoals::-webkit-scrollbar {
+    width: 2px;
+
+}
+
+.weekDayGoals::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+
+}
+
+.weekDayGoals::-webkit-scrollbar-thumb {
+    background-color: #3B151F;
+    outline: 1px solid #FFC90E;
+}
+
+
+.weekDayGoals .todo{
+    font-size: 15px ;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.weekDayGoals .taskText{
+    font-size: 15px ;
+    margin-right: 10px;
+    margin-left: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+}
+
+.weekDayGoals .task{
+
+}

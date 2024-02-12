@@ -1,5 +1,6 @@
 function init() {
     dragula([document.querySelector("#todosArea")]);
+
 }
 
 let tasks = []
