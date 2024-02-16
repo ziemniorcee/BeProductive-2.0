@@ -12,6 +12,7 @@ function todoHandlers(db) {
     let current_goal_pos = 0
 
     ipcMain.on('ask-goals', (event, params) => {
+        step_ids = {}
         current_date = params.date
 
         db.all(`SELECT id, goal, check_state, goal_pos, category, difficulty, importance
@@ -48,7 +49,7 @@ function todoHandlers(db) {
 
         db.all(`SELECT id, goal, addDate, check_state, goal_pos, category, difficulty, importance
                 FROM goals
-                WHERE addDate between "${params.dates[0]}" and  "${params.dates[6]}"
+                WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}" and check_state=0
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -81,6 +82,19 @@ function todoHandlers(db) {
         }
     })
 
+    ipcMain.on('ask-steps', (event, params) => {
+        db.all(`SELECT id, goal_id, step_text, step_check
+                        FROM steps
+                        WHERE goal_id =${goal_ids[params.todo_id]}`, (err2, steps) => {
+            if (err2) console.error(err2)
+            else {
+                step_ids = {}
+                step_ids[goal_ids[params.todo_id]] = steps.map((step) => step.id)
+                event.reply('get-steps', steps)
+            }
+        })
+    })
+
 
     ipcMain.on('new-goal', (event, params) => {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
@@ -108,6 +122,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
+        console.log("XPP")
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}

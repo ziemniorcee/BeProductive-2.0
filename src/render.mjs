@@ -169,7 +169,7 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
 
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
-        `<div class='todo'>
+        `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
             <div class="todoId">${$('.todo').length}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
@@ -268,7 +268,7 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
 })();
 
 
-$(document).on('click', '.check_task', function () {
+$(document).on('click', '#todosAll .check_task', function () {
     let id = $('.check_task').index(this)
     change_check(id)
 });
@@ -343,9 +343,77 @@ $(document).on('click', '.viewOption', function (){
 })
 
 $(document).on('click', '#viewDay', function () {
-    console.log("XPP")
+    day_view()
 })
 
+export function day_view(){
+    $('#content').css('flexDirection', 'column')
+
+    $('#todayButton .dateButtonText').text('Today')
+    $('#tomorrowButton .dateButtonText').text('Tomorrow')
+    $('#otherButton .dateButtonText').text('Another day')
+
+    build_day_view()
+    l_date.fix_header_day()
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+    dragula([document.querySelector("#todosArea")]);
+}
+
+function build_day_view(){
+    let html = `
+        <div id="todosAll">
+            <div id="todosArea">
+
+            </div>
+            <div id="finishedButton">
+                <img id="finishedImg" src="images/goals/down.png" alt="up"><span>Finished: </span><span
+                    id="finishedCount">0</span>
+            </div>
+            <div id="todosFinished">
+
+            </div>
+        </div>
+        <div id="todoInput">
+            <div id="todoEntrySimple">
+                <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
+                <div id="todoAdd">+</div>
+            </div>
+            <div id="todoEntryComplex">
+                <div id="newSteps">
+                </div>
+                <div id="todoSettings">
+                    <div class="todoLabel">Category</div>
+                    <div id="selectCategory" class="selectCategory">None</div>
+                    <div class="todoLabel" id="label1">Difficulty</div>
+                    <input type="range" class="todoRange" id="range1" min="0" max="4">
+                    <div class="todoLabel" id="label2">Importance</div>
+                    <input type="range" class="todoRange" id="range2" min="0" max="4">
+
+                    <div class="categoryPicker" id="categoryPicker">
+                        <div class="category">
+                            <span class="categoryButton"></span>
+                            <span class="categoryName">None</span>
+                        </div>
+                        <div class="category">
+                            <span class="categoryButton" style="background: #32174D"></span>
+                            <span class="categoryName">Work</span>
+                        </div>
+                        <div class="category">
+                            <span class="categoryButton" style="background: #002244"></span>
+                            <span class="categoryName">School</span>
+                        </div>
+                        <div class="category">
+                            <span class="categoryButton" style="background: #023020"></span>
+                            <span class="categoryName">House</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+    `
+    $('#content').html(html)
+}
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })

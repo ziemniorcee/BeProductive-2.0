@@ -7,13 +7,13 @@ export let goal_pressed = false
 
 let base = null
 let goal_id = 0
+let steps_count = 0
 
 
 $(document).on('click', '.todo', function (event) {
     event.stopPropagation()
     let right_bar = $('#rightbar')
     if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
-
 
     goal_id = $('.todo').index(this)
 
@@ -22,7 +22,12 @@ $(document).on('click', '.todo', function (event) {
     base = event.target
     goal_pressed = true
 
-    right_bar.html(todo_html())
+    if ($(base).closest('.weekDayGoals').length) {
+        window.goalsAPI.askSteps({todo_id: $(base).find('.todoId').text()})
+    } else{
+        let steps_html = _get_steps_html($(base).find('.step'), 0)
+        right_bar.html(todo_html(steps_html))
+    }
 });
 
 
@@ -67,26 +72,31 @@ $(document).on('blur', '.editTextStep', function () {
 
     let category_id = getIdByColor(categories, $(base).find('.todoCheck').css('backgroundColor'))
 
-    if (!$(base).find('.stepsShow').length) {
-        $(base).find('.taskText').append(
-            `<div class='stepsShow' style="background: ${categories[category_id][0]}"><img src='images/goals/down.png' alt="up" class="showImg">
+    if (!$(base).closest('.weekDayGoals').length) {
+        console.log("XPPSD")
+        if (!$(base).find('.stepsShow').length) {
+            $(base).find('.taskText').append(
+                `<div class='stepsShow' style="background: ${categories[category_id][0]}"><img src='images/goals/down.png' alt="up" class="showImg">
                 <span class="check_counter">
                     <span class="counter">${0}</span>/<span class="maxCounter">${0}</span>
                 </span>
             </div>
             <div class='steps'></div>`)
+        }
     }
 
-    if ($(base).find('.step').length < edit_text_step.length) {
+    if (steps_count < edit_text_step.length) {
         if (input !== "") {
-            $(base).find('.steps').append(
-                `<div class='step'>
+            if (!$(base).closest('.weekDayGoals').length) {
+                $(base).find('.steps').append(
+                    `<div class='step'>
                     <input type='checkbox'  class='stepCheck'> <span class="step_text">${input}</span>
                 </div>`)
 
-            let max_counter = $(base).find('.maxCounter')
-            max_counter.text(Number(max_counter.text()) + 1)
-
+                let max_counter = $(base).find('.maxCounter')
+                max_counter.text(Number(max_counter.text()) + 1)
+            }
+            steps_count += 1
             window.goalsAPI.addStep({input: input, id: Number($(base).find('.todoId').text())})
         }
     } else change_step(index, input)
@@ -137,7 +147,10 @@ $(document).on('click', '.editCheckStep', function () {
 })
 
 $(document).on('click', '#editNewStep', () => {
-    let steps_html = _get_steps_html()
+    let steps_html = ""
+
+    if ($(base).closest('.weekDayGoals').length) steps_html = _get_steps_html($('.editStep'),1)
+    else steps_html = _get_steps_html($(base).find('.step'), 0)
 
     steps_html +=
         `<div class="editStep">
@@ -189,29 +202,44 @@ export function goal_pressed_false() {
 }
 
 
-function _get_steps_html() {
+function _get_steps_html(steps, option) {
     let steps_html = ""
 
-    if ($(base).find('.step').length > 0) {
-        let array = $(base).find('.step')
-
-        for (let i = 0; i < array.length; i++) {
+    if (steps.length > 0) {
+        for (let i = 0; i < steps.length; i++) {
             let check_state = ""
-            if (array.eq(i).find('.stepCheck').prop('checked') === true) check_state = "checked"
+            if (steps.eq(i).find(option ? ".editCheckStep" : ".stepCheck").prop('checked') === true) check_state = "checked"
 
+            let value = option ? steps.eq(i).find('.editTextStep').val() : steps.eq(i).text()
             steps_html += `
                 <div class="editStep">
-                    <input type="checkbox" ${check_state} class="editCheckStep"><input type="text" class="editTextStep" value="${array[i].innerText.trim()}" spellcheck="false">
+                    <input type="checkbox" ${check_state} class="editCheckStep"><input type="text" class="editTextStep" value="${value.trim()}" spellcheck="false">
                 </div>`
         }
+        steps_count = steps.length
     }
     return steps_html
 }
 
 
-function todo_html() {
+window.goalsAPI.getSteps((steps) => {
+    let steps_html = ""
+    for(let i =0; i < steps.length; i++){
+        let check_state = ""
+        if (steps[i].step_check) check_state = "checked"
+
+        steps_html += `
+             <div class="editStep">
+                 <input type="checkbox" ${check_state} class="editCheckStep"><input type="text" class="editTextStep" value="${steps[i].step_text}" spellcheck="false">
+             </div>`
+    }
+
+    steps_count = steps.length
+    $('#rightbar').html(todo_html(steps_html))
+})
+
+function todo_html(steps_html) {
     let main_goal = $(base).find('.task').text().trim()
-    let steps_html = _get_steps_html()
 
     let check_state = $(base).find('.check_task').prop('checked') === true ? "checked" : "";
 

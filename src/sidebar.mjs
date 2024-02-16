@@ -122,9 +122,10 @@ function new_idea() {
 
 $(document).on('click', '#imgMain', () => show_hide_sidebar())
 
-export function show_hide_sidebar() {
+export function show_hide_sidebar(force= false) {
     let sidebar = $('#rightbar')
     let sidebar_state = sidebar.css('display') === 'none'
+    if (force) sidebar_state = false
     sidebar.toggle(sidebar_state)
     $('#resizer').css('display', sidebar_state ? 'flex' : 'none')
 }
