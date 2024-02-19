@@ -1,7 +1,6 @@
 import {l_date} from './date.js'
 import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
-import {show_hide_sidebar} from "./sidebar.mjs";
 
 window.addEventListener("DOMContentLoaded", () => {
     $('#date').html(l_date.display)
@@ -11,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
 window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
+
     for (let i = 0; i < goals.length; i++) {
         let goal_steps = []
         let steps_checks = []
@@ -69,10 +69,8 @@ function new_goal() {
 
         e_todo.val('')
         if (steps.length !== 0) {
-            $('#newSteps').replaceWith(
-                `<div id="newSteps" style="overflow-y: hidden;">
-                <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div></div>`
-            )
+            input_count = 0
+            $('#newSteps').html(`<div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>`)
         }
 
         build_goal(goal_text, steps, new_category, importance, difficulty)
@@ -183,25 +181,16 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
 
 $(document).on('click', '.stepsShow', (event) => show_steps(event));
 
-(function () {
-    let input_count = 0
-    new_step()
 
-    function new_step() {
+let input_count = 0
+
+$(document).on('change', '.stepEntry', function (){
+    if ($('.stepEntry').index(this) === input_count) {
+        input_count += 1
         $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
-
-        let entry = $('.stepEntry')
-
-        entry.change(function () {
-            if (entry.index(this) === input_count) {
-                input_count += 1
-                new_step()
-                document.getElementsByClassName('stepEntry')[input_count].focus()
-            }
-        })
+        document.getElementsByClassName('stepEntry')[input_count].focus()
     }
-})();
-
+});
 
 (function () {
     let selected_div = null
@@ -354,6 +343,7 @@ export function day_view(){
     $('#otherButton .dateButtonText').text('Another day')
 
     build_day_view()
+
     l_date.fix_header_day()
     window.goalsAPI.askGoals({date: l_date.day_sql})
     dragula([document.querySelector("#todosArea")]);
@@ -380,6 +370,7 @@ function build_day_view(){
             </div>
             <div id="todoEntryComplex">
                 <div id="newSteps">
+                    <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>
                 </div>
                 <div id="todoSettings">
                     <div class="todoLabel">Category</div>

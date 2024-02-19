@@ -1,4 +1,4 @@
-import {weekdays} from "./data.mjs";
+import {weekdays, month_names} from "./data.mjs";
 
 class CurrentDate {
     constructor() {
@@ -66,22 +66,20 @@ class CurrentDate {
         return dates_array;
     }
 
-    get_week_day(day_index){
-        console.log(this.week_now[day_index])
+    get_week_day(day_index) {
         let date = new Date(this.week_now[day_index])
-        console.log(date)
         this.set_attributes(date, 2)
-    }
-
-    fix_header_week() {
-        if (this.week_current.includes(this.day_sql)) this.change_images(0)
-        else if (this.week_next.includes(this.day_sql)) this.change_images(1)
-        else this.change_images(2)
     }
 
     fix_header_day() {
         if (this.day_sql === this.sql_format(this.today)) this.change_images(0)
         else if (this.day_sql === this.sql_format(this.tomorrow)) this.change_images(1)
+        else this.change_images(2)
+    }
+
+    fix_header_week() {
+        if (this.week_current.includes(this.day_sql)) this.change_images(0)
+        else if (this.week_next.includes(this.day_sql)) this.change_images(1)
         else this.change_images(2)
     }
 
@@ -92,54 +90,31 @@ class CurrentDate {
         if (format_month < 10) format_month = "0" + format_month
         if (format_day < 10) format_day = "0" + format_day
 
-        return date.getFullYear() + "-" + format_month + "-" + format_day;
+        return `${date.getFullYear()}-${format_month}-${format_day}`;
     }
 
     display_format(date) {
-        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
         let format_day = date.getDate()
-        if (format_day < 10) {
-            format_day = "0" + format_day
-        }
+        if (format_day < 10) format_day = "0" + format_day
 
-        let formatted = weekdays[date.getDay()] + ", " + month_names[date.getMonth()] + " " + format_day + ", " + date.getFullYear();
-        document.getElementById("date").innerHTML = formatted
+        $('#date').html(`${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`)
     }
 }
 
-
 export let l_date = new CurrentDate()
-let date = l_date
-
 
 function date_change(option) {
-    if (option === 0) {
-        l_date.get_today()
-    } else if (option === 1) {
-        l_date.get_tomorrow()
-    }
+    if (option === 0) l_date.get_today()
+    else if (option === 1) l_date.get_tomorrow()
 
+    $('.todo').remove()
 
-    date = l_date.day_sql
-
-
-    let elements = document.getElementsByClassName("todo")
-
-    while (elements.length > 0) {
-        elements[0].remove()
-    }
-    window.goalsAPI.askGoals({date: date})
-
+    window.goalsAPI.askGoals({date: l_date.day_sql})
 }
 
 function week_change(option) {
-    if (option === 0) {
-        l_date.this_week()
-    } else if (option === 1) {
-        l_date.next_week()
-    }
+    if (option === 0) l_date.this_week()
+    else if (option === 1) l_date.next_week()
 
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
 }

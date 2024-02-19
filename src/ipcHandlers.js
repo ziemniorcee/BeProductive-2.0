@@ -122,7 +122,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
-        console.log("XPP")
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
