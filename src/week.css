@@ -22,7 +22,7 @@
 
 .weekDayGoals{
     border-radius: 10px;
-    border: 2px solid #FFC90E;
+    border: 2px solid #9C9A92;
     height: calc(100% - 50px);
     padding-top: 10px;
     overflow-y: scroll;
@@ -30,7 +30,6 @@
 
 .weekDayGoals::-webkit-scrollbar {
     width: 2px;
-
 }
 
 .weekDayGoals::-webkit-scrollbar-track {

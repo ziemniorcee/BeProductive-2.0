@@ -1,10 +1,8 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
-import {categories, check_border} from "./data.mjs";
+import {categories, check_border, weekdays, weekdays_grid} from "./data.mjs";
 import {day_view} from "./render.mjs";
 
-const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
-const weekdays2 = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 
 $(document).on('click', '#viewWeek', function () {
@@ -19,7 +17,7 @@ $(document).on('click', '#viewWeek', function () {
 })
 
 $(document).on('click', '.weekDay', function (){
-    let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
+    let day_index = weekdays.indexOf($(this).find('.weekDayText').text())
     l_date.get_week_day(day_index)
     day_view()
 
@@ -28,16 +26,15 @@ $(document).on('click', '.weekDay', function (){
 })
 
 window.goalsAPI.getWeekGoals((goals) => {
-    $('#content').css('flexDirection', 'row')
-
-
+    let content = $('#content')
+    content.css('flexDirection', 'row')
 
     let html = ""
     let todo_id = 0
 
     for (let i = 0; i < 4; i++) {
         let days = ""
-        for (let j = 0; j < weekdays[i].length; j++) {
+        for (let j = 0; j < weekdays_grid[i].length; j++) {
             let sql_date = l_date.week_now[i + j * 3]
             let goals_html = ""
 
@@ -47,11 +44,10 @@ window.goalsAPI.getWeekGoals((goals) => {
                     todo_id++;
                 }
             }
-
             days += `
                 <div class="weekDay">
-                    <div class="weekDayText">${weekdays[i][j]}</div>
-                    <div class="weekDayGoals" id="${weekdays[i][j]}">${goals_html}</div>
+                    <div class="weekDayText">${weekdays_grid[i][j]}</div>
+                    <div class="weekDayGoals" id="${weekdays_grid[i][j]}">${goals_html}</div>
                 </div>`
         }
 
@@ -61,17 +57,15 @@ window.goalsAPI.getWeekGoals((goals) => {
             </div>`
     }
 
-    $('#content').html(html)
-
+    content.html(html)
 
     dragula([document.querySelector("#Monday"), document.querySelector("#Tuesday"),
         document.querySelector("#Wednesday"), document.querySelector("#Thursday"),
         document.querySelector("#Friday"), document.querySelector("#Saturday"),
         document.querySelector("#Sunday")]).on('drag', function (event) {
-        // window.goalsAPI.changeDate({})
 
     }).on('drop', function (event) {
-        let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))
+        let day_id = weekdays.indexOf($(event.parentNode).attr('id'))
         let date = l_date.week_now[day_id]
         let goal_id = $(event).find('.todoId').text()
 

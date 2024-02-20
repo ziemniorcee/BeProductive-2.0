@@ -6,11 +6,10 @@ window.addEventListener("DOMContentLoaded", () => {
     $('#date').html(l_date.display)
 });
 
-
+dragula_day_view()
 window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
-
     for (let i = 0; i < goals.length; i++) {
         let goal_steps = []
         let steps_checks = []
@@ -27,6 +26,7 @@ window.goalsAPI.getGoals((goals, steps) => {
     let finished_count = $('#todosFinished .todo').length
     $('#finishedButton').css('display', finished_count ? "block" : "none")
     if (finished_count) $("#finishedCount").html(finished_count);
+
 })
 
 
@@ -167,7 +167,7 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
 
     let url = `images/goals/rank${difficulty}.svg`
     document.getElementById(todo_area).innerHTML +=
-        `<div class='todo' onmousedown='press()' onmouseup='unpress()'>
+        `<div class='todo'>
             <div class="todoId">${$('.todo').length}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
@@ -346,7 +346,30 @@ export function day_view(){
 
     l_date.fix_header_day()
     window.goalsAPI.askGoals({date: l_date.day_sql})
-    dragula([document.querySelector("#todosArea")]);
+    dragula_day_view()
+}
+
+function dragula_day_view(){
+    let tasks = []
+
+    dragula([document.querySelector("#todosArea")]).on('drag', function (){
+        let elements = $('.todoId')
+        tasks = []
+        for (let i = 0; i < elements.length; i++) {
+            tasks.push(elements.eq(i).text())
+        }
+    }).on('drop', function (){
+        let elements = $('.todoId')
+        let new_tasks = []
+        if (tasks.length < elements.length){
+            for (let i = 0; i < elements.length-1; i++) {
+                new_tasks.push(elements.eq(i).text())
+            }
+            if (JSON.stringify(tasks) !== JSON.stringify(new_tasks) && tasks.length!==0) {
+                window.goalsAPI.rowsChange({after: new_tasks})
+            }
+        }
+    });
 }
 
 function build_day_view(){
@@ -400,7 +423,6 @@ function build_day_view(){
                     </div>
                 </div>
                 </div>
-
             </div>
     `
     $('#content').html(html)
