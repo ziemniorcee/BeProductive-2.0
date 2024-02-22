@@ -1,6 +1,6 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
-import {categories, check_border, weekdays, weekdays_grid} from "./data.mjs";
+import {categories, check_border, weekdays, weekdays2, weekdays_grid} from "./data.mjs";
 import {day_view} from "./render.mjs";
 
 
@@ -17,7 +17,7 @@ $(document).on('click', '#viewWeek', function () {
 })
 
 $(document).on('click', '.weekDay', function (){
-    let day_index = weekdays.indexOf($(this).find('.weekDayText').text())
+    let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
     l_date.get_week_day(day_index)
     day_view()
 
