@@ -62,9 +62,29 @@ function todoHandlers(db) {
                         goal_ids.push(...ids)
                     }
                 }
-
-
                 event.reply('get-week-goals', goals)
+            }
+        })
+    })
+
+
+    ipcMain.on('ask-month-goals', (event, params) => {
+        db.all(`SELECT id, goal, addDate, check_state, goal_pos, category, difficulty, importance
+                FROM goals
+                WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}" and check_state=0
+                ORDER BY addDate, goal_pos`, (err, goals) => {
+            if (err) console.error(err)
+            else {
+                goal_ids = goals.map((goal) => goal.id)
+                let goals_dict = {}
+                for (let i = 0; i < goals.length; i++){
+                    let day = Number(goals[i].addDate.slice(-2))
+
+                    if (day in goals_dict) goals_dict[day].push([goals[i].goal, goals[i].category])
+                    else goals_dict[day] = [[goals[i].goal, goals[i].category]]
+                }
+
+                event.reply('get-month-goals', goals_dict)
             }
         })
     })

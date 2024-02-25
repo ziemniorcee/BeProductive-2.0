@@ -65,7 +65,7 @@ window.goalsAPI.getWeekGoals((goals) => {
         document.querySelector("#Sunday")]).on('drag', function (event) {
 
     }).on('drop', function (event) {
-        let day_id = weekdays.indexOf($(event.parentNode).attr('id'))
+        let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))
         let date = l_date.week_now[day_id]
         let goal_id = $(event).find('.todoId').text()
 

@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeDate: (params) => ipcRenderer.send('change-date', params),
     askSteps: (params) => ipcRenderer.send('ask-steps',params),
     getSteps: (func) => ipcRenderer.on('get-steps', (event, steps) => func(steps)),
+    askMonthGoals: (params) => ipcRenderer.send('ask-month-goals',params),
+    getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
 
 })
 

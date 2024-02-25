@@ -30,6 +30,20 @@ $(document).on('click', '.todo', function (event) {
     }
 });
 
+// $(document).on('click', '.monthTodo', function (event){
+//     event.stopPropagation()
+//     let right_bar = $('#rightbar')
+//     if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
+//
+//     goal_id = $('.monthTodo').index(this)
+//
+//     if (right_bar.css('display') === 'none') show_hide_sidebar()
+//
+//     base = event.target
+//     goal_pressed = true
+//     window.goalsAPI.askSteps({todo_id: $(base).find('.monthTodoId').text()})
+// })
+
 
 // Blocks to do click when children were clicked
 $(document).on('click', '.todo > *', function (event) {

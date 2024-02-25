@@ -99,6 +99,37 @@ class CurrentDate {
 
         $('#date').html(`${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`)
     }
+
+    get_format_month(){
+        let date = new Date(this.day_sql)
+
+        date.setDate(date.getDate() - date.getDate() + 1)
+
+        let current_dayweek = 6
+        if (date.getDay() !== 0) current_dayweek = date.getDay() - 1
+
+
+        let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
+        return [current_dayweek, lastDate.getDate() + current_dayweek]
+    }
+
+    get_sql_month(){
+        let date = new Date(this.day_sql)
+        date.setDate(date.getDate() - date.getDate() + 1)
+
+        let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
+
+        return [this.sql_format(date), this.sql_format(lastDate)]
+    }
+
+    get_sql_month_day(day){
+        let date = new Date(this.day_sql)
+        date.setDate(date.getDate() - date.getDate() + 1)
+
+        date.setDate(date.getDate() + day - 1)
+
+        return this.sql_format(date)
+    }
 }
 
 export let l_date = new CurrentDate()

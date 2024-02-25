@@ -1,25 +1,26 @@
-.weekViewColumn{
+.weekViewColumn {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.weekViewColumn + .weekViewColumn{
+.weekViewColumn + .weekViewColumn {
     margin-left: 20px;
 }
-.weekDay{
+
+.weekDay {
     height: 100%;
     color: white;
     overflow-y: hidden;
 }
 
-.weekDayText{
+.weekDayText {
     text-align: center;
     margin-bottom: 5px;
 }
 
-.weekDayGoals{
+.weekDayGoals {
     border-radius: 10px;
     border: 2px solid #9C9A92;
     height: calc(100% - 50px);
@@ -42,14 +43,14 @@
 }
 
 
-.weekDayGoals .todo{
-    font-size: 15px ;
+.weekDayGoals .todo {
+    font-size: 15px;
     margin-right: 10px;
     margin-left: 10px;
 }
 
-.weekDayGoals .taskText{
-    font-size: 15px ;
+.weekDayGoals .taskText {
+    font-size: 15px;
     margin-right: 10px;
     margin-left: 10px;
     position: relative;
@@ -59,25 +60,25 @@
     flex-direction: column;
 }
 
-.weekDayGoals .task{
+.weekDayGoals .task {
 
 }
 
-.monthWeekDay{
+.monthWeekDay {
     text-align: center;
     width: 100%;
-
     color: white;
+    font-size: 25px;
 }
 
-.monthDay{
+.monthDay {
     border: 1px solid #9C9A92;
     width: 100%;
     height: 100%;
     border-radius: 10px;
 }
 
-#monthHeader{
+#monthHeader {
     display: flex;
     flex-direction: row;
     height: 30px;
@@ -85,7 +86,7 @@
     margin-bottom: 10px;
 }
 
-#monthGrid{
+#monthGrid {
     width: 100%;
     height: 100%;
     display: flex;
@@ -93,13 +94,75 @@
     gap: 10px;
 }
 
-.monthWeek{
+
+.monthWeek {
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: row;
 }
 
-.monthDay + .monthDay{
+.monthGoals {
+    overflow-y: scroll;
+    height: 11.5vh;
+}
+
+.monthGoals::-webkit-scrollbar {
+    width: 2px;
+}
+
+.monthGoals::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+
+}
+
+.monthGoals::-webkit-scrollbar-thumb {
+    background-color: #3B151F;
+    outline: 1px solid #FFC90E;
+}
+
+
+.monthDay {
+    overflow-y: hidden;
+    height: 100%;
+}
+
+.monthDay + .monthDay {
     margin-left: 10px;
+}
+
+.monthDate {
+    font-size: 17px;
+    margin-left: 3px;
+    margin-top: 3px;
+    height: 20px;
+    color: white;
+}
+
+.monthTodo {
+    height: 15px;
+    background-color: #3B78B6;
+    font-size: 13px;
+    margin-left: 5px;
+    margin-right: 5px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 1px;
+    border: solid 1px #363636;
+    color: white;
+}
+
+.monthTodoId {
+    display: none;
+}
+
+.monthTodoLabel {
+    width: 10px;
+    height: 100%;
+    background-color: #002244;
+
+}
+
+.monthTodoText {
+    overflow-wrap: break-word;
 }
