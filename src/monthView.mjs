@@ -1,6 +1,7 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
+import {day_view} from "./render.mjs";
 
 $(document).on('click', '#viewMonth', function () {
     $('#content').css('flexDirection', 'column')
@@ -90,4 +91,16 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
 
         window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
     })
+    l_date.fix_header_month()
+})
+
+$(document).on('click', '.monthDay', function (){
+    console.log("XPP")
+    let day_index = Number($(this).find('.monthDate').text())
+    console.log(day_index)
+    l_date.get_sql_month_day(day_index)
+    day_view()
+
+    $('.viewOption').css('borderColor', "black")
+    $('#viewDay').css('borderColor', "#FFC90E")
 })

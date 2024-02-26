@@ -26,10 +26,10 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
     askSteps: (params) => ipcRenderer.send('ask-steps',params),
-    getSteps: (func) => ipcRenderer.on('get-steps', (event, steps) => func(steps)),
+    getSteps: (func) => ipcRenderer.on('get-steps', (event,goal , steps) => func(goal, steps)),
+
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals',params),
     getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
-
 })
 
 

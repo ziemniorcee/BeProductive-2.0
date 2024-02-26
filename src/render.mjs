@@ -307,7 +307,7 @@ $(document).on('click', '.stepCheck', function () {
         counter_html.innerText = Number(counter_html.innerText) - 1
     }
 
-    window.goalsAPI.changeChecksStep({goal_id: goal_id, step_id: step_id_rel, state: Number(this.checked)})
+    window.goalsAPI.changeChecksStep({id: goal_id, step_id: step_id_rel, state: Number(this.checked)})
 });
 
 $(document).on('click', '#finishedButton', () => {

@@ -160,9 +160,10 @@
     width: 10px;
     height: 100%;
     background-color: #002244;
-
+    pointer-events: none;
 }
 
 .monthTodoText {
     overflow-wrap: break-word;
+    pointer-events: none;
 }

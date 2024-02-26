@@ -47,16 +47,24 @@ function todoHandlers(db) {
     ipcMain.on('ask-week-goals', (event, params) => {
         const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
 
-        db.all(`SELECT id, goal, addDate, check_state, goal_pos, category, difficulty, importance
+        db.all(`SELECT id,
+                       goal,
+                       addDate,
+                       check_state,
+                       goal_pos,
+                       category,
+                       difficulty,
+                       importance
                 FROM goals
-                WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}" and check_state=0
+                WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
+                  and check_state = 0
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
                 goal_ids = []
 
-                for(let i = 0; i < 4; i++){
-                    for(let j = 0; j < weekdays[i].length; j++){
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < weekdays[i].length; j++) {
                         let filtred = goals.filter(record => record.addDate === params.dates[i + j * 3])
                         let ids = filtred.map(record => record.id)
                         goal_ids.push(...ids)
@@ -69,15 +77,23 @@ function todoHandlers(db) {
 
 
     ipcMain.on('ask-month-goals', (event, params) => {
-        db.all(`SELECT id, goal, addDate, check_state, goal_pos, category, difficulty, importance
+        db.all(`SELECT id,
+                       goal,
+                       addDate,
+                       check_state,
+                       goal_pos,
+                       category,
+                       difficulty,
+                       importance
                 FROM goals
-                WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}" and check_state=0
+                WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
+                  and check_state = 0
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
                 goal_ids = goals.map((goal) => goal.id)
                 let goals_dict = {}
-                for (let i = 0; i < goals.length; i++){
+                for (let i = 0; i < goals.length; i++) {
                     let day = Number(goals[i].addDate.slice(-2))
 
                     if (day in goals_dict) goals_dict[day].push([goals[i].goal, goals[i].category])
@@ -92,8 +108,8 @@ function todoHandlers(db) {
 
     ipcMain.on('change-date', (event, params) => {
         db.run(`UPDATE goals
-            SET addDate="${params.date}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET addDate="${params.date}"
+                WHERE id = ${goal_ids[params.id]}`)
 
         for (let i = 0; i < params.order.length; i++) {
             db.run(`UPDATE goals
@@ -103,14 +119,23 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-steps', (event, params) => {
-        db.all(`SELECT id, goal_id, step_text, step_check
-                        FROM steps
-                        WHERE goal_id =${goal_ids[params.todo_id]}`, (err2, steps) => {
-            if (err2) console.error(err2)
+        db.all(`SELECT goal, check_state, goal_pos, category, difficulty, importance
+                FROM goals
+                WHERE id = ${goal_ids[params.todo_id]}
+                ORDER BY goal_pos`, (err, goal) => {
+            if (err) console.error(err)
             else {
-                step_ids = {}
-                step_ids[goal_ids[params.todo_id]] = steps.map((step) => step.id)
-                event.reply('get-steps', steps)
+                db.all(`SELECT id, goal_id, step_text, step_check
+                FROM steps
+                WHERE goal_id = ${goal_ids[params.todo_id]}`, (err2, steps) => {
+                    if (err2) console.error(err2)
+                    else {
+                        step_ids = {}
+                        step_ids[goal_ids[params.todo_id]] = steps.map((step) => step.id)
+
+                        event.reply('get-steps', goal, steps)
+                    }
+                })
             }
         })
     })
@@ -151,11 +176,11 @@ function todoHandlers(db) {
 
     ipcMain.on('goal-removed', (event, params) => {
         db.run(`DELETE
-            FROM goals
-            WHERE id = ${goal_ids[params.id]}`)
+                FROM goals
+                WHERE id = ${goal_ids[params.id]}`)
         db.run(`DELETE
-            FROM steps
-            WHERE goal_id = ${goal_ids[params.id]}`)
+                FROM steps
+                WHERE goal_id = ${goal_ids[params.id]}`)
 
         delete step_ids[goal_ids[params.id]]
         goal_ids.splice(params.id, 1)
@@ -163,29 +188,30 @@ function todoHandlers(db) {
 
     ipcMain.on('change-checks-goal', (event, params) => {
         db.run(`UPDATE goals
-            SET check_state="${Number(params.state)}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET check_state="${Number(params.state)}"
+                WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
         db.run(`UPDATE steps
-            SET step_check="${params.state}"
-            WHERE id = ${step_ids[goal_ids[params.goal_id]][params.step_id]}`)
+                SET step_check="${params.state}"
+                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('change-text-goal', (event, params) => {
         db.run(`UPDATE goals
-            SET goal="${params.input}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET goal="${params.input}"
+                WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('add-step', (event, params) => {
         db.run(`INSERT INTO steps (step_text, goal_id)
-            VALUES ("${params.input}", ${goal_ids[params.id]})`)
+                VALUES ("${params.input}", ${goal_ids[params.id]})`)
 
         db.all(`SELECT id
-            from steps
-            ORDER BY id DESC LIMIT 1`, (err, rows) => {
+                from steps
+                ORDER BY id DESC
+                LIMIT 1`, (err, rows) => {
             if (err) console.error(err)
             else {
                 if (!(goal_ids[params.id] in step_ids)) step_ids[goal_ids[params.id]] = [rows[0].id]
@@ -196,47 +222,47 @@ function todoHandlers(db) {
 
     ipcMain.on('change-step', (event, params) => {
         db.run(`UPDATE steps
-            SET step_text="${params.input}"
-            WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
+                SET step_text="${params.input}"
+                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('remove-step', (event, params) => {
         db.run(`DELETE
-            FROM steps
-            WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
+                FROM steps
+                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
         step_ids[goal_ids[params.id]].splice(params.step_id, 1)
     })
 
     ipcMain.on('change-category', (event, params) => {
         db.run(`UPDATE goals
-            SET category="${params.new_category}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET category="${params.new_category}"
+                WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('change-difficulty', (event, params) => {
         db.run(`UPDATE goals
-            SET Difficulty="${params.difficulty}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET Difficulty="${params.difficulty}"
+                WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('change-importance', (event, params) => {
         db.run(`UPDATE goals
-            SET Importance="${params.importance}"
-            WHERE id = ${goal_ids[params.id]}`)
+                SET Importance="${params.importance}"
+                WHERE id = ${goal_ids[params.id]}`)
     })
 
     ipcMain.on('ask-history', (event, params) => {
         let query = `SELECT id, goal, addDate
-                 FROM goals
-                 WHERE addDate IN (SELECT addDate
-                                   FROM goals
-                                   WHERE addDate < "${params.date}"
-                                     and check_state = 0
-                                   GROUP BY addDate
-                                   ORDER BY addDate DESC
-                     LIMIT 10)
-                   and check_state = 0
-                 ORDER BY addDate DESC;`
+                     FROM goals
+                     WHERE addDate IN (SELECT addDate
+                                       FROM goals
+                                       WHERE addDate < "${params.date}"
+                                         and check_state = 0
+                                       GROUP BY addDate
+                                       ORDER BY addDate DESC
+                                       LIMIT 10)
+                       and check_state = 0
+                     ORDER BY addDate DESC;`
         db.all(query, (err, rows) => {
             if (err) console.error(err)
             else {
@@ -250,10 +276,13 @@ function todoHandlers(db) {
         let parameters = ["test", 1, 2, 2]
 
         db.run(`UPDATE goals
-            SET addDate="${current_date}", goal_pos=${current_goal_pos}
-            WHERE id = ${history_ids[params.id]}`)
+                SET addDate="${current_date}",
+                    goal_pos=${current_goal_pos}
+                WHERE id = ${history_ids[params.id]}`)
 
-        db.all(`SELECT goal ,category, Difficulty, Importance FROM goals WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
+        db.all(`SELECT goal, category, Difficulty, Importance
+                FROM goals
+                WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
                 parameters[0] = goal[0].goal
@@ -264,8 +293,8 @@ function todoHandlers(db) {
         })
 
         db.all(`SELECT id, goal_id, step_text, step_check
-            FROM steps
-            WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
+                FROM steps
+                WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
             if (err2) console.error(err2)
             else {
                 for (let i = 0; i < steps.length; i++) {
@@ -282,15 +311,15 @@ function todoHandlers(db) {
 
     ipcMain.on('side-check-change', (event, params) => {
         db.run(`UPDATE goals
-            SET check_state=1
-            WHERE id = ${history_ids[params.id]}`)
+                SET check_state=1
+                WHERE id = ${history_ids[params.id]}`)
         history_ids.splice(params.id, 1)
     })
 
     ipcMain.on('history-removed', (event, params) => {
         db.run(`DELETE
-            FROM goals
-            WHERE id = ${history_ids[params.id]}`)
+                FROM goals
+                WHERE id = ${history_ids[params.id]}`)
         history_ids.splice(params.id, 1)
     })
 
@@ -306,16 +335,17 @@ function todoHandlers(db) {
 
     ipcMain.on('delete-idea', (event, params) => {
         db.run(`DELETE
-            FROM ideas
-            where id = ${idea_ids[params.id]}`)
+                FROM ideas
+                where id = ${idea_ids[params.id]}`)
         idea_ids.splice(params.id, 1)
 
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category)
-            VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, 1)`)
+                VALUES ("${params.goal_text}", "${current_date}", ${current_goal_pos}, 1)`)
 
         db.all(`SELECT id
-            from goals
-            ORDER BY id DESC LIMIT 1`, (err, rows) => {
+                from goals
+                ORDER BY id DESC
+                LIMIT 1`, (err, rows) => {
             if (err) console.error(err)
             else {
                 goal_ids.push(rows[0].id)
@@ -335,12 +365,14 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('idea-removed', (event, params) => {
-        db.run(`DELETE FROM ideas WHERE id=${idea_ids[params.id]}`)
+        db.run(`DELETE
+                FROM ideas
+                WHERE id = ${idea_ids[params.id]}`)
         idea_ids.splice(params.id, 1)
     })
 }
 
-function appHandlers(mainWindow, floatMenuWindow, floatContentWindow ){ //doesnt work
+function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
     let mainWindow_state = true
     let move_flag = false
     let middle = []
