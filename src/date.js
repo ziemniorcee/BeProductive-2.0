@@ -100,6 +100,7 @@ class CurrentDate {
 
         this.set_attributes(date, 2)
 
+        this.fix_header_month()
         return this.sql_format(date)
     }
 

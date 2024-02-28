@@ -4,7 +4,6 @@ import {categories, check_border, weekdays, weekdays2, weekdays_grid} from "./da
 import {day_view} from "./render.mjs";
 
 
-
 $(document).on('click', '#viewWeek', function () {
     $('#todayButton .dateButtonText').text('This week')
     $('#tomorrowButton .dateButtonText').text('Next week')
@@ -16,7 +15,7 @@ $(document).on('click', '#viewWeek', function () {
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
 })
 
-$(document).on('click', '.weekDay', function (){
+$(document).on('click', '.weekDay', function () {
     let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
     l_date.get_week_day(day_index)
     day_view()
@@ -59,12 +58,7 @@ window.goalsAPI.getWeekGoals((goals) => {
 
     content.html(html)
 
-    dragula([document.querySelector("#Monday"), document.querySelector("#Tuesday"),
-        document.querySelector("#Wednesday"), document.querySelector("#Thursday"),
-        document.querySelector("#Friday"), document.querySelector("#Saturday"),
-        document.querySelector("#Sunday")]).on('drag', function (event) {
-
-    }).on('drop', function (event) {
+    dragula(Array.from($('.weekDayGoals'))).on('drop', function (event) {
         let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))
         let date = l_date.week_now[day_id]
         let goal_id = $(event).find('.todoId').text()

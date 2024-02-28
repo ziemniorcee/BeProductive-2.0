@@ -95,9 +95,7 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
 })
 
 $(document).on('click', '.monthDay', function (){
-    console.log("XPP")
     let day_index = Number($(this).find('.monthDate').text())
-    console.log(day_index)
     l_date.get_sql_month_day(day_index)
     day_view()
 

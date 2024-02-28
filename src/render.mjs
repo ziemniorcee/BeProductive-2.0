@@ -85,10 +85,19 @@ function new_goal() {
 }
 
 
-$(document).on('click', '.selectCategory', function (){
+$(document).on('click', '.selectCategory', function (event){
+    event.stopPropagation()
     if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
     else $('#categoryPicker2').toggle()
 });
+
+$(document).on('click', '#main, #todoInput', function (){
+    $('#categoryPicker').css('display', 'none')
+})
+
+$(document).on('click', '#rightbar', function (){
+    $('#categoryPicker2').css('display', 'none')
+})
 
 $(document).on('click', '.category', function (){
     let index = $(this).closest('.categoryPicker').find('.category').index(this) + 1
@@ -102,7 +111,6 @@ $(document).on('click', '.category', function (){
 
     select_category.css('background', categories[index][0])
     select_category.text(categories[index][1])
-
 });
 
 (function () {

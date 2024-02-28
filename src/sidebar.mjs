@@ -139,6 +139,7 @@ $(document).on('click', '#imgSecond', () =>{
     if (goal_pressed) {
         goal_pressed_false()
         $('#rightbar').html(saved_sidebar)
+        current_sidebar = !current_sidebar
     } else displays[Number(current_sidebar)] = days.html()
 
     days.html(displays[Number(!current_sidebar)])

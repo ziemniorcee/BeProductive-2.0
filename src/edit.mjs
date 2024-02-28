@@ -83,12 +83,16 @@ $(document).on('click', '#editCheck', () => {
 $(document).on('blur', '#editText', () => {
     let input = $('#editText').val()
 
-    if ($(base).find('.task').text() !== input) {
+    if (input === ""){
+        $('#editText').val($(base).find('.task').text().trim())
+    }
+    else if ($(base).find('.task').text().trim() !== input) {
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
 
         window.goalsAPI.changeTextGoal({input: input, id: goal_id})
     }
+
 })
 
 $(document).on('blur', '.editTextStep', function () {
@@ -110,7 +114,7 @@ $(document).on('blur', '.editTextStep', function () {
         }
     }
 
-    if (steps_count < edit_text_step.length) {
+    if (steps_count < edit_text_step.length && index + 1 === edit_text_step.length) {
         if (input !== "") {
             if (!$(base).closest('.weekDayGoals').length) {
                 $(base).find('.steps').append(
@@ -147,7 +151,7 @@ function change_step(index, value) {
 
         $('.editStep').eq(index).remove()
 
-
+        steps_count--
         window.goalsAPI.removeStep({id: goal_id, step_id: index})
     }
 }
@@ -193,7 +197,9 @@ $(document).on('click', '#editNewStep', () => {
 export function change_category(category_id) {
     $(base).find('.todoCheck').css('backgroundColor', categories[category_id][0])
     $(base).find('.monthTodoLabel').css('backgroundColor', categories[category_id][0])
-    $(base).css('backgroundColor', categories2[category_id - 1])
+
+    if ($("#monthGrid").length) $(base).css('backgroundColor', categories2[category_id - 1])
+
 
     if ($(base).find('.stepsShow')) {
         $(base).find('.stepsShow').css('background', categories[category_id][0])
@@ -211,7 +217,6 @@ $(document).on('click', '#editDiff', () => {
 
 
 $(document).on('click', '#editImportance', () => {
-
     let importance = $('#editImportance').val()
     $('.checkDot').eq(goal_pos).css('borderColor', check_border[importance])
     window.goalsAPI.changeImportance({id: goal_id, importance: importance})
