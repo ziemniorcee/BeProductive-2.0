@@ -2,12 +2,14 @@ import {build_goal} from "./render.mjs";
 import {l_date} from './date.js'
 import {goal_pressed, goal_pressed_false, saved_sidebar} from "./edit.mjs";
 import {weekdays, month_names} from "./data.mjs";
+import {dragula_day_view} from "./render.mjs";
 
 let displays = ["", ""]
 
 
 window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
+    displays[0] = ""
     let date = data[0].addDate
     let goals = []
 
@@ -20,6 +22,7 @@ window.sidebarAPI.getHistory((data) => {
         goals.push(data[i].goal)
     }
     load_history(goals, date)
+    dragula_day_view()
 })
 
 function load_history(array, date) {

@@ -13,6 +13,7 @@ $(document).on('click', '#viewMonth', function () {
     show_hide_sidebar(true)
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
+    window.sidebarAPI.askHistory({date: l_date.history_sql})
 })
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
@@ -90,13 +91,14 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
         }
 
         window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+        window.sidebarAPI.askHistory({date: l_date.day_sql})
     })
     l_date.fix_header_month()
 })
 
 $(document).on('click', '.monthDay', function (){
     let day_index = Number($(this).find('.monthDate').text())
-    l_date.get_sql_month_day(day_index)
+    l_date.set_sql_month(day_index)
     day_view()
 
     $('.viewOption').css('borderColor', "black")

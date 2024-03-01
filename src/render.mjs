@@ -6,7 +6,6 @@ window.addEventListener("DOMContentLoaded", () => {
     $('#date').html(l_date.display)
 });
 
-dragula_day_view()
 window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
@@ -353,14 +352,17 @@ export function day_view(){
     build_day_view()
 
     l_date.fix_header_day()
+    window.sidebarAPI.askHistory({date: l_date.day_sql})
     window.goalsAPI.askGoals({date: l_date.day_sql})
     dragula_day_view()
 }
 
-function dragula_day_view(){
+export function dragula_day_view(){
     let tasks = []
+    let dragula_array = Array.from($('.historyTasks'))
+    dragula_array.push(document.querySelector("#todosArea"))
 
-    dragula([document.querySelector("#todosArea")]).on('drag', function (){
+    dragula(dragula_array).on('drag', function (){
         let elements = $('.todoId')
         tasks = []
         for (let i = 0; i < elements.length; i++) {

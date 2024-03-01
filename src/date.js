@@ -5,7 +5,6 @@ class CurrentDate {
         this.today = new Date()
         this.tomorrow = new Date(this.today.getTime())
         this.tomorrow.setDate(this.tomorrow.getDate() + 1)
-
         this.week_now = []
 
         this.set_attributes(this.today, 0)
@@ -16,6 +15,8 @@ class CurrentDate {
         this.week_next = this.set_week(_week_next)
 
         this.month_next = new Date(this.today.getFullYear(), this.today.getMonth() + 1, 1)
+
+        this.history_sql = this.day_sql
     }
 
     get_today() {
@@ -87,6 +88,9 @@ class CurrentDate {
     get_sql_month(){
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
+        let last_history_date = new Date(date)
+        last_history_date.setDate(last_history_date.getDate() -1)
+        this.history_sql = this.sql_format(last_history_date)
 
         let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
 
@@ -98,10 +102,17 @@ class CurrentDate {
         date.setDate(date.getDate() - date.getDate() + 1)
         date.setDate(date.getDate() + day - 1)
 
-        this.set_attributes(date, 2)
-
         this.fix_header_month()
         return this.sql_format(date)
+    }
+
+    set_sql_month(day){
+        let date = new Date(this.day_sql)
+        date.setDate(date.getDate() - date.getDate() + 1)
+
+        date.setDate(date.getDate() + day - 1)
+
+        this.set_attributes(date, 2)
     }
 
     this_month(){
@@ -161,6 +172,7 @@ function date_change(option) {
     $('.todo').remove()
 
     window.goalsAPI.askGoals({date: l_date.day_sql})
+    window.sidebarAPI.askHistory({date: l_date.day_sql})
 }
 
 function week_change(option) {
@@ -168,6 +180,7 @@ function week_change(option) {
     else if (option === 1) l_date.next_week()
 
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
+    window.sidebarAPI.askHistory({date: l_date.week_now[0]})
 }
 
 function month_change(option){
@@ -175,6 +188,7 @@ function month_change(option){
     else if (option === 1) l_date.next_month()
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
+    window.sidebarAPI.askHistory({date: l_date.history_sql})
 }
 
 $(document).on('click', '#todayButton', () => {

@@ -13,6 +13,7 @@ $(document).on('click', '#viewWeek', function () {
     l_date.fix_header_week()
 
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
+    window.sidebarAPI.askHistory({date: l_date.week_now[0]})
 })
 
 $(document).on('click', '.weekDay', function () {
@@ -70,6 +71,7 @@ window.goalsAPI.getWeekGoals((goals) => {
         }
 
         window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+        window.sidebarAPI.askHistory({date: l_date.day_sql})
     })
 })
 
