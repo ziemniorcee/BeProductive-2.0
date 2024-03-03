@@ -9,7 +9,6 @@ $(document).on('click', '#viewWeek', function () {
     $('#tomorrowButton .dateButtonText').text('Next week')
     $('#otherButton .dateButtonText').text('More week')
 
-    show_hide_sidebar(true)
     l_date.fix_header_week()
 
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
@@ -58,6 +57,10 @@ window.goalsAPI.getWeekGoals((goals) => {
     }
 
     content.html(html)
+
+
+    let dragula_array = Array.from($('.historyTasks'))
+    console.log(dragula_array)
 
     dragula(Array.from($('.weekDayGoals'))).on('drop', function (event) {
         let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))

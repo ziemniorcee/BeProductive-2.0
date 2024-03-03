@@ -84,25 +84,25 @@ function new_goal() {
 }
 
 
-$(document).on('click', '.selectCategory', function (event){
+$(document).on('click', '.selectCategory', function (event) {
     event.stopPropagation()
     if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
     else $('#categoryPicker2').toggle()
 });
 
-$(document).on('click', '#main, #todoInput', function (){
+$(document).on('click', '#main, #todoInput', function () {
     $('#categoryPicker').css('display', 'none')
 })
 
-$(document).on('click', '#rightbar', function (){
+$(document).on('click', '#rightbar', function () {
     $('#categoryPicker2').css('display', 'none')
 })
 
-$(document).on('click', '.category', function (){
+$(document).on('click', '.category', function () {
     let index = $(this).closest('.categoryPicker').find('.category').index(this) + 1
-    let select_category =  $('#selectCategory')
+    let select_category = $('#selectCategory')
 
-    if ($(this).closest('.categoryPicker').attr('id') === "categoryPicker2"){
+    if ($(this).closest('.categoryPicker').attr('id') === "categoryPicker2") {
         select_category = $('#selectCategory2')
 
         change_category(index)
@@ -191,7 +191,7 @@ $(document).on('click', '.stepsShow', (event) => show_steps(event));
 
 let input_count = 0
 
-$(document).on('change', '.stepEntry', function (){
+$(document).on('change', '.stepEntry', function () {
     if ($('.stepEntry').index(this) === input_count) {
         input_count += 1
         $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
@@ -333,7 +333,7 @@ export function show_steps(event1) {
 }
 
 
-$(document).on('click', '.viewOption', function (){
+$(document).on('click', '.viewOption', function () {
     $('.viewOption').css('borderColor', "black")
     $(this).css('borderColor', "#FFC90E")
 })
@@ -342,7 +342,7 @@ $(document).on('click', '#viewDay', function () {
     day_view()
 })
 
-export function day_view(){
+export function day_view() {
     $('#content').css('flexDirection', 'column')
 
     $('#todayButton .dateButtonText').text('Today')
@@ -357,32 +357,61 @@ export function day_view(){
     dragula_day_view()
 }
 
-export function dragula_day_view(){
+export function dragula_day_view() {
     let tasks = []
     let dragula_array = Array.from($('.historyTasks'))
     dragula_array.push(document.querySelector("#todosArea"))
 
-    dragula(dragula_array).on('drag', function (){
-        let elements = $('.todoId')
-        tasks = []
-        for (let i = 0; i < elements.length; i++) {
-            tasks.push(elements.eq(i).text())
+    let first_location = ""
+    let drag_sidebar_task = null
+    dragula(dragula_array, {
+        copy: function (el, source) {
+            console.log(el.className)
+            if (el.className === "sidebarTask") return true
+            else return false;
+        },
+        accepts: function (el, target, source, sibling) {
+            if (target.className === "historyTasks") return false
+            else return true
+        },
+    }).on('drag', function (event) {
+        first_location = event.className
+
+        if (first_location === "todo") {
+            let elements = $('.todoId')
+            tasks = []
+            for (let i = 0; i < elements.length; i++) {
+                tasks.push(elements.eq(i).text())
+            }
+        } else {
+            drag_sidebar_task = $(event)
+
         }
-    }).on('drop', function (){
-        let elements = $('.todoId')
-        let new_tasks = []
-        if (tasks.length < elements.length){
-            for (let i = 0; i < elements.length-1; i++) {
-                new_tasks.push(elements.eq(i).text())
+    }).on('drop', function (event) {
+        if (event.className.split(" ", 1)[0] === "todo" && event.parentNode.id === "todosArea") {
+            let elements = $('.todoId')
+            let new_tasks = []
+            if (tasks.length < elements.length) {
+                for (let i = 0; i < elements.length - 1; i++) new_tasks.push(elements.eq(i).text())
+                if (JSON.stringify(tasks) !== JSON.stringify(new_tasks) && tasks.length !== 0) {
+                    window.goalsAPI.rowsChange({after: new_tasks})
+                }
             }
-            if (JSON.stringify(tasks) !== JSON.stringify(new_tasks) && tasks.length!==0) {
-                window.goalsAPI.rowsChange({after: new_tasks})
-            }
+        } else if (first_location === "sidebarTask" && event.parentNode !== null) {
+            let new_goal_pos = -1;
+            let todos = $('#todosArea').children()
+
+            for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
+
+            window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task)})
+
+            if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
+            else drag_sidebar_task.closest('.day').remove()
         }
     });
 }
 
-function build_day_view(){
+function build_day_view() {
     let html = `
         <div id="todosAll">
             <div id="todosArea">
@@ -437,6 +466,7 @@ function build_day_view(){
     `
     $('#content').html(html)
 }
+
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })

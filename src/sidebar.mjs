@@ -47,7 +47,7 @@ function load_history(array, date) {
 
 $(document).on('click', '.historyAdd', function () {
     window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(this)})
-
+    console.log($('.historyAdd').index(this))
     if ($(this).closest('.historyTasks').children().length > 1) $(this).closest('.sidebarTask').remove()
     else $(this).closest('.day').remove()
 })
@@ -60,6 +60,22 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         step_checks.push(steps[j].step_check)
     }
     build_goal(parameters[0].replace("`@`", "'"), step_texts, parameters[1], parameters[2], parameters[3], 0, step_checks)
+
+    let new_goal_pos = -1;
+    let todos = $('#todosArea').children()
+
+    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
+
+    if (new_goal_pos !== -1) {
+        $(todos[new_goal_pos]).replaceWith(todos[todos.length - 1])
+
+        let elements = $('.todoId')
+        let new_tasks = []
+
+        for (let i = 0; i < elements.length; i++) new_tasks.push(elements.eq(i).text())
+
+        window.goalsAPI.rowsChange({after: new_tasks})
+    }
 })
 
 $(document).on('click', '.historyCheck', function () {

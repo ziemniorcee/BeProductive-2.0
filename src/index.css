@@ -84,6 +84,9 @@ body {
     transition: 0.5s;
 }
 
+#todosArea{
+    margin-top: 10px;
+}
 #todoInput {
     width: 100%;
     color: white;
@@ -598,7 +601,8 @@ body {
     margin-top: 10px;
     display: flex;
     padding-bottom: 5px;
-
+    color: white;
+    background-color: #272727;
 }
 
 .sidebarTask span {
@@ -784,6 +788,8 @@ body {
 }
 
 #editCheck {
+    position: relative;
+    top: 3px;
     display: block;
     margin: 0 10px auto;
     min-width: 30px;
@@ -799,7 +805,10 @@ body {
     border-radius: 7px;
     font-size: 25px;
     border: transparent;
+    overflow-y:hidden;
+    resize: none;
     outline: none;
+    font-family: Arial, serif;
 }
 
 
