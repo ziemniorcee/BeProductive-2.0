@@ -273,10 +273,10 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('delete-history', (event, params) => {
-        let parameters = ["test", 1, 2, 2]
+        let parameters = {"goal":"test", "category" : 1, "Importance": 2,"Difficulty": 2}
 
         db.run(`UPDATE goals
-                SET addDate="${current_date}",
+                SET addDate="${params.date}",
                     goal_pos=${current_goal_pos}
                 WHERE id = ${history_ids[params.id]}`)
 
@@ -285,10 +285,10 @@ function todoHandlers(db) {
                 WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
-                parameters[0] = goal[0].goal
-                parameters[1] = goal[0].category
-                parameters[2] = goal[0].Importance
-                parameters[3] = goal[0].Difficulty
+                parameters["goal"] = goal[0].goal
+                parameters["category"] = goal[0].category
+                parameters["Importance"] = goal[0].Importance
+                parameters["Difficulty"] = goal[0].Difficulty
             }
         })
 

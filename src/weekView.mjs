@@ -39,7 +39,7 @@ window.goalsAPI.getWeekGoals((goals) => {
 
             for (let goal_index = 0; goal_index < goals.length; goal_index++) {
                 if (goals[goal_index].addDate === sql_date) {
-                    goals_html += build_weekday(goals[goal_index], todo_id)
+                    goals_html += build_week_goal(goals[goal_index], todo_id)
                     todo_id++;
                 }
             }
@@ -57,26 +57,54 @@ window.goalsAPI.getWeekGoals((goals) => {
     }
 
     content.html(html)
-
-
-    let dragula_array = Array.from($('.historyTasks'))
-    console.log(dragula_array)
-
-    dragula(Array.from($('.weekDayGoals'))).on('drop', function (event) {
-        let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))
-        let date = l_date.week_now[day_id]
-        let goal_id = $(event).find('.todoId').text()
-
-        let order = []
-        let week_day = $(event.parentNode).children()
-        for (let i = 0; i < week_day.length; i++) {
-            order.push(Number(week_day.eq(i).find('.todoId').text()))
-        }
-
-        window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
-        window.sidebarAPI.askHistory({date: l_date.day_sql})
-    })
 })
+
+export function dragula_week_view() {
+    let drag_sidebar_task
+    let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.weekDayGoals')))
+
+    dragula(dragula_array, {
+        copy: function (el) {
+            return el.className === "sidebarTask";
+        },
+        accepts: function (el, target) {
+            return target.className !== "historyTasks";
+        }
+    }).on('drag', function (event) {
+        drag_sidebar_task = $(event)
+    }).on('drop', function (event) {
+        if (event.className.includes("todo")) _change_order(event)
+        else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
+    })
+}
+
+function _change_order(event) {
+    let day_id = weekdays2.indexOf($(event.parentNode).attr('id'))
+    let date = l_date.week_now[day_id]
+    let goal_id = $(event).find('.todoId').text()
+
+    let order = []
+    let week_day = $(event.parentNode).children()
+    for (let i = 0; i < week_day.length; i++) {
+        order.push(Number(week_day.eq(i).find('.todoId').text()))
+    }
+
+    window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+}
+
+function _get_from_sidebar(event, drag_sidebar_task) {
+    let new_goal_pos = -1;
+    let todos = $(event).closest('.weekDayGoals').children()
+
+    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
+
+    let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals').attr("id")
+    let date = l_date.week_current[weekdays2.indexOf(week_day)]
+    window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
+
+    if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
+    else drag_sidebar_task.closest('.day').remove()
+}
 
 $(document).on('click', '.weekDayGoals .check_task', function () {
     const goal_ids = $(`.todoId`)
@@ -91,7 +119,7 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
 });
 
 
-function build_weekday(goal, todo_id) {
+export function build_week_goal(goal, todo_id) {
     let difficulty = `images/goals/rank${goal.Difficulty}.svg`
     let check_state = ""
     let check_bg = ""

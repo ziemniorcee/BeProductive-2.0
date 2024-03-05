@@ -3,13 +3,16 @@ import {l_date} from './date.js'
 import {goal_pressed, goal_pressed_false, saved_sidebar} from "./edit.mjs";
 import {weekdays, month_names} from "./data.mjs";
 import {dragula_day_view} from "./render.mjs";
+import {build_week_goal, dragula_week_view} from "./weekView.mjs";
 
 let displays = ["", ""]
 
 
 window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
+    document.getElementById("days").innerHTML = displays[0] = ""
     displays[0] = ""
+    console.log("XPP")
     let date = data[0].addDate
     let goals = []
 
@@ -22,7 +25,9 @@ window.sidebarAPI.getHistory((data) => {
         goals.push(data[i].goal)
     }
     load_history(goals, date)
-    dragula_day_view()
+
+    if ($('#todosAll').length) dragula_day_view()
+    else dragula_week_view()
 })
 
 function load_history(array, date) {
@@ -46,23 +51,29 @@ function load_history(array, date) {
 }
 
 $(document).on('click', '.historyAdd', function () {
-    window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(this)})
-    console.log($('.historyAdd').index(this))
+    window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(this), date: l_date.day_sql})
     if ($(this).closest('.historyTasks').children().length > 1) $(this).closest('.sidebarTask').remove()
     else $(this).closest('.day').remove()
 })
 
 window.sidebarAPI.historyToGoal((steps, parameters) => {
-    let step_texts = []
-    let step_checks = []
-    for (let j = 0; j < steps.length; j++) {
-        step_texts.push(steps[j].step_text)
-        step_checks.push(steps[j].step_check)
-    }
-    build_goal(parameters[0].replace("`@`", "'"), step_texts, parameters[1], parameters[2], parameters[3], 0, step_checks)
+    let todos = ""
+    if ($('#todosAll').length) {
+        let step_texts = []
+        let step_checks = []
+        for (let j = 0; j < steps.length; j++) {
+            step_texts.push(steps[j].step_text)
+            step_checks.push(steps[j].step_check)
+        }
+        build_goal(parameters.goal.replace("`@`", "'"), step_texts, parameters.category, parameters.importance, parameters.difficulty, 0, step_checks)
 
+        todos = $('#todosArea').children()
+    } else {
+        let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
+        week_day.append(build_week_goal(parameters, $('.todo').length))
+        todos = week_day.children()
+    }
     let new_goal_pos = -1;
-    let todos = $('#todosArea').children()
 
     for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
 
@@ -116,7 +127,7 @@ $(document).on('click', '.ideasAdd', function () {
 
 $(document).on('click', '#ideasAdd', () => new_idea())
 
-$(document).on('keyup', '#ideasEntry',  (e)=> {
+$(document).on('keyup', '#ideasEntry', (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) new_idea()
 });
 
@@ -130,8 +141,8 @@ function new_idea() {
                 <span class="idea">${text}</span><span class="ideasAdd">+</span>
             </div>`
 
-        let ideas =  $('#ideas')
-        ideas.html(idea_formatted +  ideas.html())
+        let ideas = $('#ideas')
+        ideas.html(idea_formatted + ideas.html())
         entry.val('')
 
         window.sidebarAPI.newIdea({text: text.replace("'", "`@`")})
@@ -141,7 +152,7 @@ function new_idea() {
 
 $(document).on('click', '#imgMain', () => show_hide_sidebar())
 
-export function show_hide_sidebar(force= false) {
+export function show_hide_sidebar(force = false) {
     let sidebar = $('#rightbar')
     let sidebar_state = sidebar.css('display') === 'none'
     if (force) sidebar_state = false
@@ -150,9 +161,9 @@ export function show_hide_sidebar(force= false) {
 }
 
 
-$(document).on('click', '#imgSecond', () =>{
+$(document).on('click', '#imgSecond', () => {
     const days = $('#days')
-    const img_main =  $('#imgMain')
+    const img_main = $('#imgMain')
     let current_sidebar = img_main.attr('src') === 'images/goals/idea.png'
 
     if (goal_pressed) {
@@ -163,7 +174,7 @@ $(document).on('click', '#imgSecond', () =>{
 
     days.html(displays[Number(!current_sidebar)])
     $('#head_text').html(current_sidebar ? "History" : "Ideas")
-    days.css('overflow',current_sidebar ? "scroll" : "hidden")
+    days.css('overflow', current_sidebar ? "scroll" : "hidden")
 
 
     img_main.attr('src', `images/goals/${current_sidebar ? "history" : "idea"}.png`)

@@ -354,62 +354,47 @@ export function day_view() {
     l_date.fix_header_day()
     window.sidebarAPI.askHistory({date: l_date.day_sql})
     window.goalsAPI.askGoals({date: l_date.day_sql})
-    dragula_day_view()
 }
+
 
 export function dragula_day_view() {
-    let tasks = []
-    let dragula_array = Array.from($('.historyTasks'))
-    dragula_array.push(document.querySelector("#todosArea"))
+    let drag_sidebar_task
+    let dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
 
-    let first_location = ""
-    let drag_sidebar_task = null
     dragula(dragula_array, {
-        copy: function (el, source) {
-            console.log(el.className)
-            if (el.className === "sidebarTask") return true
-            else return false;
+        copy: function (el) {
+            return el.className === "sidebarTask";
         },
-        accepts: function (el, target, source, sibling) {
-            if (target.className === "historyTasks") return false
-            else return true
-        },
+        accepts: function (el, target) {
+            return target.className !== "historyTasks";
+        }
     }).on('drag', function (event) {
-        first_location = event.className
-
-        if (first_location === "todo") {
-            let elements = $('.todoId')
-            tasks = []
-            for (let i = 0; i < elements.length; i++) {
-                tasks.push(elements.eq(i).text())
-            }
-        } else {
-            drag_sidebar_task = $(event)
-
-        }
+        drag_sidebar_task = $(event)
     }).on('drop', function (event) {
-        if (event.className.split(" ", 1)[0] === "todo" && event.parentNode.id === "todosArea") {
-            let elements = $('.todoId')
-            let new_tasks = []
-            if (tasks.length < elements.length) {
-                for (let i = 0; i < elements.length - 1; i++) new_tasks.push(elements.eq(i).text())
-                if (JSON.stringify(tasks) !== JSON.stringify(new_tasks) && tasks.length !== 0) {
-                    window.goalsAPI.rowsChange({after: new_tasks})
-                }
-            }
-        } else if (first_location === "sidebarTask" && event.parentNode !== null) {
-            let new_goal_pos = -1;
-            let todos = $('#todosArea').children()
-
-            for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
-
-            window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task)})
-
-            if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
-            else drag_sidebar_task.closest('.day').remove()
-        }
+        if (event.className.includes("todo")) _change_order()
+        else if (event.parentNode !== null) _get_from_sidebar(drag_sidebar_task)
     });
 }
+
+function _change_order() {
+    let goals = $('.todoId')
+    let order = []
+    for (let i = 0; i < goals.length - 1; i++) order.push(goals.eq(i).text())
+    window.goalsAPI.rowsChange({after: order})
+}
+
+function _get_from_sidebar(drag_sidebar_task) {
+    let new_goal_pos = 0;
+    let todos = $('#todosArea').children()
+
+    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
+
+    window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: l_date.day_sql})
+
+    if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
+    else drag_sidebar_task.closest('.day').remove()
+}
+
 
 function build_day_view() {
     let html = `
