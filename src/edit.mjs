@@ -15,6 +15,11 @@ let steps_count = 0
 
 let goal_config = {"main_goal": "", "check_state": "", "category": 1, "difficulty": 2, "importance": 2, "steps": ""}
 
+$(document).on('click', '.viewOption', function () {
+    edit_state = 0
+    is_edit_change = false
+})
+
 $(document).on('click', '.todo', function (event) {
     is_edit_change = true
 
@@ -22,6 +27,7 @@ $(document).on('click', '.todo', function (event) {
     else {
         edit_state = 1
         change_goal_main()
+        pre_steps_change()
     }
 
     event.stopPropagation()
@@ -51,7 +57,7 @@ $(document).on('click', '.todo', function (event) {
     is_edit_change = false
 })
 
-$(document).on('click', '.monthTodo', function (event){
+$(document).on('click', '.monthTodo', function (event) {
     event.stopPropagation()
     let right_bar = $('#rightbar')
     if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
@@ -99,15 +105,14 @@ $(document).on('blur', '#editText', () => {
     edit_state = 2
 })
 
-function change_goal_main(){
+function change_goal_main() {
     let edit_text = $('#editText')
     let input = edit_text.val()
 
-    if (input === ""){
+    if (input === "") {
         edit_text.val($(base).find('.task').text().trim())
         edit_text.css('height', `${edit_text[0].scrollHeight}px`)
-    }
-    else if ($(base).find('.task').text().trim() !== input) {
+    } else if ($(base).find('.task').text().trim() !== input) {
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
         window.goalsAPI.changeTextGoal({input: input, id: goal_id})
@@ -115,13 +120,19 @@ function change_goal_main(){
 }
 
 $(document).on('blur', '.editTextStep', function () {
-    const edit_text_step = $('.editTextStep')
-    let index = edit_text_step.index(this)
-    let input = edit_text_step.eq(index).val()
+    if (edit_state === 2) steps_change(this)
+    else if (is_edit_change === false) steps_change(this)
+    edit_state = 2
+})
 
+function steps_change(that) {
+    let edit_text_step = $('.editTextStep')
+    let index = edit_text_step.index(that)
+    let input = edit_text_step.eq(index).val()
+    let steps_count = $(base).find('.step').length
     let category_id = getIdByColor(categories, $(base).find('.todoCheck').css('backgroundColor'))
 
-    if (!$(base).closest('.weekDayGoals').length) {
+    if (!$(base).closest('.weekDayGoals').length && input !== "") {
         if (!$(base).find('.stepsShow').length) {
             $(base).find('.taskText').append(
                 `<div class='stepsShow' style="background: ${categories[category_id][0]}"><img src='images/goals/down.png' alt="up" class="showImg">
@@ -148,8 +159,12 @@ $(document).on('blur', '.editTextStep', function () {
             window.goalsAPI.addStep({input: input, id: goal_id})
         }
     } else change_step(index, input)
-})
+}
 
+function pre_steps_change() {
+    let edit_text_step = $('.editTextStep')
+    if (edit_text_step.length > $(base).find('.step').length) steps_change(edit_text_step.eq(edit_text_step.length - 1))
+}
 
 function change_step(index, value) {
     if (value !== "") {
@@ -288,7 +303,7 @@ window.goalsAPI.getSteps((goal, steps) => {
     steps_count = steps.length
     goal_config["steps"] = steps_html
 
-    if ($('#monthGrid').length){
+    if ($('#monthGrid').length) {
         goal_config["main_goal"] = goal[0].goal
         goal_config["check_state"] = goal[0].check_state === true ? "checked" : ""
         goal_config["category"] = goal[0].category
@@ -348,7 +363,7 @@ function todo_html() {
 
     let edit_text = $('#editText')
     edit_text.css('height', `${edit_text[0].scrollHeight}px`)
-    edit_text.on('input', function (){
+    edit_text.on('input', function () {
         this.style.height = 'auto'
         this.style.height = `${this.scrollHeight}px`
     })

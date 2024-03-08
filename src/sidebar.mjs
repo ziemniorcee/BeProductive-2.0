@@ -4,6 +4,7 @@ import {goal_pressed, goal_pressed_false, saved_sidebar} from "./edit.mjs";
 import {weekdays, month_names} from "./data.mjs";
 import {dragula_day_view} from "./render.mjs";
 import {build_week_goal, dragula_week_view} from "./weekView.mjs";
+import {build_month_goal, dragula_month_view} from "./monthView.mjs";
 
 let displays = ["", ""]
 
@@ -12,7 +13,6 @@ window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
     document.getElementById("days").innerHTML = displays[0] = ""
     displays[0] = ""
-    console.log("XPP")
     let date = data[0].addDate
     let goals = []
 
@@ -27,7 +27,14 @@ window.sidebarAPI.getHistory((data) => {
     load_history(goals, date)
 
     if ($('#todosAll').length) dragula_day_view()
-    else dragula_week_view()
+    else if($('.weekDay').length){
+        dragula_week_view()
+        $('.historyAdd').css('visibility', 'hidden')
+    } else {
+
+        dragula_month_view()
+        $('.historyAdd').css('visibility', 'hidden')
+    }
 })
 
 function load_history(array, date) {
@@ -68,14 +75,21 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         build_goal(parameters.goal.replace("`@`", "'"), step_texts, parameters.category, parameters.importance, parameters.difficulty, 0, step_checks)
 
         todos = $('#todosArea').children()
-    } else {
+    } else if($('.weekDay').length){
         let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
         week_day.append(build_week_goal(parameters, $('.todo').length))
         todos = week_day.children()
+    } else{
+        let month_day = $('.monthGoals .sidebarTask').closest('.monthGoals')
+        month_day.append(build_month_goal(parameters, $('.monthTodo').length))
+        todos = month_day.children()
     }
     let new_goal_pos = -1;
 
-    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
+    let todo_kind = "todo"
+    if ($(".monthDay").length) todo_kind = "monthTodo"
+
+    for (let i = 0; i < todos.length; i++) if (todos[i].className !== todo_kind) new_goal_pos = i
 
     if (new_goal_pos !== -1) {
         $(todos[new_goal_pos]).replaceWith(todos[todos.length - 1])
@@ -83,6 +97,7 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         let elements = $('.todoId')
         let new_tasks = []
 
+        if ($(".monthDay").length) elements = $('.monthTodoId')
         for (let i = 0; i < elements.length; i++) new_tasks.push(elements.eq(i).text())
 
         window.goalsAPI.rowsChange({after: new_tasks})

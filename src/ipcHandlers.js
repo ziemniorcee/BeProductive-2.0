@@ -96,10 +96,9 @@ function todoHandlers(db) {
                 for (let i = 0; i < goals.length; i++) {
                     let day = Number(goals[i].addDate.slice(-2))
 
-                    if (day in goals_dict) goals_dict[day].push([goals[i].goal, goals[i].category])
-                    else goals_dict[day] = [[goals[i].goal, goals[i].category]]
+                    if (day in goals_dict) goals_dict[day].push({"goal": goals[i].goal,"category": goals[i].category})
+                    else goals_dict[day] = [{"goal": goals[i].goal,"category": goals[i].category}]
                 }
-
                 event.reply('get-month-goals', goals_dict)
             }
         })
@@ -221,6 +220,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-step', (event, params) => {
+        console.log("XPP")
         db.run(`UPDATE steps
                 SET step_text="${params.input}"
                 WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)

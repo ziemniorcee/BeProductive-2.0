@@ -10,8 +10,6 @@ $(document).on('click', '#viewMonth', function () {
     $('#tomorrowButton .dateButtonText').text('Next month')
     $('#otherButton .dateButtonText').text('More months')
 
-    show_hide_sidebar(true)
-
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
     window.sidebarAPI.askHistory({date: l_date.history_sql})
 })
@@ -43,13 +41,7 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
 
             if (goals_dict[day] !== undefined) {
                 for (let k = 0; k < goals_dict[day].length; k++) {
-                    goals += `
-                    <div class="monthTodo" style="background-color: ${categories2[goals_dict[day][k][1] - 1]}">
-                        <div class="monthTodoId">${goal_counter}</div>
-                        <div class="monthTodoLabel" style="background-color: ${categories[goals_dict[day][k][1]][0]}"></div>
-                        <div class="monthTodoText" >${goals_dict[day][k][0]}</div>
-                    </div>`
-
+                    goals += build_month_goal(goals_dict[day][k], goal_counter)
                     goal_counter++
                 }
             }
@@ -79,24 +71,61 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
         </div>
     `)
 
-    dragula(Array.from($('.monthGoals'))).on('drop', (event) => {
-        let goal_id = $(event).find('.monthTodoId').text()
-        let day = Number($(event).closest('.monthDay').find('.monthDate').text())
-        let date = l_date.get_sql_month_day(day)
-        let day_goals = $(event).parent().children()
-
-        let order = []
-        for (let i = 0; i < day_goals.length; i++){
-            order.push(Number(day_goals.eq(i).find('.monthTodoId').text()))
-        }
-
-        window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
-        window.sidebarAPI.askHistory({date: l_date.day_sql})
-    })
     l_date.fix_header_month()
 })
 
-$(document).on('click', '.monthDay', function (){
+export function build_month_goal(goals_dict, goal_counter) {
+    let goal = `
+        <div class="monthTodo" style="background-color: ${categories2[goals_dict['category'] - 1]}">
+            <div class="monthTodoId">${goal_counter}</div>
+            <div class="monthTodoLabel" style="background-color: ${categories[goals_dict['category']][0]}"></div>
+            <div class="monthTodoText" >${goals_dict['goal']}</div>
+        </div>`
+    return goal
+}
+
+export function dragula_month_view() {
+    let drag_sidebar_task
+    let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.monthGoals')))
+
+    dragula(dragula_array, {
+        copy: function (el) {
+            return el.className === "sidebarTask";
+        },
+        accepts: function (el, target) {
+            return target.className !== "historyTasks";
+        }
+    }).on('drag', function (event) {
+        drag_sidebar_task = $(event)
+    }).on('drop', (event) => {
+        if (event.className.includes("monthTodo")) {
+            let goal_id = $(event).find('.monthTodoId').text()
+            let day = Number($(event).closest('.monthDay').find('.monthDate').text())
+            let date = l_date.get_sql_month_day(day)
+            let day_goals = $(event).parent().children()
+
+            let order = []
+            for (let i = 0; i < day_goals.length; i++) {
+                order.push(Number(day_goals.eq(i).find('.monthTodoId').text()))
+            }
+
+            window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+        } else if (event.parentNode !== null) {
+            let new_goal_pos = -1;
+            let todos = $(event).closest('.monthGoals').children()
+            for (let i = 0; i < todos.length; i++) if (todos[i].className !== "monthTodo") new_goal_pos = i
+
+            let month_day = Number($('.monthGoals .sidebarTask').closest('.monthDay').find('.monthDate').text())
+            let date = l_date.get_sql_month_day(month_day)
+
+            window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
+            if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
+            else drag_sidebar_task.closest('.day').remove()
+        }
+    })
+}
+
+$(document).on('click', '.monthDay', function () {
     let day_index = Number($(this).find('.monthDate').text())
     l_date.set_sql_month(day_index)
     day_view()
