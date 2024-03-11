@@ -14,7 +14,7 @@ $(document).on('click', '#viewWeek', function () {
     window.sidebarAPI.askHistory({date: l_date.week_now[0]})
 })
 
-$(document).on('click', '.weekDay', function () {
+$(document).on('mousedown', '.weekDay', function () {
     let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
     l_date.get_week_day(day_index)
     day_view()
@@ -24,7 +24,6 @@ $(document).on('click', '.weekDay', function () {
 })
 
 window.goalsAPI.getWeekGoals((goals) => {
-    console.log(goals)
     let content = $('#content')
     content.css('flexDirection', 'row')
 

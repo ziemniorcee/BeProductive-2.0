@@ -125,7 +125,7 @@ export function dragula_month_view() {
     })
 }
 
-$(document).on('click', '.monthDay', function () {
+$(document).on('mousedown', '.monthDay', function () {
     let day_index = Number($(this).find('.monthDate').text())
     l_date.set_sql_month(day_index)
     day_view()

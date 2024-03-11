@@ -220,7 +220,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-step', (event, params) => {
-        console.log("XPP")
         db.run(`UPDATE steps
                 SET step_text="${params.input}"
                 WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
