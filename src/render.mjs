@@ -272,8 +272,16 @@ $(document).on('click', '#todosAll .check_task', function () {
 export function change_check(id) {
     const check_task = $('.check_task').eq(id)
     const dot = $('.checkDot').eq(id)
-    const todo = $('.todo')
-    const goal_id = $('.todoId')
+    let todo
+    let goal_id
+    if ($('#monthGrid').length) {
+        goal_id = $('.monthTodoId')
+        todo = $('.monthTodo')
+    }
+    else {
+        goal_id = $('.todoId')
+        todo = $('.todo')
+    }
 
     let array_id = Number(goal_id.eq(id).html())
     let state = Number(check_task.prop('checked'))
@@ -291,7 +299,7 @@ export function change_check(id) {
     }).get()
 
     window.goalsAPI.changeChecksGoal({id: array_id, state: state})
-    window.goalsAPI.rowsChange({after: new_tasks})
+    if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
 
     let finished_count = $('#todosFinished .todo').length
     $("#finishedButton").css('display', finished_count ? "block" : "none");

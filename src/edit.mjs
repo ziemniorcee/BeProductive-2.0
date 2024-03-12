@@ -10,13 +10,12 @@ let is_edit_change = false
 let goal_pos = 0
 let goal_id = 0
 let steps_count = 0
+let is_new_step = false
 
-$(document).on('mousedown', '.todo', function (event) {
+$(document).on('mousedown', '.todo, .monthTodo', function (event) {
     event.stopPropagation()
     is_edit_change = true
     goal_pressed = true
-    goal_id = Number($(this).find('.todoId').text())
-    goal_pos = $('.todo').index(this)
     base = event.target
 
     let right_bar = $('#rightbar')
@@ -24,17 +23,26 @@ $(document).on('mousedown', '.todo', function (event) {
     if (right_bar.css('display') === 'none') show_hide_sidebar()
 
 
+    if ($('#monthGrid').length) {
+        goal_id = Number($(base).find('.monthTodoId').text())
+        goal_pos = $('.monthTodo').index(this)
+    }
+    else {
+        goal_id = Number($(this).find('.todoId').text())
+        goal_pos = $('.todo').index(this)
+    }
+
     if ($('#todosAll').length) {
         let goal_config = _get_goal_config(base)
         let steps_html = _steps_html(goal_config["steps"], goal_config["steps_checks"])
         right_bar.html(_edit_html(goal_config, steps_html))
         _fix_main_goal_edit()
         steps_count = $(base).find('.step').length
-    } else if ($('.weekDay').length) window.goalsAPI.askSteps({todo_id: goal_id})
+    } else window.goalsAPI.askSteps({todo_id: goal_id})
 })
 
 
-$(document).on('mouseup', '.todo', function () {
+$(document).on('mouseup', '.todo, .monthTodo', function () {
     is_edit_change = false
 })
 
@@ -42,26 +50,8 @@ $(document).on('click', '.viewOption', function () {
     is_edit_change = false
 })
 
-// $(document).on('mousedown', '.monthTodo', function (event) {
-//     event.stopPropagation()
-//     let right_bar = $('#rightbar')
-//     if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
-//
-//     goal_pos = $('.monthTodo').index(this)
-//
-//     if (right_bar.css('display') === 'none') show_hide_sidebar()
-//
-//     base = event.target
-//     goal_pressed = true
-//
-//     goal_id = Number($(base).find('.monthTodoId').text())
-//
-//     window.goalsAPI.askSteps({todo_id: goal_id})
-// })
-
-
 // Blocks to do click when children were clicked
-$(document).on('click', '.todo > *', function (event) {
+$(document).on('mousedown', '.todo > *', function (event) {
     event.stopPropagation()
     close_edit()
 })
@@ -101,8 +91,9 @@ function steps_change(that) {
     let input = edit_text_step.eq(index).val()
 
     if (input !== "") {
+        is_new_step = false
         if ((!$(base).find('.stepsShow').length) && $('#todosAll').length) $(base).find('.taskText').append(_steps_show_html())
-        if (steps_count < edit_text_step.length) {
+        if (steps_count < edit_text_step.length && index === edit_text_step.length - 1) {
             $(base).find('.steps').append(_step_html(input))
             _change_counter(index, 0, 1)
 
@@ -113,9 +104,12 @@ function steps_change(that) {
             window.goalsAPI.changeStep({input: input, id: goal_id, step_id: index})
         }
     } else {
-        _change_counter(index, -1, -1)
-        _remove_step(index)
-        window.goalsAPI.removeStep({id: goal_id, step_id: index})
+        if (!is_new_step) {
+            _change_counter(index, -1, -1)
+            _remove_step(index)
+            window.goalsAPI.removeStep({id: goal_id, step_id: index})
+        }
+        is_new_step = false
     }
 }
 
@@ -142,6 +136,7 @@ $(document).on('click', '#editCheck', () => {
     let state = Number($('#editCheck').prop('checked'))
     $(base).find('.check_task').prop('checked', state)
     change_check(goal_pos)
+    if (!$('#todosAll').length) close_edit()
 
     if (state) goal_pos = $('.todo').length - 1
     else goal_pos = $('#todosArea').children().length - 1
@@ -150,6 +145,7 @@ $(document).on('click', '#editCheck', () => {
 })
 
 $(document).on('click', '.editCheckStep', function () {
+
     const index = $('.editCheckStep').index(this)
     const step_check = $(base).find('.stepCheck').eq(index)
     let counter = $(base).find('.counter')
@@ -168,6 +164,7 @@ $(document).on('click', '.editCheckStep', function () {
 })
 
 $(document).on('click', '#editNewStep', function () {
+    is_new_step = true
     let edit_steps = $('.editTextStep')
 
     if (edit_steps.eq(edit_steps.length - 1).val() !== "") {
@@ -223,13 +220,12 @@ window.goalsAPI.getSteps((goal, steps) => {
     let step_texts = steps.map(step => step.step_text);
     let step_checks = steps.map(step => step.step_check);
     steps_count = step_checks.length
-
     let steps_html = _steps_html(step_texts, step_checks)
-    let goal_config = _get_goal_config(base)
+    let goal_config = _get_goal_config2(goal[0])
+
     $('#rightbar').html(_edit_html(goal_config, steps_html))
     _fix_main_goal_edit()
 })
-
 
 function _edit_html(goal_config, steps_html) {
     return `<div id="editClose">⨉</div>
@@ -300,20 +296,29 @@ function _get_goal_config(that) {
     return goal_config
 }
 
+function _get_goal_config2(goal){
+    let goal_config = {}
+    goal_config["main_goal"] = goal.goal
+    goal_config["check_state"] = goal.check_state === true ? "checked" : ""
+    goal_config["category"] = goal.category
+    goal_config["difficulty"] = goal.Difficulty
+    goal_config["importance"] = goal.Importance
+
+    return goal_config
+}
+
 function _steps_html(steps, checks) {
     let steps_html = ""
 
     for (let i = 0; i < steps.length; i++) {
         let check_state = ""
-        if (checks[i] === true) check_state = "checked"
-
+        if (checks[i]) check_state = "checked"
         steps_html += `
             <div class="editStep">
                 <input type="checkbox" ${check_state} class="editCheckStep">
                 <input type="text" class="editTextStep" value="${steps[i]}" spellcheck="false">
             </div>`
     }
-
     return steps_html
 }
 

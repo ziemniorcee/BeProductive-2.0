@@ -166,6 +166,8 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
+        console.log(params)
+        console.log(goal_ids)
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
@@ -192,6 +194,8 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
+        console.log(step_ids)
+        console.log(params)
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
