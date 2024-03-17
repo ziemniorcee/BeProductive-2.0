@@ -2,7 +2,7 @@ export const categories = {
     1: ["rgb(59, 21, 31)", "None"],
     2: ["rgb(50, 23, 77)", "Work"],
     3: ["rgb(0, 34, 68)", "School"],
-    4: ["rgb(2, 48, 32)", "House"]
+    4: ["rgb(2, 48, 32)", "House"],
 }
 
 export const categories2 = ["rgb(106, 59, 71, 1)", "rgb(97, 51, 142, 1)" ,"rgb(59, 120, 182, 1)", "rgb(32, 121, 90, 1)"]

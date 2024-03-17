@@ -10,6 +10,7 @@ body {
     height: 100%;
     width: 100%;
     font-family: Arial, serif;
+    background-color: #1E1E1E;
 }
 
 #container {
@@ -75,18 +76,46 @@ body {
     padding: 50px;
     flex: 0;
     flex-grow: 1;
-
+    /*opacity: 0.5;*/
 }
 
+#onTopMain {
+    padding: 10px;
+    position: absolute;
+    width: calc(90% - 100px);
+    left: 100px;
+    margin-left: 4%;
+    margin-top: 30px;
+    height: 80%;
+    background-color: #1E1E1E;
+    border: 3px solid #FFC90E;
+    z-index: 3;
+    color: white;
+
+    visibility: hidden;
+}
+
+#mainBlur{
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: #1E1E1E;
+    opacity: 0.5;
+    visibility: hidden;
+    position: absolute;
+    margin-top: -50px;
+    margin-left: -50px;
+}
 #todosAll {
     overflow-y: scroll;
     height: calc(100% - 65px);
     transition: 0.5s;
 }
 
-#todosArea{
+#todosArea {
     margin-top: 10px;
 }
+
 #todoInput {
     width: 100%;
     color: white;
@@ -95,7 +124,7 @@ body {
 
 }
 
-#content{
+#content {
     display: flex;
     flex-direction: column;
     height: calc(100% - 120px);
@@ -197,7 +226,7 @@ body {
     display: block;
 }
 
-#subHeader{
+#subHeader {
     width: 615px;
     color: white;
     margin-top: 15px;
@@ -211,17 +240,18 @@ body {
     border-bottom: solid 3px #3B151F;
 }
 
-#viewContainer{
+#viewContainer {
     display: inline;
     position: absolute;
     right: 0;
 }
 
-#viewText{
+#viewText {
     font-size: 15px;
     padding-left: 10px;
 }
-.viewOption{
+
+.viewOption {
     font-size: 14px;
     display: inline-flex;
     padding: 2px 12px 3px 8px;
@@ -234,10 +264,9 @@ body {
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
-#viewDay{
-    border-color:#FFC90E ;
+#viewDay {
+    border-color: #FFC90E;
 }
-
 
 
 #todosFinished {
@@ -341,8 +370,6 @@ body {
 #finishedButton span {
     pointer-events: none;
 }
-
-
 
 
 #todoEntrySimple {
@@ -583,6 +610,7 @@ body {
     width: 100%;
     text-align: center;
     margin-bottom: 30px;
+
 }
 
 #head span {
@@ -592,6 +620,23 @@ body {
     width: 150px;
 
 }
+
+#gloryButton {
+    width: 50px;
+    height: 50px;
+    background-color: #3B151F;
+    border: 2px solid gold;
+    position: absolute;
+    border-radius: 10px;
+}
+
+#gloryImg {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    top: 5px;
+}
+
 
 .sidebarTask {
     width: 100%;
@@ -803,7 +848,7 @@ body {
     border-radius: 7px;
     font-size: 25px;
     border: transparent;
-    overflow-y:hidden;
+    overflow-y: hidden;
     resize: none;
     outline: none;
     font-family: Arial, serif;
@@ -851,4 +896,113 @@ body {
     position: relative;
     bottom: 2px;
     cursor: pointer;
+}
+
+#gloryHead {
+    height: 50px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#gloryHead span {
+    position: relative;
+    bottom: 15px;
+    font-size: 30px;
+}
+
+
+#gloryContent{
+    width: 100%;
+    height: calc(100% - 60px);
+}
+
+.gloryHalf{
+    height: 50%;
+
+}
+#gloryHalf1{
+    position: relative;
+}
+
+#gloryHalf2{
+    position: relative;
+}
+
+#gloryTimeline{
+    position: absolute;
+    bottom: -18px;
+    width: 92%;
+    margin-left: calc(4% - 5px);
+    height: 5px;
+    background-color: white;
+    border: none;
+}
+.vl{
+    width: 5px;
+    height: 30px;
+    background-color: white;
+}
+
+.dayTimeline{
+    font-size: 20px;
+    position: relative;
+    top: 5px;
+}
+
+#verticalLinesTop{
+    display: flex;
+    justify-content: space-between;
+    width: calc(92%);
+    margin-left: calc(4% - 5px);
+    position: absolute;
+    bottom: 0;
+    height: 30px;
+}
+
+#verticalLinesBottom{
+    display: flex;
+    justify-content: space-between;
+    width: calc(94%);
+    margin-left: calc(4% - 20px);
+    position: absolute;
+    top: 0;
+    height: 30px;
+}
+
+#gloryHalfContentTop{
+    display: flex;
+    margin-left: 0.6%;
+    width: 98%;
+    height: calc(100% - 35px);
+}
+
+#gloryHalfContentBot{
+    display: flex;
+    position: relative;
+    top: 30px;
+    margin-left: 3.6%;
+    width: 92%;
+    height: calc(100% - 35px);
+}
+
+.gloryDay{
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.gloryGoal{
+    height: 50px;
+    width: calc(100% - 14px);
+    max-width: 65px;
+    margin: 5px auto;
+    background: #3B151F url(images/goals/glory0.svg) no-repeat center;
+    border: 2px black solid;
+}
+
+#gloryHalfContentTop .gloryGoals{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
 }

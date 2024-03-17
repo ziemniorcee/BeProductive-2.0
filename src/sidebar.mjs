@@ -27,7 +27,7 @@ window.sidebarAPI.getHistory((data) => {
     load_history(goals, date)
 
     if ($('#todosAll').length) dragula_day_view()
-    else if($('.weekDay').length){
+    else if ($('.weekDay').length) {
         dragula_week_view()
         $('.historyAdd').css('visibility', 'hidden')
     } else {
@@ -54,7 +54,7 @@ function load_history(array, date) {
 
     stringhtml += "</div></div>"
     displays[0] += stringhtml
-    document.getElementById("days").innerHTML = displays[0]
+    $('#days').html(displays[0])
 }
 
 $(document).on('click', '.historyAdd', function () {
@@ -75,11 +75,11 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         build_goal(parameters.goal.replace("`@`", "'"), step_texts, parameters.category, parameters.importance, parameters.difficulty, 0, step_checks)
 
         todos = $('#todosArea').children()
-    } else if($('.weekDay').length){
+    } else if ($('.weekDay').length) {
         let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
         week_day.append(build_week_goal(parameters, $('.todo').length))
         todos = week_day.children()
-    } else{
+    } else {
         let month_day = $('.monthGoals .sidebarTask').closest('.monthGoals')
         month_day.append(build_month_goal(parameters, $('.monthTodo').length))
         todos = month_day.children()
@@ -100,6 +100,7 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         if ($(".monthDay").length) elements = $('.monthTodoId')
         for (let i = 0; i < elements.length; i++) new_tasks.push(elements.eq(i).text())
 
+        console.log(new_tasks)
         window.goalsAPI.rowsChange({after: new_tasks})
     }
 })

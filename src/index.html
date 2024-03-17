@@ -17,12 +17,14 @@
     <script type="module" src="sidebar.mjs"></script>
     <script type="module" src="weekView.mjs"></script>
     <script type="module" src="monthView.mjs"></script>
+    <script type="module" src="glory.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
 
 
 <div id="container">
+
     <div id="leftbar">
         <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
         <a><img src="images/goal1.png" draggable="false" alt="laurels"><span>TO DO</span></a>
@@ -31,6 +33,8 @@
         <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
     </div>
     <div id="main">
+        <div id="onTopMain"></div>
+        <div id="mainBlur"></div>
         <div id="header">
             <button id="todayButton" class="dateButton">
                 <span class="dateButtonImg"><img src="images/goals/today1.png" alt="today" id="todayImg"
@@ -124,6 +128,10 @@
     <div id="resizer"></div>
     <div id="rightbar">
         <div id="head">
+            <div id="gloryButton">
+                <img id="gloryImg" src="images/goals/trophy.png" alt="main">
+            </div>
+
             <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
             <span id="head_text">History</span>
             <img src="images/goals/polaura2.png" alt="polaura" width="25" height="50">

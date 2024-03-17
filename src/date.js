@@ -187,7 +187,7 @@ function month_change(option){
     if (option === 0) l_date.this_month()
     else if (option === 1) l_date.next_month()
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
     window.sidebarAPI.askHistory({date: l_date.history_sql})
 }
 

@@ -10,7 +10,8 @@ $(document).on('click', '#viewMonth', function () {
     $('#tomorrowButton .dateButtonText').text('Next month')
     $('#otherButton .dateButtonText').text('More months')
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
+
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(),  goal_check: 0})
     window.sidebarAPI.askHistory({date: l_date.history_sql})
 })
 
@@ -70,6 +71,7 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
             ${grid}
         </div>
     `)
+
 
     l_date.fix_header_month()
 })

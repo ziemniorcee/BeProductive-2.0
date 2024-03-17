@@ -87,7 +87,7 @@ function todoHandlers(db) {
                        importance
                 FROM goals
                 WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
-                  and check_state = 0
+                  and check_state = ${params.goal_check}
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -96,10 +96,13 @@ function todoHandlers(db) {
                 for (let i = 0; i < goals.length; i++) {
                     let day = Number(goals[i].addDate.slice(-2))
 
-                    if (day in goals_dict) goals_dict[day].push({"goal": goals[i].goal,"category": goals[i].category})
-                    else goals_dict[day] = [{"goal": goals[i].goal,"category": goals[i].category}]
+                    if (day in goals_dict) goals_dict[day].push({"goal": goals[i].goal,"category": goals[i].category, "difficulty": goals[i].Difficulty})
+                    else goals_dict[day] = [{"goal": goals[i].goal,"category": goals[i].category, "difficulty": goals[i].Difficulty}]
                 }
-                event.reply('get-month-goals', goals_dict)
+
+                if (params.goal_check) event.reply('get-month-goals-done', goals_dict)
+                else event.reply('get-month-goals', goals_dict)
+
             }
         })
     })
@@ -166,7 +169,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
-        console.log(params)
         console.log(goal_ids)
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
@@ -194,8 +196,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
-        console.log(step_ids)
-        console.log(params)
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
@@ -288,6 +288,7 @@ function todoHandlers(db) {
                 WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
+                console.log(goal[0])
                 parameters["goal"] = goal[0].goal
                 parameters["category"] = goal[0].category
                 parameters["Importance"] = goal[0].Importance
@@ -307,6 +308,7 @@ function todoHandlers(db) {
             }
             goal_ids.push(history_ids[params.id])
             history_ids.splice(params.id, 1)
+
             event.reply('history-to-goal', steps, parameters)
         })
         current_goal_pos++
