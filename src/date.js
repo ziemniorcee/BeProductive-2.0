@@ -17,6 +17,7 @@ class CurrentDate {
         this.month_next = new Date(this.today.getFullYear(), this.today.getMonth() + 1, 1)
 
         this.history_sql = this.day_sql
+        this.glory_month = this.get_sql_month()
     }
 
     get_today() {
@@ -129,6 +130,29 @@ class CurrentDate {
         if (date.getMonth() === this.today.getMonth()) this.change_images(0)
         else if (date.getMonth() === this.month_next.getMonth()) this.change_images(1)
         else this.change_images(2)
+    }
+
+    glory_prev_month(){
+        let last_date = new Date(this.glory_month[0])
+        last_date.setDate(last_date.getDate() - 1)
+        let date = new Date(last_date)
+        date.setDate(date.getDate() - date.getDate() + 1)
+
+        this.glory_month = [this.sql_format(date), this.sql_format(last_date)]
+        console.log(this.glory_month)
+    }
+
+    glory_next_month(){
+        let date = new Date(this.glory_month[1])
+        date.setDate(date.getDate() + 1)
+
+        let last_date = new Date(date.getFullYear(), date.getMonth()+1, 0)
+        this.glory_month = [this.sql_format(date), this.sql_format(last_date)]
+    }
+
+    get_glory_month(){
+        let date = new Date(this.glory_month[0])
+        return date.getMonth()
     }
 
     set_attributes(date, option) {

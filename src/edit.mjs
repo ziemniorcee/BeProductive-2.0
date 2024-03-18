@@ -1,5 +1,5 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
-import {change_check} from "./render.mjs";
+import {_build_categories, change_check} from "./render.mjs";
 import {categories, categories2, check_border, getIdByColor} from "./data.mjs";
 
 export let saved_sidebar = ""
@@ -228,6 +228,8 @@ window.goalsAPI.getSteps((goal, steps) => {
 })
 
 function _edit_html(goal_config, steps_html) {
+    let categories_html = _build_categories()
+
     return `<div id="editClose">⨉</div>
             <div id="editTodo">
                 <div id="editMain">
@@ -254,22 +256,7 @@ function _edit_html(goal_config, steps_html) {
                     <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${goal_config["difficulty"]}">
                     <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${goal_config["importance"]}">
                     <div class="categoryPicker" id="categoryPicker2">
-                        <div class="category">
-                            <span class="categoryButton"></span>
-                            <span class="categoryName">None</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #32174D"></span>
-                            <span class="categoryName">Work</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #002244"></span>
-                            <span class="categoryName">School</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #023020"></span>
-                            <span class="categoryName">House</span>
-                        </div>
+                        ${categories_html}
                     </div>
                 </div>
             </div>`

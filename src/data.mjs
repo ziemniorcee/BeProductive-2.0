@@ -3,9 +3,12 @@ export const categories = {
     2: ["rgb(50, 23, 77)", "Work"],
     3: ["rgb(0, 34, 68)", "School"],
     4: ["rgb(2, 48, 32)", "House"],
+    5: ["rgb(115, 29, 111)", "Reading"],
+    6: ["rgb(77, 73, 18)", "Japanese"],
 }
 
-export const categories2 = ["rgb(106, 59, 71, 1)", "rgb(97, 51, 142, 1)" ,"rgb(59, 120, 182, 1)", "rgb(32, 121, 90, 1)"]
+export const categories2 = ["rgb(106, 59, 71, 1)", "rgb(97, 51, 142, 1)" ,"rgb(59, 120, 182, 1)",
+    "rgb(32, 121, 90, 1)", "rgb(194, 49, 187)","rgb(166, 157, 39)"]
 
 export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
 

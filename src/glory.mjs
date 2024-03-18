@@ -1,7 +1,7 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
 import {day_view} from "./render.mjs";
-import {categories} from "./data.mjs";
+import {categories, month_names} from "./data.mjs";
 
 $(document).on('click','#gloryButton', function (){
     let on_top_main = $('#onTopMain')
@@ -10,7 +10,7 @@ $(document).on('click','#gloryButton', function (){
     $('#mainBlur').css('visibility', 'visible')
     on_top_main.css('visibility', 'visible')
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 1})
+    window.goalsAPI.askMonthGoals({dates: l_date.glory_month, goal_check: 1})
 })
 
 $(document).on('click', "#mainBlur", function (){
@@ -21,7 +21,64 @@ $(document).on('click', "#mainBlur", function (){
     day_view()
 })
 
+$(document).on('click', '#prevMonth', function (){
+    l_date.glory_prev_month()
+    window.goalsAPI.askMonthGoals({dates: l_date.glory_month, goal_check: 1})
+})
+
+$(document).on('click', '#nextMonth', function (){
+    l_date.glory_next_month()
+    window.goalsAPI.askMonthGoals({dates: l_date.glory_month, goal_check: 1})
+})
+
 window.goalsAPI.getMonthGoalsDone((goals_dict)=>{
+    build_glory(goals_dict)
+})
+
+function build_glory(goals_dict){
+    let vls = _build_vls()
+    let columnsTop = _build_columns(goals_dict, 15, 1)
+    let columnsBot = _build_columns(goals_dict, 14, 2)
+
+    let glory_html=
+        `<div id="gloryHead">
+            <div id="glorySetup">
+                <div id="prevMonth" class="gloryChangeMonth"><img src="images/goals/arrow0.png" alt=""></div>
+                <div id="gloryFormat"><div id="gloryFormatText">Month</div></div>
+                <div id="gloryCurrentSetup"></div>
+                <div id="nextMonth" class="gloryChangeMonth"><img src="images/goals/arrow1.png" alt=""></div>
+            </div>
+            <div>
+                <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
+                <span>Hall of glory</span>
+                <img src="images/goals/polaura2.png" alt="polaura" width="25" height="50">
+            </div>
+        </div>
+        <div id="gloryContent">
+            <div id="gloryHalf1" class="gloryHalf">
+                <div id="gloryHalfContentTop">
+                    ${columnsTop}
+                </div>
+                <div id="verticalLinesTop">
+                    ${vls[0]}
+                </div>
+                <hr id="gloryTimeline">
+            </div>
+            <div id="gloryHalf2" class="gloryHalf">
+                <div id="verticalLinesBottom">
+                    ${vls[1]}
+                </div>
+                <div id="gloryHalfContentBot">
+                    ${columnsBot}
+                </div>
+            </div>
+        </div>`
+
+    $('#onTopMain').html(glory_html)
+    $('#gloryCurrentSetup').text(month_names[l_date.get_glory_month()])
+}
+
+function _build_vls(){
     let vertical_lines_top = ""
     let vertical_lines_bottom = ""
 
@@ -35,20 +92,23 @@ window.goalsAPI.getMonthGoalsDone((goals_dict)=>{
             vertical_lines_bottom += '<div class="vl"></div>'
         }
     }
-    let columnsTop = ""
-    let columnsBot = ""
-    for(let i = 0; i <= 15; i++){
-        let day = i*2+1
+    return [vertical_lines_top, vertical_lines_bottom]
+}
 
+function _build_columns(goals_dict, days, start){
+    let columns = ""
+
+    for(let i = 0; i <= days; i++){
+        let day = i*2+start
         let goals = ""
         if(goals_dict[day] !== undefined) {
             for (let j = 0; j < goals_dict[day].length; j++) {
                 let url = `images/goals/glory${goals_dict[day][j].difficulty}.svg`
-                goals += `<div class="gloryGoal" style='background: ${categories[goals_dict[day][j].category][0]}  url(${url})'></div>`
+                goals += `<div class="gloryGoal" style='background: ${categories[goals_dict[day][j].category][0]}  url(${url}) center'></div>`
             }
         }
 
-        columnsTop +=
+        columns +=
             `<div class='gloryDay'>
                 <div class="gloryGoals">
                     ${goals}
@@ -56,50 +116,5 @@ window.goalsAPI.getMonthGoalsDone((goals_dict)=>{
             </div>`
     }
 
-    for (let i = 0; i <= 14; i++){
-        let day = i*2+2
-        let goals = ""
-        if(goals_dict[day] !== undefined) {
-            for (let j = 0; j < goals_dict[day].length; j++) {
-                let url = `images/goals/glory${goals_dict[day][j].difficulty}.svg`
-                goals += `<div class="gloryGoal" style='background: ${categories[goals_dict[day][j].category][0]}  url(${url})'></div>`
-            }
-        }
-        columnsBot +=
-            `<div class='gloryDay'>
-                <div class="gloryGoals">
-                    ${goals}
-                </div>
-            </div>`
-    }
-
-    let glory_html=
-        `<div id="gloryHead">
-            <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
-            <span>Hall of glory</span>
-            <img src="images/goals/polaura2.png" alt="polaura" width="25" height="50">
-        </div>
-        <div id="gloryContent">
-            <div id="gloryHalf1" class="gloryHalf">
-                <div id="gloryHalfContentTop">
-                    ${columnsTop}
-                </div>
-                <div id="verticalLinesTop">
-                    ${vertical_lines_top}
-                </div>
-                <hr id="gloryTimeline">
-            </div>
-            <div id="gloryHalf2" class="gloryHalf">
-                <div id="verticalLinesBottom">
-                    ${vertical_lines_bottom}
-                </div>
-                <div id="gloryHalfContentBot">
-                    ${columnsBot}
-                </div>
-            </div>
-        </div>`
-
-    $('#onTopMain').html(glory_html)
-
-
-})
+    return columns
+}

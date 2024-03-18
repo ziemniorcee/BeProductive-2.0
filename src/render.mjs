@@ -3,8 +3,10 @@ import {categories, getIdByColor} from "./data.mjs";
 import {close_edit, change_category} from "./edit.mjs";
 
 window.addEventListener("DOMContentLoaded", () => {
+    build_day_view()
     $('#date').html(l_date.display)
 });
+
 
 window.goalsAPI.askGoals({date: l_date.day_sql})
 
@@ -405,6 +407,8 @@ function _get_from_sidebar(drag_sidebar_task) {
 
 
 function build_day_view() {
+    let categories_html = _build_categories()
+
     let html = `
         <div id="todosAll">
             <div id="todosArea">
@@ -436,22 +440,7 @@ function build_day_view() {
                     <input type="range" class="todoRange" id="range2" min="0" max="4">
 
                     <div class="categoryPicker" id="categoryPicker">
-                        <div class="category">
-                            <span class="categoryButton"></span>
-                            <span class="categoryName">None</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #32174D"></span>
-                            <span class="categoryName">Work</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #002244"></span>
-                            <span class="categoryName">School</span>
-                        </div>
-                        <div class="category">
-                            <span class="categoryButton" style="background: #023020"></span>
-                            <span class="categoryName">House</span>
-                        </div>
+                        ${categories_html}
                     </div>
                 </div>
                 </div>
@@ -460,6 +449,17 @@ function build_day_view() {
     $('#content').html(html)
 }
 
+export function _build_categories(){
+    let categories_html = ""
+    for (let i = 0; i < Object.keys(categories).length; i++){
+        categories_html +=
+            `<div class="category">
+                <span class="categoryButton" style="background: ${categories[i+1][0]}"></span>
+                <span class="categoryName">${categories[i+1][1]}</span>
+            </div>`
+    }
+    return categories_html
+}
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })

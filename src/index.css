@@ -285,10 +285,12 @@ body {
 }
 
 #todosAll::-webkit-scrollbar-thumb {
-    background-color: darkgrey;
-    outline: 1px solid slategrey;
+    background-color: #888;
 }
 
+#todosAll::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 .todo {
     margin-right: 5px;
     min-height: 50px;
@@ -482,8 +484,24 @@ body {
     border: 1px solid #FFC90E;
     padding: 10px;
     display: none;
+    overflow-y: scroll;
 }
 
+.categoryPicker::-webkit-scrollbar {
+    width: 10px;
+}
+
+.categoryPicker::-webkit-scrollbar-track {
+    background: #272727;
+}
+
+.categoryPicker::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.categoryPicker::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 #categoryPicker2 {
     top: 41px;
@@ -911,6 +929,47 @@ body {
     font-size: 30px;
 }
 
+#glorySetup{
+    position: absolute;
+    display: flex;
+    left: 20px;
+    font-size: 32px;
+}
+#glorySetup img{
+    width: 30px;
+    height: 30px;
+    position: relative;
+    top: 9px;
+}
+
+#gloryFormat{
+    height: 50px;
+    width: 120px;
+    border: #FFC90E 2px solid;
+    background-color: #3B151F;
+    border-radius: 5px;
+    margin-left: 20px;
+    margin-right: 10px;
+
+}
+#gloryFormatText{
+    position: relative;
+    top: 7px;
+}
+
+#gloryCurrentSetup{
+    position: relative;
+    top: 9px;
+    margin-right: 20px;
+    margin-left: 10px;
+}
+.gloryChangeMonth{
+    width: 50px;
+    height: 50px;
+    border: #FFC90E 2px solid;
+    background-color: #3B151F;
+    border-radius: 5px;
+}
 
 #gloryContent{
     width: 100%;
@@ -990,6 +1049,18 @@ body {
     height: 100%;
     width: 100%;
     position: relative;
+
+}
+.gloryGoals{
+    max-height: 100%;
+    overflow-y: scroll;
+}
+.gloryGoals {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.gloryGoals::-webkit-scrollbar {
+    display: none;
 }
 
 .gloryGoal{

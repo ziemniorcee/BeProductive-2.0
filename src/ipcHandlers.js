@@ -169,7 +169,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
-        console.log(goal_ids)
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
@@ -288,7 +287,6 @@ function todoHandlers(db) {
                 WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
-                console.log(goal[0])
                 parameters["goal"] = goal[0].goal
                 parameters["category"] = goal[0].category
                 parameters["Importance"] = goal[0].Importance
