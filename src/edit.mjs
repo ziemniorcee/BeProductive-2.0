@@ -1,6 +1,15 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
-import {_build_categories, change_check} from "./render.mjs";
+import {
+    _build_categories,
+    change_check,
+    dragula_day_view,
+    set_block_prev_drag_day,
+    set_todo_dragged,
+    todo_dragged
+} from "./render.mjs";
 import {categories, categories2, check_border, getIdByColor} from "./data.mjs";
+import {dragula_week_view, set_block_prev_drag_week} from "./weekView.mjs";
+import {dragula_month_view, set_block_prev_drag_month} from "./monthView.mjs";
 
 export let saved_sidebar = ""
 export let goal_pressed = false
@@ -15,34 +24,37 @@ let is_new_step = false
 $(document).on('mousedown', '.todo, .monthTodo', function (event) {
     event.stopPropagation()
     is_edit_change = true
-    goal_pressed = true
-    base = event.target
-
-    let right_bar = $('#rightbar')
-    if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
-    if (right_bar.css('display') === 'none') show_hide_sidebar()
-
-
-    if ($('#monthGrid').length) {
-        goal_id = Number($(base).find('.monthTodoId').text())
-        goal_pos = $('.monthTodo').index(this)
-    }
-    else {
-        goal_id = Number($(this).find('.todoId').text())
-        goal_pos = $('.todo').index(this)
-    }
-
-    if ($('#todosAll').length) {
-        let goal_config = _get_goal_config(base)
-        let steps_html = _steps_html(goal_config["steps"], goal_config["steps_checks"])
-        right_bar.html(_edit_html(goal_config, steps_html))
-        _fix_main_goal_edit()
-        steps_count = $(base).find('.step').length
-    } else window.goalsAPI.askSteps({todo_id: goal_id})
 })
 
 
 $(document).on('mouseup', '.todo, .monthTodo', function () {
+    if (!todo_dragged && is_edit_change === true) {
+        set_block_prev_drag_day(0)
+        set_block_prev_drag_week(0)
+        set_block_prev_drag_month(0)
+        goal_pressed = true
+        base = event.target
+        let right_bar = $('#rightbar')
+        if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
+        if (right_bar.css('display') === 'none') show_hide_sidebar()
+
+
+        if ($('#monthGrid').length) {
+            goal_id = Number($(base).find('.monthTodoId').text())
+            goal_pos = $('.monthTodo').index(this)
+        } else {
+            goal_id = Number($(this).find('.todoId').text())
+            goal_pos = $('.todo').index(this)
+        }
+
+        if ($('#todosAll').length) {
+            let goal_config = _get_goal_config(base)
+            let steps_html = _steps_html(goal_config["steps"], goal_config["steps_checks"])
+            right_bar.html(_edit_html(goal_config, steps_html))
+            _fix_main_goal_edit()
+            steps_count = $(base).find('.step').length
+        } else window.goalsAPI.askSteps({todo_id: goal_id})
+    } else set_todo_dragged(false)
     is_edit_change = false
 })
 
@@ -54,9 +66,18 @@ $(document).on('click', '.viewOption', function () {
 $(document).on('mousedown', '.todo > *', function (event) {
     event.stopPropagation()
     close_edit()
+
 })
 
-$(document).on('mousedown', '#main', () => close_edit())
+$(document).on('mousedown', '#main', () => {
+    if (goal_pressed) {
+        close_edit()
+        if ($('#todosAll').length) dragula_day_view()
+        else if ($('.weekDay').length) dragula_week_view()
+        else dragula_month_view()
+    }
+
+})
 
 $(document).on('click', '#editClose', () => show_hide_sidebar())
 
@@ -81,7 +102,8 @@ function change_goal_main() {
     } else if ($(base).find('.task').text().trim() !== input) {
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
-        window.goalsAPI.changeTextGoal({input: input, id: goal_id})
+        let converted_text = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+        window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id})
     }
 }
 
@@ -89,6 +111,8 @@ function steps_change(that) {
     let edit_text_step = $('.editTextStep')
     let index = edit_text_step.index(that)
     let input = edit_text_step.eq(index).val()
+
+    let converted_step = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
 
     if (input !== "") {
         is_new_step = false
@@ -98,10 +122,10 @@ function steps_change(that) {
             _change_counter(index, 0, 1)
 
             steps_count++
-            window.goalsAPI.addStep({input: input, id: goal_id})
+            window.goalsAPI.addStep({input: converted_step, id: goal_id})
         } else {
             $(base).find('.step_text').eq(index).text(input)
-            window.goalsAPI.changeStep({input: input, id: goal_id, step_id: index})
+            window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index})
         }
     } else {
         if (!is_new_step) {
@@ -229,12 +253,13 @@ window.goalsAPI.getSteps((goal, steps) => {
 
 function _edit_html(goal_config, steps_html) {
     let categories_html = _build_categories()
+    let converted_text = goal_config["main_goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
 
     return `<div id="editClose">⨉</div>
             <div id="editTodo">
                 <div id="editMain">
                     <input type="checkbox" id="editCheck" ${goal_config["check_state"]}>
-                    <textarea  id="editText" rows="1" spellcheck="false">${goal_config["main_goal"]}</textarea>
+                    <textarea  id="editText" rows="1" spellcheck="false">${converted_text}</textarea>
                 </div>
                 <div id="editStepsContainter">
                     <div id="editSteps">
@@ -283,7 +308,7 @@ function _get_goal_config(that) {
     return goal_config
 }
 
-function _get_goal_config2(goal){
+function _get_goal_config2(goal) {
     let goal_config = {}
     goal_config["main_goal"] = goal.goal
     goal_config["check_state"] = goal.check_state === true ? "checked" : ""
@@ -300,10 +325,12 @@ function _steps_html(steps, checks) {
     for (let i = 0; i < steps.length; i++) {
         let check_state = ""
         if (checks[i]) check_state = "checked"
+        let converted_step = steps[i].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+
         steps_html += `
             <div class="editStep">
                 <input type="checkbox" ${check_state} class="editCheckStep">
-                <input type="text" class="editTextStep" value="${steps[i]}" spellcheck="false">
+                <input type="text" class="editTextStep" value=`+converted_step+` spellcheck="false">
             </div>`
     }
     return steps_html
@@ -334,4 +361,8 @@ function _fix_main_goal_edit() {
         this.style.height = 'auto'
         this.style.height = `${this.scrollHeight}px`
     })
+}
+
+export function set_goal_pos(id){
+    goal_pos = id
 }

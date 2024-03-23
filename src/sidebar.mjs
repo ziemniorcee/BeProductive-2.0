@@ -11,7 +11,7 @@ let displays = ["", ""]
 
 window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
-    document.getElementById("days").innerHTML = displays[0] = ""
+
     displays[0] = ""
     let date = data[0].addDate
     let goals = []
@@ -26,12 +26,13 @@ window.sidebarAPI.getHistory((data) => {
     }
     load_history(goals, date)
 
+    if ($('#head_text').text() === "History") $('#days').html(displays[0])
+
     if ($('#todosAll').length) dragula_day_view()
     else if ($('.weekDay').length) {
         dragula_week_view()
         $('.historyAdd').css('visibility', 'hidden')
     } else {
-
         dragula_month_view()
         $('.historyAdd').css('visibility', 'hidden')
     }
@@ -45,16 +46,17 @@ function load_history(array, date) {
     let stringhtml = `<div class='day'><span class='historyDate'>${display}</span><div class='historyTasks'>`
 
     for (let i = 0; i < array.length; i++) {
+        let converted_text = array[i].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+
         stringhtml += `
         <div class='sidebarTask'>
             <input type='checkbox' class='historyCheck'>
-            <div><span>${array[i].replace("`@`", "'")}</span></div><span class='historyAdd'>+</span>
+            <div><span>${converted_text}</span></div><span class='historyAdd'>+</span>
         </div>`
     }
 
     stringhtml += "</div></div>"
     displays[0] += stringhtml
-    $('#days').html(displays[0])
 }
 
 $(document).on('click', '.historyAdd', function () {
@@ -64,7 +66,8 @@ $(document).on('click', '.historyAdd', function () {
 })
 
 window.sidebarAPI.historyToGoal((steps, parameters) => {
-    let todos = ""
+    let month_day = $(".monthDay")
+    let todos
     if ($('#todosAll').length) {
         let step_texts = []
         let step_checks = []
@@ -72,7 +75,8 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
             step_texts.push(steps[j].step_text)
             step_checks.push(steps[j].step_check)
         }
-        build_goal(parameters.goal.replace("`@`", "'"), step_texts, parameters.category, parameters.importance, parameters.difficulty, 0, step_checks)
+        let converted_text = parameters.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
+        build_goal(converted_text, step_texts, parameters.category, parameters.Importance, parameters.Difficulty, 0, step_checks)
 
         todos = $('#todosArea').children()
     } else if ($('.weekDay').length) {
@@ -87,7 +91,7 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
     let new_goal_pos = -1;
 
     let todo_kind = "todo"
-    if ($(".monthDay").length) todo_kind = "monthTodo"
+    if (month_day.length) todo_kind = "monthTodo"
 
     for (let i = 0; i < todos.length; i++) if (todos[i].className !== todo_kind) new_goal_pos = i
 
@@ -97,10 +101,9 @@ window.sidebarAPI.historyToGoal((steps, parameters) => {
         let elements = $('.todoId')
         let new_tasks = []
 
-        if ($(".monthDay").length) elements = $('.monthTodoId')
+        if (month_day.length) elements = $('.monthTodoId')
         for (let i = 0; i < elements.length; i++) new_tasks.push(elements.eq(i).text())
 
-        console.log(new_tasks)
         window.goalsAPI.rowsChange({after: new_tasks})
     }
 })
@@ -119,9 +122,10 @@ window.sidebarAPI.askIdeas()
 window.sidebarAPI.getIdeas((data) => {
     let ideas_formatted = ""
     for (let i = 0; i < data.length; i++) {
+        let converted_text = data[i].idea.replace(/`@`/g, "'").replace(/`@@`/g, '"')
         ideas_formatted += `
             <div class="sidebarTask">
-                <span class="idea">${data[i].idea.replace("`@`", "`")}</span><span class="ideasAdd">+</span>
+                <span class="idea">${converted_text}</span><span class="ideasAdd">+</span>
             </div>`
     }
     displays[1] =
@@ -161,7 +165,9 @@ function new_idea() {
         ideas.html(idea_formatted + ideas.html())
         entry.val('')
 
-        window.sidebarAPI.newIdea({text: text.replace("'", "`@`")})
+        let converted_text = text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+
+        window.sidebarAPI.newIdea({text: converted_text})
     }
 }
 
@@ -195,6 +201,17 @@ $(document).on('click', '#imgSecond', () => {
 
     img_main.attr('src', `images/goals/${current_sidebar ? "history" : "idea"}.png`)
     $('#imgSecond').attr('src', `images/goals/${current_sidebar ? "idea" : "history"}.png`)
+
+    if (current_sidebar) {
+        if ($('#todosAll').length) dragula_day_view()
+        else if ($('.weekDay').length) {
+            dragula_week_view()
+            $('.historyAdd').css('visibility', 'hidden')
+        } else {
+            dragula_month_view()
+            $('.historyAdd').css('visibility', 'hidden')
+        }
+    }
 })
 
 

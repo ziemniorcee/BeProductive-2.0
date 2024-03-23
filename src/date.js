@@ -16,7 +16,7 @@ class CurrentDate {
 
         this.month_next = new Date(this.today.getFullYear(), this.today.getMonth() + 1, 1)
 
-        this.history_sql = this.day_sql
+        this.month_current = this.set_current_month()
         this.glory_month = this.get_sql_month()
     }
 
@@ -86,12 +86,19 @@ class CurrentDate {
         return [current_dayweek, lastDate.getDate() + current_dayweek]
     }
 
+    set_current_month(){
+        let date = new Date(this.day_sql)
+        date.setDate(date.getDate() - date.getDate() + 1)
+        let last_history_date = new Date(date)
+        last_history_date.setDate(last_history_date.getDate() -1)
+        return this.sql_format(last_history_date)
+    }
+
     get_sql_month(){
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
         let last_history_date = new Date(date)
         last_history_date.setDate(last_history_date.getDate() -1)
-        this.history_sql = this.sql_format(last_history_date)
 
         let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
 
@@ -139,7 +146,6 @@ class CurrentDate {
         date.setDate(date.getDate() - date.getDate() + 1)
 
         this.glory_month = [this.sql_format(date), this.sql_format(last_date)]
-        console.log(this.glory_month)
     }
 
     glory_next_month(){
@@ -196,7 +202,6 @@ function date_change(option) {
     $('.todo').remove()
 
     window.goalsAPI.askGoals({date: l_date.day_sql})
-    window.sidebarAPI.askHistory({date: l_date.day_sql})
 }
 
 function week_change(option) {
@@ -204,7 +209,6 @@ function week_change(option) {
     else if (option === 1) l_date.next_week()
 
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
-    window.sidebarAPI.askHistory({date: l_date.week_now[0]})
 }
 
 function month_change(option){
@@ -212,7 +216,6 @@ function month_change(option){
     else if (option === 1) l_date.next_month()
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
-    window.sidebarAPI.askHistory({date: l_date.history_sql})
 }
 
 $(document).on('click', '#todayButton', () => {

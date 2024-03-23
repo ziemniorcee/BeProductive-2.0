@@ -1,7 +1,7 @@
-import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
-import {categories, check_border, weekdays, weekdays2, weekdays_grid} from "./data.mjs";
-import {day_view} from "./render.mjs";
+import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
+import {day_view, set_todo_dragged} from "./render.mjs";
+import {set_goal_pos} from "./edit.mjs";
 
 
 $(document).on('click', '#viewWeek', function () {
@@ -11,7 +11,7 @@ $(document).on('click', '#viewWeek', function () {
 
     l_date.fix_header_week()
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
-    window.sidebarAPI.askHistory({date: l_date.week_now[0]})
+    window.sidebarAPI.askHistory({date: l_date.week_current[0]})
 })
 
 $(document).on('mousedown', '.weekDay', function () {
@@ -58,7 +58,10 @@ window.goalsAPI.getWeekGoals((goals) => {
     content.html(html)
 })
 
+let block_prev_drag = 0
+
 export function dragula_week_view() {
+    block_prev_drag = 0
     let drag_sidebar_task
     let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.weekDayGoals')))
 
@@ -67,14 +70,30 @@ export function dragula_week_view() {
             return el.className === "sidebarTask";
         },
         accepts: function (el, target) {
+            block_prev_drag = 0
             return target.className !== "historyTasks";
-        }
+        },
+        moves: function () {
+            if (block_prev_drag === 0) {
+                block_prev_drag = 1
+                return true
+            } else return false
+        },
     }).on('drag', function (event) {
         drag_sidebar_task = $(event)
+        set_todo_dragged(true)
+        block_prev_drag = 0
     }).on('drop', function (event) {
+        let new_goal_pos = $('.todo').index($(event))
+        set_goal_pos(new_goal_pos)
+
         if (event.className.includes("todo")) _change_order(event)
         else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
     })
+}
+
+export function set_block_prev_drag_week(option) {
+    block_prev_drag = option
 }
 
 function _change_order(event) {
@@ -128,17 +147,17 @@ export function build_week_goal(goal, todo_id) {
         check_bg = "url('images/goals/check.png')"
     }
 
-    let todo = `
+    let converted_text = goal.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
+
+    return `
         <div class="todo">
             <div class="todoId">${todo_id}</div>
             <div class="todoCheck" style="background: ${categories[goal.category][0]} url(${difficulty}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.Importance]} solid"></div>
                 <input type="checkbox" class="check_task" ${check_state}>
             </div>
-            <div class="taskText"><span class="task">${goal.goal}</span></div>
-        </div>`
-
-    return todo;
+            <div class="taskText"><span class="task">${converted_text}</span></div>
+        </div>`;
 }
 
 

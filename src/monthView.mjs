@@ -1,7 +1,7 @@
-import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
-import {day_view} from "./render.mjs";
+import {day_view, set_todo_dragged} from "./render.mjs";
+import {set_goal_pos} from "./edit.mjs";
 
 $(document).on('click', '#viewMonth', function () {
     $('#content').css('flexDirection', 'column')
@@ -11,16 +11,14 @@ $(document).on('click', '#viewMonth', function () {
     $('#otherButton .dateButtonText').text('More months')
 
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(),  goal_check: 0})
-    window.sidebarAPI.askHistory({date: l_date.history_sql})
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
+    window.sidebarAPI.askHistory({date: l_date.month_current})
 })
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
     let month_params = l_date.get_format_month()
     let month_counter = 0;
     let goal_counter = 0;
-
-    let html = ""
 
     let header = ""
     for (let i = 0; i < 7; i++) {
@@ -77,16 +75,19 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
 })
 
 export function build_month_goal(goals_dict, goal_counter) {
-    let goal = `
+    let converted_text = goals_dict['goal'].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+    return `
         <div class="monthTodo" style="background-color: ${categories2[goals_dict['category'] - 1]}">
             <div class="monthTodoId">${goal_counter}</div>
             <div class="monthTodoLabel" style="background-color: ${categories[goals_dict['category']][0]}"></div>
-            <div class="monthTodoText" >${goals_dict['goal']}</div>
+            <div class="monthTodoText" >${converted_text}</div>
         </div>`
-    return goal
 }
 
+let block_prev_drag = 0
+
 export function dragula_month_view() {
+    block_prev_drag = 0
     let drag_sidebar_task
     let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.monthGoals')))
 
@@ -95,10 +96,22 @@ export function dragula_month_view() {
             return el.className === "sidebarTask";
         },
         accepts: function (el, target) {
+            block_prev_drag = 0
             return target.className !== "historyTasks";
-        }
+        },
+        moves: function () {
+            if (block_prev_drag === 0) {
+                block_prev_drag = 1
+                return true
+            } else return false
+        },
     }).on('drag', function (event) {
+        let new_goal_id = $('.monthTodo').index($(event))
+        set_goal_pos(new_goal_id)
+
         drag_sidebar_task = $(event)
+        set_todo_dragged(true)
+        block_prev_drag = 0
     }).on('drop', (event) => {
         if (event.className.includes("monthTodo")) {
             let goal_id = $(event).find('.monthTodoId').text()
@@ -125,6 +138,10 @@ export function dragula_month_view() {
             else drag_sidebar_task.closest('.day').remove()
         }
     })
+}
+
+export function set_block_prev_drag_month(option) {
+    block_prev_drag = option
 }
 
 $(document).on('mousedown', '.monthDay', function () {

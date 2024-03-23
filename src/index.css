@@ -114,6 +114,7 @@ body {
 
 #todosArea {
     margin-top: 10px;
+    min-height: 200px;
 }
 
 #todoInput {
@@ -419,6 +420,7 @@ body {
     flex-grow: 1;
     padding: 10px;
     overflow-y: scroll;
+    min-height: 230px;
 }
 
 

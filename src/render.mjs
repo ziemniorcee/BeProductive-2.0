@@ -1,6 +1,8 @@
 import {l_date} from './date.js'
 import {categories, getIdByColor} from "./data.mjs";
-import {close_edit, change_category} from "./edit.mjs";
+import {close_edit, change_category, set_goal_pos} from "./edit.mjs";
+
+export let todo_dragged = false
 
 window.addEventListener("DOMContentLoaded", () => {
     build_day_view()
@@ -21,7 +23,8 @@ window.goalsAPI.getGoals((goals, steps) => {
                 steps_checks.push(steps[j].step_check)
             }
         }
-        build_goal(goals[i].goal.replace("`@`", "`"), goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
+        let converted_text = goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
+        build_goal(converted_text, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
     }
 
     let finished_count = $('#todosFinished .todo').length
@@ -35,7 +38,6 @@ $(document).on('click', '#todoInput', (event) => {
     event.stopPropagation()
     $("#todoEntryComplex").css({"height": "250px", "visibility": "visible"});
     $("#todosAll").css({"height": "calc(100% - 315px)"});
-
 })
 
 $(document).on('click', '#main', () => {
@@ -61,11 +63,15 @@ function new_goal() {
 
         let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
         let steps = []
+        let safe_steps = []
 
         let steps_elements = $('.stepEntry')
         for (let i = 0; i < steps_elements.length; i++) {
             let step_value = steps_elements[i].value
-            if (step_value !== "") steps.push(step_value)
+            if (step_value !== "") {
+                steps.push(step_value)
+                safe_steps.push(step_value.replace(/'/g, "`@`").replace(/"/g, "`@@`"))
+            }
         }
 
         e_todo.val('')
@@ -75,9 +81,11 @@ function new_goal() {
         }
 
         build_goal(goal_text, steps, new_category, importance, difficulty)
+
+        let converted_text = goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
         window.goalsAPI.newGoal({
-            goal_text: goal_text.replace("'", "`@`"),
-            steps: steps,
+            goal_text: converted_text,
+            steps: safe_steps,
             category: new_category,
             difficulty: difficulty,
             importance: importance,
@@ -165,9 +173,10 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
             let step_check = ""
             if (step_checks[i] === 1) step_check = "checked"
 
+            let converted_step = steps[i].replace(/`@`/g, "'").replace(/`@@`/g, '"')
             steps_HTML +=
                 `<div class='step'>
-                    <input type='checkbox' ${step_check} class='stepCheck'> <span class="step_text">${steps[i]}</span>
+                    <input type='checkbox' ${step_check} class='stepCheck'> <span class="step_text">${converted_step}</span>
                 </div>`
         }
         steps_HTML += "</div>"
@@ -197,9 +206,22 @@ $(document).on('change', '.stepEntry', function () {
     if ($('.stepEntry').index(this) === input_count) {
         input_count += 1
         $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
-        document.getElementsByClassName('stepEntry')[input_count].focus()
     }
 });
+
+$(document).on('keydown', '.stepEntry', function(event) {
+    if (event.which === 9) {
+        let step_entry = $('.stepEntry')
+        if (step_entry.index(this) === input_count && $(this).val() !== "") {
+            event.preventDefault();
+            input_count += 1
+            $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
+            step_entry.eq(input_count).focus()
+        }
+        else if ($(this).val() === "") event.preventDefault();
+    }
+});
+
 
 (function () {
     let selected_div = null
@@ -279,8 +301,7 @@ export function change_check(id) {
     if ($('#monthGrid').length) {
         goal_id = $('.monthTodoId')
         todo = $('.monthTodo')
-    }
-    else {
+    } else {
         goal_id = $('.todoId')
         todo = $('.todo')
     }
@@ -362,12 +383,15 @@ export function day_view() {
     build_day_view()
 
     l_date.fix_header_day()
-    window.sidebarAPI.askHistory({date: l_date.day_sql})
+
+    window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
     window.goalsAPI.askGoals({date: l_date.day_sql})
 }
 
+let block_prev_drag = 0
 
 export function dragula_day_view() {
+    block_prev_drag = 0
     let drag_sidebar_task
     let dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
 
@@ -376,14 +400,35 @@ export function dragula_day_view() {
             return el.className === "sidebarTask";
         },
         accepts: function (el, target) {
+            block_prev_drag = 0
             return target.className !== "historyTasks";
-        }
+
+        },
+        moves: function () {
+            if (block_prev_drag === 0) {
+                block_prev_drag = 1
+                return true
+            } else return false
+        },
     }).on('drag', function (event) {
+        todo_dragged = true
         drag_sidebar_task = $(event)
+        block_prev_drag = 0
     }).on('drop', function (event) {
+        let new_goal_pos = $('.todo').index($(event))
+        set_goal_pos(new_goal_pos)
+
         if (event.className.includes("todo")) _change_order()
         else if (event.parentNode !== null) _get_from_sidebar(drag_sidebar_task)
     });
+}
+
+export function set_block_prev_drag_day(option) {
+    block_prev_drag = option
+}
+
+export function set_todo_dragged(bool) {
+    todo_dragged = bool
 }
 
 function _change_order() {
@@ -449,17 +494,18 @@ function build_day_view() {
     $('#content').html(html)
 }
 
-export function _build_categories(){
+export function _build_categories() {
     let categories_html = ""
-    for (let i = 0; i < Object.keys(categories).length; i++){
+    for (let i = 0; i < Object.keys(categories).length; i++) {
         categories_html +=
             `<div class="category">
-                <span class="categoryButton" style="background: ${categories[i+1][0]}"></span>
-                <span class="categoryName">${categories[i+1][1]}</span>
+                <span class="categoryButton" style="background: ${categories[i + 1][0]}"></span>
+                <span class="categoryName">${categories[i + 1][1]}</span>
             </div>`
     }
     return categories_html
 }
+
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })
