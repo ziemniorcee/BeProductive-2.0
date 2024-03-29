@@ -125,7 +125,7 @@ $(document).on('click', '.category', function () {
 (function () {
     let backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
 
-    $(document).on('input', '#range1', function () {
+    $(document).on('input', '#range1, #editDiff', function () {
         let x = this.value
         $(this).css('background', backgrounds[x])
     })
@@ -134,7 +134,7 @@ $(document).on('click', '.category', function () {
 (function () {
     let backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
 
-    $(document).on('input', '#range2', function () {
+    $(document).on('input', '#range2, #editImportance', function () {
         let x = this.value
         $(this).css('background', backgrounds[x])
     })
@@ -390,6 +390,12 @@ export function day_view() {
 
 let block_prev_drag = 0
 
+$(document).on('click', '.sidebarTask', function (){
+    block_prev_drag = 0
+})
+
+
+
 export function dragula_day_view() {
     block_prev_drag = 0
     let drag_sidebar_task
@@ -402,7 +408,6 @@ export function dragula_day_view() {
         accepts: function (el, target) {
             block_prev_drag = 0
             return target.className !== "historyTasks";
-
         },
         moves: function () {
             if (block_prev_drag === 0) {

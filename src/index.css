@@ -659,26 +659,43 @@ body {
 
 
 .sidebarTask {
+    font-size: 16px;
+    overflow: hidden;
     width: 100%;
     border-bottom: solid 1px black;
-    margin-top: 10px;
+    margin-top: 15px;
     display: flex;
-    padding-bottom: 5px;
     color: white;
     background-color: #272727;
 }
 
 .sidebarTask span {
     word-break: break-word;
-    position: relative;
-    bottom: 5px;
-    right: 5px;
+
 }
 
 .sidebarTask div {
-    margin-bottom: auto;
-    margin-top: auto;
+    padding-bottom: 10px;
     pointer-events: none;
+}
+
+.monthDay .sidebarTask{
+    height: 17px;
+    font-size: 13px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 0;
+
+}
+
+.monthDay .sidebarTask div {
+    position: relative;
+    top: 4px;
+    right: 10px;
+}
+
+.monthDay .sidebarTask .historyCheck{
+    visibility: hidden;
 }
 
 .historyCheck {
@@ -687,8 +704,6 @@ body {
     margin-bottom: auto;
     min-width: 20px;
     min-height: 20px;
-    position: relative;
-    top: 10px;
     margin-right: 10px;
     clip-path: circle(46% at 50% 50%);
 }
@@ -714,6 +729,8 @@ body {
     margin-right: 5px;
     cursor: pointer;
     font-size: 40px;
+    position: relative;
+    bottom: 10px;
 }
 
 

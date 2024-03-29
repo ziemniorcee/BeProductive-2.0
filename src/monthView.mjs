@@ -86,6 +86,10 @@ export function build_month_goal(goals_dict, goal_counter) {
 
 let block_prev_drag = 0
 
+$(document).on('click', '.sidebarTask', function (){
+    block_prev_drag = 0
+})
+
 export function dragula_month_view() {
     block_prev_drag = 0
     let drag_sidebar_task
@@ -100,6 +104,7 @@ export function dragula_month_view() {
             return target.className !== "historyTasks";
         },
         moves: function () {
+
             if (block_prev_drag === 0) {
                 block_prev_drag = 1
                 return true
@@ -112,6 +117,7 @@ export function dragula_month_view() {
         drag_sidebar_task = $(event)
         set_todo_dragged(true)
         block_prev_drag = 0
+
     }).on('drop', (event) => {
         if (event.className.includes("monthTodo")) {
             let goal_id = $(event).find('.monthTodoId').text()

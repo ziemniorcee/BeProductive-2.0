@@ -121,19 +121,21 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-steps', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.all(`SELECT goal, check_state, goal_pos, category, difficulty, importance
                 FROM goals
-                WHERE id = ${goal_ids[params.todo_id]}
+                WHERE id = ${ids_array[params.todo_id]}
                 ORDER BY goal_pos`, (err, goal) => {
             if (err) console.error(err)
             else {
                 db.all(`SELECT id, goal_id, step_text, step_check
                 FROM steps
-                WHERE goal_id = ${goal_ids[params.todo_id]}`, (err2, steps) => {
+                WHERE goal_id = ${ids_array[params.todo_id]}`, (err2, steps) => {
                     if (err2) console.error(err2)
                     else {
-                        step_ids = {}
-                        step_ids[goal_ids[params.todo_id]] = steps.map((step) => step.id)
+                        step_ids[ids_array[params.todo_id]] = steps.map((step) => step.id)
 
                         event.reply('get-steps', goal, steps)
                     }
@@ -141,7 +143,6 @@ function todoHandlers(db) {
             }
         })
     })
-
 
     ipcMain.on('new-goal', (event, params) => {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
@@ -201,14 +202,20 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-text-goal', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`UPDATE goals
                 SET goal="${params.input}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('add-step', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`INSERT INTO steps (step_text, goal_id)
-                VALUES ("${params.input}", ${goal_ids[params.id]})`)
+                VALUES ("${params.input}", ${ids_array[params.id]})`)
 
         db.all(`SELECT id
                 from steps
@@ -216,41 +223,56 @@ function todoHandlers(db) {
                 LIMIT 1`, (err, rows) => {
             if (err) console.error(err)
             else {
-                if (!(goal_ids[params.id] in step_ids)) step_ids[goal_ids[params.id]] = [rows[0].id]
-                step_ids[goal_ids[params.id]].push(rows[0].id)
+                if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
+                step_ids[ids_array[params.id]].push(rows[0].id)
             }
         })
     })
 
     ipcMain.on('change-step', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`UPDATE steps
                 SET step_text="${params.input}"
-                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
+                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('remove-step', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`DELETE
                 FROM steps
-                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
-        step_ids[goal_ids[params.id]].splice(params.step_id, 1)
+                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
+        step_ids[ids_array[params.id]].splice(params.step_id, 1)
     })
 
     ipcMain.on('change-category', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`UPDATE goals
                 SET category="${params.new_category}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('change-difficulty', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`UPDATE goals
                 SET Difficulty="${params.difficulty}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${history_ids[params.id]}`)
     })
 
     ipcMain.on('change-importance', (event, params) => {
+        let ids_array = goal_ids
+        if(params.option) ids_array = history_ids
+
         db.run(`UPDATE goals
                 SET Importance="${params.importance}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${history_ids[params.id]}`)
     })
 
     ipcMain.on('ask-history', (event, params) => {

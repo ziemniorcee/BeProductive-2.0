@@ -43,6 +43,8 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     removingHistory: (callback) => ipcRenderer.on("removing-history", callback),
     historyRemoved: (params) => ipcRenderer.send('history-removed', params),
 
+    historyEdit: (params) => ipcRenderer.send('history-edit',params),
+
     askIdeas: (params) => ipcRenderer.send('ask-ideas',params),
     getIdeas: (func) => ipcRenderer.on('get-ideas', (event, data) => func(data)),
     deleteIdea: (params) => ipcRenderer.send('delete-idea', params),

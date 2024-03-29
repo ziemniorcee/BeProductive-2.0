@@ -60,6 +60,10 @@ window.goalsAPI.getWeekGoals((goals) => {
 
 let block_prev_drag = 0
 
+$(document).on('click', '.sidebarTask', function (){
+    block_prev_drag = 0
+})
+
 export function dragula_week_view() {
     block_prev_drag = 0
     let drag_sidebar_task

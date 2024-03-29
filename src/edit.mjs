@@ -20,15 +20,17 @@ let goal_pos = 0
 let goal_id = 0
 let steps_count = 0
 let is_new_step = false
+let is_from_sidebar = false
 
-$(document).on('mousedown', '.todo, .monthTodo', function (event) {
+$(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) {
     event.stopPropagation()
     is_edit_change = true
 })
 
 
-$(document).on('mouseup', '.todo, .monthTodo', function () {
+$(document).on('mouseup', '.todo, .monthTodo, .sidebarTask', function () {
     if (!todo_dragged && is_edit_change === true) {
+        is_from_sidebar = false
         set_block_prev_drag_day(0)
         set_block_prev_drag_week(0)
         set_block_prev_drag_month(0)
@@ -39,24 +41,31 @@ $(document).on('mouseup', '.todo, .monthTodo', function () {
         if (right_bar.css('display') === 'none') show_hide_sidebar()
 
 
-        if ($('#monthGrid').length) {
+        goal_id = Number($(this).find('.todoId').text())
+        goal_pos = $('.todo').index(this)
+
+        if ($(this).attr('class') === 'sidebarTask') {
+            is_from_sidebar = true
+            goal_id = $('.sidebarTask').index(this)
+            window.goalsAPI.askSteps({todo_id: goal_id, option: is_from_sidebar})
+        } else if ($('#todosAll').length) _build_edit()
+        else if ($('.weekDay').length) window.goalsAPI.askSteps({todo_id: goal_id, option: is_from_sidebar})
+        else if ($('#monthGrid').length) {
             goal_id = Number($(base).find('.monthTodoId').text())
             goal_pos = $('.monthTodo').index(this)
-        } else {
-            goal_id = Number($(this).find('.todoId').text())
-            goal_pos = $('.todo').index(this)
+            window.goalsAPI.askSteps({todo_id: goal_id})
         }
-
-        if ($('#todosAll').length) {
-            let goal_config = _get_goal_config(base)
-            let steps_html = _steps_html(goal_config["steps"], goal_config["steps_checks"])
-            right_bar.html(_edit_html(goal_config, steps_html))
-            _fix_main_goal_edit()
-            steps_count = $(base).find('.step').length
-        } else window.goalsAPI.askSteps({todo_id: goal_id})
     } else set_todo_dragged(false)
     is_edit_change = false
 })
+
+function _build_edit() {
+    let goal_config = _get_goal_config(base)
+    let steps_html = _steps_html(goal_config["steps"], goal_config["steps_checks"])
+    $('#rightbar').html(_edit_html(goal_config, steps_html))
+    _fix_main_goal_edit()
+    steps_count = $(base).find('.step').length
+}
 
 $(document).on('click', '.viewOption', function () {
     is_edit_change = false
@@ -103,7 +112,7 @@ function change_goal_main() {
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
         let converted_text = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
-        window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id})
+        window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id, option: is_from_sidebar})
     }
 }
 
@@ -122,16 +131,16 @@ function steps_change(that) {
             _change_counter(index, 0, 1)
 
             steps_count++
-            window.goalsAPI.addStep({input: converted_step, id: goal_id})
+            window.goalsAPI.addStep({input: converted_step, id: goal_id, option: is_from_sidebar})
         } else {
             $(base).find('.step_text').eq(index).text(input)
-            window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index})
+            window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index, option: is_from_sidebar})
         }
     } else {
         if (!is_new_step) {
             _change_counter(index, -1, -1)
             _remove_step(index)
-            window.goalsAPI.removeStep({id: goal_id, step_id: index})
+            window.goalsAPI.removeStep({id: goal_id, step_id: index, option: is_from_sidebar})
         }
         is_new_step = false
     }
@@ -184,7 +193,7 @@ $(document).on('click', '.editCheckStep', function () {
         step_check.replaceWith("<input type='checkbox' class='stepCheck'>")
         counter.text(Number(counter.text()) - 1)
     }
-    window.goalsAPI.changeChecksStep({id: goal_id, step_id: index, state: state})
+    window.goalsAPI.changeChecksStep({id: goal_id, step_id: index, state: state, option: is_from_sidebar})
 })
 
 $(document).on('click', '#editNewStep', function () {
@@ -211,22 +220,22 @@ export function change_category(category_id) {
     if ($(base).find('.stepsShow')) {
         $(base).find('.stepsShow').css('background', categories[category_id][0])
     }
-    window.goalsAPI.changeCategory({id: goal_id, new_category: category_id})
+    window.goalsAPI.changeCategory({id: goal_id, new_category: category_id, option: is_from_sidebar})
 }
 
 
 $(document).on('click', '#editDiff', () => {
     let difficulty = $('#editDiff').val()
     let url = `images/goals/rank${difficulty}.svg`
-    $('.todoCheck').eq(goal_pos).css('backgroundImage', `url("${url}")`)
-    window.goalsAPI.changeDifficulty({id: goal_id, difficulty: difficulty})
+    if (!is_from_sidebar) $('.todoCheck').eq(goal_pos).css('backgroundImage', `url("${url}")`)
+    window.goalsAPI.changeDifficulty({id: goal_id, difficulty: difficulty, option: is_from_sidebar})
 })
 
 
 $(document).on('click', '#editImportance', () => {
     let importance = $('#editImportance').val()
-    $('.checkDot').eq(goal_pos).css('borderColor', check_border[importance])
-    window.goalsAPI.changeImportance({id: goal_id, importance: importance})
+    if (!is_from_sidebar) $('.checkDot').eq(goal_pos).css('borderColor', check_border[importance])
+    window.goalsAPI.changeImportance({id: goal_id, importance: importance, option: is_from_sidebar})
 })
 
 export function close_edit() {
@@ -245,15 +254,17 @@ window.goalsAPI.getSteps((goal, steps) => {
     let step_checks = steps.map(step => step.step_check);
     steps_count = step_checks.length
     let steps_html = _steps_html(step_texts, step_checks)
-    let goal_config = _get_goal_config2(goal[0])
 
-    $('#rightbar').html(_edit_html(goal_config, steps_html))
+    $('#rightbar').html(_edit_html(goal[0], steps_html))
     _fix_main_goal_edit()
 })
 
 function _edit_html(goal_config, steps_html) {
+    let backgrounds1 = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
+    let backgrounds2 = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
+
     let categories_html = _build_categories()
-    let converted_text = goal_config["main_goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
+    let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
 
     return `<div id="editClose">⨉</div>
             <div id="editTodo">
@@ -278,8 +289,8 @@ function _edit_html(goal_config, steps_html) {
                 </div>
                 <div id="optionsConfig">
                     <div id="selectCategory2" class="selectCategory" style="background: ${categories[goal_config["category"]][0]}">${categories[goal_config["category"]][1]}</div>
-                    <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${goal_config["difficulty"]}">
-                    <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${goal_config["importance"]}">
+                    <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${goal_config["Difficulty"]}" style="background-color: ${backgrounds1[goal_config["difficulty"]]}">
+                    <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${goal_config["Importance"]}" style="background-color: ${backgrounds2[goal_config["importance"]]}">
                     <div class="categoryPicker" id="categoryPicker2">
                         ${categories_html}
                     </div>
@@ -290,11 +301,11 @@ function _edit_html(goal_config, steps_html) {
 function _get_goal_config(that) {
     let goal_config = {}
 
-    goal_config["main_goal"] = $(that).find('.task').text().trim()
+    goal_config["goal"] = $(that).find('.task').text().trim()
     goal_config["check_state"] = $(that).find('.check_task').prop('checked') === true ? "checked" : ""
     goal_config["category"] = getIdByColor(categories, $(that).find('.todoCheck').css('backgroundColor'))
-    goal_config["difficulty"] = $(that).find('.todoCheck')[0].style.backgroundImage[22]
-    goal_config["importance"] = check_border.indexOf($(that).find('.checkDot').css('borderColor'))
+    goal_config["Difficulty"] = $(that).find('.todoCheck')[0].style.backgroundImage[22]
+    goal_config["Importance"] = check_border.indexOf($(that).find('.checkDot').css('borderColor'))
 
 
     goal_config["steps"] = $(that).find('.step').map(function () {
@@ -308,16 +319,7 @@ function _get_goal_config(that) {
     return goal_config
 }
 
-function _get_goal_config2(goal) {
-    let goal_config = {}
-    goal_config["main_goal"] = goal.goal
-    goal_config["check_state"] = goal.check_state === true ? "checked" : ""
-    goal_config["category"] = goal.category
-    goal_config["difficulty"] = goal.Difficulty
-    goal_config["importance"] = goal.Importance
 
-    return goal_config
-}
 
 function _steps_html(steps, checks) {
     let steps_html = ""
@@ -330,7 +332,7 @@ function _steps_html(steps, checks) {
         steps_html += `
             <div class="editStep">
                 <input type="checkbox" ${check_state} class="editCheckStep">
-                <input type="text" class="editTextStep" value=`+converted_step+` spellcheck="false">
+                <input type="text" class="editTextStep" value=` + converted_step + ` spellcheck="false">
             </div>`
     }
     return steps_html
@@ -363,6 +365,6 @@ function _fix_main_goal_edit() {
     })
 }
 
-export function set_goal_pos(id){
+export function set_goal_pos(id) {
     goal_pos = id
 }
