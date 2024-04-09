@@ -114,7 +114,6 @@ body {
 
 #todosArea {
     margin-top: 10px;
-    min-height: 200px;
 }
 
 #todoInput {
@@ -183,6 +182,9 @@ body {
     top: 7px;
 }
 
+#todayButton{
+    border-color: #FFC90E;
+}
 
 #otherDateBtn .dateButtonText {
     left: 5px;
@@ -376,8 +378,6 @@ body {
 
 
 #todoEntrySimple {
-    height: 50px;
-    width: 100%;
     background: #282828;
     display: flex;
 }
@@ -394,13 +394,59 @@ body {
 
 #todoEntryGet {
     color: white;
-    width: calc(100% - 65px);
+    width: 100%;
     margin-left: 10px;
-    height: 48px;
     background: #282828;
     font-size: 20px;
     border: none;
     outline: none;
+}
+
+#todoRepeat{
+    width: 40px;
+    height: 50px;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 5px;
+}
+#todoRepeat img{
+    width: 25px;
+    height: 25px;
+    padding: 11px 0;
+}
+
+#repeatPicker{
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    right: 0;
+    top: -152px;
+    background-color: #282828;
+    border: 1px solid #FFC90E;
+    font-size: 20px;
+    display: none;
+}
+
+.repeatOption{
+    display: flex;
+    height: 50px;
+}
+
+.repeatOption:hover{
+    background-color: #3E3C4B!important;
+}
+
+.repeatCount{
+    width: 30px;
+    text-align: center;
+    position: relative;
+    top: 10px;
+}
+.repeatLabel{
+    text-align: right;
+    position: relative;
+    top: 10px;
+    height: 30px;
 }
 
 #todoAdd {
@@ -408,15 +454,11 @@ body {
     width: 50px;
     cursor: pointer;
     font-size: 50px;
-    border-radius: 7px;
     line-height: 50px;
-    margin-bottom: 10px;
     text-align: center;
 }
 
-
 #newSteps {
-    float: left;
     flex-grow: 1;
     padding: 10px;
     overflow-y: scroll;
@@ -459,9 +501,7 @@ body {
 
 
 #todoSettings {
-    height: 250px;
     width: 200px;
-    white-space: nowrap;
     text-align: center;
     padding-right: 20px;
 }
@@ -537,7 +577,6 @@ body {
 .todoRange {
     width: 198px;
     -webkit-appearance: none;
-    height: 25px;
     outline: none;
 }
 

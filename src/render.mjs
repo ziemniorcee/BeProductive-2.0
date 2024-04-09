@@ -1,8 +1,10 @@
 import {l_date} from './date.js'
-import {categories, getIdByColor} from "./data.mjs";
+import {categories, getIdByColor, check_border} from "./data.mjs";
 import {close_edit, change_category, set_goal_pos} from "./edit.mjs";
 
 export let todo_dragged = false
+let repeat_option = -1
+let input_count = 0
 
 window.addEventListener("DOMContentLoaded", () => {
     build_day_view()
@@ -14,23 +16,22 @@ window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals, steps) => {
     for (let i = 0; i < goals.length; i++) {
-        let goal_steps = []
-        let steps_checks = []
+        let filtered_steps = steps.filter(step => step.goal_id === goals[i].id)
 
-        for (let j = 0; j < steps.length; j++) {
-            if (goals[i].id === steps[j].goal_id) {
-                goal_steps.push(steps[j].step_text)
-                steps_checks.push(steps[j].step_check)
-            }
+        let goal = {
+            main_goal: goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
+            main_check: goals[i].check_state,
+            steps_HTML: _steps_html(filtered_steps, goals[i].category),
+            category: goals[i].category,
+            importance: goals[i].Importance,
+            difficulty: goals[i].Difficulty,
         }
-        let converted_text = goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
-        build_goal(converted_text, goal_steps, goals[i].category, goals[i].Importance, goals[i].Difficulty, goals[i].check_state, steps_checks)
+        build_goal(goal)
     }
 
     let finished_count = $('#todosFinished .todo').length
     $('#finishedButton').css('display', finished_count ? "block" : "none")
     if (finished_count) $("#finishedCount").html(finished_count);
-
 })
 
 
@@ -41,21 +42,52 @@ $(document).on('click', '#todoInput', (event) => {
 })
 
 $(document).on('click', '#main', () => {
+    $("#repeatPicker").css({"display": "none"});
     $("#todoEntryComplex").css({"height": "0", "visibility": "hidden"});
     $("#todosAll").css({"height": "calc(100% - 65px)"});
 })
 
+$(document).on('click', '.dateButton', function (event){
+    $(".dateButton").css("border-color", "black")
+    $(this).css("border-color", "#FFC90E")
+})
 
-$(document).on('click', '#todoAdd', () => new_goal())
+$(document).on('click', '#todoAdd', (event) => {
+    event.stopPropagation()
+    new_goal()
+})
+
+$(document).on('click', '#todoRepeat', (event) => {
+    event.stopPropagation()
+    $("#repeatPicker").toggle()
+})
+
+$(document).on('click', ".repeatOption", function (event) {
+    event.stopPropagation()
+    let new_repeat = $('.repeatOption').index(this)
+    $("#repeatPicker").toggle()
+
+    if (repeat_option === new_repeat) {
+        repeat_option = -1
+        $(".repeatOption").css("background-color", "#282828")
+        $('#repeatImg').attr('src', `./images/goals/repeat.png`)
+    } else {
+        repeat_option = new_repeat
+        $(".repeatOption").css("background-color", "#282828")
+        $(this).css("background-color", "#3E3C4B")
+        $('#repeatImg').attr('src', `./images/goals/repeat${new_repeat}.png`)
+    }
+})
+
 
 $(document).on('keyup', '#todoEntrySimple', (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
 })
 
-
 function new_goal() {
     let e_todo = $('#todoEntryGet')
     let goal_text = e_todo.val()
+    e_todo.val('')
 
     if (goal_text !== "") {
         let difficulty = $('#range1').val()
@@ -63,33 +95,42 @@ function new_goal() {
 
         let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
         let steps = []
-        let safe_steps = []
 
         let steps_elements = $('.stepEntry')
         for (let i = 0; i < steps_elements.length; i++) {
             let step_value = steps_elements[i].value
-            if (step_value !== "") {
-                steps.push(step_value)
-                safe_steps.push(step_value.replace(/'/g, "`@`").replace(/"/g, "`@@`"))
-            }
+            if (step_value !== "") steps.push({
+                step_text: step_value.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
+                step_check: 0
+            })
         }
 
-        e_todo.val('')
-        if (steps.length !== 0) {
+        if (steps.length) {
             input_count = 0
             $('#newSteps').html(`<div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>`)
         }
 
-        build_goal(goal_text, steps, new_category, importance, difficulty)
-
-        let converted_text = goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
-        window.goalsAPI.newGoal({
-            goal_text: converted_text,
-            steps: safe_steps,
+        let goal = {
+            main_goal: goal_text,
+            main_check: 0,
+            steps_HTML: _steps_html(steps, new_category),
             category: new_category,
-            difficulty: difficulty,
             importance: importance,
+            difficulty: difficulty,
+        }
+        build_goal(goal)
+
+        let dates = []
+        if (repeat_option === 0) dates = l_date.get_every(1, 30)
+        else if (repeat_option === 1) dates = l_date.get_every(7, 12)
+        else if (repeat_option === 2) dates = l_date.get_everymonth()
+        else dates = [l_date.day_sql]
+
+        window.goalsAPI.newGoal({
+            goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
+            steps: steps,category: new_category,difficulty: difficulty,importance: importance, dates: dates,
         })
+
     }
 }
 
@@ -140,26 +181,31 @@ $(document).on('click', '.category', function () {
     })
 })();
 
+export function build_goal(goal) {
+    let category_color = categories[goal.category][0]
 
-export function build_goal(goal_text, steps = [], category = 1, importance = 2, difficulty = 2, goal_checked = 0, step_checks = []) {
-    let category_color = categories[category][0]
+    let check_state = goal.main_check ? "checked" : "";
+    let todo_area = goal.main_check ? "todosFinished" : "todosArea";
+    let check_bg = goal.main_check ? "url('images/goals/check.png')" : "";
+    let url = `images/goals/rank${goal.difficulty}.svg`
 
-    let check_state = ""
-    let todo_area = "todosArea"
-    let check_bg = ""
-    let check_border = ["#0075FF", "#24FF00", "#FFC90E", "#FF5C00", "#FF0000"]
+    document.getElementById(todo_area).innerHTML +=
+        `<div class='todo'>
+            <div class="todoId">${$('.todo').length}</div>
+            <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
+                <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[goal.importance]}"></div>
+                <input type='checkbox' class='check_task' ${check_state}>
+            </div>
+            <div class='taskText'><span class='task'> ${goal.main_goal} </span>${goal.steps_HTML}</div>
+        </div>`
+}
 
-    if (goal_checked) {
-        check_state = "checked"
-        todo_area = "todosFinished"
-        check_bg = "url('images/goals/check.png')"
-    }
+export function _steps_html(steps, category_id) {
+    let category_color = categories[category_id][0]
     let steps_HTML = ""
-
-
     if (steps.length > 0) {
-        let checks_counter = 0
-        if (step_checks.length !== 0) checks_counter = step_checks.reduce((a, b) => a + b)
+        let checks_counter = steps.reduce((total, step) => total + step.step_check, 0);
+
         steps_HTML =
             `<div class='stepsShow' style="background: ${category_color}">
                 <img class='showImg' src='images/goals/down.png' alt="">
@@ -170,10 +216,9 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
             <div class='steps'>`
 
         for (let i = 0; i < steps.length; i++) {
-            let step_check = ""
-            if (step_checks[i] === 1) step_check = "checked"
+            let step_check = steps[i].step_check ? "checked" : ""
 
-            let converted_step = steps[i].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+            let converted_step = steps[i].step_text.replace(/`@`/g, "'").replace(/`@@`/g, '"')
             steps_HTML +=
                 `<div class='step'>
                     <input type='checkbox' ${step_check} class='stepCheck'> <span class="step_text">${converted_step}</span>
@@ -181,26 +226,12 @@ export function build_goal(goal_text, steps = [], category = 1, importance = 2, 
         }
         steps_HTML += "</div>"
     }
-
-
-    let url = `images/goals/rank${difficulty}.svg`
-    document.getElementById(todo_area).innerHTML +=
-        `<div class='todo'>
-            <div class="todoId">${$('.todo').length}</div>
-            <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[importance]}"></div>
-                <input type='checkbox' class='check_task' ${check_state}>
-            </div>
-            <div class='taskText'><span class='task'> ${goal_text} </span>${steps_HTML}</div>
-        </div>`
-
-    $('.steps:last').css('display', 'block')
+    return steps_HTML
 }
+
 
 $(document).on('click', '.stepsShow', (event) => show_steps(event));
 
-
-let input_count = 0
 
 $(document).on('change', '.stepEntry', function () {
     if ($('.stepEntry').index(this) === input_count) {
@@ -209,16 +240,16 @@ $(document).on('change', '.stepEntry', function () {
     }
 });
 
-$(document).on('keydown', '.stepEntry', function(event) {
+$(document).on('keydown', '.stepEntry', function (event) {
     if (event.which === 9) {
         let step_entry = $('.stepEntry')
         if (step_entry.index(this) === input_count && $(this).val() !== "") {
             event.preventDefault();
             input_count += 1
             $('#newSteps').append(`<div class="newStepText"><input type='text' class='stepEntry' placeholder="Action ${input_count + 1}"></div>`)
+            let step_entry = $('.stepEntry')
             step_entry.eq(input_count).focus()
-        }
-        else if ($(this).val() === "") event.preventDefault();
+        } else if ($(this).val() === "") event.preventDefault();
     }
 });
 
@@ -317,6 +348,8 @@ export function change_check(id) {
     todo.eq(id).remove()
     $(state ? "#todosFinished" : "#todosArea").append(todo.eq(id).prop("outerHTML"))
 
+    dragula_day_view()
+
     let new_tasks = goal_id.map(function () {
         return $(this).text();
     }).get()
@@ -390,10 +423,9 @@ export function day_view() {
 
 let block_prev_drag = 0
 
-$(document).on('click', '.sidebarTask', function (){
+$(document).on('click', '.sidebarTask', function () {
     block_prev_drag = 0
 })
-
 
 
 export function dragula_day_view() {
@@ -473,8 +505,24 @@ function build_day_view() {
             </div>
         </div>
         <div id="todoInput">
+            <div id="repeatPicker">
+                <div class="repeatOption">
+                    <div class="repeatCount">1</div>
+                    <div class="repeatLabel">Every day</div>
+                </div>
+                <div class="repeatOption">
+                    <div class="repeatCount">7</div>
+                    <div class="repeatLabel">Every week</div>
+                </div>
+                <div class="repeatOption">
+                    <div class="repeatCount">31</div>
+                    <div class="repeatLabel">Every month</div>
+                </div>
+            </div>
+            
             <div id="todoEntrySimple">
                 <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
+                <div id="todoRepeat"><img id="repeatImg" src="images/goals/repeat.png" alt=""></div>
                 <div id="todoAdd">+</div>
             </div>
             <div id="todoEntryComplex">

@@ -17,6 +17,7 @@ $(document).on('click', '#viewMonth', function () {
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
     let month_params = l_date.get_format_month()
+
     let month_counter = 0;
     let goal_counter = 0;
 
@@ -70,6 +71,19 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
         </div>
     `)
 
+    let today_day = l_date.is_today_monthview()
+    if (today_day){
+        let monthDate =  $('.monthDate')
+        for (let i = 0; i < monthDate.length; i++){
+            if (Number(monthDate.eq(i).text()) === today_day){
+                let id = monthDate.index(monthDate.eq(i))
+                let month_day = $('.monthDay')
+                month_day.eq(id).css("border-color", "#FFC90E")
+                month_day.eq(id).append("<div id='todayMonthText'>Today</div>")
+                break
+            }
+        }
+    }
 
     l_date.fix_header_month()
 })

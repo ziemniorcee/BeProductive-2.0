@@ -24,6 +24,7 @@ $(document).on('mousedown', '.weekDay', function () {
 })
 
 window.goalsAPI.getWeekGoals((goals) => {
+    let today_sql = l_date.sql_format(l_date.today)
     let content = $('#content')
     content.css('flexDirection', 'row')
 
@@ -42,10 +43,18 @@ window.goalsAPI.getWeekGoals((goals) => {
                     todo_id++;
                 }
             }
+
+            let classes = "weekDayGoals"
+            let today_label = ""
+            if (sql_date === today_sql) {
+                classes = "weekDayGoals weekToday"
+                today_label = "<div id='todayWeekText'>Today</div>"
+            }
             days += `
                 <div class="weekDay">
+                    ${today_label}
                     <div class="weekDayText">${weekdays_grid[i][j]}</div>
-                    <div class="weekDayGoals" id="${weekdays_grid[i][j]}">${goals_html}</div>
+                    <div class="${classes}" id="${weekdays_grid[i][j]}">${goals_html}</div>
                 </div>`
         }
 
@@ -60,7 +69,7 @@ window.goalsAPI.getWeekGoals((goals) => {
 
 let block_prev_drag = 0
 
-$(document).on('click', '.sidebarTask', function (){
+$(document).on('click', '.sidebarTask', function () {
     block_prev_drag = 0
 })
 
@@ -137,6 +146,7 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
     setTimeout(function () {
         $('.todo').eq(rel_id).remove()
         window.goalsAPI.changeChecksGoal({id: Number(goal_ids.eq(rel_id).html()), state: 1})
+        dragula_week_view()
     }, 1000);
 });
 

@@ -21,14 +21,19 @@ let goal_id = 0
 let steps_count = 0
 let is_new_step = false
 let is_from_sidebar = false
+let sidebar_change_goal = {}
 
 $(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) {
-    event.stopPropagation()
-    is_edit_change = true
+    let button_code = event.which
+    if (button_code === 1 && (event.target.className === "sidebarTask" || event.target.className === "todo"
+        || event.target.className === "monthTodo")) {
+        event.stopPropagation()
+        is_edit_change = true
+    }
 })
 
 
-$(document).on('mouseup', '.todo, .monthTodo, .sidebarTask', function () {
+$(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
     if (!todo_dragged && is_edit_change === true) {
         is_from_sidebar = false
         set_block_prev_drag_day(0)
@@ -112,6 +117,9 @@ function change_goal_main() {
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
         let converted_text = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+
+        if (is_from_sidebar) sidebar_change_goal = {text: input, id: goal_id}
+
         window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id, option: is_from_sidebar})
     }
 }
@@ -242,6 +250,7 @@ export function close_edit() {
     if (goal_pressed === true) {
         goal_pressed = false
         document.getElementById("rightbar").innerHTML = saved_sidebar
+        if(is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
 }
 
@@ -295,6 +304,9 @@ function _edit_html(goal_config, steps_html) {
                         ${categories_html}
                     </div>
                 </div>
+            </div>
+            <div id="editFunctions">
+                
             </div>`
 }
 
@@ -320,7 +332,6 @@ function _get_goal_config(that) {
 }
 
 
-
 function _steps_html(steps, checks) {
     let steps_html = ""
 
@@ -328,11 +339,10 @@ function _steps_html(steps, checks) {
         let check_state = ""
         if (checks[i]) check_state = "checked"
         let converted_step = steps[i].replace(/`@`/g, "'").replace(/`@@`/g, '"')
-
         steps_html += `
             <div class="editStep">
                 <input type="checkbox" ${check_state} class="editCheckStep">
-                <input type="text" class="editTextStep" value=` + converted_step + ` spellcheck="false">
+                <input type="text" class="editTextStep" value='${converted_step}' spellcheck="false">
             </div>`
     }
     return steps_html

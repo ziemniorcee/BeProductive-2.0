@@ -1,4 +1,4 @@
-import {build_goal} from "./render.mjs";
+import {_steps_html, build_goal} from "./render.mjs";
 import {l_date} from './date.js'
 import {goal_pressed, goal_pressed_false, saved_sidebar} from "./edit.mjs";
 import {weekdays, month_names} from "./data.mjs";
@@ -51,7 +51,7 @@ function load_history(array, date) {
         stringhtml += `
         <div class='sidebarTask'>
             <input type='checkbox' class='historyCheck'>
-            <div><span>${converted_text}</span></div><span class='historyAdd'>+</span>
+            <div><span class="historyText">${converted_text}</span></div><span class='historyAdd'>+</span>
         </div>`
     }
 
@@ -65,18 +65,27 @@ $(document).on('click', '.historyAdd', function () {
     else $(this).closest('.day').remove()
 })
 
-window.sidebarAPI.historyToGoal((steps, parameters) => {
+window.sidebarAPI.historyToGoal((steps, goal) => {
     let month_day = $(".monthDay")
     let todos
     if ($('#todosAll').length) {
-        let step_texts = []
-        let step_checks = []
+        let steps_array = []
         for (let j = 0; j < steps.length; j++) {
-            step_texts.push(steps[j].step_text)
-            step_checks.push(steps[j].step_check)
+            steps_array.push({
+                step_text: steps[j].step_text.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
+                step_check: steps[j].step_check,
+            })
         }
-        let converted_text = parameters.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
-        build_goal(converted_text, step_texts, parameters.category, parameters.Importance, parameters.Difficulty, 0, step_checks)
+
+        let import_goal = {
+            main_goal: goal.main_goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
+            main_check: 0,
+            steps_HTML: _steps_html(steps_array, goal.category),
+            category: goal.category,
+            importance: goal.Importance,
+            difficulty: goal.Difficulty,
+        }
+        build_goal(import_goal)
 
         todos = $('#todosArea').children()
     } else if ($('.weekDay').length) {
@@ -140,8 +149,13 @@ $(document).on('click', '.ideasAdd', function () {
     let id = $('.ideasAdd').index(this)
     let goal_text = $('.idea').eq(id).text()
 
-    window.sidebarAPI.deleteIdea({id: id, goal_text: goal_text})
-    build_goal(goal_text)
+    window.sidebarAPI.deleteIdea({id: id, goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")})
+
+    let import_goal = {
+        main_goal: goal_text, main_check: 0, steps_HTML: "", category: 1, importance: 2, difficulty: 2,
+    }
+
+    build_goal(import_goal)
     $('.sidebarTask').eq(id).remove()
 })
 

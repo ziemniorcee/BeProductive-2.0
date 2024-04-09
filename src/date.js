@@ -161,6 +161,47 @@ class CurrentDate {
         return date.getMonth()
     }
 
+    get_every(how_often, how_many){
+        let date = new Date(this.day_sql)
+
+        let dates = []
+        for (let i = 0; i < how_many; i++){
+            dates.push(this.sql_format(date))
+            date.setDate(date.getDate() + how_often)
+        }
+        return dates
+    }
+
+    get_everymonth(){
+
+        let date = new Date(this.day_sql)
+        let first_day = date.getDate()
+        let dates = []
+        for (let i = 0; i < 6; i++){
+            dates.push(this.sql_format(date))
+            let last_date = new Date(date.getFullYear(), date.getMonth()+1, 0)
+            let next_month = new Date(date.getFullYear(), date.getMonth()+2, 0)
+
+            if (first_day > next_month.getDate()){
+                date.setDate(date.getDate() + next_month.getDate())
+            }
+            else{
+                date = new Date(last_date)
+                date.setDate(date.getDate() + first_day)
+            }
+
+
+        }
+        return dates
+    }
+
+    is_today_monthview(){
+        let date = new Date(this.day_sql)
+        if (date.getFullYear() === this.today.getFullYear() && date.getMonth() === this.today.getMonth()){
+            return this.today.getDate()
+        }
+        return 0
+    }
     set_attributes(date, option) {
         this.display_format(date)
         this.day_sql = this.sql_format(date)
@@ -239,6 +280,8 @@ $(document).on('click', '#otherButton', () => {
 
 $("#datePicker").datepicker({
     onSelect: function () {
+        $(".dateButton").css("border-color", "black")
+        $("#otherButton").css("border-color", "#FFC90E")
         l_date.set_attributes($(this).datepicker('getDate'), 2)
         if ($('#todosAll').length) date_change(2)
         else if ($('.weekDay').length) week_change(2)
