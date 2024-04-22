@@ -1,4 +1,4 @@
-const {ipcMain} = require('electron')
+const {ipcMain, ipcRenderer} = require('electron')
 const electron = require("electron");
 
 module.exports = {todoHandlers, appHandlers}
@@ -11,12 +11,21 @@ function todoHandlers(db) {
     let idea_ids = []
     let current_goal_pos = 0
 
+
     ipcMain.on('ask-goals', (event, params) => {
         step_ids = {}
         current_date = params.date
 
-        db.all(`SELECT id, goal, check_state, goal_pos, category, difficulty, importance
-                FROM goals
+        db.all(`SELECT G.id,
+                       G.goal,
+                       G.check_state,
+                       G.goal_pos,
+                       G.category,
+                       G.difficulty,
+                       G.importance,
+                       KN.knot_id
+                FROM goals G
+                         LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE addDate = "${current_date}"
                 ORDER BY goal_pos`, (err, rows) => {
             if (err) console.error(err)
@@ -47,15 +56,17 @@ function todoHandlers(db) {
     ipcMain.on('ask-week-goals', (event, params) => {
         const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
 
-        db.all(`SELECT id,
-                       goal,
-                       addDate,
-                       check_state,
-                       goal_pos,
-                       category,
-                       difficulty,
-                       importance
-                FROM goals
+        db.all(`SELECT G.id,
+                       G.goal,
+                       G.addDate,
+                       G.check_state,
+                       G.goal_pos,
+                       G.category,
+                       G.difficulty,
+                       G.importance,
+                       KN.knot_id
+                FROM goals G
+                         LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
                   and check_state = 0
                 ORDER BY addDate, goal_pos`, (err, goals) => {
@@ -77,17 +88,11 @@ function todoHandlers(db) {
 
 
     ipcMain.on('ask-month-goals', (event, params) => {
-        db.all(`SELECT id,
-                       goal,
-                       addDate,
-                       check_state,
-                       goal_pos,
-                       category,
-                       difficulty,
-                       importance
-                FROM goals
+        db.all(`SELECT G.id, G.goal, G.addDate, G.category, G.difficulty, KN.knot_id
+                FROM goals G
+                         LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
-                  and check_state = ${params.goal_check}
+                  and check_state = 0
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -99,11 +104,13 @@ function todoHandlers(db) {
                     if (day in goals_dict) goals_dict[day].push({
                         "goal": goals[i].goal,
                         "category": goals[i].category,
+                        "knot_id": goals[i].knot_id,
                         "difficulty": goals[i].Difficulty
                     })
                     else goals_dict[day] = [{
                         "goal": goals[i].goal,
                         "category": goals[i].category,
+                        "knot_id": goals[i].knot_id,
                         "difficulty": goals[i].Difficulty
                     }]
                 }
@@ -161,6 +168,7 @@ function todoHandlers(db) {
             current_goal_pos++
         }
         values += ";"
+
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
                 VALUES ${values}`)
 
@@ -170,16 +178,18 @@ function todoHandlers(db) {
             let first_id = rows[0].id - params.dates.length + 1
             goal_ids.push(first_id)
 
-            for (let i = 0; i < params.dates.length; i++) {
-                let id = first_id + i
-                let steps_values = ""
-                for (let j = 0; j < params.steps.length; j++) {
-                    steps_values += `("${params.steps[j].step_text}", ${id})`
-                    if (j < params.steps.length - 1) steps_values += ","
+            if (params.steps.length) {
+                for (let i = 0; i < params.dates.length; i++) {
+                    let id = first_id + i
+                    let steps_values = ""
+                    for (let j = 0; j < params.steps.length; j++) {
+                        steps_values += `("${params.steps[j].step_text}", ${id})`
+                        if (j < params.steps.length - 1) steps_values += ","
+                    }
+                    steps_values += ";"
+                    db.run(`INSERT INTO steps (step_text, goal_id)
+                            VALUES ${steps_values}`)
                 }
-                steps_values += ";"
-                db.run(`INSERT INTO steps (step_text, goal_id)
-                        VALUES ${steps_values}`)
             }
 
             db.all(`SELECT id
@@ -191,8 +201,27 @@ function todoHandlers(db) {
                     step_ids[first_id].push(steps[i].id)
                 }
             })
-        })
 
+            if (params.dates.length > 1) {
+                db.all(`SELECT MAX(knot_id) as maxi
+                        FROM knots`, (err, knot) => {
+                    if (err) console.error(err)
+                    else {
+                        let knot_id = knot[0].maxi + 1
+
+                        let knots_values = ""
+                        for (let i = 0; i < params.dates.length; i++) {
+                            knots_values += `(${knot_id}, ${first_id + i})`
+                            if (i < params.dates.length - 1) knots_values += ","
+                        }
+                        knots_values += ";"
+
+                        db.run(`INSERT INTO knots (knot_id, goal_id)
+                                VALUES ${knots_values}`)
+                    }
+                })
+            }
+        })
     })
 
     ipcMain.on('rows-change', (event, params) => {
@@ -213,6 +242,54 @@ function todoHandlers(db) {
 
         delete step_ids[goal_ids[params.id]]
         goal_ids.splice(params.id, 1)
+    })
+
+    ipcMain.on('following-removed', (event, params) => {
+        console.log(params.date)
+
+        db.all(`SELECT id
+                FROM goals
+                WHERE id IN (SELECT goal_id
+                             FROM knots
+                             WHERE knot_id = (SELECT knot_id FROM knots WHERE goal_id = ${goal_ids[params.id]}))
+                  AND addDate >= '${params.date}'`, (err, goals) => {
+            if (err) console.error(err)
+            else {
+                let goals_repeat = []
+                let goals_format = "("
+
+                for (let i = 0; i < goals.length; i++) {
+                    goals_repeat.push(goals[i].id)
+                    goals_format += goals[i].id
+                    if (i < goals.length - 1) goals_format += ", "
+                    else goals_format += ")"
+                }
+
+                db.run(`DELETE
+                        FROM steps
+                        WHERE goal_id IN ${goals_format}`)
+                db.run(`DELETE
+                        FROM goals
+                        WHERE id IN ${goals_format}`)
+                db.run(`DELETE
+                        FROM knots
+                        WHERE goal_id IN ${goals_format}`)
+
+                let goals_positions = []
+                for (let i = 0; i < goal_ids.length; i++){
+                    if(goals_repeat.includes(goal_ids[i])) {
+                        goals_positions.push(i)
+                    }
+                }
+
+                if (goals_positions.length > 1) event.reply('get-following-removed', goals_positions)
+
+                for(let i = goals_positions.length - 1; i >= 0; i--){
+                    delete step_ids[goal_ids[goals_positions[i]]]
+                    goal_ids.splice(goals_positions[i], 1)
+                }
+            }
+        })
     })
 
     ipcMain.on('change-checks-goal', (event, params) => {

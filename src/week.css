@@ -170,6 +170,7 @@
     margin-bottom: 1px;
     border: solid 1px #363636;
     color: white;
+    position: relative;
 }
 
 .monthTodoId {
@@ -190,4 +191,15 @@
 .monthTodoText {
     overflow-wrap: break-word;
     pointer-events: none;
+    width: calc(100% - 28px);
+}
+
+.monthTodo .repeatLabelShow{
+    position: absolute;
+    bottom: 1px;
+    right: 0;
+}
+.monthTodo .repeatLabelShow img{
+    width: 13px;
+    height: 13px;
 }

@@ -14,13 +14,15 @@ $(document).on('click', '#viewWeek', function () {
     window.sidebarAPI.askHistory({date: l_date.week_current[0]})
 })
 
-$(document).on('mousedown', '.weekDay', function () {
-    let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
-    l_date.get_week_day(day_index)
-    day_view()
+$(document).on('mousedown', '.weekDay', function (event) {
+    if (event.which === 1) {
+        let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
+        l_date.get_week_day(day_index)
+        day_view()
 
-    $('.viewOption').css('borderColor', "black")
-    $('#viewDay').css('borderColor', "#FFC90E")
+        $('.viewOption').css('borderColor', "black")
+        $('#viewDay').css('borderColor', "#FFC90E")
+    }
 })
 
 window.goalsAPI.getWeekGoals((goals) => {
@@ -152,6 +154,7 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
 
 
 export function build_week_goal(goal, todo_id) {
+    console.log(goal)
     let difficulty = `images/goals/rank${goal.Difficulty}.svg`
     let check_state = ""
     let check_bg = ""
@@ -163,6 +166,11 @@ export function build_week_goal(goal, todo_id) {
 
     let converted_text = goal.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
 
+    let repeat = ""
+    if (goal.knot_id){
+        repeat = `<div class="repeatLabelShow"><img class="repeatLabelImg" src="images/goals/repeat.png" alt=""></div>`
+    }
+
     return `
         <div class="todo">
             <div class="todoId">${todo_id}</div>
@@ -170,7 +178,10 @@ export function build_week_goal(goal, todo_id) {
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.Importance]} solid"></div>
                 <input type="checkbox" class="check_task" ${check_state}>
             </div>
-            <div class="taskText"><span class="task">${converted_text}</span></div>
+            <div class="taskText">
+                <span class="task">${converted_text}</span>
+                ${repeat}
+            </div>
         </div>`;
 }
 

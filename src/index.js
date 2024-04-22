@@ -1,5 +1,5 @@
 const electron = require("electron")
-
+const {ipcMain} = require('electron')
 
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
@@ -87,19 +87,55 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function () {
-    createWindow()
-    const ctxMenu = new Menu()
-    ctxMenu.append(new MenuItem({
-        label: 'Remove',
-        click: () => {
-            mainWindow.webContents.send("removing-goal")
-            mainWindow.webContents.send("removing-history")
-            mainWindow.webContents.send("removing-idea")
+
+let context_option = 0
+
+const ctxMenuRepeat = new Menu()
+ctxMenuRepeat.append(new MenuItem({
+    label: '  Remove  ',
+    submenu: [
+        {
+            label: 'This goal',
+            click: () => {
+                mainWindow.webContents.send("removing-goal")
+            }
+        },
+        {
+            label: 'This and all the following goals',
+            click: () => {
+                mainWindow.webContents.send("removing-following")
+            }
         }
-    }))
+    ]
+}))
+
+
+
+const ctxMenuNormal = new Menu()
+ctxMenuNormal.append(new MenuItem({
+    label: '  Remove  ',
+    click: () => {
+        if (context_option === 0) mainWindow.webContents.send("removing-goal")
+        else if (context_option === 1) mainWindow.webContents.send("removing-history")
+        else if (context_option === 2) mainWindow.webContents.send("removing-idea")
+    }
+}))
+
+
+ipcMain.on('do_a_thing', (event, params) => {
+    if(params.repeat) ctxMenuRepeat.popup(mainWindow)
+    else {
+        context_option = params.option
+        ctxMenuNormal.popup(mainWindow)
+    }
+})
+
+
+app.on('ready', function (event) {
+    createWindow()
+
     mainWindow.webContents.on('context-menu', function () {
-        ctxMenu.popup(mainWindow)
+
     })
 });
 

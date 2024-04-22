@@ -3,6 +3,8 @@ import {weekdays2, categories, categories2} from "./data.mjs";
 import {day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
 
+
+
 $(document).on('click', '#viewMonth', function () {
     $('#content').css('flexDirection', 'column')
 
@@ -11,7 +13,7 @@ $(document).on('click', '#viewMonth', function () {
     $('#otherButton .dateButtonText').text('More months')
 
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
     window.sidebarAPI.askHistory({date: l_date.month_current})
 })
 
@@ -90,11 +92,16 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
 
 export function build_month_goal(goals_dict, goal_counter) {
     let converted_text = goals_dict['goal'].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+    let repeat = ""
+    if (goals_dict.knot_id){
+        repeat = `<div class="repeatLabelShow"><img class="repeatLabelImg" src="images/goals/repeat.png" alt=""></div>`
+    }
+
     return `
         <div class="monthTodo" style="background-color: ${categories2[goals_dict['category'] - 1]}">
             <div class="monthTodoId">${goal_counter}</div>
             <div class="monthTodoLabel" style="background-color: ${categories[goals_dict['category']][0]}"></div>
-            <div class="monthTodoText" >${converted_text}</div>
+            <div class="monthTodoText" >${converted_text} ${repeat}</div>
         </div>`
 }
 
@@ -164,11 +171,13 @@ export function set_block_prev_drag_month(option) {
     block_prev_drag = option
 }
 
-$(document).on('mousedown', '.monthDay', function () {
-    let day_index = Number($(this).find('.monthDate').text())
-    l_date.set_sql_month(day_index)
-    day_view()
+$(document).on('mousedown', '.monthDay', function (event) {
+    if (event.which === 1) {
+        let day_index = Number($(this).find('.monthDate').text())
+        l_date.set_sql_month(day_index)
+        day_view()
 
-    $('.viewOption').css('borderColor', "black")
-    $('#viewDay').css('borderColor', "#FFC90E")
+        $('.viewOption').css('borderColor', "black")
+        $('#viewDay').css('borderColor', "#FFC90E")
+    }
 })

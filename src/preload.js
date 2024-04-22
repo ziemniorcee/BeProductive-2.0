@@ -9,7 +9,10 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getGoals: (func) => ipcRenderer.on('get-goals', (event, goals, steps) => func(goals, steps)),
     newGoal: (params) => ipcRenderer.send('new-goal',params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
+    removingFollowing: (callback) => ipcRenderer.on("removing-following", callback),
     goalRemoved : (params) => ipcRenderer.send('goal-removed', params),
+    followingRemoved : (params) => ipcRenderer.send('following-removed', params),
+    getFollowingRemoved: (func) => ipcRenderer.on('get-following-removed', (event, positions) => func(positions)),
     rowsChange: (params) => ipcRenderer.send('rows-change',params),
     changeChecksGoal: (params) => ipcRenderer.send('change-checks-goal', params),
     changeChecksStep: (params) => ipcRenderer.send('change-checks-step', params),
@@ -43,8 +46,6 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     removingHistory: (callback) => ipcRenderer.on("removing-history", callback),
     historyRemoved: (params) => ipcRenderer.send('history-removed', params),
 
-    historyEdit: (params) => ipcRenderer.send('history-edit',params),
-
     askIdeas: (params) => ipcRenderer.send('ask-ideas',params),
     getIdeas: (func) => ipcRenderer.on('get-ideas', (event, data) => func(data)),
     deleteIdea: (params) => ipcRenderer.send('delete-idea', params),
@@ -54,6 +55,8 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
 })
 
 contextBridge.exposeInMainWorld('appAPI',{
+    doThing: (params) => ipcRenderer.send('do_a_thing', params),
+
     changeWindow: (params) => ipcRenderer.send('change_window',params),
     startPosChange: (params)=> ipcRenderer.send('start_pos_change',params),
     stopPosChange: (params) => ipcRenderer.send('stop_pos_change',params),
