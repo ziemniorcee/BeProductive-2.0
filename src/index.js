@@ -122,7 +122,7 @@ ctxMenuNormal.append(new MenuItem({
 }))
 
 
-ipcMain.on('do_a_thing', (event, params) => {
+ipcMain.on('context-menu-open', (event, params) => {
     if(params.repeat) ctxMenuRepeat.popup(mainWindow)
     else {
         context_option = params.option
@@ -131,11 +131,9 @@ ipcMain.on('do_a_thing', (event, params) => {
 })
 
 
-app.on('ready', function (event) {
+app.on('ready', function () {
     createWindow()
-
     mainWindow.webContents.on('context-menu', function () {
-
     })
 });
 

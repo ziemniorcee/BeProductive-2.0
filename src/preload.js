@@ -55,7 +55,7 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
 })
 
 contextBridge.exposeInMainWorld('appAPI',{
-    doThing: (params) => ipcRenderer.send('do_a_thing', params),
+    contextMenuOpen: (params) => ipcRenderer.send('context-menu-open', params),
 
     changeWindow: (params) => ipcRenderer.send('change_window',params),
     startPosChange: (params)=> ipcRenderer.send('start_pos_change',params),

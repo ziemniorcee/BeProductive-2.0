@@ -282,7 +282,7 @@ function todoHandlers(db) {
                     }
                 }
 
-                if (goals_positions.length > 1) event.reply('get-following-removed', goals_positions)
+                event.reply('get-following-removed', goals_positions)
 
                 for(let i = goals_positions.length - 1; i >= 0; i--){
                     delete step_ids[goal_ids[goals_positions[i]]]

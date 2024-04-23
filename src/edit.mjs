@@ -22,6 +22,8 @@ let steps_count = 0
 let is_new_step = false
 let is_from_sidebar = false
 let sidebar_change_goal = {}
+let goal_text = ""
+let last_step = ""
 
 $(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) {
     let button_code = event.which
@@ -90,7 +92,6 @@ $(document).on('mousedown', '#main', () => {
         else if ($('.weekDay').length) dragula_week_view()
         else dragula_month_view()
     }
-
 })
 
 $(document).on('click', '#editClose', () => show_hide_sidebar())
@@ -111,9 +112,10 @@ function change_goal_main() {
     let input = edit_text.val()
 
     if (input === "") {
-        edit_text.val($(base).find('.task').text().trim())
+        edit_text.val(goal_text)
         edit_text.css('height', `${edit_text[0].scrollHeight}px`)
     } else if ($(base).find('.task').text().trim() !== input) {
+        goal_text = input
         $(base).find('.task').text(input)
         $(base).find('.monthTodoText').text(input)
         let converted_text = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
@@ -128,7 +130,6 @@ function steps_change(that) {
     let edit_text_step = $('.editTextStep')
     let index = edit_text_step.index(that)
     let input = edit_text_step.eq(index).val()
-
     let converted_step = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
 
     if (input !== "") {
@@ -140,12 +141,13 @@ function steps_change(that) {
 
             steps_count++
             window.goalsAPI.addStep({input: converted_step, id: goal_id, option: is_from_sidebar})
+            last_step = input
         } else {
             $(base).find('.step_text').eq(index).text(input)
             window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index, option: is_from_sidebar})
         }
     } else {
-        if (!is_new_step) {
+        if ((!is_new_step && index + 1 !== edit_text_step.length) || last_step !== "") {
             _change_counter(index, -1, -1)
             _remove_step(index)
             window.goalsAPI.removeStep({id: goal_id, step_id: index, option: is_from_sidebar})
@@ -215,6 +217,7 @@ $(document).on('click', '#editNewStep', function () {
         </div>`)
     }
 
+    last_step = ""
     edit_steps.eq(edit_steps.length).focus()
 })
 
@@ -274,6 +277,7 @@ function _edit_html(goal_config, steps_html) {
 
     let categories_html = _build_categories()
     let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
+    goal_text = converted_text
 
     return `<div id="editClose">⨉</div>
             <div id="editTodo">
@@ -344,6 +348,7 @@ function _steps_html(steps, checks) {
                 <input type="checkbox" ${check_state} class="editCheckStep">
                 <input type="text" class="editTextStep" value='${converted_step}' spellcheck="false">
             </div>`
+        last_step = converted_step
     }
     return steps_html
 }

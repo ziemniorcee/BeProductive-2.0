@@ -822,9 +822,9 @@ body {
 .idea {
     position: relative;
     font-size: 20px;
-    top: 10px;
     left: 10px;
     pointer-events: none;
+    margin-bottom: 10px;
 }
 
 #ideasInput {

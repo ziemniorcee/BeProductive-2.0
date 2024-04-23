@@ -141,7 +141,7 @@ $(document).on('click', '#todoAdd', (event) => {
 
 $(document).on('keyup', '#todoEntrySimple', (e) => {
     if (e.key === 'Enter' || e.keyCode === 13) new_goal()
-})
+});
 
 
 // removing functions
@@ -149,16 +149,16 @@ $(document).on('keyup', '#todoEntrySimple', (e) => {
     let selected_div = null
 
     $(document).on('contextmenu', '.todo, .monthTodo', function (event) {
-        if ($(this).find('.repeatLabelShow').length) window.appAPI.doThing({repeat: 1})
-        else window.appAPI.doThing({repeat: 0, option: 0})
+        if ($(this).find('.repeatLabelShow').length) window.appAPI.contextMenuOpen({repeat: 1})
+        else window.appAPI.contextMenuOpen({repeat: 0, option: 0})
 
         selected_div = event.target
     })
 
     $(document).on('contextmenu', '.sidebarTask', function (event) {
         selected_div = event.target
-        if ($(this).parents('.historyTasks').length) window.appAPI.doThing({repeat: 0, option: 1})
-        else window.appAPI.doThing({repeat: 0, option: 2})
+        if ($(this).parents('.historyTasks').length) window.appAPI.contextMenuOpen({repeat: 0, option: 1})
+        else window.appAPI.contextMenuOpen({repeat: 0, option: 2})
     })
 
     window.goalsAPI.removingGoal(() => {
@@ -274,6 +274,14 @@ $(document).on('click', '.category', function () {
 
 $(document).on('click', '.stepsShow', (event) => show_steps(event));
 
+function show_steps(event1) {
+    const steps = $(event1.target).closest(".taskText").find('.steps')
+    let show = steps.css("display") === "block"
+    steps.css("display", show ? 'none' : 'block')
+    $(event1.target).find('.showImg').attr('src', show ? 'images/goals/up.png' : 'images/goals/down.png')
+    dragula_day_view()
+}
+
 
 $(document).on('change', '.stepEntry', function () {
     if ($('.stepEntry').index(this) === input_count) {
@@ -359,12 +367,7 @@ $(document).on('click', '.stepCheck', function () {
 });
 
 
-export function show_steps(event1) {
-    const steps = $(event1.target).closest(".taskText").find('.steps')
-    let show = steps.css("display") === "block"
-    steps.css("display", show ? 'none' : 'block')
-    $(event1.target).find('.showImg').attr('src', show ? 'images/goals/up.png' : 'images/goals/down.png')
-}
+
 
 
 $(document).on('click', '.sidebarTask', function () {

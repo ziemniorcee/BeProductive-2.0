@@ -211,6 +211,10 @@ class CurrentDate {
     }
 
     change_images(option) {
+        let date_button = $(".dateButton")
+        date_button.css("border-color", "black")
+        date_button.eq(option).css("border-color", "#FFC90E")
+
         $('#todayImg').attr('src', `images/goals/today${option === 0 ? "1" : "0"}.png`)
         $('#tomorrowImg').attr('src', `images/goals/tomorrow${option === 1 ? "1" : "0"}.png`)
         $('#otherImg').attr('src', `images/goals/other${option === 2 ? "1" : "0"}.png`)
