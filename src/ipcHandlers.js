@@ -27,14 +27,15 @@ function todoHandlers(db) {
                 FROM goals G
                          LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE addDate = "${current_date}"
-                ORDER BY goal_pos`, (err, rows) => {
+                ORDER BY goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
-                let positions = rows.map((goal) => Number(goal.goal_pos))
+                goals = goals.map(goal => ({...goal, steps: []}))
+                let positions = goals.map((goal) => Number(goal.goal_pos))
                 if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions) + 1
                 else current_goal_pos = 0
 
-                goal_ids = rows.map((goal) => goal.id)
+                goal_ids = goals.map((goal) => goal.id)
 
                 let ids_string = `( ${goal_ids} )`
                 db.all(`SELECT id, goal_id, step_text, step_check
@@ -42,11 +43,23 @@ function todoHandlers(db) {
                         WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                     if (err2) console.error(err2)
                     else {
+                        let safe_steps = steps.map(step => {
+                            let {id, goal_id, ...rest} = step;
+                            return rest;
+                        })
                         for (let i = 0; i < steps.length; i++) {
                             if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
                             else step_ids[steps[i].goal_id] = [steps[i].id]
+
+                            let goal_index = goal_ids.indexOf(steps[i].goal_id)
+                            goals[goal_index].steps.push(safe_steps[i])
                         }
-                        event.reply('get-goals', rows, steps)
+
+                        let safe_goals = goals.map(goal => {
+                            let {id, ...rest} = goal;
+                            return rest;
+                        })
+                        event.reply('get-goals', safe_goals)
                     }
                 })
             }
@@ -81,7 +94,12 @@ function todoHandlers(db) {
                         goal_ids.push(...ids)
                     }
                 }
-                event.reply('get-week-goals', goals)
+
+                let safe_goals = goals.map(goal => {
+                    let {id, ...rest} = goal;
+                    return rest;
+                })
+                event.reply('get-week-goals', safe_goals)
             }
         })
     })
@@ -152,7 +170,11 @@ function todoHandlers(db) {
                     else {
                         step_ids[ids_array[params.todo_id]] = steps.map((step) => step.id)
 
-                        event.reply('get-steps', goal, steps)
+                        let safe_steps = steps.map(step => {
+                            let {id, goal_id, ...rest} = step;
+                            return rest;
+                        })
+                        event.reply('get-steps', goal, safe_steps)
                     }
                 })
             }
@@ -245,8 +267,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('following-removed', (event, params) => {
-        console.log(params.date)
-
         db.all(`SELECT id
                 FROM goals
                 WHERE id IN (SELECT goal_id
@@ -276,15 +296,15 @@ function todoHandlers(db) {
                         WHERE goal_id IN ${goals_format}`)
 
                 let goals_positions = []
-                for (let i = 0; i < goal_ids.length; i++){
-                    if(goals_repeat.includes(goal_ids[i])) {
+                for (let i = 0; i < goal_ids.length; i++) {
+                    if (goals_repeat.includes(goal_ids[i])) {
                         goals_positions.push(i)
                     }
                 }
 
                 event.reply('get-following-removed', goals_positions)
 
-                for(let i = goals_positions.length - 1; i >= 0; i--){
+                for (let i = goals_positions.length - 1; i >= 0; i--) {
                     delete step_ids[goal_ids[goals_positions[i]]]
                     goal_ids.splice(goals_positions[i], 1)
                 }
@@ -394,28 +414,34 @@ function todoHandlers(db) {
             if (err) console.error(err)
             else {
                 history_ids = rows.map((goal) => goal.id)
-                event.reply('get-history', rows)
+                let safe_rows = rows.map(row => {
+                    let {id, ...rest} = row;
+                    return rest;
+                })
+                event.reply('get-history', safe_rows)
             }
         })
     })
 
     ipcMain.on('delete-history', (event, params) => {
-        let new_goal = {"goal": "test", "category": 1, "Importance": 2, "Difficulty": 2}
+        let new_goal = {}
 
         db.run(`UPDATE goals
                 SET addDate="${params.date}",
                     goal_pos=${current_goal_pos}
                 WHERE id = ${history_ids[params.id]}`)
 
-        db.all(`SELECT goal, category, Difficulty, Importance
-                FROM goals
+        db.all(`SELECT G.goal, G.category, G.Difficulty, G.Importance, KN.knot_id
+                FROM goals G
+                         LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
-                new_goal["main_goal"] = goal[0].goal
+                new_goal["goal"] = goal[0].goal
                 new_goal["category"] = goal[0].category
                 new_goal["Importance"] = goal[0].Importance
                 new_goal["Difficulty"] = goal[0].Difficulty
+                new_goal["knot_id"] = goal[0].knot_id
             }
         })
 
@@ -432,7 +458,12 @@ function todoHandlers(db) {
             goal_ids.push(history_ids[params.id])
             history_ids.splice(params.id, 1)
 
-            event.reply('history-to-goal', steps, new_goal)
+            let safe_steps = steps.map(step => {
+                let {id, goal_id, ...rest} = step;
+                return rest;
+            })
+
+            event.reply('history-to-goal', safe_steps, new_goal)
         })
         current_goal_pos++
     })
@@ -456,7 +487,13 @@ function todoHandlers(db) {
             if (err) console.error(err)
             else {
                 idea_ids = rows.map((idea) => idea.id)
-                event.reply('get-ideas', rows)
+
+                let safe_ideas = rows.map(row => {
+                    let {id, goal_id, ...rest} = row;
+                    return rest;
+                })
+
+                event.reply('get-ideas', safe_ideas)
             }
         })
     })

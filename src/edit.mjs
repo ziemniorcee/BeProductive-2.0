@@ -96,6 +96,8 @@ $(document).on('mousedown', '#main', () => {
 
 $(document).on('click', '#editClose', () => show_hide_sidebar())
 
+$(document).on('click', '#editBack', () => close_edit())
+
 $(document).on('blur', '#editText', () => {
     if (!is_edit_change) change_goal_main(this)
     is_edit_change = false
@@ -207,6 +209,17 @@ $(document).on('click', '.editCheckStep', function () {
 })
 
 $(document).on('click', '#editNewStep', function () {
+    new_step()
+})
+
+$(document).on('keydown', '.editTextStep', function (event){
+    if(event.which === 9){
+        event.preventDefault()
+        new_step()
+    }
+})
+
+function new_step(){
     is_new_step = true
     let edit_steps = $('.editTextStep')
 
@@ -218,10 +231,10 @@ $(document).on('click', '#editNewStep', function () {
     }
 
     last_step = ""
-    edit_steps.eq(edit_steps.length).focus()
-})
+    edit_steps = $('.editTextStep')
 
-
+    edit_steps.eq(edit_steps.length -1).focus()
+}
 export function change_category(category_id) {
     $(base).find('.todoCheck').css('backgroundColor', categories[category_id][0])
     $(base).find('.monthTodoLabel').css('backgroundColor', categories[category_id][0])
@@ -279,7 +292,11 @@ function _edit_html(goal_config, steps_html) {
     let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
     goal_text = converted_text
 
-    return `<div id="editClose">⨉</div>
+    return `<div id="editButtons">
+                <div id="editClose">⨉</div>
+                <div id="editBack"><img src="images/goals/arrow0.png" alt=""></div>
+            </div>
+            
             <div id="editTodo">
                 <div id="editMain">
                     <input type="checkbox" id="editCheck" ${goal_config["check_state"]}>

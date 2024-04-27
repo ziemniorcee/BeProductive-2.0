@@ -171,13 +171,23 @@ export function set_block_prev_drag_month(option) {
     block_prev_drag = option
 }
 
+let mousedown_month = false
+
 $(document).on('mousedown', '.monthDay', function (event) {
-    if (event.which === 1) {
+    if (event.which === 1 && event.target.className === "monthGoals") {
+        mousedown_month = true
+    }
+})
+
+$(document).on('mouseup', '.monthDay', function (event) {
+    if (event.which === 1 && event.target.className === "monthGoals" && mousedown_month) {
         let day_index = Number($(this).find('.monthDate').text())
         l_date.set_sql_month(day_index)
         day_view()
 
         $('.viewOption').css('borderColor', "black")
         $('#viewDay').css('borderColor', "#FFC90E")
+        mousedown_month = false
     }
 })
+

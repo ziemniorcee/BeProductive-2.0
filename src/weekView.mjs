@@ -12,18 +12,29 @@ $(document).on('click', '#viewWeek', function () {
     l_date.fix_header_week()
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
     window.sidebarAPI.askHistory({date: l_date.week_current[0]})
-})
+});
 
-$(document).on('mousedown', '.weekDay', function (event) {
-    if (event.which === 1) {
-        let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
-        l_date.get_week_day(day_index)
-        day_view()
+(function () {
+    let mousedown_weekday = false
 
-        $('.viewOption').css('borderColor', "black")
-        $('#viewDay').css('borderColor', "#FFC90E")
-    }
-})
+    $(document).on('mousedown', '.weekDay', function (event) {
+        if (event.which === 1 && event.target.className.includes("weekDayGoals")) {
+            mousedown_weekday = true
+        }
+    })
+
+    $(document).on('mouseup', '.weekDay', function (event) {
+        if (event.which === 1 && event.target.className.includes("weekDayGoals") && mousedown_weekday) {
+            let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
+            l_date.get_week_day(day_index)
+            day_view()
+
+            $('.viewOption').css('borderColor', "black")
+            $('#viewDay').css('borderColor', "#FFC90E")
+            mousedown_weekday = false
+        }
+    })
+})();
 
 window.goalsAPI.getWeekGoals((goals) => {
     let today_sql = l_date.sql_format(l_date.today)
@@ -133,6 +144,7 @@ function _get_from_sidebar(event, drag_sidebar_task) {
 
     let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals').attr("id")
     let date = l_date.week_current[weekdays2.indexOf(week_day)]
+
     window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
 
     if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
@@ -149,12 +161,12 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
         $('.todo').eq(rel_id).remove()
         window.goalsAPI.changeChecksGoal({id: Number(goal_ids.eq(rel_id).html()), state: 1})
         dragula_week_view()
+        if (l_date.week_now !== l_date.week_current) window.sidebarAPI.askHistory({date: l_date.week_current[0]})
     }, 1000);
 });
 
 
 export function build_week_goal(goal, todo_id) {
-    console.log(goal)
     let difficulty = `images/goals/rank${goal.Difficulty}.svg`
     let check_state = ""
     let check_bg = ""
@@ -167,7 +179,7 @@ export function build_week_goal(goal, todo_id) {
     let converted_text = goal.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"')
 
     let repeat = ""
-    if (goal.knot_id){
+    if (goal.knot_id) {
         repeat = `<div class="repeatLabelShow"><img class="repeatLabelImg" src="images/goals/repeat.png" alt=""></div>`
     }
 

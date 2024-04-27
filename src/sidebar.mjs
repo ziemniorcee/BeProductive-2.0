@@ -78,23 +78,24 @@ window.sidebarAPI.historyToGoal((steps, goal) => {
         }
 
         let import_goal = {
-            main_goal: goal.main_goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
+            main_goal: goal.goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
             main_check: 0,
             steps_HTML: _steps_html(steps_array, goal.category),
             category: goal.category,
             importance: goal.Importance,
             difficulty: goal.Difficulty,
+            is_knot: goal.knot_id,
         }
         build_goal(import_goal)
 
         todos = $('#todosArea').children()
     } else if ($('.weekDay').length) {
         let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
-        week_day.append(build_week_goal(parameters, $('.todo').length))
+        week_day.append(build_week_goal(goal, $('.todo').length))
         todos = week_day.children()
     } else {
         let month_day = $('.monthGoals .sidebarTask').closest('.monthGoals')
-        month_day.append(build_month_goal(parameters, $('.monthTodo').length))
+        month_day.append(build_month_goal(goal, $('.monthTodo').length))
         todos = month_day.children()
     }
     let new_goal_pos = -1;
@@ -152,7 +153,13 @@ $(document).on('click', '.ideasAdd', function () {
     window.sidebarAPI.deleteIdea({id: id, goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")})
 
     let import_goal = {
-        main_goal: goal_text, main_check: 0, steps_HTML: "", category: 1, importance: 2, difficulty: 2,
+        main_goal: goal_text,
+        main_check: 0,
+        steps_HTML: "",
+        category: 1,
+        importance: 2,
+        difficulty: 2,
+        is_knot: null,
     }
 
     build_goal(import_goal)

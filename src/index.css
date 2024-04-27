@@ -858,6 +858,13 @@ body {
     outline: none;
 }
 
+#editButtons{
+    display: flex;
+    position: relative;
+    margin-bottom: 10px;
+    height: 30px;
+}
+
 #editClose {
     background: transparent;
     font-size: 30px;
@@ -868,11 +875,29 @@ body {
     margin-left: auto;
     margin-right: 10px;
     cursor: pointer;
+    position: absolute;
 }
 
 
 #editClose:hover {
     background: #323232;
+}
+
+#editBack{
+    margin-left: 10px;
+    width: 30px;
+}
+
+#editBack:hover {
+    background: #323232;
+}
+
+#editBack img{
+    width: 20px;
+    height: 20px;
+    position: relative;
+    top: 5px;
+    left: 6px;
 }
 
 #editTodo {
@@ -1027,6 +1052,7 @@ body {
 }
 
 #gloryCurrentSetup{
+    width: 150px;
     position: relative;
     top: 9px;
     margin-right: 20px;

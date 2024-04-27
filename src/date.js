@@ -3,6 +3,7 @@ import {weekdays, month_names} from "./data.mjs";
 class CurrentDate {
     constructor() {
         this.today = new Date()
+        this.today_sql = this.sql_format(this.today)
         this.tomorrow = new Date(this.today.getTime())
         this.tomorrow.setDate(this.tomorrow.getDate() + 1)
         this.week_now = []

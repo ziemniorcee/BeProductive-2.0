@@ -18,14 +18,12 @@ $(document).on('click', '#viewDay', function () {
 
 window.goalsAPI.askGoals({date: l_date.day_sql})
 
-window.goalsAPI.getGoals((goals, steps) => {
+window.goalsAPI.getGoals((goals) => {
     for (let i = 0; i < goals.length; i++) {
-        let filtered_steps = steps.filter(step => step.goal_id === goals[i].id)
-
         let goal = {
             main_goal: goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
             main_check: goals[i].check_state,
-            steps_HTML: _steps_html(filtered_steps, goals[i].category),
+            steps_HTML: _steps_html(goals[i].steps, goals[i].category),
             category: goals[i].category,
             importance: goals[i].Importance,
             difficulty: goals[i].Difficulty,
@@ -345,6 +343,8 @@ export function change_check(id) {
     let finished_count = $('#todosFinished .todo').length
     $("#finishedButton").css('display', finished_count ? "block" : "none");
     $('#finishedCount').html(finished_count)
+
+    if (l_date.day_sql !== l_date.today_sql) window.sidebarAPI.askHistory({date: l_date.today_sql})
 }
 
 
