@@ -1,14 +1,14 @@
 import {l_date} from "./date.js";
 import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
-import {day_view, set_todo_dragged} from "./render.mjs";
+import {day_view, reset_project_pos, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
 
 
-$(document).on('click', '#viewWeek', function () {
-    $('#todayButton .dateButtonText').text('This week')
-    $('#tomorrowButton .dateButtonText').text('Next week')
-    $('#otherButton .dateButtonText').text('More week')
-
+$(document).on('click', '#dashWeek', function () {
+    reset_project_pos()
+    $('#mainTitle').text('This week')
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(this).css('backgroundColor', '#FF5D00')
     l_date.fix_header_week()
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
     window.sidebarAPI.askHistory({date: l_date.week_current[0]})
@@ -28,9 +28,10 @@ $(document).on('click', '#viewWeek', function () {
             let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
             l_date.get_week_day(day_index)
             day_view()
+            $('.dashViewOption').css('backgroundColor', '#55423B')
+            $('#dashDay').css('backgroundColor', '#FF5D00')
+            l_date.fix_header_day()
 
-            $('.viewOption').css('borderColor', "black")
-            $('#viewDay').css('borderColor', "#FFC90E")
             mousedown_weekday = false
         }
     })

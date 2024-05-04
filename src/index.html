@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="index.css"/>
     <link rel="stylesheet" href="week.css"/>
 
-<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
+    <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -28,32 +28,67 @@
 
     <div id="leftbar">
         <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
-        <a><img src="images/goal1.png" draggable="false" alt="laurels"><span>TO DO</span></a>
+        <a><img src="images/goal0.png" draggable="false" alt="laurels"><span>TO DO</span></a>
         <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
         <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
         <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
     </div>
+    <div id="dashboard">
+        <div id="dashTitle">TO DO</div>
+        <div id="dashMyDayBG">
+            <div id="dashMyDayBtn">
+                <img src="images/goals/today0.png">
+                My day
+            </div>
+        </div>
+        <div id="dashTomorrowBG">
+            <div id="dashTomorrowBtn">
+                <img src="images/goals/tomorrow0.png">
+                <span>Plan tomorrow</span>
+            </div>
+        </div>
+        <div id="dashAnotherBtn">
+            <input type="text" id="datePicker">
+            <img src="images/goals/other0.png">
+            Show another date
+        </div>
+
+        <div id="dashView">
+            <span>View:    </span>
+            <div id="dashViewTable">
+                <div class="dashViewOption" id="dashDay">Day</div>
+                <div class="dashViewOption" id="dashWeek">Week</div>
+                <div class="dashViewOption" id="dashMonth">Month</div>
+            </div>
+        </div>
+
+        <div id="dashProjectsTitle">PROJECTS</div>
+        <div id="dashProjects">
+            <div class="dashProject">
+                <div class="dashProjectIcon">
+                    <img src="images/goals/projects/keys.png">
+                </div>
+                <span>Calculus</span>
+            </div>
+            <div class="dashProject">
+                <div class="dashProjectIcon" style="background-color: #731D6F">
+                    <img src="images/goals/projects/book.png">
+                </div>
+                <span>Future ...</span>
+            </div>
+        </div>
+    </div>
     <div id="main">
+        <!--        <video autoplay muted loop id="myVideo">-->
+        <!--            <source src="images/beach-with-palm-trees.3840x2160.mp4" type="video/mp4">-->
+        <!--            Your browser does not support HTML5 video.-->
+        <!--        </video>-->
         <div id="onTopMain"></div>
+
         <div id="mainBlur"></div>
         <div id="header">
-            <button id="todayButton" class="dateButton">
-                <span class="dateButtonImg"><img src="images/goals/today1.png" alt="today" id="todayImg"
-                                                 draggable="false"></span>
-                <span class="dateButtonText">Today</span>
-            </button>
-            <button id="tomorrowButton" class="dateButton">
-                <span class="dateButtonImg"><img src="images/goals/tomorrow0.png" alt="tomorrow" id="tomorrowImg"
-                                                 draggable="false"></span>
-                <span class="dateButtonText">Tomorrow</span>
-            </button>
-            <button id="otherButton" class="dateButton">
-                <span class="dateButtonImg"><img src="images/goals/other0.png" alt="another" id="otherImg"
-                                                 draggable="false"></span>
-                <span class="dateButtonText">Another day</span>
-            </button>
+            <div id="mainTitle">My day</div>
 
-            <input type="text" id="datePicker">
 
             <div id="sidebarType">
                 <img id="imgMain" src="images/goals/history.png" alt="main" width="40" height="40">
@@ -64,12 +99,6 @@
 
             <div id="subHeader">
                 <span id="date"></span>
-                <div id="viewContainer">
-                    <span id="viewText">View:</span>
-                    <span class="viewOption" id="viewDay"><img src="images/goals/dayview.png">Day</span>
-                    <span class="viewOption" id="viewWeek"><img src="images/goals/weekview.png">Week</span>
-                    <span class="viewOption" id="viewMonth"><img src="images/goals/monthview.png">Month</span>
-                </div>
             </div>
         </div>
         <div id="content">

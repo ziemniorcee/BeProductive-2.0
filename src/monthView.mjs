@@ -1,17 +1,16 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
-import {day_view, set_todo_dragged} from "./render.mjs";
+import {day_view, reset_project_pos, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
 
 
 
-$(document).on('click', '#viewMonth', function () {
+$(document).on('click', '#dashMonth', function () {
+    reset_project_pos()
     $('#content').css('flexDirection', 'column')
-
-    $('#todayButton .dateButtonText').text('This month')
-    $('#tomorrowButton .dateButtonText').text('Next month')
-    $('#otherButton .dateButtonText').text('More months')
-
+    $('#mainTitle').text('This month')
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(this).css('backgroundColor', '#FF5D00')
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
     window.sidebarAPI.askHistory({date: l_date.month_current})
@@ -185,8 +184,10 @@ $(document).on('mouseup', '.monthDay', function (event) {
         l_date.set_sql_month(day_index)
         day_view()
 
-        $('.viewOption').css('borderColor', "black")
-        $('#viewDay').css('borderColor', "#FFC90E")
+        $('.dashViewOption').css('backgroundColor', '#55423B')
+        $('#dashDay').css('backgroundColor', '#FF5D00')
+        l_date.fix_header_day()
+
         mousedown_month = false
     }
 })

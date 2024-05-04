@@ -8,10 +8,7 @@ import {build_month_goal, dragula_month_view} from "./monthView.mjs";
 
 let displays = ["", ""]
 
-
-window.sidebarAPI.askHistory({date: l_date.day_sql})
 window.sidebarAPI.getHistory((data) => {
-
     displays[0] = ""
     let date = data[0].addDate
     let goals = []
@@ -36,6 +33,7 @@ window.sidebarAPI.getHistory((data) => {
         dragula_month_view()
         $('.historyAdd').css('visibility', 'hidden')
     }
+    show_hide_sidebar(true)
 })
 
 function load_history(array, date) {
@@ -194,7 +192,7 @@ function new_idea() {
 
 
 $(document).on('click', '#imgMain', () => show_hide_sidebar())
-
+//force = false
 export function show_hide_sidebar(force = false) {
     let sidebar = $('#rightbar')
     let sidebar_state = sidebar.css('display') === 'none'

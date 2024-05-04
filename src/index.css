@@ -18,30 +18,28 @@ body {
     width: 100%;
     height: 100%;
     display: flex;
+    background-color: #2A231F;
 }
 
 #leftbar {
-    background: #3B151F;
+    background: #D8E1E7;
     z-index: 10;
     width: 100px;
 }
 
 #leftbar a {
     left: 8px;
-    margin-bottom: 10px;
-    top: 50px;
+    margin-bottom: 60px;
+    top: 150px;
     position: relative;
     transition: 0.3s;
     width: 85px;
     height: 85px;
     color: white;
     border-radius: 15px;
-    background-color: #9B082D;
     white-space: nowrap;
     overflow: hidden;
     display: flex;
-    border: solid 1px black;
-    box-shadow: 0 2px 6px 0 black;
 }
 
 #leftbar a img {
@@ -63,20 +61,210 @@ body {
 }
 
 
-#leftbar a:hover {
-    width: 300px;
+#dashboard{
+    width: 420px;
+    background-color: #55423B;
+    padding: 30px;
+    color: white;
+    border-radius: 0 30px 30px 0
 }
 
+#dashTitle{
+    font-size: 48px;
+    border-bottom: 3px #FF5D00 solid;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+#dashMyDayBG{
+    position: relative;
+    height: 200px;
+    width: 100%;
+    background-color: #D8E1E7;
+    margin-top: 20px;
+    border-radius: 10px;
+    border: 1px black solid;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+}
+
+#dashMyDayBtn{
+    cursor: pointer;
+    height: 50px;
+    width: 100%;
+    background-color: #FF5D00;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashMyDayBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 6px;
+}
+
+#dashTomorrowBG{
+    margin-top: 20px;
+    background-color: #D8E1E7;
+    height: 50px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashTomorrowBtn{
+    cursor: pointer;
+    position: relative;
+    width: 300px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: #FF5D00;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashTomorrowBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 4px;
+}
+
+#dashTomorrowBtn span{
+    position: relative;
+    left: 12px;
+}
+
+#dashAnotherBtn{
+    position: relative;
+    margin-top: 20px;
+    height: 50px;
+    width: 100%;
+    background-color: #FF5D00;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+    margin-bottom: 20px;
+}
+
+#dashAnotherBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 4px;
+}
+
+#dashView{
+    display: inline-block;
+    font-size: 20px;
+}
+#dashViewTable{
+    border: 1px black solid;
+    margin-left: 14px;
+    display: inline-block;
+    width: 345px;
+    height: 30px;
+    line-height: 30px;
+}
+
+#dashDay{
+    background-color: #FF5D00;
+
+}
+.dashViewOption{
+    height: 30px;
+    text-align: center;
+    width: 114px;
+    display: inline-block;
+    margin-right: -5px;
+}
+
+.dashViewOption + .dashViewOption{
+    border-left: 1px solid black;
+}
+
+#dashProjectsTitle{
+    margin-top: 50px;
+    font-size: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    width: max-content;
+    border-bottom: 3px solid #FF5D00;
+}
+
+.dashProject{
+    cursor: pointer;
+    display: inline-block;
+    font-size: 20px;
+    color: black;
+    width: 195px;
+    height: 50px;
+    background-color: #D8E1E7;
+    position: relative;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+.dashProject + .dashProject{
+    margin-left: 20px;
+}
+
+.dashProjectIcon {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    background-color: #002244;
+    border-radius: 5px;
+
+}
+
+.dashProjectIcon img{
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    height: 30px;
+    width: 30px;
+}
+
+.dashProject span{
+    position: relative;
+    left: 16px;
+}
 
 #main {
     display: flex;
     flex-direction: column;
-    background: #1E1E1E;
+    background: #2A231F;
     font-size: 28px;
     padding: 50px;
     flex: 0;
     flex-grow: 1;
-    /*opacity: 0.5;*/
+    z-index: 1;
+    position: relative;
+    overflow-x: hidden;
 }
 
 #onTopMain {
@@ -84,7 +272,6 @@ body {
     position: absolute;
     width: calc(90% - 100px);
     left: 100px;
-    margin-left: 4%;
     margin-top: 30px;
     height: 80%;
     background-color: #1E1E1E;
@@ -127,7 +314,7 @@ body {
 #content {
     display: flex;
     flex-direction: column;
-    height: calc(100% - 120px);
+    height: calc(100% - 100px);
     position: relative;
 }
 
@@ -135,77 +322,46 @@ body {
 #resizer {
     flex-basis: 4px;
     cursor: col-resize;
-    background: #FFC90E;
+    background: #D8E1E7;
 }
 
 #rightbar {
     color: white;
-    background: #272727;
+    background: #2A231F;
     box-sizing: border-box;
-    border: 4px solid #FFC90E;
+    border: 4px solid #D8E1E7;
     border-left: none;
     padding: 10px 10px 100px;
     flex-basis: 500px;
 }
 
-.dateButton {
-    width: 200px;
-    height: 50px;
-    background-color: #3B151F;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    border-radius: 10px;
-    border: 1px black solid;
-    box-shadow: 0 2px 6px 0 black;
-}
-
-.dateButton:active {
-    box-shadow: 0 0 0 0 black;
-}
-
-.dateButton img {
-    position: relative;
-    left: 0;
-    width: 40px;
-    height: 40px;
-}
-
-.dateButtonImg {
-    float: left;
-    position: relative;
-    left: 5px;
-}
-
-.dateButtonText {
-    position: relative;
-    top: 7px;
-}
-
-#todayButton{
-    border-color: #FFC90E;
-}
-
-#otherDateBtn .dateButtonText {
-    left: 5px;
-}
 
 #datePicker {
-    left: 565px;
-    top: 50px;
+    left: 0;
+    top: 0;
     position: absolute;
     cursor: pointer;
-    width: 192px;
+    width: 412px;
     height: 45px;
     opacity: 0;
 }
 
+#header{
+    color: white;
+    position: relative;
+}
+#mainTitle{
+    font-size: 40px;
+}
 #sidebarType {
+    right: 0;
+    top: 0;
+
     width: 50px;
     float: right;
-    position: relative;
+    position: absolute;
     height: 50px;
-    background-color: #3B151F;
+    background-color: #FF5D00;
     border: 1px solid gold;
 }
 
@@ -218,7 +374,7 @@ body {
 .sidebars {
     display: none;
     height: 50px;
-    background-color: #3B151F;
+    background-color: #FF5D00;
     position: relative;
     top: 4px;
     width: 50px;
@@ -232,7 +388,7 @@ body {
 #subHeader {
     width: 615px;
     color: white;
-    margin-top: 15px;
+    margin-top: 5px;
     margin-bottom: 20px;
     position: relative;
 }
@@ -240,37 +396,9 @@ body {
 #date {
     font-size: 20px;
     width: max-content;
-    border-bottom: solid 3px #3B151F;
+    border-bottom: solid 3px #FF5D00;
+    padding-bottom: 4px;
 }
-
-#viewContainer {
-    display: inline;
-    position: absolute;
-    right: 0;
-}
-
-#viewText {
-    font-size: 15px;
-    padding-left: 10px;
-}
-
-.viewOption {
-    font-size: 14px;
-    display: inline-flex;
-    padding: 2px 12px 3px 8px;
-    align-items: center;
-    gap: 10px;
-
-    border-radius: 5px;
-    border: 1px solid black;
-    background: #3B151F;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
-}
-
-#viewDay {
-    border-color: #FFC90E;
-}
-
 
 #todosFinished {
     display: block;
@@ -297,11 +425,11 @@ body {
 .todo {
     margin-right: 5px;
     min-height: 50px;
-    background: #363636;
+    background: #2A231F;
     font-size: 25px;
     color: white;
     margin-bottom: 7px;
-    border: 1px solid #666;
+    border: 1px solid #D8E1E7;
     display: flex;
     cursor: default;
 }
@@ -313,7 +441,7 @@ body {
 .todoCheck {
     pointer-events: none;
     position: relative;
-    background: #3B151F url("images/goals/Frame 8.svg") no-repeat;
+    background: #FF5D00 url("images/goals/Frame 8.svg") no-repeat;
 }
 
 .checkDot {
@@ -344,7 +472,7 @@ body {
 }
 
 #finishedButton {
-    background-color: #363636;
+    background-color: #FF5D00;
     color: white;
     width: max-content;
     font-size: 20px;
@@ -378,16 +506,16 @@ body {
 
 
 #todoEntrySimple {
-    background: #282828;
+    background: #55423B;
     display: flex;
 }
 
 #todoEntryComplex {
-    background: #282828;
+    background: #55423B;
     display: flex;
     height: 0;
     transition: 0.5s;
-    border-top: #FFC90E 1px solid;
+    border-top: #D8E1E7 1px solid;
     visibility: hidden;
     overflow: hidden;
 }
@@ -396,7 +524,7 @@ body {
     color: white;
     width: 100%;
     margin-left: 10px;
-    background: #282828;
+    background: #55423B;
     font-size: 20px;
     border: none;
     outline: none;
@@ -510,7 +638,7 @@ body {
 .selectCategory {
     background: #3B151F;
     width: 200px;
-    border: 1px solid #FFC90E;
+    border: 1px solid #D8E1E7;
 }
 
 #selectCategory {
@@ -562,7 +690,7 @@ body {
 .categoryPicker .categoryButton {
     width: 20px;
     height: 20px;
-    background: #3B151F;
+    background: #FF5D00;
     border: 1px solid black;
     display: inline-block;
 }
@@ -586,7 +714,7 @@ body {
     appearance: none;
     width: 25px;
     height: 25px;
-    background: #3B151F;
+    background: #FF5D00;
     cursor: pointer;
 }
 
@@ -625,7 +753,7 @@ body {
     padding-bottom: 1px;
     margin-top: 10px;
     margin-bottom: 5px;
-    background: #3B151F;
+    background: #FF5D00;
     display: block;
     width: max-content;
     padding-right: 5px;
@@ -694,7 +822,7 @@ body {
 #gloryButton {
     width: 50px;
     height: 50px;
-    background-color: #3B151F;
+    background-color: #FF5D00;
     border: 2px solid gold;
     position: absolute;
     border-radius: 10px;
@@ -716,7 +844,7 @@ body {
     margin-top: 15px;
     display: flex;
     color: white;
-    background-color: #272727;
+    background-color: #2A231F;
 }
 
 .sidebarTask span {
@@ -1040,7 +1168,7 @@ body {
     height: 50px;
     width: 120px;
     border: #FFC90E 2px solid;
-    background-color: #3B151F;
+    background-color: #FF5D00;
     border-radius: 5px;
     margin-left: 20px;
     margin-right: 10px;
@@ -1062,7 +1190,7 @@ body {
     width: 50px;
     height: 50px;
     border: #FFC90E 2px solid;
-    background-color: #3B151F;
+    background-color: #FF5D00;
     border-radius: 5px;
 }
 
@@ -1163,7 +1291,7 @@ body {
     width: calc(100% - 14px);
     max-width: 65px;
     margin: 5px auto;
-    background: #3B151F url(images/goals/glory0.svg) no-repeat center;
+    background: #FF5D00 url(images/goals/glory0.svg) no-repeat center;
     border: 2px black solid;
 }
 

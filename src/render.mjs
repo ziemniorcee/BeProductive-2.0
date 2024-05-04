@@ -7,18 +7,23 @@ export let todo_dragged = false
 let repeat_option = null
 let input_count = 0
 let block_prev_drag = 0
+let project_pos = null
 
 window.addEventListener("DOMContentLoaded", () => {
     build_day_view()
+    get_projects()
 });
 
-$(document).on('click', '#viewDay', function () {
+$(document).on('click', '#dashDay', function () {
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(this).css('backgroundColor', '#FF5D00')
+    $('#mainTitle').text('My day')
     day_view()
 })
 
-window.goalsAPI.askGoals({date: l_date.day_sql})
 
 window.goalsAPI.getGoals((goals) => {
+
     for (let i = 0; i < goals.length; i++) {
         let goal = {
             main_goal: goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
@@ -40,10 +45,7 @@ window.goalsAPI.getGoals((goals) => {
 
 export function day_view() {
     $('#content').css('flexDirection', 'column')
-
-    $('#todayButton .dateButtonText').text('Today')
-    $('#tomorrowButton .dateButtonText').text('Tomorrow')
-    $('#otherButton .dateButtonText').text('Another day')
+    project_pos = null
 
     build_day_view()
 
@@ -127,7 +129,12 @@ function new_goal() {
 
         window.goalsAPI.newGoal({
             goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
-            steps: steps, category: new_category, difficulty: difficulty, importance: importance, dates: dates,
+            steps: steps,
+            category: new_category,
+            difficulty: difficulty,
+            importance: importance,
+            dates: dates,
+            project_pos: project_pos,
         })
     }
 }
@@ -367,9 +374,6 @@ $(document).on('click', '.stepCheck', function () {
 });
 
 
-
-
-
 $(document).on('click', '.sidebarTask', function () {
     block_prev_drag = 0
 })
@@ -474,6 +478,25 @@ function build_day_view() {
     $('#content').html(html)
 }
 
+function get_projects() {
+    window.goalsAPI.askProjectsInfo()
+
+    window.goalsAPI.getProjectsInfo((projects) => {
+        let projects_HTML = ""
+        for (let i = 0; i < projects.length; i++) {
+            projects_HTML += `
+            <div class="dashProject">
+                <div class="dashProjectIcon" style="background-color: ${categories[projects[i].category][0]}">
+                    <img src="images/goals/projects/keys.png">
+                </div>
+                <span class="dashProjectName">${projects[i].name}</span>
+            </div>`
+        }
+        $('#dashProjects').html(projects_HTML)
+
+    })
+}
+
 export function _steps_html(steps, category_id) {
     let category_color = categories[category_id][0]
     let steps_HTML = ""
@@ -532,6 +555,20 @@ function _get_from_sidebar(drag_sidebar_task) {
 
     if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
     else drag_sidebar_task.closest('.day').remove()
+}
+
+
+$(document).on('click', '.dashProject', function () {
+    project_pos = $('.dashProject').index(this)
+    let project_name = $('.dashProjectName').eq(project_pos).text()
+    build_day_view()
+    $('#mainTitle').text(project_name)
+
+    window.goalsAPI.askGoals({project_pos: project_pos})
+})
+
+export function reset_project_pos(){
+    project_pos = null
 }
 
 // document.getElementById("laurels").addEventListener('click', () => {

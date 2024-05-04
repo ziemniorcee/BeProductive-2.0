@@ -1,4 +1,5 @@
 import {weekdays, month_names} from "./data.mjs";
+import {day_view, reset_project_pos} from "./render.mjs";
 
 class CurrentDate {
     constructor() {
@@ -30,9 +31,9 @@ class CurrentDate {
     }
 
     fix_header_day() {
-        if (this.day_sql === this.sql_format(this.today)) this.change_images(0)
-        else if (this.day_sql === this.sql_format(this.tomorrow)) this.change_images(1)
-        else this.change_images(2)
+        if (this.day_sql === this.sql_format(this.today)) $('#mainTitle').text('My day')
+        else if (this.day_sql === this.sql_format(this.tomorrow)) $('#mainTitle').text('Tomorrow')
+        else $('#mainTitle').text('Another day')
     }
 
     set_week(date) {
@@ -69,8 +70,8 @@ class CurrentDate {
     }
 
     fix_header_week() {
-        if (this.week_current.includes(this.day_sql)) this.change_images(0)
-        else if (this.week_next.includes(this.day_sql)) this.change_images(1)
+        if (this.week_current.includes(this.day_sql)) $('#mainTitle').text('This Week')
+        else if (this.week_next.includes(this.day_sql)) $('#mainTitle').text('Next Week')
         else this.change_images(2)
     }
 
@@ -135,9 +136,9 @@ class CurrentDate {
     fix_header_month() {
         let date = new Date(this.day_sql)
 
-        if (date.getMonth() === this.today.getMonth()) this.change_images(0)
-        else if (date.getMonth() === this.month_next.getMonth()) this.change_images(1)
-        else this.change_images(2)
+        if (date.getMonth() === this.today.getMonth()) $('#mainTitle').text('This Month')
+        else if (date.getMonth() === this.month_next.getMonth()) $('#mainTitle').text('Next Month')
+        else $('#mainTitle').text('Another Month')
     }
 
     glory_prev_month(){
@@ -241,6 +242,10 @@ class CurrentDate {
 
 export let l_date = new CurrentDate()
 
+window.goalsAPI.askGoals({date: l_date.day_sql})
+window.sidebarAPI.askHistory({date: l_date.day_sql})
+
+
 function date_change(option) {
     if (option === 0) l_date.get_today()
     else if (option === 1) l_date.get_tomorrow()
@@ -264,16 +269,21 @@ function month_change(option){
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
 }
 
-$(document).on('click', '#todayButton', () => {
-    if ($('#todosAll').length) date_change(0)
-    else if ($('.weekDay').length) week_change(0)
-    else month_change(0)
+$(document).on('click', '#dashMyDayBtn', () => {
+    l_date.get_today()
+    day_view()
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $('#dashDay').css('backgroundColor', '#FF5D00')
+    $('#mainTitle').text('My day')
+
 })
 
-$(document).on('click', '#tomorrowButton', () => {
-    if ($('#todosAll').length) date_change(1)
-    else if ($('.weekDay').length) week_change(1)
-    else month_change(1)
+$(document).on('click', '#dashTomorrowBtn', () => {
+    l_date.get_tomorrow()
+    day_view()
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $('#dashDay').css('backgroundColor', '#FF5D00')
+    $('#mainTitle').text('Tomorrow')
 })
 
 $(document).on('click', '#otherButton', () => {
@@ -285,11 +295,19 @@ $(document).on('click', '#otherButton', () => {
 
 $("#datePicker").datepicker({
     onSelect: function () {
+        reset_project_pos()
         $(".dateButton").css("border-color", "black")
         $("#otherButton").css("border-color", "#FFC90E")
         l_date.set_attributes($(this).datepicker('getDate'), 2)
-        if ($('#todosAll').length) date_change(2)
-        else if ($('.weekDay').length) week_change(2)
+        if ($('#todosAll').length) {
+            $('#mainTitle').text('Another day')
+            date_change(2)
+            l_date.fix_header_day()
+        }
+        else if ($('.weekDay').length) {
+            week_change(2)
+            l_date.fix_header_week()
+        }
         else month_change(2)
     }
 });

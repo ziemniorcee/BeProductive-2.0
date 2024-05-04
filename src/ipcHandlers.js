@@ -9,12 +9,18 @@ function todoHandlers(db) {
     let step_ids = {}
     let history_ids = []
     let idea_ids = []
+    let project_ids = []
     let current_goal_pos = 0
 
 
     ipcMain.on('ask-goals', (event, params) => {
         step_ids = {}
         current_date = params.date
+
+        let list_type = `addDate = "${current_date}"`
+        if (params.date === undefined){
+            list_type = `project_id = ${project_ids[params.project_pos]}`
+        }
 
         db.all(`SELECT G.id,
                        G.goal,
@@ -26,7 +32,7 @@ function todoHandlers(db) {
                        KN.knot_id
                 FROM goals G
                          LEFT JOIN knots KN ON KN.goal_id = G.id
-                WHERE addDate = "${current_date}"
+                WHERE ${list_type}
                 ORDER BY goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -140,6 +146,21 @@ function todoHandlers(db) {
         })
     })
 
+    ipcMain.on('ask-projects-info', (event, params) => {
+        db.all(`SELECT *
+                FROM projects`, (err, projects) => {
+            project_ids = projects.map((project) => project.id)
+
+            let safe_projects = projects.map(project => {
+                let {id, ...rest} = project;
+                return rest;
+            })
+            console.log(safe_projects)
+            event.reply('get-projects-info',safe_projects)
+        })
+
+    })
+
 
     ipcMain.on('change-date', (event, params) => {
         db.run(`UPDATE goals
@@ -182,16 +203,25 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('new-goal', (event, params) => {
+        console.log(params)
         let values = ""
         for (let i = 0; i < params.dates.length; i++) {
-            values += `("${params.goal_text}", "${params.dates[i]}", ${current_goal_pos}, ${params.category},
-                        ${params.difficulty}, ${params.importance})`
+            let date = params.dates[i]
+            let project_id = 0
+
+            if (params.project_pos !== null) {
+                project_id = project_ids[params.project_pos]
+                date = ""
+            }
+
+            values += `("${params.goal_text}", "${date}", ${current_goal_pos}, ${params.category},
+                        ${params.difficulty}, ${params.importance}, ${project_id})`
             if (i < params.dates.length - 1) values += ","
             current_goal_pos++
         }
         values += ";"
 
-        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance)
+        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id)
                 VALUES ${values}`)
 
         db.all(`SELECT id
