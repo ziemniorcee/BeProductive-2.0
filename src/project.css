@@ -1,0 +1,115 @@
+/* Project css */
+
+/* --------- Project View --------- */
+
+/* main */
+#projectContent {
+    position: relative;
+    height: 100%;
+    display: flex;
+}
+
+/* header */
+#projectHeader {
+    height: 50px;
+    background-color: #002244;
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+}
+
+#projectHeader img {
+    width: 40px;
+    height: 40px;
+    float: left;
+    padding-left: 5px;
+}
+
+#projectName {
+    margin-left: 10px;
+    font-size: 40px;
+}
+
+/* main */
+.projectSection {
+    border: #002244;
+    width: 100%;
+    height: calc(100% - 65px);
+}
+
+.projectSection + .projectSection {
+    margin-left: 30px;
+}
+
+.projectSection .todo {
+    margin-right: 0;
+}
+
+.projectSectionTitle {
+    background-color: #002244;
+    border: 1px solid #D8E1E7;
+    font-size: 20px;
+    height: 30px;
+    width: 80%;
+    text-align: center;
+    line-height: 30px;
+    margin: 30px auto 10px;
+}
+
+/* --------- --------- --------- */
+
+
+/* --------- Project Sidebar --------- */
+
+/* header */
+#sideProjectHeader{
+    background-color: #002244;
+    width: 100%;
+    height: 70px;
+    position: relative;
+    line-height: 70px;
+}
+
+#sideProjectIcon{
+    position: absolute;
+    left: 7px;
+    top: 7px;
+}
+
+
+#sideProjectIcon img{
+    width: 55px;
+    height: 55px;
+}
+
+#sideProjectTitle{
+    text-align: center;
+    font-size: 30px;
+}
+
+#sideProjectTitle img{
+    height: 70px;
+}
+
+#sideProjectTitle span{
+    position: relative;
+    bottom: 26px;
+}
+
+/* display options */
+#sideProjectOptions{
+    width: 100%;
+    height: 30px;
+    display: flex;
+    line-height: 30px;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.sideProjectOption{
+    border: 1px solid #D8E1E7;
+    width: 100%;
+
+}

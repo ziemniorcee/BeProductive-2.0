@@ -1,18 +1,21 @@
 import {l_date} from './date.js'
-import {categories, getIdByColor, check_border, weekdays2, range2_backgrounds, range1_backgrounds} from "./data.mjs";
-import {close_edit, change_category, set_goal_pos} from "./edit.mjs";
+import {categories, check_border, getIdByColor, weekdays2} from "./data.mjs";
+import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
+import {project_pos, reset_project_pos} from "./project.mjs";
 
 
 export let todo_dragged = false
 let repeat_option = null
 let input_count = 0
 let block_prev_drag = 0
-let project_pos = null
 
-window.addEventListener("DOMContentLoaded", () => {
-    build_day_view()
-    get_projects()
+
+window.addEventListener('DOMContentLoaded', function() {
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+    window.sidebarAPI.askHistory({date: l_date.day_sql})
+    build_view(_day_view_main(), _day_view_header())
 });
+
 
 $(document).on('click', '#dashDay', function () {
     $('.dashViewOption').css('backgroundColor', '#55423B')
@@ -23,18 +26,14 @@ $(document).on('click', '#dashDay', function () {
 
 
 window.goalsAPI.getGoals((goals) => {
-
     for (let i = 0; i < goals.length; i++) {
-        let goal = {
-            main_goal: goals[i].goal.replace(/`@`/g, "'").replace(/`@@`/g, '"'),
-            main_check: goals[i].check_state,
-            steps_HTML: _steps_html(goals[i].steps, goals[i].category),
-            category: goals[i].category,
-            importance: goals[i].Importance,
-            difficulty: goals[i].Difficulty,
-            is_knot: goals[i].knot_id,
-        }
-        build_goal(goal)
+        goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
+        goals[i]['goal'] = goals[i]['goal'].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+
+        let todo_area = goals[i]['check_state'] ? "#todosFinished" : "#todosArea";
+
+        build_goal(goals[i])
+        $(todo_area).append(build_goal(goals[i]))
     }
 
     let finished_count = $('#todosFinished .todo').length
@@ -45,9 +44,9 @@ window.goalsAPI.getGoals((goals) => {
 
 export function day_view() {
     $('#content').css('flexDirection', 'column')
-    project_pos = null
+    reset_project_pos()
 
-    build_day_view()
+    build_view(_day_view_main(), _day_view_header())
 
     l_date.fix_header_day()
 
@@ -57,32 +56,31 @@ export function day_view() {
 
 
 export function build_goal(goal) {
+    let todo_id = $('.todo').length
     let category_color = categories[goal.category][0]
-
-    let check_state = goal.main_check ? "checked" : "";
-    let todo_area = goal.main_check ? "#todosFinished" : "#todosArea";
-    let check_bg = goal.main_check ? "url('images/goals/check.png')" : "";
+    let check_state = goal.check_state ? "checked" : "";
+    let todo_area = goal.check_state ? "#todosFinished" : "#todosArea";
+    let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
     let url = `images/goals/rank${goal.difficulty}.svg`
-    let repeat = ""
+    let repeat = _repeat_html(goal.knot_id)
+    let project_emblem = _project_emblem_html(goal.pr_pos, goal.pr_category, goal.pr_icon)
 
-    if (goal.is_knot !== null) {
-        repeat = `<div class="repeatLabelShow"><img class="repeatLabelImg" src="images/goals/repeat.png" alt=""></div>`
-    }
-
-    $(todo_area).append(
-        `<div class='todo'>
-            <div class="todoId">${$('.todo').length}</div>
+    return `
+        <div class='todo'>
+            <div class="todoId">${todo_id}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[goal.importance]}"></div>
                 <input type='checkbox' class='check_task' ${check_state}>
             </div>
             <div class='taskText'>
-                <span class='task'> ${goal.main_goal} </span>
+                <span class='task'> ${goal.goal} </span>
                 ${repeat}
-                ${goal.steps_HTML}
+                ${goal.steps}
             </div>
-        </div>`)
+            ${project_emblem}
+        </div>`
 }
+
 
 function new_goal() {
     let e_todo = $('#todoEntryGet')
@@ -90,54 +88,19 @@ function new_goal() {
     e_todo.val('')
 
     if (goal_text !== "") {
-        let difficulty = $('#range1').val()
-        let importance = $('#range2').val()
-
-        let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
-        let steps = []
-
-        let steps_elements = $('.stepEntry')
-        for (let i = 0; i < steps_elements.length; i++) {
-            let step_value = steps_elements[i].value
-            if (step_value !== "") steps.push({
-                step_text: step_value.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
-                step_check: 0
-            })
-        }
-
-        if (steps.length) {
-            input_count = 0
-            $('#newSteps').html(`<div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>`)
-        }
-
-        let goal = {
-            main_goal: goal_text,
-            main_check: 0,
-            steps_HTML: _steps_html(steps, new_category),
-            category: new_category,
-            importance: importance,
-            difficulty: difficulty,
-            is_knot: repeat_option
-        }
+        let steps = _new_goal_steps()
+        let goal = _new_goal_dict(goal_text, steps)
         build_goal(goal)
 
-        let dates
-        if (repeat_option === 0) dates = l_date.get_every(1, 30)
-        else if (repeat_option === 1) dates = l_date.get_every(7, 12)
-        else if (repeat_option === 2) dates = l_date.get_everymonth()
-        else dates = [l_date.day_sql]
+        goal['goal'] = goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+        goal['steps'] = steps
+        goal['dates'] = l_date.get_repeat_dates(repeat_option)
+        goal['project_pos'] = project_pos
 
-        window.goalsAPI.newGoal({
-            goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
-            steps: steps,
-            category: new_category,
-            difficulty: difficulty,
-            importance: importance,
-            dates: dates,
-            project_pos: project_pos,
-        })
+        window.goalsAPI.newGoal(goal)
     }
 }
+
 
 $(document).on('click', '#todoAdd', (event) => {
     event.stopPropagation()
@@ -317,14 +280,12 @@ $(document).on('click', '#todosAll .check_task', function () {
 export function change_check(id) {
     const check_task = $('.check_task').eq(id)
     const dot = $('.checkDot').eq(id)
-    let todo
-    let goal_id
+
+    let todo = $('.todo')
+    let goal_id = $('.todoId')
     if ($('#monthGrid').length) {
         goal_id = $('.monthTodoId')
         todo = $('.monthTodo')
-    } else {
-        goal_id = $('.todoId')
-        todo = $('.todo')
     }
 
     let array_id = Number(goal_id.eq(id).html())
@@ -419,22 +380,69 @@ export function set_todo_dragged(bool) {
 }
 
 
-function build_day_view() {
-    let categories_html = _build_categories()
-
+export function build_view(main, header) {
     let html = `
+        <div id="onTopMain"></div>
+        <div id="mainBlur"></div>
+        ${header}
+        ${main}
+    `
+    $('#main').html(html)
+}
+
+function _day_view_main(){
+    return `
+    <div id="content">
         <div id="todosAll">
             <div id="todosArea">
-
+            
             </div>
             <div id="finishedButton">
                 <img id="finishedImg" src="images/goals/down.png" alt="up"><span>Finished: </span><span
                     id="finishedCount">0</span>
             </div>
             <div id="todosFinished">
-
+            
             </div>
         </div>
+        ${_input_html()}
+    </div>
+    `
+}
+
+function _day_view_header(){
+    let date = l_date.get_display_format()
+    return `
+        <div id="header">
+            <div id="mainTitle">My day</div>
+    
+            <div id="projectShowed">
+                <img id="imgProjectShowed" src="images/goals/projects/project.png">
+                <div id="projectTypes">
+    
+                </div>
+            </div>
+    
+            <div id="sidebarType">
+                <img id="imgMain" src="images/goals/history.png" alt="main">
+                <div class="sidebars">
+                    <img id="imgSecond" src="images/goals/idea.png" alt="second" width="40" height="40">
+                </div>
+            </div>
+    
+            <div id="subHeader">
+                <span id="date">
+                    ${date}
+                </span>
+            </div>
+        </div>
+    `
+}
+
+export function _input_html(){
+    let categories_html = _build_categories()
+
+    return `
         <div id="todoInput">
             <div id="repeatPicker">
                 <div class="repeatOption">
@@ -450,7 +458,7 @@ function build_day_view() {
                     <div class="repeatLabel">Every month</div>
                 </div>
             </div>
-            
+        
             <div id="todoEntrySimple">
                 <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
                 <div id="todoRepeat"><img id="repeatImg" src="images/goals/repeat.png" alt=""></div>
@@ -462,40 +470,81 @@ function build_day_view() {
                 </div>
                 <div id="todoSettings">
                     <div class="todoLabel">Category</div>
-                    <div id="selectCategory" class="selectCategory">None</div>
+                    <div id="selectCategory" class="selectCategory">General</div>
                     <div class="todoLabel" id="label1">Difficulty</div>
                     <input type="range" class="todoRange" id="range1" min="0" max="4">
                     <div class="todoLabel" id="label2">Importance</div>
-                    <input type="range" class="todoRange" id="range2" min="0" max="4">
-
+                    <input type="range" class="todoRange" id="range2" min="0" max="4">   
                     <div class="categoryPicker" id="categoryPicker">
                         ${categories_html}
                     </div>
                 </div>
-                </div>
             </div>
+        </div>
     `
-    $('#content').html(html)
 }
 
-function get_projects() {
-    window.goalsAPI.askProjectsInfo()
+function _project_emblem_html(position, category, icon){
+    let project_emblem = ''
+    if (position !== -1  && position !== undefined){
+        let project_category_color = categories[category][0]
+        project_emblem = `
+            <div class="projectEmblem" style="background-color: ${project_category_color}">
+                <img src="images/goals/projects/${icon}.png">
+                <div class="projectPos">${position}</div>
+            </div>
+        `
+    }
+    return project_emblem
+}
 
-    window.goalsAPI.getProjectsInfo((projects) => {
-        let projects_HTML = ""
-        for (let i = 0; i < projects.length; i++) {
-            projects_HTML += `
-            <div class="dashProject">
-                <div class="dashProjectIcon" style="background-color: ${categories[projects[i].category][0]}">
-                    <img src="images/goals/projects/keys.png">
-                </div>
-                <span class="dashProjectName">${projects[i].name}</span>
+function _repeat_html(knot_id){
+    let repeat = ""
+    if (knot_id !== null) {
+        repeat = `
+            <div class="repeatLabelShow">
+                <img class="repeatLabelImg" src="images/goals/repeat.png" alt="">
             </div>`
-        }
-        $('#dashProjects').html(projects_HTML)
-
-    })
+    }
+    return repeat
 }
+
+function _new_goal_dict(goal_text, steps){
+    let difficulty = $('#range1').val()
+    let importance = $('#range2').val()
+
+    let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
+
+    return {
+        goal: goal_text,
+        steps: _steps_html(steps, new_category),
+        category: new_category,
+        importance: importance,
+        difficulty: difficulty,
+        knot_id: repeat_option
+    }
+}
+
+function _new_goal_steps(){
+    let steps = []
+
+    let steps_elements = $('.stepEntry')
+    for (let i = 0; i < steps_elements.length; i++) {
+        let step_value = steps_elements[i].value
+        if (step_value !== "") steps.push({
+            step_text: step_value.replace(/'/g, "`@`").replace(/"/g, "`@@`"),
+            step_check: 0
+        })
+    }
+
+    if (steps.length) {
+        input_count = 0
+        $('#newSteps').html(`<div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>`)
+    }
+
+    return steps
+}
+
 
 export function _steps_html(steps, category_id) {
     let category_color = categories[category_id][0]
@@ -558,18 +607,19 @@ function _get_from_sidebar(drag_sidebar_task) {
 }
 
 
-$(document).on('click', '.dashProject', function () {
-    project_pos = $('.dashProject').index(this)
-    let project_name = $('.dashProjectName').eq(project_pos).text()
-    build_day_view()
-    $('#mainTitle').text(project_name)
-
-    window.goalsAPI.askGoals({project_pos: project_pos})
-})
-
-export function reset_project_pos(){
-    project_pos = null
+export function _show_sidebar(){
+    let right_bar = $('#rightbar')
+    let resizer = $('#resizer')
+    if (right_bar.css('display') === 'none') {
+        right_bar.toggle()
+        resizer.css('display', right_bar ? 'flex' : 'none')
+    }
 }
+
+
+
+
+
 
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()

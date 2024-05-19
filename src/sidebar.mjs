@@ -148,7 +148,7 @@ $(document).on('click', '.ideasAdd', function () {
     let id = $('.ideasAdd').index(this)
     let goal_text = $('.idea').eq(id).text()
 
-    window.sidebarAPI.deleteIdea({id: id, goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")})
+    window.sidebarAPI.deleteIdea({id: id, goal_text: goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`"), date: l_date.day_sql})
 
     let import_goal = {
         main_goal: goal_text,

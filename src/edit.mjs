@@ -54,13 +54,13 @@ $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
         if ($(this).attr('class') === 'sidebarTask') {
             is_from_sidebar = true
             goal_id = $('.sidebarTask').index(this)
-            window.goalsAPI.askSteps({todo_id: goal_id, option: is_from_sidebar})
+            window.goalsAPI.askGoalInfo({todo_id: goal_id, option: is_from_sidebar})
         } else if ($('#todosAll').length) _build_edit()
-        else if ($('.weekDay').length) window.goalsAPI.askSteps({todo_id: goal_id, option: is_from_sidebar})
+        else if ($('.weekDay').length) window.goalsAPI.askGoalInfo({todo_id: goal_id, option: is_from_sidebar})
         else if ($('#monthGrid').length) {
             goal_id = Number($(base).find('.monthTodoId').text())
             goal_pos = $('.monthTodo').index(this)
-            window.goalsAPI.askSteps({todo_id: goal_id})
+            window.goalsAPI.askGoalInfo({todo_id: goal_id})
         }
     } else set_todo_dragged(false)
     is_edit_change = false
@@ -212,14 +212,14 @@ $(document).on('click', '#editNewStep', function () {
     new_step()
 })
 
-$(document).on('keydown', '.editTextStep', function (event){
-    if(event.which === 9){
+$(document).on('keydown', '.editTextStep', function (event) {
+    if (event.which === 9) {
         event.preventDefault()
         new_step()
     }
 })
 
-function new_step(){
+function new_step() {
     is_new_step = true
     let edit_steps = $('.editTextStep')
 
@@ -233,8 +233,9 @@ function new_step(){
     last_step = ""
     edit_steps = $('.editTextStep')
 
-    edit_steps.eq(edit_steps.length -1).focus()
+    edit_steps.eq(edit_steps.length - 1).focus()
 }
+
 export function change_category(category_id) {
     $(base).find('.todoCheck').css('backgroundColor', categories[category_id][0])
     $(base).find('.monthTodoLabel').css('backgroundColor', categories[category_id][0])
@@ -266,7 +267,7 @@ export function close_edit() {
     if (goal_pressed === true) {
         goal_pressed = false
         document.getElementById("rightbar").innerHTML = saved_sidebar
-        if(is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
+        if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
 }
 
@@ -274,23 +275,67 @@ export function goal_pressed_false() {
     goal_pressed = false
 }
 
-window.goalsAPI.getSteps((goal, steps) => {
+window.goalsAPI.getGoalInfo((goal, steps) => {
     let step_texts = steps.map(step => step.step_text);
     let step_checks = steps.map(step => step.step_check);
     steps_count = step_checks.length
     let steps_html = _steps_html(step_texts, step_checks)
 
-    $('#rightbar').html(_edit_html(goal[0], steps_html))
+    console.log(goal.pr_pos)
+    goal["project"] = _project_config(goal.pr_pos)
+    $('#rightbar').html(_edit_html(goal, steps_html))
     _fix_main_goal_edit()
 })
 
+$(document).on('click', '#editSelectProject', function (event) {
+    event.stopPropagation()
+    $('#editProjectPicker').toggle()
+})
+
+$(document).on('click', '.editPickProject', function () {
+    let project_id = $('.editPickProject').index(this) -1
+
+    $(base).find('.projectEmblem').remove()
+    if (project_id >= 0) {
+        let project_color = $('.dashProjectIcon').eq(project_id).css('background-color')
+        let project_src = $('.dashProjectIcon img').eq(project_id).attr('src')
+        let edit_project_icon = $('.editProjectIcon')
+
+        edit_project_icon.eq(0).html(`<img class="editPickProjectIcon" src="${project_src}">`)
+        edit_project_icon.eq(0).css('background-color', project_color)
+        $('.editProjectName').eq(0).text($('.dashProjectName').eq(project_id).text())
+        $('.editSelectProject').eq(0).html(`<img class="editPickProjectIcon" src="${project_src}">`)
+        $('#editSelectProject').css("backgroundColor", project_color)
+
+        if($('#todosAll').length) {
+            $(base).append(`
+            <div class="projectEmblem" style="background-color: ${project_color}">
+                <img src="${project_src}">
+                <div class="projectPos">${project_id}</div>
+            </div>`)
+        }
+    }
+    else{
+        $('.editProjectName').eq(0).text('None')
+        $('.editProjectIcon').eq(0).css("backgroundColor", "#D8E1E7")
+        $('#editSelectProject').css("backgroundColor", "#FF5D00")
+    }
+
+    window.goalsAPI.changeProject({id: goal_id, project_pos: project_id, option: is_from_sidebar})
+    $('#editProjectPicker').toggle()
+})
+
 function _edit_html(goal_config, steps_html) {
+
     let backgrounds1 = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
     let backgrounds2 = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
 
     let categories_html = _build_categories()
+    let projects_html = _build_project_picker()
     let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
+    console.log("XPP")
     goal_text = converted_text
+    console.log(goal_config['project'])
 
     return `<div id="editButtons">
                 <div id="editClose">⨉</div>
@@ -318,16 +363,26 @@ function _edit_html(goal_config, steps_html) {
                     <div>Importance</div>
                 </div>
                 <div id="optionsConfig">
-                    <div id="selectCategory2" class="selectCategory" style="background: ${categories[goal_config["category"]][0]}">${categories[goal_config["category"]][1]}</div>
-                    <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${goal_config["Difficulty"]}" style="background-color: ${backgrounds1[goal_config["difficulty"]]}">
-                    <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${goal_config["Importance"]}" style="background-color: ${backgrounds2[goal_config["importance"]]}">
+                    <div id="selectCategory2" class="selectCategory" style="background: ${categories[goal_config["category"]][0]}">
+                        ${categories[goal_config["category"]][1]}
+                    </div>
+                    <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="${goal_config["difficulty"]}" style="background-color: ${backgrounds1[goal_config["difficulty"]]}">
+                    <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="${goal_config["importance"]}" style="background-color: ${backgrounds2[goal_config["importance"]]}">
                     <div class="categoryPicker" id="categoryPicker2">
                         ${categories_html}
                     </div>
                 </div>
             </div>
-            <div id="editFunctions">
-                
+            <div id="editProject">
+                <div id="editProjectTitle">Project</div>
+                <div id="editSelectProject" style="background-color: ${goal_config['project'][2]}">
+                    <div class="editProjectIcon" style="background-color: ${goal_config['project'][1]}">${goal_config['project'][3]}</div>
+                    <div class="editProjectName">${goal_config['project'][0]}</div>
+                    
+                </div>
+                <div id="editProjectPicker">
+                    ${projects_html}
+                </div>
             </div>`
 }
 
@@ -337,9 +392,11 @@ function _get_goal_config(that) {
     goal_config["goal"] = $(that).find('.task').text().trim()
     goal_config["check_state"] = $(that).find('.check_task').prop('checked') === true ? "checked" : ""
     goal_config["category"] = getIdByColor(categories, $(that).find('.todoCheck').css('backgroundColor'))
-    goal_config["Difficulty"] = $(that).find('.todoCheck')[0].style.backgroundImage[22]
-    goal_config["Importance"] = check_border.indexOf($(that).find('.checkDot').css('borderColor'))
+    goal_config["difficulty"] = $(that).find('.todoCheck')[0].style.backgroundImage[22]
+    goal_config["importance"] = check_border.indexOf($(that).find('.checkDot').css('borderColor'))
 
+    let project_pos = $(that).find('.projectPos').text() // week and month have to get project info from db
+    goal_config['project'] = _project_config(project_pos)
 
     goal_config["steps"] = $(that).find('.step').map(function () {
         return $(this).text().trim();
@@ -352,6 +409,23 @@ function _get_goal_config(that) {
     return goal_config
 }
 
+function _project_config(project_pos){
+    let project_config = []
+    if (project_pos !== "" && project_pos !== -1) {
+        project_config[0] = $('.dashProjectName').eq(project_pos).text()
+        project_config[1] = $('.dashProjectIcon').eq(project_pos).css('backgroundColor')
+        project_config[2] = project_config[1]
+        let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
+        project_config[3] = `<img class="editPickProjectIcon" src="${project_icon}">`
+    }
+    else{
+        project_config[0] = 'None'
+        project_config[1] = '#D8E1E7'
+        project_config[2] = '#FF5D00'
+        project_config[3] = ""
+    }
+    return project_config
+}
 
 function _steps_html(steps, checks) {
     let steps_html = ""
@@ -395,6 +469,27 @@ function _fix_main_goal_edit() {
         this.style.height = 'auto'
         this.style.height = `${this.scrollHeight}px`
     })
+}
+
+function _build_project_picker() {
+    let picks_HTML = `
+        <div class="editPickProject">
+            <div class="editProjectIcon"></div>
+            <div class="editProjectName">None</div>
+        </div>`
+
+    for (let i = 0; i < $('.dashProject').length; i++) {
+        let icon_color = $('.dashProjectIcon').eq(i).css('backgroundColor')
+        let icon_src = $('.dashProjectIcon img').eq(i).attr('src')
+        picks_HTML += `
+            <div class="editPickProject">
+                <div class="editProjectIcon" style="background-color: ${icon_color}">
+                    <img class="editPickProjectIcon" src="${icon_src}">
+                </div>
+                <div class="editProjectName">${$('.dashProjectName').eq(i).text()}</div>
+            </div>`
+    }
+    return picks_HTML
 }
 
 export function set_goal_pos(id) {

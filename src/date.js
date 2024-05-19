@@ -1,5 +1,6 @@
 import {weekdays, month_names} from "./data.mjs";
-import {day_view, reset_project_pos} from "./render.mjs";
+import {day_view} from "./render.mjs";
+import {reset_project_pos} from "./project.mjs";
 
 class CurrentDate {
     constructor() {
@@ -163,6 +164,14 @@ class CurrentDate {
         return date.getMonth()
     }
 
+    get_repeat_dates(option){
+        let dates = [l_date.day_sql]
+        if (option === 0) dates = l_date.get_every(1, 30)
+        else if (option === 1) dates = l_date.get_every(7, 12)
+        else if (option === 2) dates = l_date.get_everymonth()
+        return dates
+    }
+
     get_every(how_often, how_many){
         let date = new Date(this.day_sql)
 
@@ -175,7 +184,6 @@ class CurrentDate {
     }
 
     get_everymonth(){
-
         let date = new Date(this.day_sql)
         let first_day = date.getDate()
         let dates = []
@@ -191,8 +199,6 @@ class CurrentDate {
                 date = new Date(last_date)
                 date.setDate(date.getDate() + first_day)
             }
-
-
         }
         return dates
     }
@@ -205,7 +211,6 @@ class CurrentDate {
         return 0
     }
     set_attributes(date, option) {
-        this.display_format(date)
         this.day_sql = this.sql_format(date)
         this.week_now = this.set_week(date)
 
@@ -232,18 +237,17 @@ class CurrentDate {
         return `${date.getFullYear()}-${format_month}-${format_day}`;
     }
 
-    display_format(date) {
+    get_display_format() {
+        let date = new Date(this.day_sql)
         let format_day = date.getDate()
         if (format_day < 10) format_day = "0" + format_day
 
-        $('#date').html(`${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`)
+        return `${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
 }
 
 export let l_date = new CurrentDate()
 
-window.goalsAPI.askGoals({date: l_date.day_sql})
-window.sidebarAPI.askHistory({date: l_date.day_sql})
 
 
 function date_change(option) {

@@ -57,7 +57,6 @@ $(document).on('click', '#rightbar', function () {
     $('#categoryPicker2').css('display', 'none')
 })
 
-$(document).on('click', '.viewOption', function () {
-    $('.viewOption').css('borderColor', "black")
-    $(this).css('borderColor', "#FFC90E")
+$(document).on('click', '#rightbar', function () {
+    $('#editProjectPicker').css('display', 'none')
 })

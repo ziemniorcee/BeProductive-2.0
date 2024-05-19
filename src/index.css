@@ -225,8 +225,8 @@ body {
     border: 1px black solid;
 }
 
-.dashProject + .dashProject{
-    margin-left: 20px;
+.dashProjectRight{
+    margin-right: 20px;
 }
 
 .dashProjectIcon {
@@ -255,6 +255,7 @@ body {
 }
 
 #main {
+    color: white;
     display: flex;
     flex-direction: column;
     background: #2A231F;
@@ -265,6 +266,7 @@ body {
     z-index: 1;
     position: relative;
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 #onTopMain {
@@ -314,7 +316,7 @@ body {
 #content {
     display: flex;
     flex-direction: column;
-    height: calc(100% - 100px);
+    height: 100%;
     position: relative;
 }
 
@@ -353,8 +355,13 @@ body {
 #mainTitle{
     font-size: 40px;
 }
-#sidebarType {
-    right: 0;
+
+#projectShowed {
+    right: 75px;
+
+}
+
+#sidebarType, #projectShowed{
     top: 0;
 
     width: 50px;
@@ -362,26 +369,65 @@ body {
     position: absolute;
     height: 50px;
     background-color: #FF5D00;
-    border: 1px solid gold;
+    border: 1px solid #D9D9D9;
+}
+#sidebarType {
+    right: 0;
 }
 
-#sidebarType img {
+#sidebarType img, #projectShowed img {
+    width: 40px;
+    height: 40px;
     position: relative;
     top: 5px;
     left: 5px;
 }
 
-.sidebars {
-    display: none;
+.projectType{
+    border: 1px solid #D9D9D9;
+    position: relative;
     height: 50px;
+    cursor: pointer;
+}
+
+
+.sidebars{
+    height: 50px;
+}
+
+.sidebars, #projectTypes {
+    z-index: 1;
+    display: none;
     background-color: #FF5D00;
     position: relative;
     top: 4px;
-    width: 50px;
-
+    width: 52px;
+    right: 1px;
 }
 
 #sidebarType:hover .sidebars {
+    display: block;
+}
+
+#projectShowed:hover #projectTypes {
+    display: block;
+}
+
+.projectName{
+    background-color: #FF5D00;
+    width: 170px;
+    height: 50px;
+    position: absolute;
+    top: -1px;
+    right: 51px;
+    text-align: center;
+    border: 1px solid #D9D9D9;
+    line-height: 50px;
+    font-size: 24px;
+    display: none;
+}
+
+.projectType:hover .projectName {
     display: block;
 }
 
@@ -432,6 +478,7 @@ body {
     border: 1px solid #D8E1E7;
     display: flex;
     cursor: default;
+    position: relative;
 }
 
 .todoId {
@@ -650,11 +697,12 @@ body {
     height: 130px;
     position: relative;
     bottom: 152px;
-    background: #272727;
-    border: 1px solid #FFC90E;
+    background: #2A231F;
+    border: 1px solid #D8E1E7;
     padding: 10px;
     display: none;
     overflow-y: scroll;
+    z-index: 2;
 }
 
 .categoryPicker::-webkit-scrollbar {
@@ -676,7 +724,7 @@ body {
 #categoryPicker2 {
     top: 41px;
     position: absolute;
-    height: 110px;
+    height: 105px;
 }
 
 .category {
@@ -732,9 +780,27 @@ body {
 .taskText {
     margin: 10px;
     word-break: break-word;
-    width: auto;
+    width: 100%;
     overflow-y: hidden;
     pointer-events: none;
+}
+
+.projectEmblem{
+    float: right;
+    width: 50px;
+    background-color: #002244;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.projectEmblem img{
+    width: 40px;
+    height: 40px;
+}
+
+.projectPos {
+    display: none;
 }
 
 .repeatLabelShow{
@@ -817,6 +883,11 @@ body {
     font-size: 30px;
     width: 150px;
 
+}
+
+#polaura2{
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
 }
 
 #gloryButton {
@@ -1029,15 +1100,14 @@ body {
 }
 
 #editTodo {
-    background: #323232;
+    background: #55423B;
     margin: 10px;
     font-size: 25px;
     padding: 10px;
-
 }
 
 #editOptions {
-    background: #323232;
+    background: #55423B;
     margin: 10px;
     font-size: 25px;
     padding: 10px;
@@ -1065,6 +1135,91 @@ body {
     margin-bottom: 15px;
 }
 
+#editProject{
+    font-size: 20px;
+    height: 40px;
+    background: #55423B;
+    margin: 10px;
+    display: flex;
+    padding: 10px;
+    position: relative;
+}
+
+#editProjectTitle{
+    flex-grow: 1;
+    text-align: center;
+    font-size: 25px;
+    line-height: 40px;
+}
+
+#editSelectProject, .editPickProject{
+    line-height: 40px;
+    height: 40px;
+    width: 200px;
+    text-align: center;
+    margin-right: 8px;
+    background-color: #FF5D00;
+    border: 1px solid #D8E1E7;
+    position: relative;
+}
+
+.editProjectIcon{
+    width: 30px;
+    height: 30px;
+    background-color: #D8E1E7;
+    display: inline-block;
+    position: absolute;
+    left: 6px;
+    top: 5px;
+    border-radius: 5px;
+}
+.editProjectName{
+    display: inline-block;
+    position: relative;
+    left: 10px;
+}
+
+#editProjectPicker{
+    width: 200px;
+    max-height: 160px;
+    position: absolute;
+    background-color: #2A231F;
+    border: 1px solid #D8E1E7;
+    right: 18px;
+    top: 51px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    display: none;
+}
+
+.editPickProject{
+    background-color: #2A231F;
+    border: 0;
+}
+
+.editPickProjectIcon{
+    width: 25px;
+    height: 25px;
+    position: relative;
+    right: 1px;
+}
+
+#editProjectPicker::-webkit-scrollbar {
+    width: 10px;
+}
+
+#editProjectPicker::-webkit-scrollbar-track {
+    background: #272727;
+}
+
+#editProjectPicker::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+#editProjectPicker::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 #editMain {
     display: flex;
     margin-bottom: 10px;
@@ -1084,7 +1239,7 @@ body {
 #editText {
     color: white;
     width: 100%;
-    background: #323232;
+    background: #55423B;
     border-radius: 7px;
     font-size: 25px;
     border: transparent;
@@ -1100,7 +1255,7 @@ body {
     margin-bottom: 5px;
     padding-top: 5px;
 
-    border-bottom: 1px solid #323232;
+    border-bottom: 1px solid #55423B;
 
 }
 
@@ -1115,7 +1270,7 @@ body {
 .editTextStep {
     color: #b9b4b4;
     width: 100%;
-    background: #323232;
+    background: #55423B;
     border-radius: 7px;
     font-size: 20px;
     border: transparent;
@@ -1131,7 +1286,7 @@ body {
 }
 
 #editNewStep {
-    color: #FFC90E;
+    color: #FF5D00;
     font-size: 20px;
     position: relative;
     bottom: 2px;

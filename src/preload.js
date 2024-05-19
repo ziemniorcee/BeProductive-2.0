@@ -24,12 +24,13 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeCategory: (params) => ipcRenderer.send('change-category', params),
     changeDifficulty: (params) => ipcRenderer.send('change-difficulty', params),
     changeImportance: (params) => ipcRenderer.send('change-importance', params),
+    changeProject: (params) => ipcRenderer.send('change-project', params),
 
     askWeekGoals: (params) => ipcRenderer.send('ask-week-goals',params),
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
-    askSteps: (params) => ipcRenderer.send('ask-steps',params),
-    getSteps: (func) => ipcRenderer.on('get-steps', (event,goal , steps) => func(goal, steps)),
+    askGoalInfo: (params) => ipcRenderer.send('ask-goal-info',params),
+    getGoalInfo: (func) => ipcRenderer.on('get-goal-info', (event,goal , steps) => func(goal, steps)),
 
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals',params),
     getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
@@ -37,7 +38,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     askProjectsInfo: (params) => ipcRenderer.send('ask-projects-info',params),
     getProjectsInfo: (func) => ipcRenderer.on('get-projects-info', (event, projects) => func(projects)),
-
+    askProjectGoals: (params) => ipcRenderer.send('ask-project-goals',params),
+    getProjectGoals: (func) => ipcRenderer.on('get-project-goals', (event, goals, steps) => func(goals, steps)),
 })
 
 

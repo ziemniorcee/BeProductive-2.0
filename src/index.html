@@ -5,6 +5,7 @@
     <title>Hello World!</title>
     <link rel="stylesheet" href="index.css"/>
     <link rel="stylesheet" href="week.css"/>
+    <link rel="stylesheet" href="project.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -19,6 +20,7 @@
     <script type="module" src="monthView.mjs"></script>
     <script type="module" src="glory.mjs"></script>
     <script type="module" src="behaviors.js"></script>
+    <script type="module" src="project.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
@@ -64,34 +66,25 @@
 
         <div id="dashProjectsTitle">PROJECTS</div>
         <div id="dashProjects">
-            <div class="dashProject">
-                <div class="dashProjectIcon">
-                    <img src="images/goals/projects/keys.png">
-                </div>
-                <span>Calculus</span>
-            </div>
-            <div class="dashProject">
-                <div class="dashProjectIcon" style="background-color: #731D6F">
-                    <img src="images/goals/projects/book.png">
-                </div>
-                <span>Future ...</span>
-            </div>
+
         </div>
     </div>
     <div id="main">
-        <!--        <video autoplay muted loop id="myVideo">-->
-        <!--            <source src="images/beach-with-palm-trees.3840x2160.mp4" type="video/mp4">-->
-        <!--            Your browser does not support HTML5 video.-->
-        <!--        </video>-->
         <div id="onTopMain"></div>
 
         <div id="mainBlur"></div>
         <div id="header">
             <div id="mainTitle">My day</div>
 
+            <div id="projectShowed">
+                <img id="imgProjectShowed" src="images/goals/projects/project.png">
+                <div id="projectTypes">
+
+                </div>
+            </div>
 
             <div id="sidebarType">
-                <img id="imgMain" src="images/goals/history.png" alt="main" width="40" height="40">
+                <img id="imgMain" src="images/goals/history.png" alt="main">
                 <div class="sidebars">
                     <img id="imgSecond" src="images/goals/idea.png" alt="second" width="40" height="40">
                 </div>
@@ -114,7 +107,7 @@
 
             <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
             <span id="head_text">History</span>
-            <img src="images/goals/polaura2.png" alt="polaura" width="25" height="50">
+            <img src="images/goals/polaura.png" id="polaura2" alt="polaura" width="25" height="50">
         </div>
         <div id="days">
 

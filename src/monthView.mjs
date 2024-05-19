@@ -1,7 +1,8 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
-import {day_view, reset_project_pos, set_todo_dragged} from "./render.mjs";
+import {day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
+import {reset_project_pos} from "./project.mjs";
 
 
 

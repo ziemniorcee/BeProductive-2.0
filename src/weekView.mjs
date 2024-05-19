@@ -1,7 +1,8 @@
 import {l_date} from "./date.js";
 import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
-import {day_view, reset_project_pos, set_todo_dragged} from "./render.mjs";
+import {day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
+import {reset_project_pos} from "./project.mjs";
 
 
 $(document).on('click', '#dashWeek', function () {
@@ -168,7 +169,7 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
 
 
 export function build_week_goal(goal, todo_id) {
-    let difficulty = `images/goals/rank${goal.Difficulty}.svg`
+    let difficulty = `images/goals/rank${goal.difficulty}.svg`
     let check_state = ""
     let check_bg = ""
 
@@ -188,7 +189,7 @@ export function build_week_goal(goal, todo_id) {
         <div class="todo">
             <div class="todoId">${todo_id}</div>
             <div class="todoCheck" style="background: ${categories[goal.category][0]} url(${difficulty}) no-repeat">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.Importance]} solid"></div>
+                <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.importance]} solid"></div>
                 <input type="checkbox" class="check_task" ${check_state}>
             </div>
             <div class="taskText">
