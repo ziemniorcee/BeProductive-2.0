@@ -1,7 +1,7 @@
 import {l_date} from './date.js'
 import {categories, check_border, getIdByColor, weekdays2} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
-import {project_pos, reset_project_pos} from "./project.mjs";
+import {build_project_goal, project_pos, reset_project_pos} from "./project.mjs";
 
 
 export let todo_dragged = false
@@ -90,7 +90,9 @@ function new_goal() {
     if (goal_text !== "") {
         let steps = _new_goal_steps()
         let goal = _new_goal_dict(goal_text, steps)
-        build_goal(goal)
+
+        if (project_pos === null) $('#todosArea').append(build_goal(goal))
+        else $('#projectTodo').append(build_project_goal(goal))
 
         goal['goal'] = goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
         goal['steps'] = steps
@@ -411,6 +413,8 @@ function _day_view_main(){
 }
 
 function _day_view_header(){
+    window.goalsAPI.askProjectsInfo()
+
     let date = l_date.get_display_format()
     return `
         <div id="header">

@@ -68,7 +68,6 @@
     width: 100%;
     height: 70px;
     position: relative;
-    line-height: 70px;
 }
 
 #sideProjectIcon{
@@ -99,6 +98,7 @@
 
 /* display options */
 #sideProjectOptions{
+    cursor: pointer;
     width: 100%;
     height: 30px;
     display: flex;

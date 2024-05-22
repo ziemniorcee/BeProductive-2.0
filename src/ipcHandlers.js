@@ -82,6 +82,40 @@ function todoHandlers(db) {
         })
     })
 
+    ipcMain.on('ask-project-sidebar', (event, params) => {
+        let option_sql = ""
+
+        if (params.option === 0) {
+            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
+                        AND G.check_state = 1`
+        } else if (params.option === 1) {
+            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
+                        AND G.check_state = 0 AND G.addDate <> ""`
+        } else {
+            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
+                        AND G.check_state = 0 AND G.addDate = ""`
+        }
+        db.all(`SELECT G.id,
+                       G.goal,
+                       G.check_state,
+                       G.goal_pos,
+                       G.category,
+                       G.difficulty,
+                       G.importance,
+                       G.addDate
+                FROM goals G
+                    ${option_sql}
+                ORDER BY goal_pos`, (err, goals) => {
+            if (err) console.error(err)
+            else {
+                set_goal_ids(goals)
+                let safe_goals = get_safe_goals(goals, [])
+                event.reply('get-project-sidebar', safe_goals)
+            }
+        })
+    })
+
+
     function set_goal_ids(goals) {
         goal_ids = goals.map((goal) => goal.id)
     }
@@ -265,7 +299,9 @@ function todoHandlers(db) {
             let date = params.dates[i]
             let project_id = 0
 
+            console.log(params.project_pos)
             if (params.project_pos !== null) {
+                console.log("XPP")
                 project_id = project_ids[params.project_pos]
                 date = ""
             }

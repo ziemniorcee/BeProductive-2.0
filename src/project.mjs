@@ -3,38 +3,69 @@ import {_input_html, _steps_html, _show_sidebar, build_view} from "./render.mjs"
 
 export let project_pos = null
 
-$(document).on('click', '.projectType', show_project_sidebar);
+$(document).on('click', '.projectType', function () {
+    show_project_sidebar(this)
+});
 
 /**
  * opens sidebar and displays project sidebar
  */
-function show_project_sidebar(){
+function show_project_sidebar(that) {
+    project_pos = $('.projectType').index(that)
+    let project_color = $('.dashProjectIcon').eq(project_pos).css('background-color')
+    let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
+    let project_name = $('.dashProjectName').eq(project_pos).text()
     _show_sidebar()
     $('#rightbar').html(`
         <div id="sideProjectHeader">
             <div id="sideProjectIcon">
-                <img src="images/goals/projects/keys.png">               
+                <img src="${project_icon}">               
             </div>
-            <div id="sideProjectTitle">
+            <div id="sideProjectTitle" style="background-color: ${project_color}">
                 <img src="images/goals/polaura.png">
-                <span>Calculus</span>
+                <span>${project_name}</span>
                 <img id="polaura2" src="images/goals/polaura.png">
             </div>
         </div>
         <div id="sideProjectOptions">
             <div class="sideProjectOption">Done</div>
             <div class="sideProjectOption">Doing</div>
-            <div class="sideProjectOption" style="background-color: #002244">To do</div>
+            <div class="sideProjectOption" style="background-color: ${project_color}">To do</div>
         </div>
         <div id="sideProjectGoals">
             
         </div>
     `)
-    window.goalsAPI.askProjectGoals({project_pos: project_pos})
 
+    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2})
 }
 
-window.goalsAPI.askProjectsInfo()
+$(document).on('click', '.sideProjectOption', function () {
+    change_sidebar_option(this)
+})
+
+/**
+ * changes type of displayed goals from project
+ * @param that html element of selected sidebar project option
+ */
+function change_sidebar_option(that){
+    let side_project_option = $('.sideProjectOption')
+    let option = side_project_option.index(that)
+    side_project_option.css('background-color', '#2A231F')
+    $(that).css('background-color', '#002244')
+    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: option})
+}
+
+window.goalsAPI.getProjectSidebar((goals) => build_project_sidebar(goals))
+
+function build_project_sidebar(goals) {
+    let side_project_goals = $('#sideProjectGoals')
+    side_project_goals.html("")
+
+    for (let i = 0; i < goals.length; i++) {
+        side_project_goals.append(build_project_goal(goals[i]))
+    }
+}
 
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
 
@@ -43,19 +74,18 @@ window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
  * sets projects options on dashboard and sidebar
  * @param projects data of projects ,
  */
-function set_projects_options(projects){
+function set_projects_options(projects) {
     let projects_HTML = ""
     let project_types_HTML = ""
 
     for (let i = 0; i < projects.length; i++) {
-        let project_class =  "dashProject"
+        let project_class = "dashProject"
         if (i % 2 === 0) project_class = "dashProject dashProjectRight"
         let icon_color = categories[projects[i].category][0]
 
         projects_HTML += _dash_project_HTML(project_class, icon_color, projects[i].icon, projects[i].name)
-        project_types_HTML += _type_project_HTML(icon_color,projects[i].icon ,projects[i].name)
+        project_types_HTML += _type_project_HTML(icon_color, projects[i].icon, projects[i].name)
     }
-    console.log(project_types_HTML)
     $('#dashProjects').html(projects_HTML)
     $('#projectTypes').html(project_types_HTML)
 }
@@ -70,8 +100,8 @@ function set_projects_options(projects){
  * @returns {string} HTML format
  * @private
  */
-function _dash_project_HTML(project_class, icon_color, icon, name){
-    return`
+function _dash_project_HTML(project_class, icon_color, icon, name) {
+    return `
         <div class="${project_class}">
             <div class="dashProjectIcon" style="background-color: ${icon_color}">
                 <img src="images/goals/projects/${icon}.png">
@@ -88,7 +118,7 @@ function _dash_project_HTML(project_class, icon_color, icon, name){
  * @returns {string} HTML format
  * @private
  */
-function _type_project_HTML(icon_color,icon , name){
+function _type_project_HTML(icon_color, icon, name) {
     return `
         <div class="projectType" style="background-color: ${icon_color}">
             <img class="projectTypeImg" src="images/goals/projects/${icon}.png" alt="">
@@ -99,7 +129,7 @@ function _type_project_HTML(icon_color,icon , name){
 }
 
 
-$(document).on('click', '.dashProject', function (){
+$(document).on('click', '.dashProject', function () {
     project_view(this)
 })
 
@@ -107,12 +137,13 @@ $(document).on('click', '.dashProject', function (){
 /**
  * Displays project view
  */
-function project_view(that){
+function project_view(that) {
     project_pos = $('.dashProject').index(that)
+    let project_color = $('.dashProjectIcon').eq(project_pos).css('background-color')
+    let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
     let project_name = $('.dashProjectName').eq(project_pos).text()
-    build_view(_project_view_main() ,_project_view_header())
 
-    $('#mainTitle').text(project_name)
+    build_view(_project_view_main(project_color), _project_view_header(project_color, project_icon, project_name))
 
     window.goalsAPI.askProjectGoals({project_pos: project_pos})
 }
@@ -124,13 +155,13 @@ window.goalsAPI.getProjectGoals((goals) => build_project_view(goals))
  * Depending on goal type it goes to specific container
  * @param goals goals data
  */
-function build_project_view(goals){
+function build_project_view(goals) {
     for (let i = 0; i < goals.length; i++) {
         goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
         goals[i]['goal'] = goals[i]['goal'].replace(/`@`/g, "'").replace(/`@@`/g, '"')
 
         if (Number(goals[i]['check_state']) === 1) $('#projectDone').append(build_project_goal(goals[i]))
-        else if(goals[i]['addDate'] !== "") $('#projectDoing').append(build_project_goal(goals[i]))
+        else if (goals[i]['addDate'] !== "") $('#projectDoing').append(build_project_goal(goals[i]))
         else $('#projectTodo').append(build_project_goal(goals[i]))
     }
 }
@@ -140,7 +171,7 @@ function build_project_view(goals){
  * @param goal data of project goal
  * @returns {string} project goal in HTML format
  */
-function build_project_goal(goal) {
+export function build_project_goal(goal) {
     let todo_id = $('.todo').length
     let category_color = categories[goal.category][0]
     let check_state = goal.check_state ? "checked" : "";
@@ -166,43 +197,38 @@ function build_project_goal(goal) {
  * Creates header of project view HTML
  * @returns {string}
  */
-function _project_view_header(){
+function _project_view_header(color, icon, name) {
     return `
-        <div id="projectHeader">
-            <img src="images/goals/projects/keys.png">
-            <div id="projectName">Calculus</div>
-        </div>
-    `
+        <div id="projectHeader" style="background-color: ${color}">
+            <img src="${icon}">
+            <div id="projectName">${name}</div>
+        </div>`
 }
 
 /**
  * Creates main element of project view HTML
+ * @param color bg color of project sections
  * @returns {string}
  */
-function _project_view_main(){
+function _project_view_main(color) {
     return `
         <div id="projectContent">
             <div class="projectSection" id="projectDone">
-                <div class="projectSectionTitle">Done</div>
-                
+                <div class="projectSectionTitle" style="background-color: ${color}">Done</div>
             </div>
             <div class="projectSection" id="projectDoing">
-                <div class="projectSectionTitle">Doing</div>
-                
+                <div class="projectSectionTitle" style="background-color: ${color}">Doing</div>
             </div>
             <div class="projectSection" id="projectTodo">
-                <div class="projectSectionTitle">To Do</div>
-            
+                <div class="projectSectionTitle" style="background-color: ${color}">To Do</div>
             </div>
             ${_input_html()}
-        </div>
-        
-    `
+        </div>`
 }
 
 /**
  * Resets project selection
  */
-export function reset_project_pos(){
+export function reset_project_pos() {
     project_pos = null
 }
