@@ -237,13 +237,14 @@ class CurrentDate {
         return `${date.getFullYear()}-${format_month}-${format_day}`;
     }
 
-    get_display_format() {
-        let date = new Date(this.day_sql)
+    get_display_format(date_sql) {
+        let date = new Date(date_sql)
         let format_day = date.getDate()
         if (format_day < 10) format_day = "0" + format_day
 
         return `${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
+
 }
 
 export let l_date = new CurrentDate()

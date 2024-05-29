@@ -30,7 +30,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
     askGoalInfo: (params) => ipcRenderer.send('ask-goal-info', params),
-    getGoalInfo: (func) => ipcRenderer.on('get-goal-info', (event, goal, steps) => func(goal, steps)),
+    getEditInfo: (func) => ipcRenderer.on('get-edit-info', (event, goal, steps) => func(goal, steps)),
 
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals', params),
     getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getProjectGoals: (func) => ipcRenderer.on('get-project-goals', (event, goals, steps) => func(goals, steps)),
     askProjectSidebar: (params) => ipcRenderer.send('ask-project-sidebar', params),
     getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
+    getFromProject: (params) => ipcRenderer.send('get-from-project', params),
 })
 
 

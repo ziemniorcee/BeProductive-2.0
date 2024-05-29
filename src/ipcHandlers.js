@@ -9,6 +9,7 @@ function todoHandlers(db) {
     let history_ids = []
     let idea_ids = []
     let project_ids = []
+    let project_sidebar_ids = []
     let current_goal_pos = 0
 
 
@@ -95,6 +96,7 @@ function todoHandlers(db) {
             option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
                         AND G.check_state = 0 AND G.addDate = ""`
         }
+
         db.all(`SELECT G.id,
                        G.goal,
                        G.check_state,
@@ -102,13 +104,14 @@ function todoHandlers(db) {
                        G.category,
                        G.difficulty,
                        G.importance,
-                       G.addDate
+                       G.addDate,
+                       G.addDate = "${params.current_date}" as "already"
                 FROM goals G
                     ${option_sql}
                 ORDER BY goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
-                set_goal_ids(goals)
+                project_sidebar_ids = goals.map((goal) => goal.id)
                 let safe_goals = get_safe_goals(goals, [])
                 event.reply('get-project-sidebar', safe_goals)
             }
@@ -242,6 +245,14 @@ function todoHandlers(db) {
 
     })
 
+    ipcMain.on('get-from-project', (event, params) => {
+        db.run(`UPDATE goals
+                SET addDate="${params.date}"
+                WHERE id = ${project_sidebar_ids[params.id]}`)
+
+        goal_ids.push(project_sidebar_ids[params.id])
+        project_sidebar_ids.splice(params.id, 1)
+    })
 
     ipcMain.on('change-date', (event, params) => {
         db.run(`UPDATE goals
@@ -286,7 +297,7 @@ function todoHandlers(db) {
                             return rest;
                         })
 
-                        event.reply('get-goal-info', goal[0], safe_steps)
+                        event.reply('get-edit-info', goal[0], safe_steps)
                     }
                 })
             }
@@ -299,9 +310,7 @@ function todoHandlers(db) {
             let date = params.dates[i]
             let project_id = 0
 
-            console.log(params.project_pos)
-            if (params.project_pos !== null) {
-                console.log("XPP")
+            if (params.project_pos !== null && params.project_pos !== -1) {
                 project_id = project_ids[params.project_pos]
                 date = ""
             }
@@ -557,48 +566,53 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('delete-history', (event, params) => {
-        let new_goal = {}
-
         db.run(`UPDATE goals
                 SET addDate="${params.date}",
                     goal_pos=${current_goal_pos}
                 WHERE id = ${history_ids[params.id]}`)
 
-        db.all(`SELECT G.goal, G.category, G.Difficulty, G.Importance, KN.knot_id
+        db.all(`SELECT G.goal,
+                       G.category,
+                       G.difficulty,
+                       G.importance,
+                       KN.knot_id,
+                       PR.category as pr_category,
+                       PR.id       as pr_id,
+                       PR.icon     as pr_icon
                 FROM goals G
                          LEFT JOIN knots KN ON KN.goal_id = G.id
-                WHERE id = ${history_ids[params.id]}`, (err2, goal) => {
+                         LEFT JOIN projects PR ON PR.id = G.project_id
+                WHERE G.id = ${history_ids[params.id]}`, (err2, goal) => {
             if (err2) console.error(err2)
             else {
-                new_goal["goal"] = goal[0].goal
-                new_goal["category"] = goal[0].category
-                new_goal["Importance"] = goal[0].Importance
-                new_goal["Difficulty"] = goal[0].Difficulty
-                new_goal["knot_id"] = goal[0].knot_id
-            }
-        })
+                goal[0]["pr_pos"] = project_ids.indexOf(goal[0].pr_id)
+                delete goal[0]["pr_id"]
 
-        db.all(`SELECT id, goal_id, step_text, step_check
+                db.all(`SELECT id, goal_id, step_text, step_check
                 FROM steps
                 WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
-            if (err2) console.error(err2)
-            else {
-                for (let i = 0; i < steps.length; i++) {
-                    if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
-                    else step_ids[steps[i].goal_id] = [steps[i].id]
-                }
+                    if (err2) console.error(err2)
+                    else {
+                        for (let i = 0; i < steps.length; i++) {
+                            if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
+                            else step_ids[steps[i].goal_id] = [steps[i].id]
+                        }
+                    }
+                    goal_ids.push(history_ids[params.id])
+                    history_ids.splice(params.id, 1)
+
+                    let safe_steps = steps.map(step => {
+                        let {id, goal_id, ...rest} = step;
+                        return rest;
+                    })
+
+                    event.reply('history-to-goal', safe_steps, goal[0])
+                })
+                current_goal_pos++
             }
-            goal_ids.push(history_ids[params.id])
-            history_ids.splice(params.id, 1)
-
-            let safe_steps = steps.map(step => {
-                let {id, goal_id, ...rest} = step;
-                return rest;
-            })
-
-            event.reply('history-to-goal', safe_steps, new_goal)
         })
-        current_goal_pos++
+
+
     })
 
     ipcMain.on('side-check-change', (event, params) => {

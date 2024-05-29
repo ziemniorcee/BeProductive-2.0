@@ -113,3 +113,50 @@
     width: 100%;
 
 }
+
+/* --------- Project Features--------- */
+
+/* Project Emblem */
+.projectEmblem{
+    float: right;
+    width: 55px;
+    background-color: #002244;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #D8E1E7;
+    border-left: 2px solid #D8E1E7;
+    pointer-events: none;
+}
+
+.projectEmblem img{
+    width: 35px;
+    height: 35px;
+}
+
+.projectPos {
+    display: none;
+}
+
+/* Already Emblem */
+
+.alreadyEmblem{
+    width: 20px;
+    background-color: red;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.alreadyEmblem span{
+    position: relative;
+    top: 3px;
+}
+
+.alreadyEmblemILetter{
+    position: relative;
+    left: 5px;
+}
+.alreadyEmblemNLetter{
+    position: relative;
+    left: 1px;
+}

@@ -2,12 +2,9 @@ import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
 import {day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
-import {reset_project_pos} from "./project.mjs";
-
 
 
 $(document).on('click', '#dashMonth', function () {
-    reset_project_pos()
     $('#content').css('flexDirection', 'column')
     $('#mainTitle').text('This month')
     $('.dashViewOption').css('backgroundColor', '#55423B')

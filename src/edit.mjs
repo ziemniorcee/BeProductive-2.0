@@ -87,6 +87,7 @@ $(document).on('mousedown', '.todo > *', function (event) {
 
 $(document).on('mousedown', '#main', () => {
     if (goal_pressed) {
+        console.log("XPP")
         close_edit()
         if ($('#todosAll').length) dragula_day_view()
         else if ($('.weekDay').length) dragula_week_view()
@@ -183,6 +184,7 @@ $(document).on('click', '#editCheck', () => {
     change_check(goal_pos)
     if (!$('#todosAll').length) close_edit()
 
+
     if (state) goal_pos = $('.todo').length - 1
     else goal_pos = $('#todosArea').children().length - 1
 
@@ -266,7 +268,8 @@ $(document).on('click', '#editImportance', () => {
 export function close_edit() {
     if (goal_pressed === true) {
         goal_pressed = false
-        document.getElementById("rightbar").innerHTML = saved_sidebar
+        $('#rightbar').toggle()
+        $('#resizer').toggle()
         if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
 }
@@ -275,13 +278,12 @@ export function goal_pressed_false() {
     goal_pressed = false
 }
 
-window.goalsAPI.getGoalInfo((goal, steps) => {
+window.goalsAPI.getEditInfo((goal, steps) => {
     let step_texts = steps.map(step => step.step_text);
     let step_checks = steps.map(step => step.step_check);
     steps_count = step_checks.length
     let steps_html = _steps_html(step_texts, step_checks)
 
-    console.log(goal.pr_pos)
     goal["project"] = _project_config(goal.pr_pos)
     $('#rightbar').html(_edit_html(goal, steps_html))
     _fix_main_goal_edit()
@@ -333,9 +335,7 @@ function _edit_html(goal_config, steps_html) {
     let categories_html = _build_categories()
     let projects_html = _build_project_picker()
     let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
-    console.log("XPP")
     goal_text = converted_text
-    console.log(goal_config['project'])
 
     return `<div id="editButtons">
                 <div id="editClose">⨉</div>

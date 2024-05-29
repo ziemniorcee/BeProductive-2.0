@@ -1,7 +1,13 @@
 import {l_date} from './date.js'
-import {categories, check_border, getIdByColor, weekdays2} from "./data.mjs";
+import {categories, check_border, decode_text, encode_text, getIdByColor, weekdays2} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
-import {build_project_goal, project_pos, reset_project_pos} from "./project.mjs";
+import {
+    already_emblem_HTML,
+    build_project_goal,
+    project_emblem_html,
+    project_pos,
+    reset_project_pos
+} from "./project.mjs";
 
 
 export let todo_dragged = false
@@ -10,29 +16,24 @@ let input_count = 0
 let block_prev_drag = 0
 
 
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function () {
     window.goalsAPI.askGoals({date: l_date.day_sql})
-    window.sidebarAPI.askHistory({date: l_date.day_sql})
     build_view(_day_view_main(), _day_view_header())
+    dragula_day_view()
 });
 
+window.goalsAPI.getGoals((goals) => get_goals(goals))
 
-$(document).on('click', '#dashDay', function () {
-    $('.dashViewOption').css('backgroundColor', '#55423B')
-    $(this).css('backgroundColor', '#FF5D00')
-    $('#mainTitle').text('My day')
-    day_view()
-})
-
-
-window.goalsAPI.getGoals((goals) => {
+/**
+ * Displays goals
+ * @param goals data of goals
+ */
+function get_goals(goals){
     for (let i = 0; i < goals.length; i++) {
         goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
-        goals[i]['goal'] = goals[i]['goal'].replace(/`@`/g, "'").replace(/`@@`/g, '"')
+        goals[i]['goal'] = decode_text(goals[i]['goal'])
 
         let todo_area = goals[i]['check_state'] ? "#todosFinished" : "#todosArea";
-
-        build_goal(goals[i])
         $(todo_area).append(build_goal(goals[i]))
     }
 
@@ -40,14 +41,11 @@ window.goalsAPI.getGoals((goals) => {
     $('#finishedButton').css('display', finished_count ? "block" : "none")
     if (finished_count) $("#finishedCount").html(finished_count);
     repeat_option = null
-})
+}
 
 export function day_view() {
     $('#content').css('flexDirection', 'column')
-    reset_project_pos()
-
     build_view(_day_view_main(), _day_view_header())
-
     l_date.fix_header_day()
 
     window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
@@ -56,14 +54,14 @@ export function day_view() {
 
 
 export function build_goal(goal) {
-    let todo_id = $('.todo').length
+    let todo_id = $('#todosAll .todo').length
     let category_color = categories[goal.category][0]
     let check_state = goal.check_state ? "checked" : "";
-    let todo_area = goal.check_state ? "#todosFinished" : "#todosArea";
     let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
     let url = `images/goals/rank${goal.difficulty}.svg`
     let repeat = _repeat_html(goal.knot_id)
-    let project_emblem = _project_emblem_html(goal.pr_pos, goal.pr_category, goal.pr_icon)
+
+    let project_emblem = project_emblem_html(goal.pr_pos)
 
     return `
         <div class='todo'>
@@ -81,6 +79,14 @@ export function build_goal(goal) {
         </div>`
 }
 
+$(document).on('click', '#todoAdd', (event) => {
+    event.stopPropagation()
+    new_goal()
+})
+
+$(document).on('keyup', '#todoEntrySimple', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) new_goal()
+});
 
 function new_goal() {
     let e_todo = $('#todoEntryGet')
@@ -91,28 +97,21 @@ function new_goal() {
         let steps = _new_goal_steps()
         let goal = _new_goal_dict(goal_text, steps)
 
-        if (project_pos === null) $('#todosArea').append(build_goal(goal))
-        else $('#projectTodo').append(build_project_goal(goal))
-
-        goal['goal'] = goal_text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+        if (!$('#projectHeader').length) {
+            $('#todosArea').append(build_goal(goal))
+            goal['project_pos'] = -1
+        }
+        else{
+            $('#projectTodo').append(build_project_goal(goal))
+            goal['project_pos'] = project_pos
+        }
+        goal['goal'] = encode_text(goal_text)
         goal['steps'] = steps
         goal['dates'] = l_date.get_repeat_dates(repeat_option)
-        goal['project_pos'] = project_pos
 
         window.goalsAPI.newGoal(goal)
     }
 }
-
-
-$(document).on('click', '#todoAdd', (event) => {
-    event.stopPropagation()
-    new_goal()
-})
-
-$(document).on('keyup', '#todoEntrySimple', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) new_goal()
-});
-
 
 // removing functions
 (function () {
@@ -343,42 +342,81 @@ $(document).on('click', '.sidebarTask', function () {
 
 export function dragula_day_view() {
     block_prev_drag = 0
-    let drag_sidebar_task
-    let dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
+    let dragged_task
+    let dragula_array
+    let todos_area_before
+
+    if ($('#sideProjectHeader').length) {
+        dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
+    } else dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
 
     dragula(dragula_array, {
         copy: function (el) {
-            return el.className === "sidebarTask";
+            return el.parentNode.id !== "todosArea";
         },
         accepts: function (el, target) {
             block_prev_drag = 0
             return target.className !== "historyTasks";
         },
-        moves: function () {
-            if (block_prev_drag === 0) {
+        moves: function (el) {
+            let is_in = $(el).find('.alreadyEmblem').length
+            let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
+
+            if (block_prev_drag === 0 && is_in === 0 && !is_done) {
                 block_prev_drag = 1
+                console.log()
                 return true
             } else return false
         },
     }).on('drag', function (event) {
         todo_dragged = true
-        drag_sidebar_task = $(event)
+        dragged_task = $(event)
         block_prev_drag = 0
+
+        todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
         let new_goal_pos = $('.todo').index($(event))
         set_goal_pos(new_goal_pos)
+        let todos_area_after = Array.from($('#todosArea').children())
 
-        if (event.className.includes("todo")) _change_order()
-        else if (event.parentNode !== null) _get_from_sidebar(drag_sidebar_task)
+        if(todos_area_after.length !== todos_area_before.length) {
+            if (dragged_task.attr('class') === "sidebarTask") get_from_history(dragged_task)
+            else if (dragged_task.parent().attr('id') === "sideProjectGoals") {
+                get_from_project(new_goal_pos, dragged_task)
+            }
+        }
+
+        if (dragged_task.attr('class').includes("todo")) _change_order()
     });
 }
 
-export function set_block_prev_drag_day(option) {
-    block_prev_drag = option
+function get_from_history(dragged_task) {
+    window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(dragged_task), date: l_date.day_sql})
+
+    if (dragged_task.closest('.historyTasks').children().length > 1) dragged_task.closest('.sidebarTask').remove()
+    else dragged_task.closest('.day').remove()
 }
 
-export function set_todo_dragged(bool) {
-    todo_dragged = bool
+function get_from_project(new_goal_index, drag_sidebar_task){
+    let todos = $('#todosArea .todo')
+    let sidebar_pos = $('#rightbar .todo').index(drag_sidebar_task)
+
+    $('.todoId').eq(new_goal_index).text(todos.length - 1)
+    todos.eq(new_goal_index).append(project_emblem_html(project_pos))
+    window.goalsAPI.getFromProject({date: l_date.day_sql, id: sidebar_pos})
+
+    console.log()
+    if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(drag_sidebar_task).remove()
+    else{
+        drag_sidebar_task.append(already_emblem_HTML())
+    }
+}
+
+function _change_order() {
+    let goals = $('.todoId')
+    let order = []
+    for (let i = 0; i < goals.length - 1; i++) order.push(goals.eq(i).text())
+    window.goalsAPI.rowsChange({after: order})
 }
 
 
@@ -392,7 +430,7 @@ export function build_view(main, header) {
     $('#main').html(html)
 }
 
-function _day_view_main(){
+function _day_view_main() {
     return `
     <div id="content">
         <div id="todosAll">
@@ -412,25 +450,29 @@ function _day_view_main(){
     `
 }
 
-function _day_view_header(){
+function _day_view_header() {
     window.goalsAPI.askProjectsInfo()
 
-    let date = l_date.get_display_format()
+    let date = l_date.get_display_format(l_date.day_sql)
     return `
         <div id="header">
             <div id="mainTitle">My day</div>
     
             <div id="projectShowed">
-                <img id="imgProjectShowed" src="images/goals/projects/project.png">
+                <img src="images/goals/projects/project.png">
                 <div id="projectTypes">
     
                 </div>
             </div>
     
-            <div id="sidebarType">
-                <img id="imgMain" src="images/goals/history.png" alt="main">
+            <div id="sideOptions">
+                <div id="sideHistory">
+                    <img src="images/goals/history.png" alt="main">
+                </div>
                 <div class="sidebars">
-                    <img id="imgSecond" src="images/goals/idea.png" alt="second" width="40" height="40">
+                    <div id="sideIdeas">
+                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
+                    </div>
                 </div>
             </div>
     
@@ -443,7 +485,7 @@ function _day_view_header(){
     `
 }
 
-export function _input_html(){
+export function _input_html() {
     let categories_html = _build_categories()
 
     return `
@@ -488,21 +530,9 @@ export function _input_html(){
     `
 }
 
-function _project_emblem_html(position, category, icon){
-    let project_emblem = ''
-    if (position !== -1  && position !== undefined){
-        let project_category_color = categories[category][0]
-        project_emblem = `
-            <div class="projectEmblem" style="background-color: ${project_category_color}">
-                <img src="images/goals/projects/${icon}.png">
-                <div class="projectPos">${position}</div>
-            </div>
-        `
-    }
-    return project_emblem
-}
 
-function _repeat_html(knot_id){
+
+function _repeat_html(knot_id) {
     let repeat = ""
     if (knot_id !== null) {
         repeat = `
@@ -513,7 +543,7 @@ function _repeat_html(knot_id){
     return repeat
 }
 
-function _new_goal_dict(goal_text, steps){
+function _new_goal_dict(goal_text, steps) {
     let difficulty = $('#range1').val()
     let importance = $('#range2').val()
 
@@ -529,7 +559,7 @@ function _new_goal_dict(goal_text, steps){
     }
 }
 
-function _new_goal_steps(){
+function _new_goal_steps() {
     let steps = []
 
     let steps_elements = $('.stepEntry')
@@ -591,27 +621,10 @@ export function _build_categories() {
     return categories_html
 }
 
-function _change_order() {
-    let goals = $('.todoId')
-    let order = []
-    for (let i = 0; i < goals.length - 1; i++) order.push(goals.eq(i).text())
-    window.goalsAPI.rowsChange({after: order})
-}
-
-function _get_from_sidebar(drag_sidebar_task) {
-    let new_goal_pos = 0;
-    let todos = $('#todosArea').children()
-
-    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "todo") new_goal_pos = i
-
-    window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: l_date.day_sql})
-
-    if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
-    else drag_sidebar_task.closest('.day').remove()
-}
 
 
-export function _show_sidebar(){
+
+export function _show_sidebar() {
     let right_bar = $('#rightbar')
     let resizer = $('#resizer')
     if (right_bar.css('display') === 'none') {
@@ -620,10 +633,34 @@ export function _show_sidebar(){
     }
 }
 
+$(document).on('click', '#dashClose', () => hide_dashboard())
 
+function hide_dashboard() {
+    $('#dashboard').toggle()
+}
 
+export function set_block_prev_drag_day(option) {
+    block_prev_drag = option
+}
 
+export function set_todo_dragged(bool) {
+    todo_dragged = bool
+}
 
+$(document).on('click', '#dashDay', function () {
+    show_my_day(this)
+})
+
+/**
+ * Shows day view
+ * @param that option selected
+ */
+function show_my_day(that){
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(that).css('backgroundColor', '#FF5D00')
+    $('#mainTitle').text('My day')
+    day_view()
+}
 
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
