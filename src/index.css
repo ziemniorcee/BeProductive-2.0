@@ -437,6 +437,7 @@ body {
 }
 
 .todoCheck {
+    border-right: 1px solid #D8E1E7;
     pointer-events: none;
     position: relative;
     background: #FF5D00 url("images/goals/Frame 8.svg") no-repeat;

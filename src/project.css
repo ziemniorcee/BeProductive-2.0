@@ -7,6 +7,7 @@
     position: relative;
     height: 100%;
     display: flex;
+    overflow: hidden;
 }
 
 /* header */
@@ -57,10 +58,49 @@
     margin: 30px auto 10px;
 }
 
-/* --------- --------- --------- */
+.projectSectionGoals{
+    height: calc(100% - 65px);
+    overflow-y: scroll;
+    transition: 0.5s;
+}
 
+.projectSectionGoals .todo{
+    margin-right: 5px;
+}
+
+.projectSectionGoals::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+.projectSectionGoals::-webkit-scrollbar-thumb {
+    background-color: #888;
+}
+
+.projectSectionGoals::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 /* --------- Project Sidebar --------- */
+
+/* close button */
+#sideProjectClose {
+    background: transparent;
+    font-size: 30px;
+    width: 30px;
+    text-align: center;
+    display: block;
+    top: 20px;
+    right: 0;
+    margin-left: auto;
+    margin-right: 10px;
+    cursor: pointer;
+    position: absolute;
+}
+
+
+#sideProjectClose:hover {
+    background: #323232;
+}
 
 /* header */
 #sideProjectHeader{
@@ -72,8 +112,8 @@
 
 #sideProjectIcon{
     position: absolute;
-    left: 7px;
-    top: 7px;
+    left: 11px;
+    top: 11px;
 }
 
 
@@ -111,8 +151,8 @@
 .sideProjectOption{
     border: 1px solid #D8E1E7;
     width: 100%;
-
 }
+
 
 /* --------- Project Features--------- */
 

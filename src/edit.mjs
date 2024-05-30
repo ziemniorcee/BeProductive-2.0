@@ -125,6 +125,7 @@ function change_goal_main() {
 
         if (is_from_sidebar) sidebar_change_goal = {text: input, id: goal_id}
 
+        console.log(goal_id)
         window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id, option: is_from_sidebar})
     }
 }

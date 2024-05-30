@@ -1,6 +1,7 @@
 import {categories, check_border, decode_text, getIdByColor} from "./data.mjs";
 import {_input_html, _steps_html, _show_sidebar, build_view, dragula_day_view} from "./render.mjs";
 import {l_date} from "./date.js";
+import {show_hide_sidebar} from "./sidebar.mjs";
 
 export let project_pos = null
 
@@ -19,14 +20,16 @@ function show_project_sidebar(that) {
     _show_sidebar()
     $('#rightbar').html(`
         <div id="sideProjectHeader">
+            <div id="sideProjectClose">⨉</div>
             <div id="sideProjectIcon">
-                <img src="${project_icon}">               
+                <img src="${project_icon}" alt="">               
             </div>
             <div id="sideProjectTitle" style="background-color: ${project_color}">
-                <img src="images/goals/polaura.png">
+                <img src="images/goals/polaura.png" alt="">
                 <span>${project_name}</span>
-                <img id="polaura2" src="images/goals/polaura.png">
+                <img id="polaura2" src="images/goals/polaura.png" alt="">
             </div>
+            
         </div>
         <div id="sideProjectOptions">
             <div class="sideProjectOption">Done</div>
@@ -69,8 +72,6 @@ function build_project_sidebar(goals) {
 
     dragula_day_view()
 }
-
-
 
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
 
@@ -175,9 +176,9 @@ function build_project_view(goals) {
     for (let i = 0; i < goals.length; i++) {
         goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
         goals[i]['goal'] = decode_text(goals[i]['goal'])
-        if (Number(goals[i]['check_state']) === 1) $('#projectDone').append(build_project_goal(goals[i]))
-        else if (goals[i]['addDate'] !== "") $('#projectDoing').append(build_project_goal(goals[i]))
-        else $('#projectTodo').append(build_project_goal(goals[i]))
+        if (Number(goals[i]['check_state']) === 1) $('#projectDone .projectSectionGoals').append(build_project_goal(goals[i]))
+        else if (goals[i]['addDate'] !== "") $('#projectDoing .projectSectionGoals').append(build_project_goal(goals[i]))
+        else $('#projectTodo .projectSectionGoals').append(build_project_goal(goals[i]))
     }
 }
 
@@ -232,12 +233,21 @@ function _project_view_main(color) {
         <div id="projectContent">
             <div class="projectSection" id="projectDone">
                 <div class="projectSectionTitle" style="background-color: ${color}">Done</div>
+                <div class="projectSectionGoals">
+                
+                </div>
             </div>
             <div class="projectSection" id="projectDoing">
                 <div class="projectSectionTitle" style="background-color: ${color}">Doing</div>
+                <div class="projectSectionGoals">
+                
+                </div>
             </div>
             <div class="projectSection" id="projectTodo">
                 <div class="projectSectionTitle" style="background-color: ${color}">To Do</div>
+                <div class="projectSectionGoals">
+                
+                </div>
             </div>
             ${_input_html()}
         </div>`
@@ -273,3 +283,5 @@ export function already_emblem_HTML(){
 export function reset_project_pos() {
     project_pos = null
 }
+
+$(document).on('click', '#sideProjectClose', () => show_hide_sidebar())

@@ -7,12 +7,14 @@ import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
         event.stopPropagation()
         $("#todoEntryComplex").css({"height": "250px", "visibility": "visible"});
         $("#todosAll").css({"height": "calc(100% - 315px)"});
+        $('.projectSectionGoals').css({"height": "calc(100% - 315px)"})
     })
 
     $(document).on('click', '#main', () => {
         $("#repeatPicker").css({"display": "none"});
         $("#todoEntryComplex").css({"height": "0", "visibility": "hidden"});
         $("#todosAll").css({"height": "calc(100% - 65px)"});
+        $('.projectSectionGoals').css({"height": "calc(100% - 65px)"})
     })
 
     $(document).on('click', '.dateButton', function () {

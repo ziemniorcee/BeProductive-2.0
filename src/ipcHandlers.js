@@ -456,6 +456,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-text-goal', (event, params) => {
+        console.log(project_sidebar_ids)
         let ids_array = goal_ids
         if (params.option) ids_array = history_ids
 

@@ -102,7 +102,7 @@ function new_goal() {
             goal['project_pos'] = -1
         }
         else{
-            $('#projectTodo').append(build_project_goal(goal))
+            $('#projectTodo .projectSectionGoals').append(build_project_goal(goal))
             goal['project_pos'] = project_pos
         }
         goal['goal'] = encode_text(goal_text)
