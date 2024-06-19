@@ -1,18 +1,63 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
-import {day_view, set_todo_dragged} from "./render.mjs";
+import {build_view, day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
 
 
 $(document).on('click', '#dashMonth', function () {
     $('#content').css('flexDirection', 'column')
-    $('#mainTitle').text('This month')
     $('.dashViewOption').css('backgroundColor', '#55423B')
     $(this).css('backgroundColor', '#FF5D00')
+
+    build_view(_month_view_main(), _month_view_header())
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
     window.sidebarAPI.askHistory({date: l_date.month_current})
 })
+
+function _month_view_main(){
+    return `
+        <div id="content">
+            
+        </div>
+    `
+}
+
+function _month_view_header(){
+    window.goalsAPI.askProjectsInfo()
+
+    let date = l_date.get_month_display_format(l_date.day_sql)
+    let main_title = l_date.get_fixed_header_month()
+    return `
+        <div id="header">
+            <div id="mainTitle">${main_title}</div>
+    
+            <div id="projectShowed">
+                <img src="images/goals/projects/project.png">
+                <div id="projectTypes">
+    
+                </div>
+            </div>
+    
+            <div id="sideOptions">
+                <div id="sideHistory">
+                    <img src="images/goals/history.png" alt="main">
+                </div>
+                <div class="sidebars">
+                    <div id="sideIdeas">
+                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
+                    </div>
+                </div>
+            </div>
+    
+            <div id="subHeader">
+                <span id="date">
+                    ${date}
+                </span>
+            </div>
+        </div>
+    `
+}
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
     let month_params = l_date.get_format_month()
@@ -84,7 +129,8 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
         }
     }
 
-    l_date.fix_header_month()
+    $('#date').text(l_date.get_month_display_format(l_date.day_sql))
+    $('#mainTitle').text(l_date.get_fixed_header_month())
 })
 
 export function build_month_goal(goals_dict, goal_counter) {

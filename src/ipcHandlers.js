@@ -12,6 +12,8 @@ function todoHandlers(db) {
     let project_sidebar_ids = []
     let current_goal_pos = 0
 
+    let ids_array = []
+
 
     ipcMain.on('ask-goals', (event, params) => {
         db.all(`SELECT G.id,
@@ -254,6 +256,24 @@ function todoHandlers(db) {
         project_sidebar_ids.splice(params.id, 1)
     })
 
+    ipcMain.on('goal-remove-date', (event, params) => {
+        let empty = ""
+        let array_ids = goal_ids
+        if (params.option === 1){
+            array_ids = project_sidebar_ids
+        }
+
+        db.run(`UPDATE goals
+                SET addDate="${empty}", check_state=0 
+                WHERE id = ${array_ids[params.id]}`)
+
+        if (params.option === 1){
+            project_sidebar_ids.splice(params.id, 1)
+        }
+
+    })
+
+
     ipcMain.on('change-date', (event, params) => {
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
@@ -266,9 +286,12 @@ function todoHandlers(db) {
         }
     })
 
+
     ipcMain.on('ask-goal-info', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
+        if (params.option === 0) ids_array = goal_ids
+        else if (params.option === 1) ids_array = history_ids
+        else if (params.option === 2) ids_array = project_sidebar_ids
+
         db.all(`SELECT G.goal,
                        G.check_state,
                        G.goal_pos,
@@ -302,6 +325,11 @@ function todoHandlers(db) {
                 })
             }
         })
+    })
+
+
+    ipcMain.on('set-default-edit', (event, params) => {
+        ids_array = goal_ids
     })
 
     ipcMain.on('new-goal', (event, params) => {
@@ -381,7 +409,7 @@ function todoHandlers(db) {
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
-                    WHERE id = ${goal_ids[params.after[i]]}`)
+                    WHERE id = ${goal_ids[(params.after[i])]}`)
         }
     })
 
@@ -444,9 +472,19 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-goal', (event, params) => {
+
+        let array_ids = goal_ids
+        if (params.option === 1){
+            array_ids = project_sidebar_ids
+        }
+
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${array_ids[params.id]}`)
+
+        if (params.option === 1){
+            project_sidebar_ids.splice(params.id, 1)
+        }
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
@@ -456,19 +494,12 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-text-goal', (event, params) => {
-        console.log(project_sidebar_ids)
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`UPDATE goals
                 SET goal="${params.input}"
                 WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('add-step', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`INSERT INTO steps (step_text, goal_id)
                 VALUES ("${params.input}", ${ids_array[params.id]})`)
 
@@ -485,18 +516,12 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-step', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`UPDATE steps
                 SET step_text="${params.input}"
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('remove-step', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`DELETE
                 FROM steps
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
@@ -504,36 +529,24 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-category', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`UPDATE goals
                 SET category="${params.new_category}"
                 WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('change-difficulty', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`UPDATE goals
                 SET Difficulty="${params.difficulty}"
                 WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('change-importance', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         db.run(`UPDATE goals
                 SET Importance="${params.importance}"
                 WHERE id = ${ids_array[params.id]}`)
     })
 
     ipcMain.on('change-project', (event, params) => {
-        let ids_array = goal_ids
-        if (params.option) ids_array = history_ids
-
         let new_project_id = 0
         if (params.project_pos !== -1) new_project_id = project_ids[params.project_pos]
         db.run(`UPDATE goals
@@ -617,10 +630,11 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('side-check-change', (event, params) => {
+        let local_ids_array =  history_ids
+        if (params.option === 2) local_ids_array = project_sidebar_ids
         db.run(`UPDATE goals
-                SET check_state=1
-                WHERE id = ${history_ids[params.id]}`)
-        history_ids.splice(params.id, 1)
+                SET check_state=${params.state}
+                WHERE id = ${local_ids_array[params.id]}`)
     })
 
     ipcMain.on('history-removed', (event, params) => {
@@ -682,6 +696,13 @@ function todoHandlers(db) {
                 FROM ideas
                 WHERE id = ${idea_ids[params.id]}`)
         idea_ids.splice(params.id, 1)
+    })
+
+    ipcMain.on('project-goal-removed', (event, params) => {
+        db.run(`DELETE
+                FROM goals
+                WHERE id = ${project_sidebar_ids[params.id]}`)
+        project_sidebar_ids.splice(params.id, 1)
     })
 }
 

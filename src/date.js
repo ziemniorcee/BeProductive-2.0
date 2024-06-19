@@ -73,10 +73,13 @@ class CurrentDate {
     fix_header_week() {
         if (this.week_current.includes(this.day_sql)) $('#mainTitle').text('This Week')
         else if (this.week_next.includes(this.day_sql)) $('#mainTitle').text('Next Week')
-        else this.change_images(2)
+        else {
+            $('#mainTitle').text('Another Week')
+            this.change_images(2)
+        }
     }
 
-    get_format_month(){
+    get_format_month() {
         let date = new Date(this.day_sql)
 
         date.setDate(date.getDate() - date.getDate() + 1)
@@ -85,39 +88,38 @@ class CurrentDate {
         if (date.getDay() !== 0) current_dayweek = date.getDay() - 1
 
 
-        let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
+        let lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
         return [current_dayweek, lastDate.getDate() + current_dayweek]
     }
 
-    set_current_month(){
+    set_current_month() {
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
         let last_history_date = new Date(date)
-        last_history_date.setDate(last_history_date.getDate() -1)
+        last_history_date.setDate(last_history_date.getDate() - 1)
         return this.sql_format(last_history_date)
     }
 
-    get_sql_month(){
+    get_sql_month() {
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
         let last_history_date = new Date(date)
-        last_history_date.setDate(last_history_date.getDate() -1)
+        last_history_date.setDate(last_history_date.getDate() - 1)
 
-        let lastDate = new Date(date.getFullYear(), date.getMonth()+1, 0)
+        let lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
         return [this.sql_format(date), this.sql_format(lastDate)]
     }
 
-    get_sql_month_day(day){
+    get_sql_month_day(day) {
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
         date.setDate(date.getDate() + day - 1)
 
-        this.fix_header_month()
         return this.sql_format(date)
     }
 
-    set_sql_month(day){
+    set_sql_month(day) {
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
 
@@ -126,23 +128,25 @@ class CurrentDate {
         this.set_attributes(date, 2)
     }
 
-    this_month(){
+    this_month() {
         this.set_attributes(this.today, 0)
     }
 
-    next_month(){
+    next_month() {
         this.set_attributes(this.month_next, 1)
     }
 
-    fix_header_month() {
+    get_fixed_header_month() {
         let date = new Date(this.day_sql)
 
-        if (date.getMonth() === this.today.getMonth()) $('#mainTitle').text('This Month')
-        else if (date.getMonth() === this.month_next.getMonth()) $('#mainTitle').text('Next Month')
-        else $('#mainTitle').text('Another Month')
+        let header = "Another Month"
+        if (date.getMonth() === this.today.getMonth()) header = "This Month"
+        else if (date.getMonth() === this.month_next.getMonth()) header = "Next Month"
+
+        return header
     }
 
-    glory_prev_month(){
+    glory_prev_month() {
         let last_date = new Date(this.glory_month[0])
         last_date.setDate(last_date.getDate() - 1)
         let date = new Date(last_date)
@@ -151,20 +155,20 @@ class CurrentDate {
         this.glory_month = [this.sql_format(date), this.sql_format(last_date)]
     }
 
-    glory_next_month(){
+    glory_next_month() {
         let date = new Date(this.glory_month[1])
         date.setDate(date.getDate() + 1)
 
-        let last_date = new Date(date.getFullYear(), date.getMonth()+1, 0)
+        let last_date = new Date(date.getFullYear(), date.getMonth() + 1, 0)
         this.glory_month = [this.sql_format(date), this.sql_format(last_date)]
     }
 
-    get_glory_month(){
+    get_glory_month() {
         let date = new Date(this.glory_month[0])
         return date.getMonth()
     }
 
-    get_repeat_dates(option){
+    get_repeat_dates(option) {
         let dates = [l_date.day_sql]
         if (option === 0) dates = l_date.get_every(1, 30)
         else if (option === 1) dates = l_date.get_every(7, 12)
@@ -172,30 +176,29 @@ class CurrentDate {
         return dates
     }
 
-    get_every(how_often, how_many){
+    get_every(how_often, how_many) {
         let date = new Date(this.day_sql)
 
         let dates = []
-        for (let i = 0; i < how_many; i++){
+        for (let i = 0; i < how_many; i++) {
             dates.push(this.sql_format(date))
             date.setDate(date.getDate() + how_often)
         }
         return dates
     }
 
-    get_everymonth(){
+    get_everymonth() {
         let date = new Date(this.day_sql)
         let first_day = date.getDate()
         let dates = []
-        for (let i = 0; i < 6; i++){
+        for (let i = 0; i < 6; i++) {
             dates.push(this.sql_format(date))
-            let last_date = new Date(date.getFullYear(), date.getMonth()+1, 0)
-            let next_month = new Date(date.getFullYear(), date.getMonth()+2, 0)
+            let last_date = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+            let next_month = new Date(date.getFullYear(), date.getMonth() + 2, 0)
 
-            if (first_day > next_month.getDate()){
+            if (first_day > next_month.getDate()) {
                 date.setDate(date.getDate() + next_month.getDate())
-            }
-            else{
+            } else {
                 date = new Date(last_date)
                 date.setDate(date.getDate() + first_day)
             }
@@ -203,13 +206,14 @@ class CurrentDate {
         return dates
     }
 
-    is_today_monthview(){
+    is_today_monthview() {
         let date = new Date(this.day_sql)
-        if (date.getFullYear() === this.today.getFullYear() && date.getMonth() === this.today.getMonth()){
+        if (date.getFullYear() === this.today.getFullYear() && date.getMonth() === this.today.getMonth()) {
             return this.today.getDate()
         }
         return 0
     }
+
     set_attributes(date, option) {
         this.day_sql = this.sql_format(date)
         this.week_now = this.set_week(date)
@@ -245,10 +249,27 @@ class CurrentDate {
         return `${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
 
+    get_week_display_format(week) {
+        let beginning = new Date(week[0])
+        let format_day_beginning = beginning.getDate()
+        if (format_day_beginning < 10) format_day_beginning = "0" + format_day_beginning
+
+        let ending = new Date(week[6])
+        let format_day_ending = ending.getDate()
+        if (format_day_ending < 10) format_day_ending = "0" + format_day_ending
+
+        return `${month_names[beginning.getMonth()]} ${format_day_beginning} -
+        ${month_names[ending.getMonth()]} ${format_day_ending}`
+    }
+
+    get_month_display_format(date_sql){
+        let date = new Date(date_sql)
+        return `${month_names[date.getMonth()]} ${date.getFullYear()}`
+    }
+
 }
 
 export let l_date = new CurrentDate()
-
 
 
 function date_change(option) {
@@ -267,7 +288,7 @@ function week_change(option) {
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
 }
 
-function month_change(option){
+function month_change(option) {
     if (option === 0) l_date.this_month()
     else if (option === 1) l_date.next_month()
 
@@ -308,12 +329,12 @@ $("#datePicker").datepicker({
             $('#mainTitle').text('Another day')
             date_change(2)
             l_date.fix_header_day()
-        }
-        else if ($('.weekDay').length) {
+        } else if ($('.weekDay').length) {
             week_change(2)
             l_date.fix_header_week()
+        } else {
+            month_change(2)
         }
-        else month_change(2)
     }
 });
 

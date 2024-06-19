@@ -153,6 +153,19 @@
     width: 100%;
 }
 
+#sideProjectGoals{
+    overflow-y: scroll;
+    height: calc(100% - 50px);
+}
+
+#sideProjectGoals::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+#sideProjectGoals::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+}
 
 /* --------- Project Features--------- */
 
@@ -166,7 +179,6 @@
     align-items: center;
     border: 1px solid #D8E1E7;
     border-left: 2px solid #D8E1E7;
-    pointer-events: none;
 }
 
 .projectEmblem img{

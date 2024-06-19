@@ -119,6 +119,7 @@ ctxMenuNormal.append(new MenuItem({
         if (context_option === 0) mainWindow.webContents.send("removing-goal")
         else if (context_option === 1) mainWindow.webContents.send("removing-history")
         else if (context_option === 2) mainWindow.webContents.send("removing-idea")
+        else if (context_option === 3) mainWindow.webContents.send("removing-project-goal")
     }
 }))
 

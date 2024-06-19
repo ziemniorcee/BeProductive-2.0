@@ -37,6 +37,7 @@ window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
  * @param data data from sql
  */
 function build_history_sidebar(data) {
+
     let grouped_goals = data.reduce((acc, curr) => {
         if (!acc[curr.addDate]) {
             acc[curr.addDate] = [];
@@ -192,7 +193,7 @@ function change_history_check(that){
         if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
         else $(that).closest('.day').remove()
     }, 1000)
-    window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(this)})
+    window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(this), state:1})
 }
 
 $(document).on('click', '#sideIdeas', () => show_ideas_sidebar())

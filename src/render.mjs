@@ -41,14 +41,16 @@ function get_goals(goals){
     $('#finishedButton').css('display', finished_count ? "block" : "none")
     if (finished_count) $("#finishedCount").html(finished_count);
     repeat_option = null
+
+    $('#date').text(l_date.get_display_format(l_date.day_sql))
 }
 
 export function day_view() {
     $('#content').css('flexDirection', 'column')
     build_view(_day_view_main(), _day_view_header())
     l_date.fix_header_day()
-
-    window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
+    dragula_day_view()
+    // window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
     window.goalsAPI.askGoals({date: l_date.day_sql})
 }
 
@@ -117,9 +119,16 @@ function new_goal() {
 (function () {
     let selected_div = null
 
-    $(document).on('contextmenu', '.todo, .monthTodo', function (event) {
+    $(document).on('contextmenu', '#main .todo, .monthTodo', function (event) {
         if ($(this).find('.repeatLabelShow').length) window.appAPI.contextMenuOpen({repeat: 1})
         else window.appAPI.contextMenuOpen({repeat: 0, option: 0})
+
+        selected_div = event.target
+    })
+
+    $(document).on('contextmenu', '#sideProjectGoals .todo', function (event) {
+        window.appAPI.contextMenuOpen({repeat: 0, option: 3})
+        // else window.appAPI.contextMenuOpen({repeat: 0, option: 0})
 
         selected_div = event.target
     })
@@ -206,6 +215,11 @@ function new_goal() {
         window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
     })
+
+    window.sidebarAPI.removingProjectGoal(() => {
+        window.sidebarAPI.projectGoalRemoved({id: $('#sideProjectGoals .todo').index(selected_div)})
+        selected_div.remove()
+    })
 })();
 
 
@@ -278,7 +292,8 @@ $(document).on('click', '#todosAll .check_task', function () {
     change_check(id)
 });
 
-export function change_check(id) {
+
+export function change_check(id, sidebar_option=0,sidebar_state=0) {
     const check_task = $('.check_task').eq(id)
     const dot = $('.checkDot').eq(id)
 
@@ -289,31 +304,36 @@ export function change_check(id) {
         todo = $('.monthTodo')
     }
 
-    let array_id = Number(goal_id.eq(id).html())
-    let state = Number(check_task.prop('checked'))
+    if (sidebar_option){
+        window.sidebarAPI.sideChangeChecks({id: id, state:sidebar_state, option:sidebar_option})
+    }
+    else{
+        let state = Number(check_task.prop('checked'))
+        let array_id = Number(goal_id.eq(id).html())
 
-    check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
+        check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
 
-    let category_color = $(dot).css('borderColor')
-    $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
+        let category_color = $(dot).css('borderColor')
+        $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
 
-    todo.eq(id).remove()
-    $(state ? "#todosFinished" : "#todosArea").append(todo.eq(id).prop("outerHTML"))
+        todo.eq(id).remove()
 
-    dragula_day_view()
+        $(state ? "#todosFinished" : "#todosArea").append(todo.eq(id).prop("outerHTML"))
 
-    let new_tasks = goal_id.map(function () {
-        return $(this).text();
-    }).get()
+        dragula_day_view()
+        let new_tasks = goal_id.map(function () {
+            return $(this).text();
+        }).get()
 
-    window.goalsAPI.changeChecksGoal({id: array_id, state: state})
-    if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
+        window.goalsAPI.changeChecksGoal({id: array_id, state: state})
+        if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
 
-    let finished_count = $('#todosFinished .todo').length
-    $("#finishedButton").css('display', finished_count ? "block" : "none");
-    $('#finishedCount').html(finished_count)
+        let finished_count = $('#todosFinished .todo').length
+        $("#finishedButton").css('display', finished_count ? "block" : "none");
+        $('#finishedCount').html(finished_count)
 
-    if (l_date.day_sql !== l_date.today_sql) window.sidebarAPI.askHistory({date: l_date.today_sql})
+        if (l_date.day_sql !== l_date.today_sql) window.sidebarAPI.askHistory({date: l_date.today_sql})
+    }
 }
 
 
@@ -346,9 +366,18 @@ export function dragula_day_view() {
     let dragula_array
     let todos_area_before
 
-    if ($('#sideProjectHeader').length) {
-        dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
-    } else dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
+    let rightbar = $('#rightbar')
+    let is_edit = $('#editTodo').length
+    let is_project_sidebar = $('#sideProjectHeader').length
+
+    if (!is_edit){
+        rightbar.html(rightbar.html())
+        if (is_project_sidebar) {
+            dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
+        } else {
+            dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
+        }
+    }
 
     dragula(dragula_array, {
         copy: function (el) {
@@ -356,7 +385,7 @@ export function dragula_day_view() {
         },
         accepts: function (el, target) {
             block_prev_drag = 0
-            return target.className !== "historyTasks";
+            return target.parentNode.id === "todosAll";
         },
         moves: function (el) {
             let is_in = $(el).find('.alreadyEmblem').length
@@ -364,7 +393,6 @@ export function dragula_day_view() {
 
             if (block_prev_drag === 0 && is_in === 0 && !is_done) {
                 block_prev_drag = 1
-                console.log()
                 return true
             } else return false
         },
@@ -398,14 +426,13 @@ function get_from_history(dragged_task) {
 }
 
 function get_from_project(new_goal_index, drag_sidebar_task){
-    let todos = $('#todosArea .todo')
+    let todos = $('#main .todo')
     let sidebar_pos = $('#rightbar .todo').index(drag_sidebar_task)
 
     $('.todoId').eq(new_goal_index).text(todos.length - 1)
     todos.eq(new_goal_index).append(project_emblem_html(project_pos))
     window.goalsAPI.getFromProject({date: l_date.day_sql, id: sidebar_pos})
 
-    console.log()
     if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(drag_sidebar_task).remove()
     else{
         drag_sidebar_task.append(already_emblem_HTML())
@@ -413,9 +440,9 @@ function get_from_project(new_goal_index, drag_sidebar_task){
 }
 
 function _change_order() {
-    let goals = $('.todoId')
+    let goals = $('#main .todoId')
     let order = []
-    for (let i = 0; i < goals.length - 1; i++) order.push(goals.eq(i).text())
+    for (let i = 0; i < goals.length ; i++) order.push(goals.eq(i).text())
     window.goalsAPI.rowsChange({after: order})
 }
 
@@ -622,14 +649,22 @@ export function _build_categories() {
 }
 
 
-
-
 export function _show_sidebar() {
     let right_bar = $('#rightbar')
     let resizer = $('#resizer')
     if (right_bar.css('display') === 'none') {
         right_bar.toggle()
-        resizer.css('display', right_bar ? 'flex' : 'none')
+        resizer.css('display', 'flex')
+    }
+}
+
+export function _hide_sidebar() {
+    let right_bar = $('#rightbar')
+    let resizer = $('#resizer')
+    if (right_bar.css('display') === 'block') {
+        right_bar.toggle()
+        right_bar.html("")
+        resizer.css('display', 'none')
     }
 }
 

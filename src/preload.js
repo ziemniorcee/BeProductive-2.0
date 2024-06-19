@@ -32,6 +32,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     askGoalInfo: (params) => ipcRenderer.send('ask-goal-info', params),
     getEditInfo: (func) => ipcRenderer.on('get-edit-info', (event, goal, steps) => func(goal, steps)),
 
+    setDefaultEdit: (params) => ipcRenderer.send('set-default-edit', params),
+
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals', params),
     getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
     getMonthGoalsDone: (func) => ipcRenderer.on('get-month-goals-done', (event, goals_dict) => func(goals_dict)),
@@ -43,6 +45,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     askProjectSidebar: (params) => ipcRenderer.send('ask-project-sidebar', params),
     getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
     getFromProject: (params) => ipcRenderer.send('get-from-project', params),
+
+    goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
 })
 
 
@@ -61,6 +65,9 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
     newIdea: (params) => ipcRenderer.send('new-idea', params),
     removingIdea: (callback) => ipcRenderer.on("removing-idea", callback),
     ideaRemoved: (params) => ipcRenderer.send('idea-removed', params),
+
+    removingProjectGoal: (callback) => ipcRenderer.on("removing-project-goal", callback),
+    projectGoalRemoved: (params) => ipcRenderer.send('project-goal-removed', params),
 })
 
 contextBridge.exposeInMainWorld('appAPI', {

@@ -1,6 +1,6 @@
 import {l_date} from "./date.js";
 import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
-import {day_view, set_todo_dragged} from "./render.mjs";
+import { build_view, day_view, set_todo_dragged} from "./render.mjs";
 import {set_goal_pos} from "./edit.mjs";
 import {reset_project_pos} from "./project.mjs";
 
@@ -11,9 +11,13 @@ $(document).on('click', '#dashWeek', function () {
     $('.dashViewOption').css('backgroundColor', '#55423B')
     $(this).css('backgroundColor', '#FF5D00')
     l_date.fix_header_week()
+    build_view(_week_view_main(), _week_view_header())
+
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
     window.sidebarAPI.askHistory({date: l_date.week_current[0]})
 });
+
+
 
 (function () {
     let mousedown_weekday = false
@@ -37,6 +41,52 @@ $(document).on('click', '#dashWeek', function () {
         }
     })
 })();
+
+
+function _week_view_main(){
+    return `
+    <div id="content">
+        
+    </div>
+    `
+}
+
+function _week_view_header(){
+    window.goalsAPI.askProjectsInfo()
+
+
+    let date_display = l_date.get_week_display_format(l_date.week_now)
+    console.log(l_date.week_now)
+    return `
+        <div id="header">
+            <div id="mainTitle">This Week</div>
+    
+            <div id="projectShowed">
+                <img src="images/goals/projects/project.png">
+                <div id="projectTypes">
+    
+                </div>
+            </div>
+    
+            <div id="sideOptions">
+                <div id="sideHistory">
+                    <img src="images/goals/history.png" alt="main">
+                </div>
+                <div class="sidebars">
+                    <div id="sideIdeas">
+                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
+                    </div>
+                </div>
+            </div>
+    
+            <div id="subHeader">
+                <span id="date">
+                    ${date_display}
+                </span>
+            </div>
+        </div>
+    `
+}
 
 window.goalsAPI.getWeekGoals((goals) => {
     let today_sql = l_date.sql_format(l_date.today)
@@ -80,6 +130,9 @@ window.goalsAPI.getWeekGoals((goals) => {
     }
 
     content.html(html)
+    let date_display = l_date.get_week_display_format(l_date.week_now)
+    l_date.fix_header_week()
+    $('#date').text(date_display)
 })
 
 let block_prev_drag = 0

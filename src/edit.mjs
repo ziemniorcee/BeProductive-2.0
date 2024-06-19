@@ -10,6 +10,8 @@ import {
 import {categories, categories2, check_border, getIdByColor} from "./data.mjs";
 import {dragula_week_view, set_block_prev_drag_week} from "./weekView.mjs";
 import {dragula_month_view, set_block_prev_drag_month} from "./monthView.mjs";
+import {project_pos, set_block_prev_drag_project} from "./project.mjs";
+import {l_date} from "./date.js";
 
 export let saved_sidebar = ""
 export let goal_pressed = false
@@ -21,6 +23,7 @@ let goal_id = 0
 let steps_count = 0
 let is_new_step = false
 let is_from_sidebar = false
+let is_from_project = false
 let sidebar_change_goal = {}
 let goal_text = ""
 let last_step = ""
@@ -37,10 +40,13 @@ $(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) 
 
 $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
     if (!todo_dragged && is_edit_change === true) {
+        console.log("XPAA")
         is_from_sidebar = false
+        is_from_project = false
         set_block_prev_drag_day(0)
         set_block_prev_drag_week(0)
         set_block_prev_drag_month(0)
+        set_block_prev_drag_project(0)
         goal_pressed = true
         base = event.target
         let right_bar = $('#rightbar')
@@ -54,9 +60,15 @@ $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
         if ($(this).attr('class') === 'sidebarTask') {
             is_from_sidebar = true
             goal_id = $('.sidebarTask').index(this)
-            window.goalsAPI.askGoalInfo({todo_id: goal_id, option: is_from_sidebar})
-        } else if ($('#todosAll').length) _build_edit()
-        else if ($('.weekDay').length) window.goalsAPI.askGoalInfo({todo_id: goal_id, option: is_from_sidebar})
+            window.goalsAPI.askGoalInfo({todo_id: goal_id, option: 1})
+        } else if ($(this).parent().attr('id') === 'sideProjectGoals') {
+            is_from_project = true
+            goal_id = Number($(base).find('.todoId').text())
+            window.goalsAPI.askGoalInfo({todo_id: goal_id, option: 2})
+        } else if ($('#todosAll').length || $('#projectContent').length) {
+            window.goalsAPI.setDefaultEdit()
+            _build_edit()
+        } else if ($('.weekDay').length) window.goalsAPI.askGoalInfo({todo_id: goal_id, option: 0})
         else if ($('#monthGrid').length) {
             goal_id = Number($(base).find('.monthTodoId').text())
             goal_pos = $('.monthTodo').index(this)
@@ -79,23 +91,24 @@ $(document).on('click', '.viewOption', function () {
 })
 
 // Blocks to do click when children were clicked
-$(document).on('mousedown', '.todo > *', function (event) {
-    event.stopPropagation()
-    close_edit()
+// $(document).on('mousedown', '.todo > *', function (event) {
+//     console.log("XPaaP")
+//     close_edit()
+// })
 
-})
+$(document).on('mousedown', '#main', (event) => {
+    let opening_sidebar = $('#projectTypes').css('display') === "block" || $('.sidebars').css('display') === "block"
 
-$(document).on('mousedown', '#main', () => {
-    if (goal_pressed) {
-        console.log("XPP")
-        close_edit()
+    if (goal_pressed && !opening_sidebar) {
+        close_edit(event)
         if ($('#todosAll').length) dragula_day_view()
         else if ($('.weekDay').length) dragula_week_view()
         else dragula_month_view()
     }
+    goal_pressed = false
 })
 
-$(document).on('click', '#editClose', () => show_hide_sidebar())
+$(document).on('click', '#editClose', () => close_edit(true))
 
 $(document).on('click', '#editBack', () => close_edit())
 
@@ -125,8 +138,7 @@ function change_goal_main() {
 
         if (is_from_sidebar) sidebar_change_goal = {text: input, id: goal_id}
 
-        console.log(goal_id)
-        window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id, option: is_from_sidebar})
+        window.goalsAPI.changeTextGoal({input: converted_text, id: goal_id})
     }
 }
 
@@ -136,25 +148,26 @@ function steps_change(that) {
     let input = edit_text_step.eq(index).val()
     let converted_step = input.replace(/'/g, "`@`").replace(/"/g, "`@@`")
 
+
     if (input !== "") {
         is_new_step = false
-        if ((!$(base).find('.stepsShow').length) && $('#todosAll').length) $(base).find('.taskText').append(_steps_show_html())
-        if (steps_count < edit_text_step.length && index === edit_text_step.length - 1) {
+        if ((!$(base).find('.stepsShow').length) && ($('#todosAll').length || $('#projectContent').length)) $(base).find('.taskText').append(_steps_show_html())
+        if ((steps_count < edit_text_step.length && index === edit_text_step.length - 1) || steps_count === edit_text_step.length - 2) {
             $(base).find('.steps').append(_step_html(input))
             _change_counter(index, 0, 1)
 
             steps_count++
-            window.goalsAPI.addStep({input: converted_step, id: goal_id, option: is_from_sidebar})
+            window.goalsAPI.addStep({input: converted_step, id: goal_id})
             last_step = input
         } else {
             $(base).find('.step_text').eq(index).text(input)
-            window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index, option: is_from_sidebar})
+            window.goalsAPI.changeStep({input: converted_step, id: goal_id, step_id: index})
         }
     } else {
-        if ((!is_new_step && index + 1 !== edit_text_step.length) || last_step !== "") {
+        if ((!is_new_step && index + 1 !== edit_text_step.length) || (last_step !== "" && !is_new_step)) {
             _change_counter(index, -1, -1)
             _remove_step(index)
-            window.goalsAPI.removeStep({id: goal_id, step_id: index, option: is_from_sidebar})
+            window.goalsAPI.removeStep({id: goal_id, step_id: index})
         }
         is_new_step = false
     }
@@ -182,14 +195,20 @@ function _change_counter(index, current, max) {
 $(document).on('click', '#editCheck', () => {
     let state = Number($('#editCheck').prop('checked'))
     $(base).find('.check_task').prop('checked', state)
-    change_check(goal_pos)
-    if (!$('#todosAll').length) close_edit()
+    let sidebar_option = 0
+    if (is_from_sidebar) sidebar_option = 1
+    else if (is_from_project) sidebar_option = 2
+    change_check(goal_id, sidebar_option, state)
 
 
-    if (state) goal_pos = $('.todo').length - 1
-    else goal_pos = $('#todosArea').children().length - 1
+    if (!is_from_sidebar && !is_from_project){
+        if (!$('#todosAll').length) close_edit()
+        if (state) goal_pos = $('.todo').length - 1
+        else goal_pos = $('#todosArea').children().length - 1
 
-    base = document.getElementsByClassName("todo")[goal_pos]
+        base = document.getElementsByClassName("todo")[goal_pos]
+    }
+
 })
 
 $(document).on('click', '.editCheckStep', function () {
@@ -208,7 +227,7 @@ $(document).on('click', '.editCheckStep', function () {
         step_check.replaceWith("<input type='checkbox' class='stepCheck'>")
         counter.text(Number(counter.text()) - 1)
     }
-    window.goalsAPI.changeChecksStep({id: goal_id, step_id: index, state: state, option: is_from_sidebar})
+    window.goalsAPI.changeChecksStep({id: goal_id, step_id: index, state: state})
 })
 
 $(document).on('click', '#editNewStep', function () {
@@ -219,6 +238,7 @@ $(document).on('keydown', '.editTextStep', function (event) {
     if (event.which === 9) {
         event.preventDefault()
         new_step()
+        is_new_step = true
     }
 })
 
@@ -248,7 +268,7 @@ export function change_category(category_id) {
     if ($(base).find('.stepsShow')) {
         $(base).find('.stepsShow').css('background', categories[category_id][0])
     }
-    window.goalsAPI.changeCategory({id: goal_id, new_category: category_id, option: is_from_sidebar})
+    window.goalsAPI.changeCategory({id: goal_id, new_category: category_id})
 }
 
 
@@ -256,23 +276,41 @@ $(document).on('click', '#editDiff', () => {
     let difficulty = $('#editDiff').val()
     let url = `images/goals/rank${difficulty}.svg`
     if (!is_from_sidebar) $('.todoCheck').eq(goal_pos).css('backgroundImage', `url("${url}")`)
-    window.goalsAPI.changeDifficulty({id: goal_id, difficulty: difficulty, option: is_from_sidebar})
+    window.goalsAPI.changeDifficulty({id: goal_id, difficulty: difficulty})
 })
 
 
 $(document).on('click', '#editImportance', () => {
     let importance = $('#editImportance').val()
     if (!is_from_sidebar) $('.checkDot').eq(goal_pos).css('borderColor', check_border[importance])
-    window.goalsAPI.changeImportance({id: goal_id, importance: importance, option: is_from_sidebar})
+    window.goalsAPI.changeImportance({id: goal_id, importance: importance})
 })
 
-export function close_edit() {
-    if (goal_pressed === true) {
+export function close_edit(close = false) {
+    if (goal_pressed === true || close) {
         goal_pressed = false
-        $('#rightbar').toggle()
-        $('#resizer').toggle()
+        if (close || saved_sidebar.trim() === "") {
+            $('#rightbar').toggle()
+            $('#resizer').toggle()
+            saved_sidebar = ""
+        } else {
+            $('#rightbar').html(saved_sidebar)
+        }
         if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
+
+    if ($('#sideProjectHeader').length) {
+        let options = $('.sideProjectOption')
+        let project_option
+        for (let i = 0; i < options.length; i++) {
+            if (options.eq(i).css('background-color') === 'rgb(0, 34, 68)') project_option = i
+        }
+        window.goalsAPI.askProjectSidebar({
+            project_pos: project_pos,
+            option: project_option,
+            current_date: l_date.day_sql
+        })
+    }
 }
 
 export function goal_pressed_false() {
@@ -296,7 +334,7 @@ $(document).on('click', '#editSelectProject', function (event) {
 })
 
 $(document).on('click', '.editPickProject', function () {
-    let project_id = $('.editPickProject').index(this) -1
+    let project_id = $('.editPickProject').index(this) - 1
 
     $(base).find('.projectEmblem').remove()
     if (project_id >= 0) {
@@ -310,21 +348,20 @@ $(document).on('click', '.editPickProject', function () {
         $('.editSelectProject').eq(0).html(`<img class="editPickProjectIcon" src="${project_src}">`)
         $('#editSelectProject').css("backgroundColor", project_color)
 
-        if($('#todosAll').length) {
+        if ($('#todosAll').length) {
             $(base).append(`
             <div class="projectEmblem" style="background-color: ${project_color}">
                 <img src="${project_src}">
                 <div class="projectPos">${project_id}</div>
             </div>`)
         }
-    }
-    else{
+    } else {
         $('.editProjectName').eq(0).text('None')
         $('.editProjectIcon').eq(0).css("backgroundColor", "#D8E1E7")
         $('#editSelectProject').css("backgroundColor", "#FF5D00")
     }
 
-    window.goalsAPI.changeProject({id: goal_id, project_pos: project_id, option: is_from_sidebar})
+    window.goalsAPI.changeProject({id: goal_id, project_pos: project_id})
     $('#editProjectPicker').toggle()
 })
 
@@ -410,7 +447,7 @@ function _get_goal_config(that) {
     return goal_config
 }
 
-function _project_config(project_pos){
+function _project_config(project_pos) {
     let project_config = []
     if (project_pos !== "" && project_pos !== -1) {
         project_config[0] = $('.dashProjectName').eq(project_pos).text()
@@ -418,8 +455,7 @@ function _project_config(project_pos){
         project_config[2] = project_config[1]
         let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
         project_config[3] = `<img class="editPickProjectIcon" src="${project_icon}">`
-    }
-    else{
+    } else {
         project_config[0] = 'None'
         project_config[1] = '#D8E1E7'
         project_config[2] = '#FF5D00'
