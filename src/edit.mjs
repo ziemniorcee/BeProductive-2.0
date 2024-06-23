@@ -10,7 +10,7 @@ import {
 import {categories, categories2, check_border, getIdByColor} from "./data.mjs";
 import {dragula_week_view, set_block_prev_drag_week} from "./weekView.mjs";
 import {dragula_month_view, set_block_prev_drag_month} from "./monthView.mjs";
-import {project_pos, set_block_prev_drag_project} from "./project.mjs";
+import {change_project_emblem, project_pos, set_block_prev_drag_project} from "./project.mjs";
 import {l_date} from "./date.js";
 
 export let saved_sidebar = ""
@@ -40,7 +40,6 @@ $(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) 
 
 $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
     if (!todo_dragged && is_edit_change === true) {
-        console.log("XPAA")
         is_from_sidebar = false
         is_from_project = false
         set_block_prev_drag_day(0)
@@ -72,7 +71,7 @@ $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
         else if ($('#monthGrid').length) {
             goal_id = Number($(base).find('.monthTodoId').text())
             goal_pos = $('.monthTodo').index(this)
-            window.goalsAPI.askGoalInfo({todo_id: goal_id})
+            window.goalsAPI.askGoalInfo({todo_id: goal_id, option: 0})
         }
     } else set_todo_dragged(false)
     is_edit_change = false
@@ -111,6 +110,7 @@ $(document).on('mousedown', '#main', (event) => {
 $(document).on('click', '#editClose', () => close_edit(true))
 
 $(document).on('click', '#editBack', () => close_edit())
+
 
 $(document).on('blur', '#editText', () => {
     if (!is_edit_change) change_goal_main(this)
@@ -201,7 +201,7 @@ $(document).on('click', '#editCheck', () => {
     change_check(goal_id, sidebar_option, state)
 
 
-    if (!is_from_sidebar && !is_from_project){
+    if (!is_from_sidebar && !is_from_project) {
         if (!$('#todosAll').length) close_edit()
         if (state) goal_pos = $('.todo').length - 1
         else goal_pos = $('#todosArea').children().length - 1
@@ -295,6 +295,9 @@ export function close_edit(close = false) {
             saved_sidebar = ""
         } else {
             $('#rightbar').html(saved_sidebar)
+            if ($('#todosAll').length) dragula_day_view()
+            else if ($('.weekDay').length) dragula_week_view()
+            else dragula_month_view()
         }
         if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
@@ -334,36 +337,108 @@ $(document).on('click', '#editSelectProject', function (event) {
 })
 
 $(document).on('click', '.editPickProject', function () {
-    let project_id = $('.editPickProject').index(this) - 1
+    pick_project(this)
+})
 
-    $(base).find('.projectEmblem').remove()
-    if (project_id >= 0) {
-        let project_color = $('.dashProjectIcon').eq(project_id).css('background-color')
-        let project_src = $('.dashProjectIcon img').eq(project_id).attr('src')
-        let edit_project_icon = $('.editProjectIcon')
+/**
+ * Selects project emblem from project picker
+ * @param that selected new project
+ */
+function pick_project(that) {
+    let selected_project_pos = $('.editPickProject').index(that) - 1
 
-        edit_project_icon.eq(0).html(`<img class="editPickProjectIcon" src="${project_src}">`)
-        edit_project_icon.eq(0).css('background-color', project_color)
-        $('.editProjectName').eq(0).text($('.dashProjectName').eq(project_id).text())
-        $('.editSelectProject').eq(0).html(`<img class="editPickProjectIcon" src="${project_src}">`)
-        $('#editSelectProject').css("backgroundColor", project_color)
-
-        if ($('#todosAll').length) {
-            $(base).append(`
-            <div class="projectEmblem" style="background-color: ${project_color}">
-                <img src="${project_src}">
-                <div class="projectPos">${project_id}</div>
-            </div>`)
+    if ($("#todosAll").length) {
+        change_project_emblem(goal_id, selected_project_pos)
+        fix_project_edit(selected_project_pos)
+    } else if ($('#projectContent').length) {
+        if (selected_project_pos < 0) ask_to_delete()
+        else if (selected_project_pos !== project_pos) {
+            window.goalsAPI.changeProject({id: goal_id, project_pos: selected_project_pos})
+            close_edit()
+            base.remove()
         }
+    }
+
+    $('#editProjectPicker').toggle()
+}
+
+
+/**
+ * fixes currently selected project in edit
+ * @param project_pos new project position
+ */
+function fix_project_edit(project_pos) {
+    if (project_pos >= 0) {
+        let project_color = $('.dashProjectIcon').eq(project_pos).css('background-color')
+        let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
+
+        let edit_project_icon = $('.editProjectIcon')
+        edit_project_icon.eq(0).html(`<img class="editPickProjectIcon" src="${project_icon}" alt="">`)
+        edit_project_icon.eq(0).css('background-color', project_color)
+        $('.editProjectName').eq(0).text($('.dashProjectName').eq(project_pos).text())
+        $('.editSelectProject').eq(0).html(`<img class="editPickProjectIcon" src="${project_icon}" alt="">`)
+        $('#editSelectProject').css("backgroundColor", project_color)
     } else {
         $('.editProjectName').eq(0).text('None')
         $('.editProjectIcon').eq(0).css("backgroundColor", "#D8E1E7")
         $('#editSelectProject').css("backgroundColor", "#FF5D00")
     }
+}
 
-    window.goalsAPI.changeProject({id: goal_id, project_pos: project_id})
-    $('#editProjectPicker').toggle()
+/**
+ * Displays question window adn changes color of rightbar border
+ */
+function ask_to_delete() {
+    let rightbar = $('#rightbar')
+    rightbar.append(`
+         <div id="editConfirmProject">
+             <div id="editConfirmProjectQuestion">Task will be deleted</div>
+             <div id="editConfirmProjectButtons">
+                 <div id="editConfirmProjectYes">Delete</div>
+                 <div id="editConfirmProjectNo">Cancel</div>
+             </div>
+         </div>
+    `)
+    rightbar.css("border-color", "red")
+    $('#resizer').css("background-color", "red")
+}
+
+$(document).on('click', '#editConfirmProjectYes', () => {
+    confirm_delete()
 })
+
+/**
+ * function after selecting yes in delete question window.
+ * Removes goal in project View and fixes ids of goals that are left
+ */
+function confirm_delete() {
+    let local_goal_id = $(base).find(".todoId").text()
+    base.remove()
+    close_confirm()
+
+    let goals = $('.todoId')
+    for (let i = 0; i < goals.length; i++) {
+        if (goals.eq(i).html() > local_goal_id) goals.eq(i).html(goals.eq(i).html() - 1)
+    }
+    close_edit()
+
+    window.goalsAPI.goalRemoved({id: local_goal_id})
+}
+
+
+$(document).on('click', '#editConfirmProjectNo', () => {
+    close_confirm()
+})
+
+/**
+ * closes confim window and fixes colors
+ */
+function close_confirm() {
+    $('#editConfirmProject').remove()
+    $('#rightbar').css("border-color", "#D8E1E7")
+    $('#resizer').css("background-color", "#D8E1E7")
+}
+
 
 function _edit_html(goal_config, steps_html) {
 
@@ -433,8 +508,14 @@ function _get_goal_config(that) {
     goal_config["difficulty"] = $(that).find('.todoCheck')[0].style.backgroundImage[22]
     goal_config["importance"] = check_border.indexOf($(that).find('.checkDot').css('borderColor'))
 
-    let project_pos = $(that).find('.projectPos').text() // week and month have to get project info from db
-    goal_config['project'] = _project_config(project_pos)
+    let selected_project_pos = ""
+    if ($('#todosAll').length) {
+        selected_project_pos = $(that).find('.projectPos').text()
+    } else if ($('#projectContent').length) {
+        selected_project_pos = project_pos
+    }
+
+    goal_config['project'] = _project_config(selected_project_pos)
 
     goal_config["steps"] = $(that).find('.step').map(function () {
         return $(this).text().trim();

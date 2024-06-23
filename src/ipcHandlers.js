@@ -250,10 +250,27 @@ function todoHandlers(db) {
     ipcMain.on('get-from-project', (event, params) => {
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
-                WHERE id = ${project_sidebar_ids[params.id]}`)
+                WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
 
-        goal_ids.push(project_sidebar_ids[params.id])
-        project_sidebar_ids.splice(params.id, 1)
+        db.all(`SELECT id, goal_id, step_text, step_check
+                FROM steps
+                WHERE goal_id = ${project_sidebar_ids[params.sidebar_pos]}`, (err2, steps) => {
+            if (err2) console.error(err2)
+            else {
+                for (let i = 0; i < steps.length; i++) {
+                    if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
+                    else step_ids[steps[i].goal_id] = [steps[i].id]
+                }
+                goal_ids.push(project_sidebar_ids[params.sidebar_pos])
+                project_sidebar_ids.splice(params.sidebar_pos, 1)
+
+                let safe_steps = steps.map(step => {
+                    let {id, goal_id, ...rest} = step;
+                    return rest;
+                })
+                event.reply('project-to-goal', safe_steps, params.main_pos)
+            }
+        })
     })
 
     ipcMain.on('goal-remove-date', (event, params) => {

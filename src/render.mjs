@@ -95,7 +95,7 @@ function new_goal() {
     let goal_text = e_todo.val()
     e_todo.val('')
 
-    if (goal_text !== "") {
+    if (goal_text.trim() !== "") {
         let steps = _new_goal_steps()
         let goal = _new_goal_dict(goal_text, steps)
 
@@ -410,11 +410,13 @@ export function dragula_day_view() {
         if(todos_area_after.length !== todos_area_before.length) {
             if (dragged_task.attr('class') === "sidebarTask") get_from_history(dragged_task)
             else if (dragged_task.parent().attr('id') === "sideProjectGoals") {
+                console.log(dragged_task.parent().attr("id"))
                 get_from_project(new_goal_pos, dragged_task)
             }
         }
-
-        if (dragged_task.attr('class').includes("todo")) _change_order()
+        else{
+            _change_order()
+        }
     });
 }
 
@@ -431,7 +433,7 @@ function get_from_project(new_goal_index, drag_sidebar_task){
 
     $('.todoId').eq(new_goal_index).text(todos.length - 1)
     todos.eq(new_goal_index).append(project_emblem_html(project_pos))
-    window.goalsAPI.getFromProject({date: l_date.day_sql, id: sidebar_pos})
+    window.goalsAPI.getFromProject({date: l_date.day_sql, sidebar_pos: sidebar_pos, main_pos:new_goal_index})//need new goal index
 
     if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(drag_sidebar_task).remove()
     else{
@@ -439,7 +441,7 @@ function get_from_project(new_goal_index, drag_sidebar_task){
     }
 }
 
-function _change_order() {
+export function _change_order() {
     let goals = $('#main .todoId')
     let order = []
     for (let i = 0; i < goals.length ; i++) order.push(goals.eq(i).text())

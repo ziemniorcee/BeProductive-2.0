@@ -1089,6 +1089,52 @@ body {
     position: relative;
 }
 
+#editConfirmProject{
+    font-size: 20px;
+    height: 150px;
+    background: #55423B;
+    margin: 10px;
+    padding: 10px;
+    position: relative;
+    bottom: 10px;
+    border: 5px solid red;
+}
+
+#editConfirmProjectQuestion{
+    width: 100%;
+    height: 75px;
+    display: block;
+    text-align: center;
+    line-height: 75px;
+    margin-bottom: 15px;
+
+}
+
+#editConfirmProjectButtons{
+    display: flex;
+    justify-content: center;
+}
+
+#editConfirmProjectYes{
+    line-height: 40px;
+    height: 40px;
+    width: 100px;
+    text-align: center;
+    border: 1px solid black;
+
+    margin-right: 100px;
+}
+
+#editConfirmProjectNo{
+    line-height: 40px;
+    height: 40px;
+    width: 100px;
+    text-align: center;
+    border: 1px solid black;
+    background-color: red;
+}
+
+
 #editProjectTitle{
     flex-grow: 1;
     text-align: center;

@@ -61,7 +61,7 @@ function _month_view_header(){
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
     let month_params = l_date.get_format_month()
-
+    let month_days_limit = month_params[1] - month_params[0]
     let month_counter = 0;
     let goal_counter = 0;
 
@@ -74,7 +74,10 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
     }
 
     let grid = ""
-    for (let i = 0; i < 5; i++) {
+    let weeks_end_flag = true
+    let is_six_weeks = false
+
+    for (let i = 0; i < 6 && weeks_end_flag; i++) {
         let week = ""
 
         for (let j = 0; j < 7; j++) {
@@ -99,11 +102,19 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
                 </div>`
 
             month_counter++
+
+            if (day >= month_days_limit ) weeks_end_flag = false
         }
+
+
         grid += `
             <div class="monthWeek">
                 ${week}
             </div>`
+
+        if (i === 5){
+            is_six_weeks = true
+        }
     }
 
     $('#content').html(`
@@ -129,6 +140,9 @@ window.goalsAPI.getMonthGoals((goals_dict) => {
         }
     }
 
+    if (is_six_weeks){
+        $('.monthGoals').css('max-height', "9.0vh")
+    }
     $('#date').text(l_date.get_month_display_format(l_date.day_sql))
     $('#mainTitle').text(l_date.get_fixed_header_month())
 })

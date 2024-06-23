@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     askProjectSidebar: (params) => ipcRenderer.send('ask-project-sidebar', params),
     getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
     getFromProject: (params) => ipcRenderer.send('get-from-project', params),
+    projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
+
 
     goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
 })
