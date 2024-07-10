@@ -1,12 +1,14 @@
 import {l_date} from "./date.js";
 import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
 import { build_view, day_view, set_todo_dragged} from "./render.mjs";
-import {set_goal_pos} from "./edit.mjs";
-import {reset_project_pos} from "./project.mjs";
+import {close_edit, set_goal_pos} from "./edit.mjs";
+import {already_emblem_HTML, reset_project_pos} from "./project.mjs";
 
 
 $(document).on('click', '#dashWeek', function () {
-    reset_project_pos()
+    console.log()
+    if ($('#projectContent').length) reset_project_pos()
+
     $('#mainTitle').text('This week')
     $('.dashViewOption').css('backgroundColor', '#55423B')
     $(this).css('backgroundColor', '#FF5D00')
@@ -56,7 +58,6 @@ function _week_view_header(){
 
 
     let date_display = l_date.get_week_display_format(l_date.week_now)
-    console.log(l_date.week_now)
     return `
         <div id="header">
             <div id="mainTitle">This Week</div>
@@ -144,15 +145,31 @@ $(document).on('click', '.sidebarTask', function () {
 export function dragula_week_view() {
     block_prev_drag = 0
     let drag_sidebar_task
-    let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.weekDayGoals')))
+    let dragula_array
+    let rightbar = $('#rightbar')
+    let is_project_sidebar = $('#sideProjectHeader').length
+    let is_edit = $('#editTodo').css('display') === "none"
+    console.log(is_edit)
+    let dragged_task
+
+    if (!is_edit){
+        rightbar.html(rightbar.html())
+        console.log('CHUJ')
+        if (is_project_sidebar) {
+            dragula_array =  Array.from($('#sideProjectGoals')).concat(Array.from($('.weekDayGoals')))
+        } else {
+            dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.weekDayGoals')))
+        }
+    }
+
 
     dragula(dragula_array, {
         copy: function (el) {
-            return el.className === "sidebarTask";
+            return !el.parentNode.className.includes("weekDayGoals") ;
         },
         accepts: function (el, target) {
             block_prev_drag = 0
-            return target.className !== "historyTasks";
+            return target.className.includes("weekDayGoals");
         },
         moves: function () {
             if (block_prev_drag === 0) {
@@ -164,11 +181,33 @@ export function dragula_week_view() {
         drag_sidebar_task = $(event)
         set_todo_dragged(true)
         block_prev_drag = 0
+
+        dragged_task = event
     }).on('drop', function (event) {
         let new_goal_pos = $('.todo').index($(event))
         set_goal_pos(new_goal_pos)
 
-        if (event.className.includes("todo")) _change_order(event)
+        console.log(event)
+        if (event.className.includes("todo")) {
+            if(dragged_task.parentNode.id === "sideProjectGoals"){
+                console.log("XPP")
+
+                let sidebar_pos = $('#rightbar .todo').index(dragged_task)
+                let new_goal_index = $('.weekDayGoals .todo').index(event)
+
+                let display_week_day = $('.weekDayGoals').index(event.parentNode)
+                let real_week_day = weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
+                let add_date = l_date.week_now[real_week_day]
+                window.goalsAPI.getFromProject({date: add_date, sidebar_pos: sidebar_pos, main_pos:new_goal_index})
+                if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(drag_sidebar_task).remove()
+                else{
+                    $(dragged_task).append(already_emblem_HTML())
+                }
+            }
+            else {
+                _change_order(event)
+            }
+        }
         else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
     })
 }

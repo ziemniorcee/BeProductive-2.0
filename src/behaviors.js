@@ -30,11 +30,14 @@ import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
     $(document).on('click', '.selectCategory', function (event) {
         event.stopPropagation()
         if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
-        else $('#categoryPicker2').toggle()
+        else if ($(this).attr('id') === "selectCategory2") $('#categoryPicker2').toggle()
+        else if ($(this).attr('id') === "selectCategory3") $('#categoryPicker3').toggle()
     });
 
     $(document).on('click', '#main, #todoInput', function () {
         $('#categoryPicker').css('display', 'none')
+        $('#categoryPicker3').css('display', 'none')
+        $('#newProjectIconPicker').css("visibility", "hidden")
     })
 
     $(document).on('click', '#finishedButton', () => {
@@ -62,3 +65,16 @@ $(document).on('click', '#rightbar', function () {
 $(document).on('click', '#rightbar', function () {
     $('#editProjectPicker').css('display', 'none')
 })
+
+$(document).on('click', '#dashNewProjectContent', function (){
+    $('#categoryPicker3').css('display', 'none')
+    $('#newProjectIconPicker').css("visibility", "hidden")
+})
+
+$(document).on('click', "#projectSettingsIcon", function (event){
+    event.stopPropagation()
+    let icon_picker = $('#newProjectIconPicker')
+    let state = icon_picker.css("visibility") === "hidden"
+    icon_picker.css("visibility", state ? 'visible' : "hidden")
+})
+

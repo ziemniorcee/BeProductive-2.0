@@ -1,7 +1,7 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2} from "./data.mjs";
 import {build_view, day_view, set_todo_dragged} from "./render.mjs";
-import {set_goal_pos} from "./edit.mjs";
+import {close_edit, set_goal_pos} from "./edit.mjs";
 
 
 $(document).on('click', '#dashMonth', function () {
@@ -13,6 +13,7 @@ $(document).on('click', '#dashMonth', function () {
 
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
     window.sidebarAPI.askHistory({date: l_date.month_current})
+
 })
 
 function _month_view_main(){

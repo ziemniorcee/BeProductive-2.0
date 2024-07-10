@@ -17,10 +17,14 @@ let block_prev_drag = 0
 
 
 window.addEventListener('DOMContentLoaded', function () {
+    generate_day_view()
+});
+
+export function generate_day_view(){
     window.goalsAPI.askGoals({date: l_date.day_sql})
     build_view(_day_view_main(), _day_view_header())
     dragula_day_view()
-});
+}
 
 window.goalsAPI.getGoals((goals) => get_goals(goals))
 
@@ -29,6 +33,7 @@ window.goalsAPI.getGoals((goals) => get_goals(goals))
  * @param goals data of goals
  */
 function get_goals(goals){
+
     for (let i = 0; i < goals.length; i++) {
         goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
         goals[i]['goal'] = decode_text(goals[i]['goal'])
@@ -50,7 +55,7 @@ export function day_view() {
     build_view(_day_view_main(), _day_view_header())
     l_date.fix_header_day()
     dragula_day_view()
-    // window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
+    window.sidebarAPI.askHistory({date: l_date.sql_format(l_date.today)})
     window.goalsAPI.askGoals({date: l_date.day_sql})
 }
 
@@ -249,6 +254,10 @@ $(document).on('click', '.category', function () {
         select_category = $('#selectCategory2')
         change_category(index)
     }
+    else if ($(this).closest('.categoryPicker').attr('id') === "categoryPicker3"){
+        select_category = $('#selectCategory3')
+        $('#categoryPicker3').css('display', 'none')
+    }
 
     select_category.css('background', categories[index][0])
     select_category.text(categories[index][1])
@@ -433,7 +442,7 @@ function get_from_project(new_goal_index, drag_sidebar_task){
 
     $('.todoId').eq(new_goal_index).text(todos.length - 1)
     todos.eq(new_goal_index).append(project_emblem_html(project_pos))
-    window.goalsAPI.getFromProject({date: l_date.day_sql, sidebar_pos: sidebar_pos, main_pos:new_goal_index})//need new goal index
+    window.goalsAPI.getFromProject({date: l_date.day_sql, sidebar_pos: sidebar_pos, main_pos:new_goal_index})
 
     if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(drag_sidebar_task).remove()
     else{

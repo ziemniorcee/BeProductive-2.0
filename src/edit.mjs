@@ -212,7 +212,6 @@ $(document).on('click', '#editCheck', () => {
 })
 
 $(document).on('click', '.editCheckStep', function () {
-
     const index = $('.editCheckStep').index(this)
     const step_check = $(base).find('.stepCheck').eq(index)
     let counter = $(base).find('.counter')
@@ -326,6 +325,7 @@ window.goalsAPI.getEditInfo((goal, steps) => {
     steps_count = step_checks.length
     let steps_html = _steps_html(step_texts, step_checks)
 
+    goal["check_state"] = goal.check_state ? "checked" : ""
     goal["project"] = _project_config(goal.pr_pos)
     $('#rightbar').html(_edit_html(goal, steps_html))
     _fix_main_goal_edit()
@@ -365,17 +365,17 @@ function pick_project(that) {
 
 /**
  * fixes currently selected project in edit
- * @param project_pos new project position
+ * @param new_project_pos new project position
  */
-function fix_project_edit(project_pos) {
-    if (project_pos >= 0) {
-        let project_color = $('.dashProjectIcon').eq(project_pos).css('background-color')
-        let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
+function fix_project_edit(new_project_pos) {
+    if (new_project_pos >= 0) {
+        let project_color = $('.dashProjectIcon').eq(new_project_pos).css('background-color')
+        let project_icon = $('.dashProjectIcon img').eq(new_project_pos).attr('src')
 
         let edit_project_icon = $('.editProjectIcon')
         edit_project_icon.eq(0).html(`<img class="editPickProjectIcon" src="${project_icon}" alt="">`)
         edit_project_icon.eq(0).css('background-color', project_color)
-        $('.editProjectName').eq(0).text($('.dashProjectName').eq(project_pos).text())
+        $('.editProjectName').eq(0).text($('.dashProjectName').eq(new_project_pos).text())
         $('.editSelectProject').eq(0).html(`<img class="editPickProjectIcon" src="${project_icon}" alt="">`)
         $('#editSelectProject').css("backgroundColor", project_color)
     } else {
@@ -441,7 +441,6 @@ function close_confirm() {
 
 
 function _edit_html(goal_config, steps_html) {
-
     let backgrounds1 = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
     let backgrounds2 = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
 
@@ -528,13 +527,13 @@ function _get_goal_config(that) {
     return goal_config
 }
 
-function _project_config(project_pos) {
+function _project_config(new_project_pos) {
     let project_config = []
-    if (project_pos !== "" && project_pos !== -1) {
-        project_config[0] = $('.dashProjectName').eq(project_pos).text()
-        project_config[1] = $('.dashProjectIcon').eq(project_pos).css('backgroundColor')
+    if (new_project_pos !== "" && new_project_pos !== -1) {
+        project_config[0] = $('.dashProjectName').eq(new_project_pos).text()
+        project_config[1] = $('.dashProjectIcon').eq(new_project_pos).css('backgroundColor')
         project_config[2] = project_config[1]
-        let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
+        let project_icon = $('.dashProjectIcon img').eq(new_project_pos).attr('src')
         project_config[3] = `<img class="editPickProjectIcon" src="${project_icon}">`
     } else {
         project_config[0] = 'None'

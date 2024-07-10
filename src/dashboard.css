@@ -1,0 +1,359 @@
+#dashboard{
+    width: 420px;
+    background-color: #55423B;
+    padding: 30px;
+    color: white;
+    border-radius: 0 30px 30px 0;
+    position: relative;
+}
+
+#dashClose{
+    position: absolute;
+    right: 10px;
+    top: 20px;
+    height: 40px;
+    width: 40px;
+    border-radius: 10px;
+}
+
+#dashClose img{
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 4px;
+    left: 3px;
+}
+#dashClose:hover{
+    background-color: #2A231F;
+}
+
+#dashTitle{
+    font-size: 48px;
+    border-bottom: 3px #FF5D00 solid;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+#dashMyDayBG{
+    position: relative;
+    height: 200px;
+    width: 100%;
+    background-color: #D8E1E7;
+    margin-top: 20px;
+    border-radius: 10px;
+    border: 1px black solid;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+}
+
+#dashMyDayBtn{
+    cursor: pointer;
+    height: 50px;
+    width: 100%;
+    background-color: #FF5D00;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashMyDayBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 6px;
+}
+
+#dashTomorrowBG{
+    margin-top: 20px;
+    background-color: #D8E1E7;
+    height: 50px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashTomorrowBtn{
+    cursor: pointer;
+    position: relative;
+    width: 300px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: #FF5D00;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+#dashTomorrowBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 4px;
+}
+
+#dashTomorrowBtn span{
+    position: relative;
+    left: 12px;
+}
+
+#dashAnotherBtn{
+    position: relative;
+    margin-top: 20px;
+    height: 50px;
+    width: 100%;
+    background-color: #FF5D00;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+    margin-bottom: 20px;
+}
+
+#dashAnotherBtn img{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 12px;
+    top: 4px;
+}
+
+#dashView{
+    display: inline-block;
+    font-size: 20px;
+}
+#dashViewTable{
+    border: 1px black solid;
+    margin-left: 14px;
+    display: inline-block;
+    width: 345px;
+    height: 30px;
+    line-height: 30px;
+}
+
+#dashDay{
+    background-color: #FF5D00;
+
+}
+.dashViewOption{
+    height: 30px;
+    text-align: center;
+    width: 114px;
+    display: inline-block;
+    margin-right: -5px;
+}
+
+.dashViewOption + .dashViewOption{
+    border-left: 1px solid black;
+}
+
+#dashProjectsTitle{
+    margin-top: 50px;
+    font-size: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    width: max-content;
+    border-bottom: 3px solid #FF5D00;
+}
+
+.dashProject{
+    cursor: pointer;
+    display: inline-block;
+    font-size: 20px;
+    color: black;
+    width: 195px;
+    height: 50px;
+    background-color: #D8E1E7;
+    position: relative;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}
+
+.dashProjectRight{
+    margin-right: 20px;
+}
+
+.dashProjectIcon {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    background-color: #002244;
+    border-radius: 5px;
+
+}
+
+.dashProjectIcon img{
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    height: 30px;
+    width: 30px;
+}
+
+.dashProject span{
+    position: relative;
+    left: 16px;
+}
+
+#dashProjects{
+    position: relative;
+}
+
+#dashNewProject{
+    margin-top: 10px;
+    color: black;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    height: 300px;
+    background-color: #D8E1E7;
+    border-radius: 10px;
+}
+
+#dashNewProjectContent{
+    padding: 10px;
+    height: 200px;
+}
+
+#newProjectTitle{
+    font-size: 25px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#newProjectSettings{
+    display: flex;
+    font-size: 25px;
+}
+
+#newProjectSettings div{
+    height: 30px;
+    width: 200px;
+    text-align: center;
+}
+
+
+
+#newProjectSettingsNames div{
+    margin-bottom: 10px;
+}
+
+#selectProjectCategory{
+    height: 30px;
+    width: 200px;
+    border: 1px solid black;
+    margin-bottom: 10px;
+}
+
+#newProjectName{
+    font-size: 20px;
+    background-color: #D8E1E7;
+    width: 195px;
+    outline: none;
+    border: 1px solid black;
+    margin-top: 10px;
+}
+
+#newProjectIconText{
+    margin-top: 30px;
+}
+
+#projectSettingsIcon {
+    width: 50px !important;
+    height: 50px !important;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+#projectSettingsIcon img{
+    width: 40px;
+    height: 40px;
+    position: relative;
+    top: 5px;
+    left: 2px;
+}
+
+#newProjectIconPicker{
+    width: 202px;
+    height: 100px;
+    background-color: #2A231F;
+    position: absolute;
+    left: 207px;
+    top: 37px;
+    border: 1px solid black;
+    display: flex;
+    visibility: hidden;
+}
+
+#selectIconColumn{
+    width: 50px;
+    height: 100px;
+
+}
+
+#selectIconColumn div{
+    height: 48px;
+    position: relative;
+    border: 1px solid white;
+}
+
+#newProjectIconPicker img{
+    width: 38px;
+    height: 38px;
+    position: absolute;
+    top: 5px;
+    left: 4px;
+}
+
+#categoryPicker3{
+    bottom: 0;
+    left: 200px;
+}
+
+#dashNewButtons{
+    display: flex;
+}
+
+#newProjectButtons div{
+    margin-left: 25px;
+    width: 170px;
+    height: 40px;
+    border: 1px solid black;
+    display: inline-block;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+}
+
+#newProjectDiscard{
+    background-color: red;
+    color: white;
+}
+
+#newProjectError{
+    text-align: center;
+    background-color: red;
+    position: relative;
+    top: 5px;
+    color: white;
+}

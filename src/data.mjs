@@ -7,6 +7,8 @@ export const categories = {
     6: ["rgb(77, 73, 18)", "Japanese"],
 }
 
+export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
+
 export const categories2 = ["rgb(106, 59, 71, 1)", "rgb(97, 51, 142, 1)" ,"rgb(59, 120, 182, 1)",
     "rgb(32, 121, 90, 1)", "rgb(194, 49, 187)","rgb(166, 157, 39)"]
 

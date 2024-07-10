@@ -16,7 +16,7 @@
     background-color: #002244;
     display: flex;
     align-items: center;
-
+    position: relative;
     width: 100%;
 }
 
@@ -30,6 +30,36 @@
 #projectName {
     margin-left: 10px;
     font-size: 40px;
+}
+
+#projectDelete{
+    position: absolute;
+    right: 5px;
+    cursor: pointer;
+}
+
+#projectAskDelete{
+    width: 200px;
+    height: 40px;
+    font-size: 15px;
+    background-color: #55423B;
+    position: absolute;
+    right: 50px;
+    line-height: 40px;
+    padding-left: 10px;
+    visibility: hidden;
+}
+
+#projectDeleteConfirm{
+    margin-left: 12px;
+    padding-left: 5px;
+    padding-right: 5px;
+    background-color: red;
+    display: inline-block;
+    height: 30px;
+    align-items: center;
+    line-height: 30px;
+    cursor: pointer;
 }
 
 /* main */
@@ -197,11 +227,8 @@
     background-color: red;
     font-size: 20px;
     pointer-events: none;
-}
-
-.alreadyEmblem span{
-    position: relative;
-    top: 3px;
+    align-items: center;
+    display: flex;
 }
 
 .alreadyEmblemILetter{

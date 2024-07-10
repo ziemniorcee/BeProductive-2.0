@@ -86,18 +86,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-project-sidebar', (event, params) => {
-        let option_sql = ""
-
-        if (params.option === 0) {
-            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
-                        AND G.check_state = 1`
-        } else if (params.option === 1) {
-            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
-                        AND G.check_state = 0 AND G.addDate <> ""`
-        } else {
-            option_sql = `WHERE G.project_id = ${project_ids[params.project_pos]} 
-                        AND G.check_state = 0 AND G.addDate = ""`
-        }
+        let option_sql = where_option(params.option, params.project_pos)
 
         db.all(`SELECT G.id,
                        G.goal,
@@ -107,19 +96,33 @@ function todoHandlers(db) {
                        G.difficulty,
                        G.importance,
                        G.addDate,
-                       G.addDate = "${params.current_date}" as "already"
+                       CASE WHEN G.addDate IN (${params.current_dates}) THEN 1 ELSE 0 END as "already"
                 FROM goals G
                     ${option_sql}
                 ORDER BY goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
+                console.log(goals)
                 project_sidebar_ids = goals.map((goal) => goal.id)
                 let safe_goals = get_safe_goals(goals, [])
                 event.reply('get-project-sidebar', safe_goals)
             }
         })
-    })
+    })// for week addDate must be in range of week
+    // same for month
 
+    function where_option(option, project_pos){
+        if (option === 0) {
+            return `WHERE G.project_id = ${project_ids[project_pos]} 
+                        AND G.check_state = 1`
+        } else if (option === 1) {
+            return `WHERE G.project_id = ${project_ids[project_pos]} 
+                        AND G.check_state = 0 AND G.addDate <> ""`
+        } else {
+            return `WHERE G.project_id = ${project_ids[project_pos]} 
+                        AND G.check_state = 0 AND G.addDate = ""`
+        }
+    }
 
     function set_goal_ids(goals) {
         goal_ids = goals.map((goal) => goal.id)
@@ -271,6 +274,29 @@ function todoHandlers(db) {
                 event.reply('project-to-goal', safe_steps, params.main_pos)
             }
         })
+    })
+
+    ipcMain.on('new-project', (event, params) => {
+        db.run(`INSERT INTO projects (name, category, icon)
+                VALUES ("${params.name}", ${params.category}, "${params.icon}")`)
+
+        db.all(`SELECT *
+                FROM projects`, (err, projects) => {
+            project_ids = projects.map((project) => project.id)
+            let safe_projects = projects.map(project => {
+                let {id, ...rest} = project;
+                return rest;
+            })
+            event.reply('get-projects-info', safe_projects)
+        })
+    })
+
+    ipcMain.on('delete-project', (event, params) => {
+        db.run(`DELETE
+                FROM projects
+                WHERE id = ${project_ids[params.position]}`)
+
+        project_ids.splice(params.position, 1)
     })
 
     ipcMain.on('goal-remove-date', (event, params) => {
@@ -507,7 +533,7 @@ function todoHandlers(db) {
     ipcMain.on('change-checks-step', (event, params) => {
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
-                WHERE id = ${step_ids[goal_ids[params.id]][params.step_id]}`)
+                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('change-text-goal', (event, params) => {

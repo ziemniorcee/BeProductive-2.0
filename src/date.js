@@ -1,6 +1,9 @@
 import {weekdays, month_names} from "./data.mjs";
-import {day_view} from "./render.mjs";
+import {day_view, dragula_day_view} from "./render.mjs";
 import {reset_project_pos} from "./project.mjs";
+import {close_edit} from "./edit.mjs";
+import {dragula_week_view} from "./weekView.mjs";
+import {dragula_month_view} from "./monthView.mjs";
 
 class CurrentDate {
     constructor() {
@@ -267,6 +270,26 @@ class CurrentDate {
         return `${month_names[date.getMonth()]} ${date.getFullYear()}`
     }
 
+    get_current_dates(){
+        if ($('#todosAll').length) return [this.day_sql]
+        else if ($('.weekDay').length) return this.week_now
+        else if($('#monthGrid').length) return this.get_month_array()
+    }
+
+    get_month_array(){
+        let dates = this.get_sql_month()
+        let range = this.get_format_month()
+        let base = dates[0].substring(0,8)
+
+        let month_array = []
+        for (let i = 1; i <= range[1]; i++){
+            console.log(i)
+            if (i < 10) month_array.push(base + "0" + i)
+            else month_array.push(base + i)
+        }
+
+        return month_array
+    }
 }
 
 export let l_date = new CurrentDate()
@@ -301,7 +324,7 @@ $(document).on('click', '#dashMyDayBtn', () => {
     $('.dashViewOption').css('backgroundColor', '#55423B')
     $('#dashDay').css('backgroundColor', '#FF5D00')
     $('#mainTitle').text('My day')
-
+    close_edit()
 })
 
 $(document).on('click', '#dashTomorrowBtn', () => {
@@ -310,6 +333,7 @@ $(document).on('click', '#dashTomorrowBtn', () => {
     $('.dashViewOption').css('backgroundColor', '#55423B')
     $('#dashDay').css('backgroundColor', '#FF5D00')
     $('#mainTitle').text('Tomorrow')
+    close_edit()
 })
 
 $(document).on('click', '#otherButton', () => {
@@ -335,6 +359,7 @@ $("#datePicker").datepicker({
         } else {
             month_change(2)
         }
+        close_edit()
     }
 });
 

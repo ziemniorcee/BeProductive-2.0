@@ -1,14 +1,19 @@
-import {categories, check_border, decode_text, getIdByColor} from "./data.mjs";
+import {categories, check_border, decode_text, getIdByColor, icons} from "./data.mjs";
 import {
-    _input_html,
-    _steps_html,
-    _show_sidebar,
-    build_view,
-    dragula_day_view,
+    _build_categories,
+    _change_order,
     _hide_sidebar,
-    set_todo_dragged, _change_order,
+    _input_html,
+    _show_sidebar,
+    _steps_html,
+    build_view, day_view,
+    dragula_day_view,
+    generate_day_view,
+    set_todo_dragged,
 } from "./render.mjs";
 import {l_date} from "./date.js";
+import {dragula_week_view} from "./weekView.mjs";
+import {dragula_month_view} from "./monthView.mjs";
 
 export let project_pos = null
 let block_prev_drag = 0
@@ -49,7 +54,8 @@ function show_project_sidebar(that) {
         </div>
     `)
 
-    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_date: l_date.day_sql})
+    console.log(l_date.get_month_array())
+    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
 }
 
 $(document).on('click', '.sideProjectOption', function () {
@@ -67,20 +73,27 @@ function change_sidebar_option(that) {
     let color = $('.dashProjectIcon').eq(project_pos).css('background-color')
     side_project_option.css('background-color', '#2A231F')
     $(that).css('background-color', color)
-
-    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: option, current_date: l_date.day_sql})
+    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: option, current_dates: l_date.get_current_dates()})
 }
 
 
 $(document).on('click', '#sideProjectGoals .check_task', function () {
     let check_state = !$(this).prop('checked')
     let goal_index = $('#sideProjectGoals .check_task').index(this)
-    $(this).closest('.todo').remove()
+
+    let todo = $('#sideProjectGoals .todo').eq(goal_index)
+    let is_in = todo.find(".alreadyEmblem").length
+
+    todo.eq(goal_index).remove()
 
     if (check_state) {
         window.goalsAPI.goalRemoveDate({id: goal_index, option: 1})
     } else {
         window.goalsAPI.changeChecksGoal({id: goal_index, state: 1, option: 1})
+    }
+
+    if (is_in) {
+        generate_day_view()
     }
 });
 
@@ -94,9 +107,12 @@ function build_project_sidebar(goals) {
     side_project_goals.html("")
 
     for (let i = 0; i < goals.length; i++) {
+        console.log(goals[i])
         side_project_goals.append(build_project_goal(goals[i]))
     }
-    dragula_day_view()
+    if ($('#todosAll').length) dragula_day_view()
+    else if ($('.weekDay').length) dragula_week_view()
+    else dragula_month_view()
 }
 
 window.goalsAPI.projectToGoal((steps, position) => get_goal_from_sidebar(steps, position))
@@ -106,12 +122,13 @@ window.goalsAPI.projectToGoal((steps, position) => get_goal_from_sidebar(steps, 
  * @param steps steps data
  * @param position position of dragged goal
  */
-function get_goal_from_sidebar(steps, position){
+function get_goal_from_sidebar(steps, position) {
     _change_order()
     let category = getIdByColor(categories, $('#main .todoCheck').eq(position).css('backgroundColor'))
 
     $('#main .taskText').eq(position).append(_steps_html(steps, category))
 }
+
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
 
 /**
@@ -130,6 +147,8 @@ function set_projects_options(projects) {
         projects_HTML += _dash_project_HTML(project_class, icon_color, projects[i].icon, projects[i].name)
         project_types_HTML += _type_project_HTML(icon_color, projects[i].icon, projects[i].name)
     }
+
+    projects_HTML += _dash_add_project_HTML()
     $('#dashProjects').html(projects_HTML)
     $('#projectTypes').html(project_types_HTML)
 }
@@ -145,12 +164,23 @@ function set_projects_options(projects) {
  * @private
  */
 function _dash_project_HTML(project_class, icon_color, icon, name) {
+
     return `
         <div class="${project_class}">
             <div class="dashProjectIcon" style="background-color: ${icon_color}">
                 <img src="images/goals/projects/${icon}.png" alt="">
             </div>
             <span class="dashProjectName">${name}</span>
+        </div>`
+}
+
+function _dash_add_project_HTML() {
+    return `
+        <div class="dashProject" style="background-color: #55423B; border: 1px #D8E1E7 dashed">
+            <div class="dashProjectIcon" style="background-color: #D8E1E7">
+                <img src="images/goals/projects/plus.png" alt="">
+            </div>
+            <span class="dashProjectName" style="color: white">New</span>
         </div>`
 }
 
@@ -172,10 +202,18 @@ function _type_project_HTML(icon_color, icon, name) {
         </div>`
 }
 
-
 $(document).on('click', '.dashProject', function () {
-    project_pos = $('.dashProject').index(this)
-    project_view(project_pos)
+    let jq_dash_project = $('.dashProject')
+
+    project_pos = jq_dash_project.index(this)
+    let how_many_projects = jq_dash_project.length
+    if (project_pos < how_many_projects - 1) {
+        project_view(project_pos)
+    } else {
+        project_pos = null
+        open_add_project()
+    }
+
 })
 
 
@@ -183,7 +221,6 @@ $(document).on('click', '.dashProject', function () {
  * Displays project view
  */
 function project_view(project_pos) {
-
     let project_color = $('.dashProjectIcon').eq(project_pos).css('background-color')
     let project_icon = $('.dashProjectIcon img').eq(project_pos).attr('src')
     let project_name = $('.dashProjectName').eq(project_pos).text()
@@ -207,6 +244,125 @@ function _set_input_category(project_color) {
 
     select_category.css('background-color', categories[category_id][0])
     select_category.text(categories[category_id][1])
+}
+
+/**
+ * Builds new project creation window
+ */
+function open_add_project() {
+    let categories_html = _build_categories()
+    let icon_picker_html = _icon_picker_HTML()
+
+    $("#dashProjects").append(`
+        <div id="dashNewProject">
+            <div id="dashNewProjectContent">
+                <div id="newProjectTitle">Create new Project</div>
+                <div id="newProjectSettings">
+                    <div id="newProjectSettingsNames">
+                        <div>Category</div>
+                        <div>Project name</div>
+                        <div id="newProjectIconText">Icon</div>
+                    </div>
+                    <div id="projectSettings">
+                        <div class="selectCategory" id="selectCategory3">General</div>
+                        <input type="text" id="newProjectName" placeholder="Enter name">
+                        <div id="projectSettingsIcon">
+                            <img src="images/goals/projects/project.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="categoryPicker" id="categoryPicker3">
+                    ${categories_html}
+                </div>
+                ${icon_picker_html}
+            </div>
+            <div id="newProjectButtons">
+                <div id="newProjectDiscard">Discard</div>
+                <div id="newProjectCreate">Create</div>
+            </div>
+            <div id="newProjectError"></div>
+        </div>
+    `)
+}
+
+/**
+ * Builds icon picker using icon names
+ * @returns {string} HTML of icon picker
+ */
+function _icon_picker_HTML() {
+    let columns = ""
+
+    for (let i = 0; i < icons.length; i += 2) {
+        let column_inner = `
+            <div class="iconOption">
+                <img src="images/goals/projects/${icons[i]}.png">
+            </div>`
+
+        if (icons[i + 1] !== undefined) {
+            column_inner += `
+                <div class="iconOption">
+                    <img src="images/goals/projects/${icons[i + 1]}.png">  
+                </div>`
+        }
+
+        columns += `
+            <div id="selectIconColumn">
+                ${column_inner}
+            </div>`
+    }
+
+    return `
+        <div id="newProjectIconPicker">
+            ${columns}
+        </div>
+    `
+}
+
+$(document).on('click', '#newProjectDiscard', () => {
+    $('#dashNewProject').remove()
+})
+
+$(document).on('click', '.iconOption', function (event) {
+    event.stopPropagation()
+    set_icon(this)
+})
+
+function set_icon(that) {
+    let project_setting_icon = $('#projectSettingsIcon')
+
+    let icon = $(that).find("img").attr('src')
+    $('#newProjectIconPicker').css("visibility", "hidden")
+    project_setting_icon.find("img").attr('src', icon)
+    project_setting_icon.css('background-color', '#2A231F')
+    project_setting_icon.find("img").css('left', '0')
+}
+
+
+$(document).on('click', '#newProjectCreate', function () {
+    new_project()
+})
+
+/**
+ * Builds new project based on given settings
+ */
+function new_project() {
+    let project_setting_icon = $('#projectSettingsIcon')
+    let category = getIdByColor(categories, $('#selectCategory3').css('backgroundColor'))
+
+    let name = $('#newProjectName').val()
+
+    let parts = project_setting_icon.find('img').attr('src').split('/');
+    let fileName = parts[parts.length - 1];
+    let icon = fileName.split('.')[0];
+
+    if (name === "") {
+        $('#newProjectError').text("NO NAME GIVEN")
+    } else if (project_setting_icon.css('background-color') === 'rgba(0, 0, 0, 0)') {
+        $('#newProjectError').text("NO ICON SELECTED")
+    } else {
+        $('#dashNewProject').remove()
+        window.goalsAPI.newProject({category: category, name: name, icon: icon})
+    }
 }
 
 window.goalsAPI.getProjectGoals((goals) => build_project_view(goals))
@@ -263,8 +419,7 @@ function dragula_project_view() {
         if (drag_parent_id !== 'projectDone' && drop_parent_id === 'projectDone') {
             let new_goal_pos = $('#projectDone .todo').index(event)
             move_to_done(new_goal_pos, dragged_task)
-        }
-        else if (drag_parent_id !== 'projectTodo' && drop_parent_id === 'projectTodo') {
+        } else if (drag_parent_id !== 'projectTodo' && drop_parent_id === 'projectTodo') {
             let new_goal_pos = $('#projectTodo .todo').index(event)
             move_to_todo(new_goal_pos, dragged_task)
         }
@@ -314,6 +469,7 @@ function change_project_check(that) {
 
     let goal_id = $('.todoId').eq(id).text()
     let todo = $('.todo').eq(id)
+
     if (check_state) {
         $('.checkDot').eq(id).css('background-image', ``)
         $('#projectTodo .projectSectionGoals').append(todo)
@@ -356,7 +512,7 @@ export function build_project_goal(goal) {
                 <input type='checkbox' class='check_task' ${check_state}>
             </div>
             <div class='taskText'>
-                <span class='task'> ${goal.goal} </span>
+                <span class='task'> ${decode_text(goal.goal)} </span>
                 ${goal.steps}
             </div>
             ${already_emblem}
@@ -372,6 +528,8 @@ function _project_view_header(color, icon, name) {
         <div id="projectHeader" style="background-color: ${color}">
             <img src="${icon}" alt="">
             <div id="projectName">${name}</div>
+            <div id="projectAskDelete">Are you sure? <div id="projectDeleteConfirm">DELETE</div></div>
+            <img id="projectDelete" src="images/goals/delete.png" alt="">
         </div>`
 }
 
@@ -405,6 +563,18 @@ function _project_view_main(color) {
         </div>`
 }
 
+$(document).on('click', '#projectDelete', () => {
+    $('#projectAskDelete').css('visibility', "visible")
+})
+
+$(document).on('click', '#projectDeleteConfirm', () => {
+    delete_project()
+})
+function delete_project(){
+    window.goalsAPI.deleteProject({position:project_pos})
+    day_view()
+}
+
 /**
  * builds html of project emblem
  * @param project_pos
@@ -433,8 +603,10 @@ export function project_emblem_html(project_pos) {
 export function already_emblem_HTML() {
     return `
         <div class="alreadyEmblem">
-            <span class="alreadyEmblemILetter">I</span>
-            <span class="alreadyEmblemNLetter">N</span>
+            <div class="alreadyEmblemILetters">
+                <span class="alreadyEmblemILetter">I</span>
+                <span class="alreadyEmblemNLetter">N</span>
+            </div>
         </div>`
 }
 
