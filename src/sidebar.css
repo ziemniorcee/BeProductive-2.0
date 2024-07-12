@@ -1,6 +1,6 @@
 /* --------- Sidebars Picker --------- */
 
-#sideOptions, #projectShowed{
+#sideOptions, #projectShowed, #dashOpen{
     top: 0;
 
     width: 50px;
@@ -13,8 +13,11 @@
 #sideOptions {
     right: 0;
 }
+#dashOpen {
+    right: 150px;
+}
 
-#sideOptions img, #projectShowed img {
+#sideOptions img, #projectShowed img , #dashOpen img{
     width: 40px;
     height: 40px;
     position: relative;

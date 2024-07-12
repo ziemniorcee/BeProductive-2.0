@@ -683,6 +683,22 @@ $(document).on('click', '#dashClose', () => hide_dashboard())
 
 function hide_dashboard() {
     $('#dashboard').toggle()
+    if ($('#dashOpen').length) {
+        $('#dashOpen').toggle();
+    }
+    else {
+        var new_div = $('<div id="dashOpen"></div>');
+        var img = $('<img>');
+        img.attr('src', 'images/goals/right_arrow.png');
+        new_div.append(img);
+        $('#header').append(new_div);
+        $(document).on('click', '#dashOpen', () => show_dashboard())
+    }
+}
+
+function show_dashboard() {
+    $('#dashboard').toggle();
+    $('#dashOpen').toggle();
 }
 
 export function set_block_prev_drag_day(option) {
