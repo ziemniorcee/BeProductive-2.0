@@ -285,12 +285,12 @@ $(document).on('click', '#editImportance', () => {
     window.goalsAPI.changeImportance({id: goal_id, importance: importance})
 })
 
-export function close_edit(close = false) {
-    if (goal_pressed === true || close) {
+export function close_edit() {
+    if (goal_pressed === true ) {
         goal_pressed = false
-        if (close || saved_sidebar.trim() === "") {
-            $('#rightbar').toggle()
-            $('#resizer').toggle()
+        if (saved_sidebar.trim() === "") {
+            $('#rightbar').css('display', 'none')
+            $('#resizer').css('display', 'none')
             saved_sidebar = ""
         } else {
             $('#rightbar').html(saved_sidebar)
@@ -301,19 +301,10 @@ export function close_edit(close = false) {
         if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
     } else goal_pressed = false
 
-    if ($('#sideProjectHeader').length) {
-        let options = $('.sideProjectOption')
-        let project_option
-        for (let i = 0; i < options.length; i++) {
-            if (options.eq(i).css('background-color') === 'rgb(0, 34, 68)') project_option = i
-        }
-        window.goalsAPI.askProjectSidebar({
-            project_pos: project_pos,
-            option: project_option,
-            current_date: l_date.day_sql
-        })
-    }
+
 }
+
+
 
 export function goal_pressed_false() {
     goal_pressed = false

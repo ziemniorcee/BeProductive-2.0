@@ -2,18 +2,17 @@ import {categories, check_border, decode_text, getIdByColor, icons} from "./data
 import {
     _build_categories,
     _change_order,
-    _hide_sidebar,
     _input_html,
-    _show_sidebar,
     _steps_html,
     build_view, day_view,
     dragula_day_view,
-    generate_day_view,
     set_todo_dragged,
 } from "./render.mjs";
 import {l_date} from "./date.js";
 import {dragula_week_view} from "./weekView.mjs";
 import {dragula_month_view} from "./monthView.mjs";
+import {_hide_sidebar, _show_sidebar} from "./sidebar.mjs";
+
 
 export let project_pos = null
 let block_prev_drag = 0
@@ -53,8 +52,7 @@ function show_project_sidebar(that) {
             
         </div>
     `)
-
-    console.log(l_date.get_month_array())
+    console.log("XPFAP")
     window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
 }
 
@@ -93,7 +91,7 @@ $(document).on('click', '#sideProjectGoals .check_task', function () {
     }
 
     if (is_in) {
-        generate_day_view()
+        day_view()
     }
 });
 
@@ -107,7 +105,6 @@ function build_project_sidebar(goals) {
     side_project_goals.html("")
 
     for (let i = 0; i < goals.length; i++) {
-        console.log(goals[i])
         side_project_goals.append(build_project_goal(goals[i]))
     }
     if ($('#todosAll').length) dragula_day_view()
@@ -126,7 +123,27 @@ function get_goal_from_sidebar(steps, position) {
     _change_order()
     let category = getIdByColor(categories, $('#main .todoCheck').eq(position).css('backgroundColor'))
 
-    $('#main .taskText').eq(position).append(_steps_html(steps, category))
+    if ($('#todosAll').length) $('#main .taskText').eq(position).append(_steps_html(steps, category))
+}
+
+
+$(document).on('click', '#dashMyDayBtn', () =>{
+    fix_project_sidebar()
+})
+
+export function fix_project_sidebar(){
+    if ($('#sideProjectHeader').length) {
+        let options = $('.sideProjectOption')
+        let project_option
+        for (let i = 0; i < options.length; i++) {
+            if (options.eq(i).css('background-color') === 'rgb(0, 34, 68)') project_option = i
+        }
+        window.goalsAPI.askProjectSidebar({
+            project_pos: project_pos,
+            option: project_option,
+            current_dates: l_date.get_current_dates()
+        })
+    }
 }
 
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))

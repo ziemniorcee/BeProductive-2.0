@@ -245,7 +245,7 @@ $(document).on('mouseup', '.monthDay', function (event) {
 
         $('.dashViewOption').css('backgroundColor', '#55423B')
         $('#dashDay').css('backgroundColor', '#FF5D00')
-        l_date.fix_header_day()
+        l_date.get_day_view_header()
 
         mousedown_month = false
     }

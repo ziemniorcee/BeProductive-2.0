@@ -86,7 +86,11 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-project-sidebar', (event, params) => {
+        console.log(params)
         let option_sql = where_option(params.option, params.project_pos)
+        console.log(params.current_dates)
+
+        const current_dates_str = params.current_dates.map(date => `'${date}'`).join(', ');
 
         db.all(`SELECT G.id,
                        G.goal,
@@ -96,20 +100,18 @@ function todoHandlers(db) {
                        G.difficulty,
                        G.importance,
                        G.addDate,
-                       CASE WHEN G.addDate IN (${params.current_dates}) THEN 1 ELSE 0 END as "already"
+                       CASE WHEN G.addDate IN (${current_dates_str}) THEN 1 ELSE 0 END as "already"
                 FROM goals G
                     ${option_sql}
                 ORDER BY goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
-                console.log(goals)
                 project_sidebar_ids = goals.map((goal) => goal.id)
                 let safe_goals = get_safe_goals(goals, [])
                 event.reply('get-project-sidebar', safe_goals)
             }
         })
-    })// for week addDate must be in range of week
-    // same for month
+    })
 
     function where_option(option, project_pos){
         if (option === 0) {
