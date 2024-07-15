@@ -144,23 +144,43 @@ export function fix_project_sidebar(){
             current_dates: l_date.get_current_dates()
         })
     }
+
     const canv = $('#dashGraph1')[0].getContext('2d');
     const graph = new Chart(canv, {
         type: 'line',
         data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
             datasets: [{
-                label: 'Sample Data',
-                data: [65, 59, 80, 81, 56, 55, 40],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-                fill: false
+                data: [3, 4, 6, 1, 7, 2, 9, 6, 13, 2],
+                borderColor: 'rgba(249, 67, 64, 1)',
+                borderWidth: 3,
+                pointRadius: 0,
+                backgroundColor: 'rgba(224, 193, 199, 1)',
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
             scales: {
+                x: {
+                    display: false,
+                    grid: {
+                        display: false
+                    }
+                },
                 y: {
-                    beginAtZero: true
+                    display: false,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        max: 30
+                    }
                 }
             },
             responsive: true,
