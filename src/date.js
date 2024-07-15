@@ -1,5 +1,4 @@
 import {weekdays, month_names} from "./data.mjs";
-import {day_view, dragula_day_view} from "./render.mjs";
 import {reset_project_pos} from "./project.mjs";
 import {close_edit} from "./edit.mjs";
 import {dragula_week_view} from "./weekView.mjs";
@@ -13,7 +12,7 @@ class CurrentDate {
         this.tomorrow.setDate(this.tomorrow.getDate() + 1)
         this.week_now = []
 
-        this.set_attributes(this.today, 0)
+        this.set_attributes(this.today)
         this.week_current = this.week_now
 
         let _week_next = new Date()
@@ -26,18 +25,11 @@ class CurrentDate {
         this.glory_month = this.get_sql_month()
     }
 
-    get_today() {
-        this.set_attributes(this.today, 0)
-    }
-
-    get_tomorrow() {
-        this.set_attributes(this.tomorrow, 1)
-    }
-
-    fix_header_day() {
-        if (this.day_sql === this.sql_format(this.today)) $('#mainTitle').text('My day')
-        else if (this.day_sql === this.sql_format(this.tomorrow)) $('#mainTitle').text('Tomorrow')
-        else $('#mainTitle').text('Another day')
+    get_day_view_header() {
+        console.log(this.day_sql)
+        if (this.day_sql === this.sql_format(this.today)) return 'My day'
+        else if (this.day_sql === this.sql_format(this.tomorrow)) return 'Tomorrow'
+        else return 'Another day'
     }
 
     set_week(date) {
@@ -59,18 +51,18 @@ class CurrentDate {
 
     get_week_day(day_index) {
         let date = new Date(this.week_now[day_index])
-        this.set_attributes(date, 2)
+        this.set_attributes(date)
     }
 
     this_week() {
-        this.set_attributes(this.today, 0)
+        this.set_attributes(this.today)
     }
 
     next_week() {
         let week_next = new Date()
 
         week_next.setDate(this.today.getDate() + 7)
-        this.set_attributes(week_next, 1)
+        this.set_attributes(week_next)
     }
 
     fix_header_week() {
@@ -78,7 +70,6 @@ class CurrentDate {
         else if (this.week_next.includes(this.day_sql)) $('#mainTitle').text('Next Week')
         else {
             $('#mainTitle').text('Another Week')
-            this.change_images(2)
         }
     }
 
@@ -128,15 +119,15 @@ class CurrentDate {
 
         date.setDate(date.getDate() + day - 1)
 
-        this.set_attributes(date, 2)
+        this.set_attributes(date)
     }
 
     this_month() {
-        this.set_attributes(this.today, 0)
+        this.set_attributes(this.today)
     }
 
     next_month() {
-        this.set_attributes(this.month_next, 1)
+        this.set_attributes(this.month_next)
     }
 
     get_fixed_header_month() {
@@ -217,21 +208,9 @@ class CurrentDate {
         return 0
     }
 
-    set_attributes(date, option) {
+    set_attributes(date) {
         this.day_sql = this.sql_format(date)
         this.week_now = this.set_week(date)
-
-        this.change_images(option)
-    }
-
-    change_images(option) {
-        let date_button = $(".dateButton")
-        date_button.css("border-color", "black")
-        date_button.eq(option).css("border-color", "#FFC90E")
-
-        $('#todayImg').attr('src', `images/goals/today${option === 0 ? "1" : "0"}.png`)
-        $('#tomorrowImg').attr('src', `images/goals/tomorrow${option === 1 ? "1" : "0"}.png`)
-        $('#otherImg').attr('src', `images/goals/other${option === 2 ? "1" : "0"}.png`)
     }
 
     sql_format(date) {
@@ -272,7 +251,10 @@ class CurrentDate {
 
     get_current_dates(){
         if ($('#todosAll').length) return [this.day_sql]
-        else if ($('.weekDay').length) return this.week_now
+        else if ($('.weekDay').length) {
+
+            return this.week_now
+        }
         else if($('#monthGrid').length) return this.get_month_array()
     }
 
@@ -283,7 +265,6 @@ class CurrentDate {
 
         let month_array = []
         for (let i = 1; i <= range[1]; i++){
-            console.log(i)
             if (i < 10) month_array.push(base + "0" + i)
             else month_array.push(base + i)
         }
@@ -296,8 +277,8 @@ export let l_date = new CurrentDate()
 
 
 function date_change(option) {
-    if (option === 0) l_date.get_today()
-    else if (option === 1) l_date.get_tomorrow()
+    if (option === 0) this.set_attributes(this.today)
+    else if (option === 1) this.set_attributes(this.tomorrow)
 
     $('.todo').remove()
 
@@ -318,41 +299,17 @@ function month_change(option) {
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
 }
 
-$(document).on('click', '#dashMyDayBtn', () => {
-    l_date.get_today()
-    day_view()
-    $('.dashViewOption').css('backgroundColor', '#55423B')
-    $('#dashDay').css('backgroundColor', '#FF5D00')
-    $('#mainTitle').text('My day')
-    close_edit()
-})
-
-$(document).on('click', '#dashTomorrowBtn', () => {
-    l_date.get_tomorrow()
-    day_view()
-    $('.dashViewOption').css('backgroundColor', '#55423B')
-    $('#dashDay').css('backgroundColor', '#FF5D00')
-    $('#mainTitle').text('Tomorrow')
-    close_edit()
-})
-
-$(document).on('click', '#otherButton', () => {
-    $(function () {
-        $("#otherDateBtn").datepicker();
-    })
-})
-
 
 $("#datePicker").datepicker({
     onSelect: function () {
+        console.log("XPP23")
         reset_project_pos()
         $(".dateButton").css("border-color", "black")
         $("#otherButton").css("border-color", "#FFC90E")
-        l_date.set_attributes($(this).datepicker('getDate'), 2)
+        l_date.set_attributes($(this).datepicker('getDate'))
         if ($('#todosAll').length) {
-            $('#mainTitle').text('Another day')
             date_change(2)
-            l_date.fix_header_day()
+            $('#mainTitle').text(l_date.get_day_view_header())
         } else if ($('.weekDay').length) {
             week_change(2)
             l_date.fix_header_week()

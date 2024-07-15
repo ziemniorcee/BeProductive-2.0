@@ -1,4 +1,4 @@
-import {_show_sidebar, _steps_html, build_goal, dragula_day_view} from "./render.mjs";
+import {_steps_html, build_goal, dragula_day_view} from "./render.mjs";
 import {l_date} from './date.js'
 import {build_week_goal, dragula_week_view} from "./weekView.mjs";
 import {build_month_goal, dragula_month_view} from "./monthView.mjs";
@@ -223,6 +223,25 @@ function show_ideas_sidebar(){
     `)
 
     window.sidebarAPI.askIdeas()
+}
+
+export function _show_sidebar() {
+    let right_bar = $('#rightbar')
+    let resizer = $('#resizer')
+    if (right_bar.css('display') === 'none') {
+        right_bar.toggle()
+        resizer.css('display', 'flex')
+    }
+}
+
+export function _hide_sidebar() {
+    let right_bar = $('#rightbar')
+    let resizer = $('#resizer')
+    if (right_bar.css('display') === 'block') {
+        right_bar.toggle()
+        right_bar.html("")
+        resizer.css('display', 'none')
+    }
 }
 
 window.sidebarAPI.getIdeas((data) => {
