@@ -144,6 +144,30 @@ export function fix_project_sidebar(){
             current_dates: l_date.get_current_dates()
         })
     }
+    const canv = $('#dashGraph1')[0].getContext('2d');
+    const graph = new Chart(canv, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [{
+                label: 'Sample Data',
+                data: [65, 59, 80, 81, 56, 55, 40],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
 }
 
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
