@@ -51,18 +51,28 @@
 #dashGraph1BG, #dashGraph2BG {
     position: absolute;
     height: 75%;
-    bottom:0%;
     border-radius: 10px;
 }
 
 #dashGraph1BG {
     width:70%;
     left:0%;
+    bottom:0%;
 }
 
 #dashGraph2BG {
-    width: 30%;
-    right:0%;
+    width: 24%;
+    right:3%;
+    bottom:3%;
+}
+
+#graphLine1 {
+    position: absolute;
+    width:10%;
+    height:75%;
+    bottom:0%;
+    right:20%;
+    border-left: #FF5D00 5px solid;
 }
 
 #dashMyDayBtn{
