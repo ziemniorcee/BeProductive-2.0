@@ -1,6 +1,6 @@
 import {l_date} from "./date.js";
 import {categories, check_border, weekdays2, weekdays_grid} from "./data.mjs";
-import {build_view, change_check, day_view, set_todo_dragged} from "./render.mjs";
+import {build_view, day_view, set_todo_dragged} from "./render.mjs";
 import {close_edit, set_goal_pos} from "./edit.mjs";
 import {already_emblem_HTML, fix_project_sidebar, reset_project_pos} from "./project.mjs";
 

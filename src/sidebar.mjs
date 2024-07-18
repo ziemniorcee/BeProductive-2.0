@@ -1,4 +1,4 @@
-import {_steps_html, build_goal, dragula_day_view} from "./render.mjs";
+import {_steps_HTML, build_goal, dragula_day_view} from "./render.mjs";
 import {l_date} from './date.js'
 import {build_week_goal, dragula_week_view} from "./weekView.mjs";
 import {build_month_goal, dragula_month_view} from "./monthView.mjs";
@@ -124,7 +124,7 @@ function history_to_goal(goal, steps) {
     let todos
 
     if ($('#todosAll').length) {
-        goal['steps'] = _steps_html(_prepare_steps(steps), goal.category)
+        goal['steps'] = _steps_HTML(_prepare_steps(steps), goal.category)
         goal['goal'] = decode_text(goal['goal'])
 
         $("#todosArea").append(build_goal(goal))

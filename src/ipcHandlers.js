@@ -35,7 +35,7 @@ function todoHandlers(db) {
             if (err) console.error(err)
             else {
                 set_goal_ids(goals)
-
+                ids_array = goal_ids
                 let ids_string = `( ${goal_ids} )`
                 db.all(`SELECT id, goal_id, step_text, step_check
                         FROM steps
@@ -533,6 +533,9 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
+        console.log(step_ids)
+        console.log(ids_array)
+        console.log(params)
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)

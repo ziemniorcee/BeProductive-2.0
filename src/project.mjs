@@ -1,9 +1,9 @@
 import {categories, check_border, decode_text, getIdByColor, icons} from "./data.mjs";
 import {
-    _build_categories,
-    _change_order,
-    _input_html,
-    _steps_html,
+    _categories_HTML,
+    change_order,
+    _input_HTML,
+    _steps_HTML,
     build_view, day_view,
     dragula_day_view,
     set_todo_dragged,
@@ -120,10 +120,10 @@ window.goalsAPI.projectToGoal((steps, position) => get_goal_from_sidebar(steps, 
  * @param position position of dragged goal
  */
 function get_goal_from_sidebar(steps, position) {
-    _change_order()
+    change_order()
     let category = getIdByColor(categories, $('#main .todoCheck').eq(position).css('backgroundColor'))
 
-    if ($('#todosAll').length) $('#main .taskText').eq(position).append(_steps_html(steps, category))
+    if ($('#todosAll').length) $('#main .taskText').eq(position).append(_steps_HTML(steps, category))
 }
 
 
@@ -267,7 +267,7 @@ function _set_input_category(project_color) {
  * Builds new project creation window
  */
 function open_add_project() {
-    let categories_html = _build_categories()
+    let categories_html = _categories_HTML()
     let icon_picker_html = _icon_picker_HTML()
 
     $("#dashProjects").append(`
@@ -392,7 +392,7 @@ window.goalsAPI.getProjectGoals((goals) => build_project_view(goals))
 function build_project_view(goals) {
     current_goal_id = 0
     for (let i = 0; i < goals.length; i++) {
-        goals[i]['steps'] = _steps_html(goals[i].steps, goals[i].category)
+        goals[i]['steps'] = _steps_HTML(goals[i].steps, goals[i].category)
         goals[i]['goal'] = decode_text(goals[i]['goal'])
         if (Number(goals[i]['check_state']) === 1) $('#projectDone .projectSectionGoals').append(build_project_goal(goals[i]))
         else if (goals[i]['addDate'] !== "") $('#projectDoing .projectSectionGoals').append(build_project_goal(goals[i]))
@@ -576,7 +576,7 @@ function _project_view_main(color) {
                 
                 </div>
             </div>
-            ${_input_html()}
+            ${_input_HTML()}
         </div>`
 }
 

@@ -56,6 +56,10 @@ import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
     })
 })();
 
+$(document).on('click', '#dashClose, #dashOpen', () => {
+    $('#dashboard').toggle()
+    $('#dashOpen').toggle();
+})
 
 
 $(document).on('click', '#rightbar', function () {

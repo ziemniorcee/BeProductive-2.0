@@ -6,7 +6,7 @@ const {contextBridge, ipcRenderer} = require('electron')
 contextBridge.exposeInMainWorld('goalsAPI', {
     test: (params) => ipcRenderer.send('test', params),
     askGoals: (params) => ipcRenderer.send('ask-goals', params),
-    getGoals: (func) => ipcRenderer.on('get-goals', (event, goals, steps) => func(goals, steps)),
+    getGoals: (func) => ipcRenderer.on('get-goals', (event, goals) => func(goals)),
     newGoal: (params) => ipcRenderer.send('new-goal', params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
     removingFollowing: (callback) => ipcRenderer.on("removing-following", callback),
