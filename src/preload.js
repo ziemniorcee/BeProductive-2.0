@@ -50,6 +50,9 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     newProject: (params) => ipcRenderer.send('new-project', params),
 
     goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
+
+    askProductivity: (params) => ipcRenderer.send('ask-productivity', params),
+    getProductivity: (func) => ipcRenderer.on('get-productivity', (event, productivities) => func(productivities)),
 })
 
 
