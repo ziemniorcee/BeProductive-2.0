@@ -1,4 +1,5 @@
 import {l_date} from "./date.js";
+import { categories } from "./data.mjs";
 
 export function create_today_graphs() {
     const canv = $('#dashGraph1')[0].getContext('2d');
@@ -101,21 +102,40 @@ export function create_today_graphs() {
         dates.push(l_date.sql_format(prev_day));
     }
     window.goalsAPI.askProductivity(dates);
+    window.goalsAPI.askCategoriesCounts();
     console.log("lolol2");
 }
 
-window.goalsAPI.getProductivity((productivities) => update_today_graphs(productivities));
+window.goalsAPI.getProductivity((productivities) => update_productivity_graph(productivities));
 
-function update_today_graphs(productivities) {
+function update_productivity_graph(productivities) {
     let ctx = $('#dashGraph1')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
-    for (let val of productivities) {
-        console.log(val);
-    }
-    console.log("lololol");
     productivities.pop();
     productivities.reverse();
     chart.data.datasets[0].data = productivities;
+    chart.update();
+}
+
+window.goalsAPI.getCategoriesCounts((counts) => update_categories_graph(counts));
+
+function update_categories_graph(counts) {
+    let ctx = $('#dashGraph2')[0].getContext('2d');
+    let chart = Chart.getChart(ctx);
+    for (let val of counts) {
+        console.log(val);
+    }
+    let colors = [];
+    let names = [];
+    let quantities = [];
+    for (let c of counts) {
+        colors.push(categories[c.category][0]);
+        names.push(categories[c.category][1]);
+        quantities.push(c.counts);
+    }
+    chart.data.datasets[0].data = quantities;
+    chart.data.labels = names;
+    chart.data.datasets[0].backgroundColor = colors;
     chart.update();
 }
 

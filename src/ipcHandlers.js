@@ -815,6 +815,20 @@ function todoHandlers(db) {
             }
         })
     })
+
+
+    ipcMain.on('ask-categories-counts', (event) => {
+        db.all(`SELECT COUNT(goal) AS counts, 
+            category
+        FROM goals
+        GROUP BY category
+        ORDER BY category;`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                event.reply('get-categories-counts', rows);
+            }
+        })
+    })
 }
 
 
