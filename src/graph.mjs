@@ -71,6 +71,17 @@ export function create_today_graphs() {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let dataset = context.dataset;
+                            let total = dataset.data.reduce((sum, value) => sum + value, 0);
+                            let currentValue = dataset.data[context.dataIndex];
+                            let percentage = ((currentValue / total) * 100).toFixed(2);
+                            return percentage + '%';
+                        }
+                    }
                 }
             },
             scales: {
@@ -92,7 +103,7 @@ export function create_today_graphs() {
             },
             responsive: true,
             maintainAspectRatio: false
-        }
+        },
     });
     console.log("lolol1");
     let prev_day = new Date(l_date.today);
