@@ -52,7 +52,6 @@ function show_project_sidebar(that) {
             
         </div>
     `)
-    console.log("XPFAP")
     window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
 }
 
@@ -127,11 +126,11 @@ function get_goal_from_sidebar(steps, position) {
 }
 
 
-$(document).on('click', '#dashMyDayBtn', () =>{
-    fix_project_sidebar()
+$(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn, #dashDay, #dashWeek', function () {
+    fix_project_sidebar(this)
 })
 
-export function fix_project_sidebar(){
+export function fix_project_sidebar(selected_button){
     if ($('#sideProjectHeader').length) {
         let options = $('.sideProjectOption')
         let project_option
@@ -141,7 +140,7 @@ export function fix_project_sidebar(){
         window.goalsAPI.askProjectSidebar({
             project_pos: project_pos,
             option: project_option,
-            current_dates: l_date.get_current_dates()
+            current_dates: l_date.get_current_dates(selected_button)
         })
     }
 }

@@ -26,7 +26,6 @@ class CurrentDate {
     }
 
     get_day_view_header() {
-        console.log(this.day_sql)
         if (this.day_sql === this.sql_format(this.today)) return 'My day'
         else if (this.day_sql === this.sql_format(this.tomorrow)) return 'Tomorrow'
         else return 'Another day'
@@ -65,12 +64,15 @@ class CurrentDate {
         this.set_attributes(week_next)
     }
 
-    fix_header_week() {
-        if (this.week_current.includes(this.day_sql)) $('#mainTitle').text('This Week')
-        else if (this.week_next.includes(this.day_sql)) $('#mainTitle').text('Next Week')
-        else {
-            $('#mainTitle').text('Another Week')
-        }
+    get_header_week() {
+        let main_title = ""
+        if (this.week_current.includes(this.day_sql)) main_title = 'This Week'
+        else if (this.week_next.includes(this.day_sql)) main_title = 'Next Week'
+        else main_title = 'Another Week'
+
+        let date_display = l_date.get_week_display_format(l_date.week_now)
+
+        return [main_title, date_display]
     }
 
     get_format_month() {
@@ -244,27 +246,25 @@ class CurrentDate {
         ${month_names[ending.getMonth()]} ${format_day_ending}`
     }
 
-    get_month_display_format(date_sql){
+    get_month_display_format(date_sql) {
         let date = new Date(date_sql)
         return `${month_names[date.getMonth()]} ${date.getFullYear()}`
     }
 
-    get_current_dates(){
+    get_current_dates(selected_button = null) {
+        let button_id = $(selected_button).attr('id')
         if ($('#todosAll').length) return [this.day_sql]
-        else if ($('.weekDay').length) {
-
-            return this.week_now
-        }
-        else if($('#monthGrid').length) return this.get_month_array()
+        else if ($('.weekDay').length || button_id === "dashWeek") return this.week_now
+        else if ($('#monthGrid').length) return this.get_month_array()
     }
 
-    get_month_array(){
+    get_month_array() {
         let dates = this.get_sql_month()
         let range = this.get_format_month()
-        let base = dates[0].substring(0,8)
+        let base = dates[0].substring(0, 8)
 
         let month_array = []
-        for (let i = 1; i <= range[1]; i++){
+        for (let i = 1; i <= range[1]; i++) {
             if (i < 10) month_array.push(base + "0" + i)
             else month_array.push(base + i)
         }
@@ -302,17 +302,17 @@ function month_change(option) {
 
 $("#datePicker").datepicker({
     onSelect: function () {
-        console.log("XPP23")
         reset_project_pos()
-        $(".dateButton").css("border-color", "black")
-        $("#otherButton").css("border-color", "#FFC90E")
+
         l_date.set_attributes($(this).datepicker('getDate'))
         if ($('#todosAll').length) {
             date_change(2)
             $('#mainTitle').text(l_date.get_day_view_header())
         } else if ($('.weekDay').length) {
             week_change(2)
-            l_date.fix_header_week()
+            let header_params = l_date.get_header_week()
+            $('#mainTitle').text(header_params[0])
+            $('#date').text(header_params[1])
         } else {
             month_change(2)
         }
