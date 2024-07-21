@@ -35,7 +35,8 @@ export function create_today_graphs() {
                     grid: {
                         display: false
                     },
-                    max: 100,
+                    max: 120,
+                    min: 0,
                 }
             },
             responsive: true,
@@ -124,6 +125,9 @@ function update_productivity_graph(productivities) {
     let chart = Chart.getChart(ctx);
     productivities.pop();
     productivities.reverse();
+    for (let i=0; i<productivities.length; i++) {
+        productivities[i] += 20;
+    }
     chart.data.datasets[0].data = productivities;
     chart.update();
 }

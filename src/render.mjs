@@ -6,6 +6,7 @@ import {
     build_project_goal, project_emblem_html,
     project_pos
 } from "./project.mjs";
+import { create_today_graphs } from './graph.mjs';
 
 
 export let todo_dragged = false
@@ -16,6 +17,8 @@ let block_prev_drag = 0
 
 window.addEventListener('DOMContentLoaded', function () {
     day_view()
+    create_today_graphs();
+    $('#graphLine1').show();
 });
 
 $(document).on('click', '#dashMyDayBtn', () => {

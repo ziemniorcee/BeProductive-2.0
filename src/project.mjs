@@ -12,7 +12,6 @@ import {l_date} from "./date.js";
 import {dragula_week_view} from "./weekView.mjs";
 import {dragula_month_view} from "./monthView.mjs";
 import {_hide_sidebar, _show_sidebar} from "./sidebar.mjs";
-import { create_today_graphs } from "./graph.mjs";
 
 
 export let project_pos = null
@@ -145,8 +144,6 @@ export function fix_project_sidebar(){
             current_dates: l_date.get_current_dates()
         })
     }
-    create_today_graphs();
-    $('#graphLine1').show();
 }
 
 window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
