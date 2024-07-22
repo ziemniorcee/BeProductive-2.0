@@ -16,7 +16,7 @@ $(document).on('click', '#dashWeek', function () {
  */
 function week_view() {
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
-    build_view(_week_content_HTML(), _week_view_header())
+    build_view(_week_content_HTML(), _week_header_HTML())
     dragula_week_view()
     close_edit()
 }
@@ -138,7 +138,7 @@ function _week_content_HTML() {
  * creates head of week view
  * @returns {string} HTML of header
  */
-function _week_view_header() {
+function _week_header_HTML() {
     window.goalsAPI.askProjectsInfo()
     let header_params = l_date.get_header_week()
 

@@ -2,7 +2,7 @@ import {weekdays, month_names} from "./data.mjs";
 import {reset_project_pos} from "./project.mjs";
 import {close_edit} from "./edit.mjs";
 import {dragula_week_view} from "./weekView.mjs";
-import {dragula_month_view} from "./monthView.mjs";
+import {dragula_month_view, month_view} from "./monthView.mjs";
 
 class CurrentDate {
     constructor() {
@@ -296,7 +296,7 @@ function month_change(option) {
     if (option === 0) l_date.this_month()
     else if (option === 1) l_date.next_month()
 
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(), goal_check: 0})
+    month_view()
 }
 
 
