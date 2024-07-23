@@ -48,22 +48,28 @@
     overflow: hidden;
 }
 
-#dashGraph1BG, #dashGraph2BG {
+.dash-graph-1BG, .dash-graph-2BG {
     position: absolute;
     height: 75%;
     border-radius: 10px;
+    transition: width 1s, height 1s;
 }
 
-#dashGraph1BG {
+.dash-graph-1BG {
     width:70%;
     left:0%;
     bottom:0%;
 }
 
-#dashGraph2BG {
+.dash-graph-2BG {
     width: 24%;
     right:3%;
     bottom:0%;
+}
+
+.dash-graph-1BG.expanded {
+    width: 100%;
+    height: 100%;
 }
 
 #graphLine1 {

@@ -40,8 +40,28 @@ export function create_today_graphs() {
                 }
             },
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
         }
+    });
+    function toggle_graph_1() {
+        if (!$("#dashGraph1BG").hasClass('expanded')) {
+            $('#dashGraph2BG').toggle();
+            $('#graphLine1').toggle();
+            $('#dashMyDayBtn').toggle();
+        }
+        $('#dashGraph1BG').toggleClass('expanded');
+        setTimeout(function() {
+            graph.resize();
+            if (!$("#dashGraph1BG").hasClass('expanded')) {
+                $('#dashGraph2BG').toggle();
+                $('#graphLine1').toggle();
+                $('#dashMyDayBtn').toggle();
+            }
+        }, 1000);
+    };
+
+    $(document).on('click', '#dashGraph1', () => {
+        toggle_graph_1();
     });
 
 
@@ -153,4 +173,6 @@ function update_categories_graph(counts) {
     chart.data.datasets[0].backgroundColor = colors;
     chart.update();
 }
+
+
 
