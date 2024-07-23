@@ -31,18 +31,33 @@ export function create_today_graphs() {
                     }
                 },
                 y: {
-                    display: false,
+                    display: true,
                     grid: {
                         display: false
                     },
                     max: 120,
                     min: 0,
-                }
+                    ticks: {
+                        autoSkip: false,
+                        stepSize: 10,
+                        callback: function(value) {
+                            if (value === 20) {
+                                return '0%';
+                            } else if (value === 70) {
+                                return '50%';
+                            } else if (value === 120) {
+                                return '100%';
+                            }
+                            return '';
+                        }
+                    },
+                },
             },
             responsive: true,
             maintainAspectRatio: false,
         }
     });
+
     function toggle_graph_1() {
         if (!$("#dashGraph1BG").hasClass('expanded')) {
             $('#dashGraph2BG').toggle();
