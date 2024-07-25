@@ -14,6 +14,8 @@
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
     <script type="module" src="date.js"></script>
     <script type="module" src="edit.mjs"></script>
     <script type="module" src="render.mjs"></script>
@@ -47,6 +49,13 @@
                 <img src="images/goals/today0.png">
                 My day
             </div>
+            <div class="dash-graph-1BG" id="dashGraph1BG">
+                <canvas id="dashGraph1"></canvas>
+            </div>
+            <div class="dash-graph-2BG" id="dashGraph2BG">
+                <canvas id="dashGraph2"></canvas>
+            </div>
+            <div id="graphLine1" style="display: none"></div>
         </div>
         <div id="dashTomorrowBG">
             <div id="dashTomorrowBtn">

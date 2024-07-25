@@ -1,6 +1,12 @@
 import {l_date} from './date.js'
 import {categories, check_border, decode_text, encode_text, getIdByColor, weekdays2} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
+import {
+    already_emblem_HTML,
+    build_project_goal, project_emblem_html,
+    project_pos
+} from "./project.mjs";
+import { create_today_graphs } from './graph.mjs';
 import {already_emblem_HTML, build_project_goal, project_emblem_html, project_pos} from "./project.mjs";
 
 
@@ -10,6 +16,8 @@ let block_prev_drag = 0
 
 window.addEventListener('DOMContentLoaded', function () {
     day_view()
+    create_today_graphs();
+    $('#graphLine1').show();
 });
 
 $(document).on('click', '#dashMyDayBtn', () => {

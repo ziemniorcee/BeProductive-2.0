@@ -752,7 +752,92 @@ function todoHandlers(db) {
                 WHERE id = ${project_sidebar_ids[params.id]}`)
         project_sidebar_ids.splice(params.id, 1)
     })
+
+
+    ipcMain.on('ask-productivity', (event, params) => {
+        db.all(`SELECT date_col, prod
+        FROM productivity
+        WHERE date_col >= "${params[params.length - 1]}" AND date_col <= "${params[0]}"
+        ORDER BY date_col DESC;`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                db.all(`SELECT G.addDate, 
+                        G.difficulty,
+                        G.importance,
+                        G.check_state
+                    FROM goals G
+                    WHERE G.addDate NOT IN (SELECT P.date_col
+                                      FROM productivity P
+                                      WHERE P.date_col >= "${params[params.length - 1]}" AND P.date_col < "${params[0]}"
+                                      GROUP BY P.date_col
+                                      ORDER BY P.date_col DESC) 
+                                      AND G.addDate >= "${params[params.length - 1]}" 
+                                      AND G.addDate < "${params[0]}"
+                    ORDER BY G.addDate DESC;`, (err2, rows2) => {
+                        if (err2) console.error(err2);
+                        else {
+                            console.log(rows2)
+                            let res = [];
+                            for (let date of params) {
+                                let flag = true;
+                                for (let prod of rows) {
+                                    if (date == prod.date_col) {
+                                        flag = false;
+                                        res.push(prod.prod);
+                                        break;
+                                    }
+                                }
+                                if (flag) {
+                                    console.log(date);
+                                    let sum_done = 0;
+                                    let sum_all = 0;
+                                    for (let task of rows2) {
+                                        if (date == task.addDate && task.importance > 2) {
+                                            if (task.check_state == 1) {
+                                                sum_done += task.difficulty * task.importance;
+                                            }
+                                            sum_all += task.difficulty * task.importance;
+                                        }
+                                    }
+                                    console.log(sum_all);
+                                    let sum = 0;
+                                    if (sum_all != 0) {
+                                        sum = Math.round(sum_done * 100 / sum_all);
+                                    } else {
+                                        sum = 0;
+                                    }
+                                    db.run(`INSERT INTO productivity (date_col, prod)
+                                            VALUES ("${date}", "${sum}")`)
+                                    res.push(sum);
+                                }
+
+                            }
+                            event.reply('get-productivity', res);
+                        }
+                    })
+            }
+        })
+    })
+
+
+    ipcMain.on('ask-categories-counts', (event) => {
+        db.all(`SELECT COUNT(goal) AS counts, 
+            category
+        FROM goals
+        GROUP BY category
+        ORDER BY category;`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                event.reply('get-categories-counts', rows);
+            }
+        })
+    })
 }
+
+
+
+
+
 
 function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
     let mainWindow_state = true
@@ -813,4 +898,7 @@ function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt
         else floatContentWindow.hide()
         event.reply('return_state', goals_state)
     })
+
+
+    
 }
