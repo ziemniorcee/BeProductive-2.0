@@ -52,7 +52,7 @@
     position: absolute;
     height: 75%;
     border-radius: 10px;
-    transition: width 1s, height 1s;
+    transition: width 500ms, height 500ms ease-in;
 }
 
 .dash-graph-1BG {

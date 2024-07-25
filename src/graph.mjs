@@ -2,11 +2,20 @@ import {l_date} from "./date.js";
 import { categories } from "./data.mjs";
 
 export function create_today_graphs() {
+    let date1 = new Date(l_date.today);
+    let date2 = new Date();
+    let date3 = new Date();
+    date2.setDate(date1.getDate() - 5);
+    date3.setDate(date1.getDate() - 10);
     const canv = $('#dashGraph1')[0].getContext('2d');
     const graph = new Chart(canv, {
         type: 'line',
         data: {
-            labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
+            labels: [date3.toLocaleDateString(), 
+                    '', '', '', '', 
+                    date2.toLocaleDateString(), 
+                    '', '', '', '', 
+                    date1.toLocaleDateString()],
             datasets: [{
                 data: [3, 4, 6, 1, 7, 2, 9, 6, 13, 2],
                 borderColor: 'rgba(249, 67, 64, 1)',
@@ -21,6 +30,13 @@ export function create_today_graphs() {
             plugins: {
                 legend: {
                     display: false
+                },
+                title: {
+                    display: false,
+                    text: 'Productivity %',
+                    font: {
+                        size: 20
+                    }
                 }
             },
             scales: {
@@ -28,10 +44,16 @@ export function create_today_graphs() {
                     display: false,
                     grid: {
                         display: false
+                    },
+                    offset: false,
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0
                     }
                 },
                 y: {
-                    display: true,
+                    display: false,
                     grid: {
                         display: false
                     },
@@ -63,6 +85,15 @@ export function create_today_graphs() {
             $('#dashGraph2BG').toggle();
             $('#graphLine1').toggle();
             $('#dashMyDayBtn').toggle();
+            graph.options.plugins.title.display = true;
+            graph.options.scales.y.display = true;
+            graph.options.scales.x.display = true;
+            graph.update();
+        } else {
+            graph.options.plugins.title.display = false;
+            graph.options.scales.y.display = false;
+            graph.options.scales.x.display = false;
+            graph.update();
         }
         $('#dashGraph1BG').toggleClass('expanded');
         setTimeout(function() {
@@ -71,8 +102,10 @@ export function create_today_graphs() {
                 $('#dashGraph2BG').toggle();
                 $('#graphLine1').toggle();
                 $('#dashMyDayBtn').toggle();
+            } else {
+                
             }
-        }, 1000);
+        }, 500);
     };
 
     $(document).on('click', '#dashGraph1', () => {
@@ -144,7 +177,7 @@ export function create_today_graphs() {
     console.log("lolol1");
     let prev_day = new Date(l_date.today);
     let dates = [l_date.sql_format(prev_day)];
-    for (let i=0; i<10; i++) {
+    for (let i=0; i<11; i++) {
         prev_day.setDate(prev_day.getDate() - 1);
         dates.push(l_date.sql_format(prev_day));
     }
