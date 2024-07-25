@@ -1,7 +1,7 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {
-    _build_categories,
-    change_check,
+    _categories_HTML,
+    change_main_check,
     dragula_day_view,
     set_block_prev_drag_day,
     set_todo_dragged,
@@ -42,6 +42,7 @@ $(document).on('mouseup', '.todo, .monthTodo, .day .sidebarTask', function () {
     if (!todo_dragged && is_edit_change === true) {
         is_from_sidebar = false
         is_from_project = false
+        console.log("edit")
         set_block_prev_drag_day(0)
         set_block_prev_drag_week(0)
         set_block_prev_drag_month(0)
@@ -195,11 +196,16 @@ function _change_counter(index, current, max) {
 $(document).on('click', '#editCheck', () => {
     let state = Number($('#editCheck').prop('checked'))
     $(base).find('.check_task').prop('checked', state)
-    let sidebar_option = 0
-    if (is_from_sidebar) sidebar_option = 1
-    else if (is_from_project) sidebar_option = 2
-    change_check(goal_id, sidebar_option, state)
 
+    if (is_from_sidebar) {
+        window.sidebarAPI.sideChangeChecks({id: goal_id, state: state, option: 1})
+    }
+    else if (is_from_project) {
+        window.sidebarAPI.sideChangeChecks({id: goal_id, state: state, option: 2})
+    }
+    else{
+        change_main_check(goal_id)
+    }
 
     if (!is_from_sidebar && !is_from_project) {
         if (!$('#todosAll').length) close_edit()
@@ -435,7 +441,7 @@ function _edit_html(goal_config, steps_html) {
     let backgrounds1 = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
     let backgrounds2 = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
 
-    let categories_html = _build_categories()
+    let categories_html = _categories_HTML()
     let projects_html = _build_project_picker()
     let converted_text = goal_config["goal"].replace(/`@`/g, "'").replace(/`@@`/g, '"');
     goal_text = converted_text

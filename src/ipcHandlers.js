@@ -35,7 +35,7 @@ function todoHandlers(db) {
             if (err) console.error(err)
             else {
                 set_goal_ids(goals)
-
+                ids_array = goal_ids
                 let ids_string = `( ${goal_ids} )`
                 db.all(`SELECT id, goal_id, step_text, step_check
                         FROM steps
@@ -86,9 +86,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-project-sidebar', (event, params) => {
-        console.log(params)
         let option_sql = where_option(params.option, params.project_pos)
-        console.log(params.current_dates)
 
         const current_dates_str = params.current_dates.map(date => `'${date}'`).join(', ');
 
@@ -166,8 +164,6 @@ function todoHandlers(db) {
 
 
     ipcMain.on('ask-week-goals', (event, params) => {
-        const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
-
         db.all(`SELECT G.id,
                        G.goal,
                        G.addDate,
@@ -184,15 +180,7 @@ function todoHandlers(db) {
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
-                goal_ids = []
-
-                for (let i = 0; i < 4; i++) {
-                    for (let j = 0; j < weekdays[i].length; j++) {
-                        let filtred = goals.filter(record => record.addDate === params.dates[i + j * 3])
-                        let ids = filtred.map(record => record.id)
-                        goal_ids.push(...ids)
-                    }
-                }
+                goal_ids = goals.map(item => item.id);
 
                 let safe_goals = goals.map(goal => {
                     let {id, ...rest} = goal;
@@ -257,6 +245,7 @@ function todoHandlers(db) {
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
 
+
         db.all(`SELECT id, goal_id, step_text, step_check
                 FROM steps
                 WHERE goal_id = ${project_sidebar_ids[params.sidebar_pos]}`, (err2, steps) => {
@@ -267,7 +256,7 @@ function todoHandlers(db) {
                     else step_ids[steps[i].goal_id] = [steps[i].id]
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                project_sidebar_ids.splice(params.sidebar_pos, 1)
+                if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
 
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;
@@ -451,6 +440,8 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
+        console.log(params)
+        console.log(goal_ids)
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
@@ -517,7 +508,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-goal', (event, params) => {
-
         let array_ids = goal_ids
         if (params.option === 1){
             array_ids = project_sidebar_ids
@@ -530,6 +520,14 @@ function todoHandlers(db) {
         if (params.option === 1){
             project_sidebar_ids.splice(params.id, 1)
         }
+    })
+
+    ipcMain.on('change-week-goal-check', (event, params) => {
+        db.run(`UPDATE goals
+                SET check_state="${Number(params.state)}"
+                WHERE id = ${goal_ids[params.id]}`)
+
+        goal_ids.splice(params.id, 1)
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
