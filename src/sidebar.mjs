@@ -37,7 +37,6 @@ window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
  * @param data data from sql
  */
 function build_history_sidebar(data) {
-
     let grouped_goals = data.reduce((acc, curr) => {
         if (!acc[curr.addDate]) {
             acc[curr.addDate] = [];
@@ -58,6 +57,7 @@ function build_history_sidebar(data) {
         dragula_week_view()
         $('.historyAdd').css('visibility', 'hidden')
     } else {
+        console.log('xd')
         dragula_month_view()
         $('.historyAdd').css('visibility', 'hidden')
     }

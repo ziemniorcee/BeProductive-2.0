@@ -36,16 +36,10 @@ $(document).on('click', '#dashDay', function () {
 
 /**
  * Displays day view in #main
- * 1st part fixes css
- * 2nd part builds view, gets goals, allows drag&drop and closes edit
+ * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    $('#content').css('flexDirection', 'column')
-    $('.dashViewOption').css('backgroundColor', '#55423B')
-    $('#dashDay').css('backgroundColor', '#FF5D00')
-
     window.goalsAPI.askGoals({date: l_date.day_sql})
-
     build_view(_day_content_HTML(), _day_header_HTML())
     dragula_day_view()
     close_edit()
@@ -499,16 +493,13 @@ export function dragula_day_view() {
     let todos_area_before
 
     let rightbar = $('#rightbar')
-    let is_edit = $('#editTodo').length
     let is_project_sidebar = $('#sideProjectHeader').length
 
-    if (!is_edit) {
-        rightbar.html(rightbar.html())
-        if (is_project_sidebar) {
-            dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
-        } else {
-            dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
-        }
+    rightbar.html(rightbar.html())
+    if (is_project_sidebar) {
+        dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
+    } else {
+        dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
     }
 
     dragula(dragula_array, {
@@ -584,6 +575,7 @@ function _get_from_project(new_goal_index, dragged_task) {
  * fixes order of goals and saves it
  */
 export function change_order() {
+    console.log("chuj")
     let goals = $('#main .todoId')
     let order = []
     for (let i = 0; i < goals.length; i++) order.push(goals.eq(i).text())
@@ -635,9 +627,9 @@ function _day_content_HTML() {
  */
 function _day_header_HTML() {
     window.goalsAPI.askProjectsInfo()
-
     let main_title = l_date.get_day_view_header()
     let date = l_date.get_display_format(l_date.day_sql)
+
     return `
         <div id="header">
             <div id="mainTitle">${main_title}</div>
@@ -725,7 +717,7 @@ export function _input_HTML() {
  * creates repeat label
  * @returns {string} HTML of repeat label
  */
-function _repeat_label_HTML() {
+export function _repeat_label_HTML() {
     return `
         <div class="repeatLabelShow">
             <img class="repeatLabelImg" src="images/goals/repeat.png" alt="">

@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getFollowingRemoved: (func) => ipcRenderer.on('get-following-removed', (event, positions) => func(positions)),
     rowsChange: (params) => ipcRenderer.send('rows-change', params),
     changeChecksGoal: (params) => ipcRenderer.send('change-checks-goal', params),
+
     changeChecksStep: (params) => ipcRenderer.send('change-checks-step', params),
 
     changeTextGoal: (params) => ipcRenderer.send('change-text-goal', params),
@@ -31,6 +32,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeDate: (params) => ipcRenderer.send('change-date', params),
     askGoalInfo: (params) => ipcRenderer.send('ask-goal-info', params),
     getEditInfo: (func) => ipcRenderer.on('get-edit-info', (event, goal, steps) => func(goal, steps)),
+    changeWeekGoalCheck: (params) => ipcRenderer.send('change-week-goal-check', params),
 
     setDefaultEdit: (params) => ipcRenderer.send('set-default-edit', params),
 
