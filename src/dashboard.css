@@ -52,7 +52,7 @@
     position: absolute;
     height: 75%;
     border-radius: 10px;
-    transition: width 500ms, height 500ms ease-in;
+    transition: all 0.5s ease;
 }
 
 .dash-graph-1BG {
@@ -72,6 +72,11 @@
     height: 100%;
 }
 
+.dash-graph-2BG.expanded {
+    width: 100%;
+    height: 100%;
+}
+
 #graphLine1 {
     position: absolute;
     width:10%;
@@ -79,6 +84,14 @@
     bottom:0%;
     right:20%;
     border-left: #FF5D00 5px solid;
+}
+
+#dashGraph1BG,
+#dashGraph2BG,
+#graphLine1,
+#dashMyDayBtn {
+    transition: opacity 0.5s ease;
+    opacity: 1;
 }
 
 #dashMyDayBtn{
