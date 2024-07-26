@@ -1,8 +1,8 @@
 import {l_date} from "./date.js";
 import { categories } from "./data.mjs";
 
-let flag_graph_1 = false;
-let flag_graph_2 = false;
+let flag_graph_1 = true;
+let flag_graph_2 = true;
 
 export function create_today_graphs() {
     let date1 = new Date(l_date.today);
@@ -84,8 +84,8 @@ export function create_today_graphs() {
     });
 
     function grow_graph_1() {
-        if (!flag_graph_1 && !flag_graph_2) {
-            flag_graph_1 = true;
+        if (!$('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && flag_graph_1) {
+            flag_graph_1 = false;
             $('#dashGraph2BG').toggle();
             $('#graphLine1').toggle();
             $('#dashMyDayBtn').toggle();
@@ -103,7 +103,7 @@ export function create_today_graphs() {
     });
 
     function shrink_graph_1() {
-        if (flag_graph_1 && !flag_graph_2) {
+        if ($('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && !flag_graph_1) {
             graph.options.plugins.title.display = false;
             graph.options.scales.y.display = false;
             graph.options.scales.x.display = false;
@@ -115,7 +115,7 @@ export function create_today_graphs() {
                 $('#dashGraph2BG').toggle();
                 $('#graphLine1').toggle();
                 $('#dashMyDayBtn').toggle();
-                flag_graph_1 = false;
+                flag_graph_1 = true;
             }, 500);
         }
     }
@@ -188,15 +188,15 @@ export function create_today_graphs() {
 
     
     function grow_graph_2() {
-        if (!flag_graph_1 && !flag_graph_2) {
-            flag_graph_2 = true;
+        if (!$('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && flag_graph_2) {
+            flag_graph_2 = false;
             $('#dashGraph1BG').toggle();
             $('#graphLine1').toggle();
             $('#dashMyDayBtn').toggle();
-            graph.options.plugins.title.display = true;
-            graph.options.scales.y.display = true;
-            graph.options.scales.x.display = true;
-            graph.update();
+            graph2.options.plugins.title.display = true;
+            graph2.options.scales.y.display = true;
+            graph2.options.scales.x.display = true;
+            graph2.update();
             $('#dashGraph2BG').toggleClass('expanded');
         }
     }
@@ -206,18 +206,18 @@ export function create_today_graphs() {
     });
 
     function shrink_graph_2() {
-        if (!flag_graph_1 && flag_graph_2) {
-            graph.options.plugins.title.display = false;
-            graph.options.scales.y.display = false;
-            graph.options.scales.x.display = false;
-            graph.update();
+        if (!$('#dashGraph1BG').hasClass('expanded') && $('#dashGraph2BG').hasClass('expanded') && !flag_graph_2) {
+            graph2.options.plugins.title.display = false;
+            graph2.options.scales.y.display = false;
+            graph2.options.scales.x.display = false;
+            graph2.update();
             $('#dashGraph2BG').toggleClass('expanded');
             setTimeout(function() {
-                graph.resize();
+                graph2.resize();
                 $('#dashGraph1BG').toggle();
                 $('#graphLine1').toggle();
                 $('#dashMyDayBtn').toggle();
-                flag_graph_2 = false;
+                flag_graph_2 = true;
             }, 500);
         }
     }
