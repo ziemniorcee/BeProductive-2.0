@@ -6,7 +6,6 @@ import {
     _steps_HTML,
     build_view, day_view,
     dragula_day_view,
-    set_todo_dragged,
 } from "./render.mjs";
 import {l_date} from "./date.js";
 import {dragula_week_view} from "./weekView.mjs";
@@ -424,7 +423,6 @@ function dragula_project_view() {
             } else return false
         },
     }).on('drag', function (event) {
-        set_todo_dragged(true)
         block_prev_drag = 0
         dragged_task = $(event)
     }).on('drop', function (event) {

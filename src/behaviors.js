@@ -90,3 +90,9 @@ $(document).on('click', '.dashViewOption', function (){
 $(document).on('click', '#dashWeek', function () {
     $('#content').css('flexDirection', 'row')
 });
+
+
+$(document).on('click', '#editSelectProject', function (event) {
+    event.stopPropagation()
+    $('#editProjectPicker').toggle()
+})

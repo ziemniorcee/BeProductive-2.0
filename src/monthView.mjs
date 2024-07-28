@@ -1,6 +1,6 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2, decode_text} from "./data.mjs";
-import {_repeat_label_HTML, build_view, day_view, set_todo_dragged} from "./render.mjs";
+import {_repeat_label_HTML, build_view, day_view, } from "./render.mjs";
 import {close_edit, set_goal_pos} from "./edit.mjs";
 
 let block_prev_drag = 0
@@ -218,7 +218,6 @@ export function dragula_month_view() {
         set_goal_pos(new_goal_id)
 
         drag_sidebar_task = $(event)
-        set_todo_dragged(true)
         block_prev_drag = 0
 
     }).on('drop', (event) => {

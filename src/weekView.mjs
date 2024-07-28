@@ -1,10 +1,10 @@
 import {l_date} from "./date.js";
 import {categories, check_border, decode_text, weekdays2, weekdays_grid} from "./data.mjs";
-import {_repeat_label_HTML, build_view, day_view, set_todo_dragged} from "./render.mjs";
+import {_repeat_label_HTML, build_view, day_view} from "./render.mjs";
 import {close_edit, set_goal_pos} from "./edit.mjs";
 import {already_emblem_HTML, project_pos, reset_project_pos} from "./project.mjs";
 
-let block_prev_drag = 0
+export let is_week_drag = 0
 
 $(document).on('click', '#dashWeek', function () {
     week_view()
@@ -176,7 +176,7 @@ function _week_header_HTML() {
  * and differences between state before and after
  */
 export function dragula_week_view() {
-    block_prev_drag = 0
+    is_week_drag = 0
     let drag_sidebar_task
     let dragula_array
     let dragged_task
@@ -197,21 +197,20 @@ export function dragula_week_view() {
             return !el.parentNode.className.includes("weekDayGoals");
         },
         accepts: function (el, target) {
-            block_prev_drag = 0
+            is_week_drag = 0
             return target.className.includes("weekDayGoals");
         },
         moves: function (el, target) {
             let is_in = $(el).find('.alreadyEmblem').length
             let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
-            if (block_prev_drag === 0 && is_in === 0 && !is_done) {
-                block_prev_drag = 1
+            if (is_week_drag === 0 && is_in === 0 && !is_done) {
+                is_week_drag = 1
                 return true
             } else return false
         },
     }).on('drag', function (event) {
         drag_sidebar_task = $(event)
-        set_todo_dragged(true)
-        block_prev_drag = 0
+        is_week_drag = 0
 
         dragged_task = event
         goals_length_before = $('#main .todo').length
@@ -324,10 +323,10 @@ function check_week_goal(that){
 }
 
 $(document).on('click', '.sidebarTask', function () {
-    block_prev_drag = 0
+    is_week_drag = 0
 })
 
 export function set_block_prev_drag_week(option) {
-    block_prev_drag = option
+    is_week_drag = option
 }
 

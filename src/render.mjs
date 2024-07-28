@@ -7,11 +7,9 @@ import {
     project_pos
 } from "./project.mjs";
 import { create_today_graphs } from './graph.mjs';
-import {already_emblem_HTML, build_project_goal, project_emblem_html, project_pos} from "./project.mjs";
 
 
-export let todo_dragged = false
-let block_prev_drag = 0
+export let is_day_drag = 0
 
 
 window.addEventListener('DOMContentLoaded', function () {
@@ -478,7 +476,7 @@ function change_step_check(that){
 }
 
 $(document).on('click', '.sidebarTask', function () {
-    block_prev_drag = 0
+    is_day_drag = 0
 })
 
 /**
@@ -487,7 +485,7 @@ $(document).on('click', '.sidebarTask', function () {
  * depends if project sidebar is on, dragula elements are selected
  */
 export function dragula_day_view() {
-    block_prev_drag = 0
+    is_day_drag = 0
     let dragged_task
     let dragula_array
     let todos_area_before
@@ -507,22 +505,22 @@ export function dragula_day_view() {
             return el.parentNode.id !== "todosArea";
         },
         accepts: function (el, target) {
-            block_prev_drag = 0
+            is_day_drag = 0
             return target.parentNode.id === "todosAll";
         },
         moves: function (el) {
             let is_in = $(el).find('.alreadyEmblem').length
             let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
 
-            if (block_prev_drag === 0 && is_in === 0 && !is_done) {
-                block_prev_drag = 1
+            if (is_day_drag === 0 && is_in === 0 && !is_done) {
+                is_day_drag = 1
                 return true
             } else return false
         },
     }).on('drag', function (event) {
-        todo_dragged = true
         dragged_task = $(event)
-        block_prev_drag = 0
+        is_day_drag = 0
+
 
         todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
@@ -575,7 +573,6 @@ function _get_from_project(new_goal_index, dragged_task) {
  * fixes order of goals and saves it
  */
 export function change_order() {
-    console.log("chuj")
     let goals = $('#main .todoId')
     let order = []
     for (let i = 0; i < goals.length; i++) order.push(goals.eq(i).text())
@@ -827,12 +824,9 @@ export function _categories_HTML() {
 
 
 export function set_block_prev_drag_day(option) {
-    block_prev_drag = option
+    is_day_drag = option
 }
 
-export function set_todo_dragged(bool) {
-    todo_dragged = bool
-}
 
 
 // document.getElementById("laurels").addEventListener('click', () => {

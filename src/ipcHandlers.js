@@ -321,7 +321,7 @@ function todoHandlers(db) {
     })
 
 
-    ipcMain.on('ask-goal-info', (event, params) => {
+    ipcMain.on('ask-edit-goal', (event, params) => {
         if (params.option === 0) ids_array = goal_ids
         else if (params.option === 1) ids_array = history_ids
         else if (params.option === 2) ids_array = project_sidebar_ids
@@ -354,7 +354,7 @@ function todoHandlers(db) {
                             return rest;
                         })
 
-                        event.reply('get-edit-info', goal[0], safe_steps)
+                        event.reply('get-edit-goal', goal[0], safe_steps)
                     }
                 })
             }
@@ -440,8 +440,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
-        console.log(params)
-        console.log(goal_ids)
         for (let i = 0; i < goal_ids.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
