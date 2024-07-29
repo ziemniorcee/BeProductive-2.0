@@ -52,22 +52,31 @@
     position: absolute;
     height: 75%;
     border-radius: 10px;
-    transition: width 500ms, height 500ms ease-in;
+    transition: all 0.5s ease;
 }
 
 .dash-graph-1BG {
+    transform-origin: bottom left;
     width:70%;
     left:0%;
     bottom:0%;
 }
 
 .dash-graph-2BG {
+    transform-origin: bottom right;
     width: 24%;
     right:3%;
     bottom:0%;
 }
 
 .dash-graph-1BG.expanded {
+    transition: transform 0.5s ease-in-out;
+    width: 100%;
+    height: 100%;
+}
+
+.dash-graph-2BG.expanded {
+    transition: transform 0.5s ease-in-out;
     width: 100%;
     height: 100%;
 }
@@ -79,6 +88,14 @@
     bottom:0%;
     right:20%;
     border-left: #FF5D00 5px solid;
+}
+
+#dashGraph1BG,
+#dashGraph2BG,
+#graphLine1,
+#dashMyDayBtn {
+    transition: opacity 0.5s ease;
+    opacity: 1;
 }
 
 #dashMyDayBtn{

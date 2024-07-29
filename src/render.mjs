@@ -7,7 +7,6 @@ import {
     project_pos
 } from "./project.mjs";
 import { create_today_graphs } from './graph.mjs';
-import {already_emblem_HTML, build_project_goal, project_emblem_html, project_pos} from "./project.mjs";
 
 
 export let todo_dragged = false
