@@ -315,7 +315,8 @@ function select_repeat_option(that) {
     }
 }
 
-$(document).on('click', '.category', function () {
+$(document).on('click', '.category', function (event) {
+    event.stopPropagation();
     select_category(this)
 });
 
@@ -325,18 +326,25 @@ $(document).on('click', '.category', function () {
  */
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-    let select_category = $('#selectCategory')
+    if (index === 1) {
+        console.log("lololxD");
+    } else {
+        let select_category = $('#selectCategory')
+        if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
+            select_category = $('#selectCategory')
+            $('#categoryPicker').css('display', 'none')
+        } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
+            select_category = $('#selectCategory2')
+            change_category(index)
+            $('#categoryPicker2').css('display', 'none')
+        } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
+            select_category = $('#selectCategory3')
+            $('#categoryPicker3').css('display', 'none')
+        }
 
-    if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
-        select_category = $('#selectCategory2')
-        change_category(index)
-    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
-        select_category = $('#selectCategory3')
-        $('#categoryPicker3').css('display', 'none')
+        select_category.css('background', categories[index - 1][0])
+        select_category.text(categories[index - 1][1])
     }
-
-    select_category.css('background', categories[index][0])
-    select_category.text(categories[index][1])
 }
 
 
@@ -814,6 +822,11 @@ export function _steps_HTML(steps, category_id) {
  */
 export function _categories_HTML() {
     let categories_html = ""
+    categories_html +=
+            `<div class="category">
+                <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
+                <span class="categoryName">New Category</span>
+            </div>`
     for (let i = 0; i < Object.keys(categories).length; i++) {
         categories_html +=
             `<div class="category">

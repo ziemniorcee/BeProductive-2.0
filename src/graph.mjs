@@ -4,6 +4,9 @@ import { categories } from "./data.mjs";
 let flag_graph_1 = true;
 let flag_graph_2 = true;
 
+/**
+ * creates both of todays graphs and updates them
+ */
 export function create_today_graphs() {
     let date1 = new Date(l_date.today);
     let date2 = new Date();
@@ -238,6 +241,10 @@ export function create_today_graphs() {
 
 window.goalsAPI.getProductivity((productivities) => update_productivity_graph(productivities));
 
+/**
+ * updates first graph with given data of last days productivity
+ * @param productivities number of productivities in last 11 days
+ */
 function update_productivity_graph(productivities) {
     let ctx = $('#dashGraph1')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
@@ -252,6 +259,10 @@ function update_productivity_graph(productivities) {
 
 window.goalsAPI.getCategoriesCounts((counts) => update_categories_graph(counts));
 
+/**
+ * updates second graph with given data of categories tasks quantity
+ * @param counts quantities of tasks in each category
+ */
 function update_categories_graph(counts) {
     let ctx = $('#dashGraph2')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
