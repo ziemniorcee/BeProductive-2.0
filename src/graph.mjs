@@ -92,7 +92,6 @@ export function create_today_graphs() {
             $('#dashGraph2BG').toggle();
             $('#graphLine1').toggle();
             $('#dashMyDayBtn').toggle();
-            console.log("lolol1");
             graph.options.plugins.title.display = true;
             graph.options.scales.y.display = true;
             graph.options.scales.x.display = true;
@@ -114,7 +113,6 @@ export function create_today_graphs() {
             $('#dashGraph1BG').toggleClass('expanded');
             setTimeout(function() {
                 graph.resize();
-                console.log("lolol2");
                 $('#dashGraph2BG').toggle();
                 $('#graphLine1').toggle();
                 $('#dashMyDayBtn').toggle();

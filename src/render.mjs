@@ -326,22 +326,22 @@ $(document).on('click', '.category', function (event) {
  */
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
+    let select_category = $('#selectCategory')
+    if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
+        select_category = $('#selectCategory')
+        $('#categoryPicker').css('display', 'none')
+    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
+        select_category = $('#selectCategory2')
+        $('#categoryPicker2').css('display', 'none')
+        if (index !== 1) change_category(index)
+    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
+        select_category = $('#selectCategory3')
+        $('#categoryPicker3').css('display', 'none')
+    }
     if (index === 1) {
-        console.log("lololxD");
+        $("#vignette").css('display', 'block')
+        $("#newCategory").css('display', 'block')
     } else {
-        let select_category = $('#selectCategory')
-        if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
-            select_category = $('#selectCategory')
-            $('#categoryPicker').css('display', 'none')
-        } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
-            select_category = $('#selectCategory2')
-            change_category(index)
-            $('#categoryPicker2').css('display', 'none')
-        } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
-            select_category = $('#selectCategory3')
-            $('#categoryPicker3').css('display', 'none')
-        }
-
         select_category.css('background', categories[index - 1][0])
         select_category.text(categories[index - 1][1])
     }
