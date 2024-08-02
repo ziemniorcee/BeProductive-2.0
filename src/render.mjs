@@ -315,6 +315,13 @@ function select_repeat_option(that) {
     }
 }
 
+$(document).on('click', '#newCategoryDiscard', function () {
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+});
+
+
+
 $(document).on('click', '.category', function (event) {
     event.stopPropagation();
     select_category(this)
