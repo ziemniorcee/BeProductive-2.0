@@ -827,6 +827,18 @@ function todoHandlers(db) {
             }
         })
     })
+
+    ipcMain.on('ask-categories', (event) => {
+        db.all(`SELECT *
+        FROM categories
+        ORDER BY id`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                console.log(rows);
+                event.reply('get-categories', rows);
+            }
+        })
+    })
 }
 
 

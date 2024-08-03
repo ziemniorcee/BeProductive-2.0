@@ -1,4 +1,4 @@
-import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
+import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
 
 
 // #main behaviors
@@ -90,3 +90,8 @@ $(document).on('click', '.dashViewOption', function (){
 $(document).on('click', '#dashWeek', function () {
     $('#content').css('flexDirection', 'row')
 });
+
+$(document).on('input', '#newCategoryColor', function () {
+    let rgb = hsvToRgb(this.value * 2, 0.7, 0.7);
+    $('#newCategoryColor').css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}`);
+})

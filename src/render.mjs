@@ -14,10 +14,19 @@ let block_prev_drag = 0
 
 
 window.addEventListener('DOMContentLoaded', function () {
+    window.goalsAPI.askCategories();
+});
+
+window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
+
+function wait_for_categories(cats) {
+    for (let c of cats) {
+        categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
+    }
     day_view()
     create_today_graphs();
     $('#graphLine1').show();
-});
+}
 
 $(document).on('click', '#dashMyDayBtn', () => {
     l_date.set_attributes(l_date.today)
@@ -857,3 +866,4 @@ export function set_todo_dragged(bool) {
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })
+

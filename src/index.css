@@ -1346,3 +1346,25 @@ body {
     top: 5px;
     color: white;
 }
+
+#newCategoryColor {
+    width: 198px;
+    -webkit-appearance: none;
+    outline: none;
+}
+
+#newCategoryColor::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #FF5D00;
+    cursor: pointer;
+}
+
+#newCategoryColor::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+}

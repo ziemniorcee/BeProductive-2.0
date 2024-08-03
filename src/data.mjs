@@ -1,10 +1,13 @@
-export const categories = {
-    1: ["rgb(59, 21, 31)", "General"],
-    2: ["rgb(50, 23, 77)", "BeProductive"],
-    3: ["rgb(0, 34, 68)", "University"],
-    4: ["rgb(2, 48, 32)", "House"],
-    5: ["rgb(115, 29, 111)", "Reading"],
-    6: ["rgb(77, 73, 18)", "Japanese"],
+// export const categories = {
+//     1: ["rgb(59, 21, 31)", "General"],
+//     2: ["rgb(50, 23, 77)", "BeProductive"],
+//     3: ["rgb(0, 34, 68)", "University"],
+//     4: ["rgb(2, 48, 32)", "House"],
+//     5: ["rgb(115, 29, 111)", "Reading"],
+//     6: ["rgb(77, 73, 18)", "Japanese"],
+// }
+
+export let categories = {
 }
 
 export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
@@ -26,6 +29,11 @@ export function getIdByColor(dict, color) {
     return 1;
 }
 
+export function hsvToRgb(h, s, v) {
+    let f = (n, k = (n + h / 60) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+    return [Math.round(f(5) * 255), Math.round(f(3) * 255), Math.round(f(1) * 255)];
+}
+
 export const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const weekdays2 = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 export const month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -39,3 +47,7 @@ export function decode_text(text){
 export function encode_text(text){
     return text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
 }
+
+export let colors = [
+    
+]
