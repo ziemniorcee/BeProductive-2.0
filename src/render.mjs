@@ -1,5 +1,5 @@
 import {l_date} from './date.js'
-import {categories, check_border, decode_text, encode_text, getIdByColor, weekdays2} from "./data.mjs";
+import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
@@ -22,6 +22,9 @@ window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
+        categories2[c.id] = `rgb(${Math.min(c.r * 4 / 3, 255)}, 
+                                ${Math.min(c.g * 4 / 3, 255)}, 
+                                ${Math.min(c.b * 4 / 3, 255)})`;
     }
     day_view()
     create_today_graphs();
@@ -324,12 +327,38 @@ function select_repeat_option(that) {
     }
 }
 
+
+$(document).on('click', '#newCategoryCreate', function () {
+    create_new_category();
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+})
+
+function create_new_category() {
+    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.7);
+    console.log(rgb);
+    const len = Object.keys(categories).length + 1;
+    let index = len;
+    for (let i = 1; i < len; i++) {
+        if (!(i in categories)) {
+            index = i;
+            break;
+        }
+    }
+    let name = $('#newCategoryName').val();
+    categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
+    categories2[index] = `rgb(${Math.min(rgb[0] * 4 / 3, 255)}, 
+                            ${Math.min(rgb[1] * 4 / 3, 255)}, 
+                            ${Math.min(rgb[2] * 4 / 3, 255)})`;
+    
+    window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
+    $('#newCategoryName').val('');
+}
+
 $(document).on('click', '#newCategoryDiscard', function () {
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
 });
-
-
 
 $(document).on('click', '.category', function (event) {
     event.stopPropagation();

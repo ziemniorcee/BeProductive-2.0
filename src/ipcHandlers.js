@@ -839,6 +839,13 @@ function todoHandlers(db) {
             }
         })
     })
+
+    ipcMain.on('add-category', (event, params) => {
+        console.log(params.id, params.name, params.r, params.g, params.b);
+        db.run(`INSERT INTO categories (id, name, r, g, b)
+            VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
+    })
+
 }
 
 
