@@ -334,6 +334,9 @@ $(document).on('click', '#newCategoryCreate', function () {
     $("#vignette").css('display', 'none');
 })
 
+/**
+ * Creates new category from newCategory box and resets categories pickers
+ */
 function create_new_category() {
     let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.7);
     console.log(rgb);
@@ -353,12 +356,14 @@ function create_new_category() {
     
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
+    let html_categories = _categories_HTML();
+    $('#categoryPicker').empty();
+    $('#categoryPicker2').empty();
+    $('#categoryPicker3').empty();
+    $('#categoryPicker').html(html_categories);
+    $('#categoryPicker2').html(html_categories);
+    $('#categoryPicker3').html(html_categories);
 }
-
-$(document).on('click', '#newCategoryDiscard', function () {
-    $("#newCategory").css('display', 'none');
-    $("#vignette").css('display', 'none');
-});
 
 $(document).on('click', '.category', function (event) {
     event.stopPropagation();
