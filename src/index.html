@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="project.css"/>
     <link rel="stylesheet" href="sidebar.css"/>
     <link rel="stylesheet" href="dashboard.css"/>
+    <link rel="stylesheet" href="galactic.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -25,6 +26,8 @@
     <script type="module" src="glory.mjs"></script>
     <script type="module" src="behaviors.js"></script>
     <script type="module" src="project.mjs"></script>
+    <script type="module" src="graph.mjs"></script>
+    <script type="module" src="galactic.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
@@ -34,7 +37,7 @@
 
     <div id="leftbar">
         <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
-        <a><img src="images/goal0.png" draggable="false" alt="laurels"><span>TO DO</span></a>
+        <a><img src="images/goal0.png" draggable="false" alt="laurels" id="to-do"><span>TO DO</span></a>
         <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
         <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
         <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
@@ -89,6 +92,11 @@
     <div id="resizer"></div>
     <div id="rightbar">
 
+    </div>
+    <div id="galactics">
+        <div id="galacticContainer">
+
+        </div>
     </div>
     <div id="vignette">
         <div id="newCategory">

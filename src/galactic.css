@@ -1,0 +1,48 @@
+#galactics {
+    position: absolute;
+    top: 0%;
+    left: 100px;
+    width: calc(100vw - 100px);
+    height: 100%;
+    background: #FF5D00 url("https://www.pixel4k.com/wp-content/uploads/2018/10/space-sky-star-cosmic-night-4k_1540140109.jpg.webp");
+    z-index: 50;
+    display: none;
+}
+
+#galacticContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.galacticBox {
+    width: 100%;
+    height: 10%;
+    display: grid;
+    margin: 5px;
+}
+
+.galacticBoxOdd {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.galacticBoxEven {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.galactic {
+    margin: 1px;
+    text-align: center;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    height: 100%;
+}
+
+.galactic-text {
+    justify-content: center;
+    font-size: 30px;
+    padding-top: 15px;
+}
+

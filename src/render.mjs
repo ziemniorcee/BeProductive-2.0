@@ -350,9 +350,9 @@ function create_new_category() {
     }
     let name = $('#newCategoryName').val();
     categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
-    categories2[index] = `rgb(${Math.min(rgb[0] * 4 / 3, 255)}, 
-                            ${Math.min(rgb[1] * 4 / 3, 255)}, 
-                            ${Math.min(rgb[2] * 4 / 3, 255)})`;
+    categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
+                            ${Math.min(rgb[1] * 5 / 3, 255)}, 
+                            ${Math.min(rgb[2] * 5 / 3, 255)})`;
     
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
@@ -900,4 +900,5 @@ export function set_todo_dragged(bool) {
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })
+
 
