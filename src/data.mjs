@@ -33,7 +33,7 @@ export const weekdays_grid = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "
 
 
 export function decode_text(text){
-    return text.replace(/`@`/g, "'").replace(/`@@`/g, '"')
+    return text.replace(/`@`/g, "'").replace(/`@@`/g, '"').replace(/'/g, "&#39;")
 }
 
 export function encode_text(text){

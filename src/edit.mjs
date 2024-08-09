@@ -8,7 +8,8 @@ import {
 import {categories, categories2, check_border, decode_text, encode_text, getIdByColor} from "./data.mjs";
 import {dragula_week_view, set_block_prev_drag_week} from "./weekView.mjs";
 import {dragula_month_view, set_block_prev_drag_month} from "./monthView.mjs";
-import {change_project_emblem, project_pos,} from "./project.mjs";
+import {change_project_emblem, fix_project_sidebar, project_pos,} from "./project.mjs";
+import {l_date} from "./date.js";
 
 export let saved_sidebar = ""
 export let goal_pressed = false
@@ -16,14 +17,12 @@ export let goal_pressed = false
 let base = null
 let previous_base = null
 let is_edit_change = false
-let goal_pos = 0
 let goal_id = 0
 let previous_goal_id = null
 let steps_count = 0
 let is_new_step = false
 let is_from_sidebar = false
 let is_from_project = false
-let sidebar_change_goal = {}
 let goal_text = ""
 let last_step = ""
 
@@ -91,7 +90,7 @@ function build_week_edit(that) {
     }, 1)
 }
 
-$(document).on('mouseup', '#monthGrid .todo', function () {
+$(document).on('mouseup', '#monthGrid .monthTodo', function () {
     build_month_edit(this)
 })
 
@@ -101,6 +100,7 @@ $(document).on('mouseup', '#monthGrid .todo', function () {
  */
 function build_month_edit(that) {
     if (is_edit_change) {
+        console.log("launch")
         prepare_edit(that, 1)
         window.goalsAPI.askEditGoal({todo_id: goal_id, option: 0})
         set_block_prev_drag_month(0)
@@ -122,10 +122,11 @@ function build_history_edit(that) {
     if (is_edit_change) {
         prepare_edit(that, 0)
         is_from_sidebar = true
-        goal_id = $('.sidebarTask').index(this)
+        goal_id = $('.sidebarTask').index(that)
         window.goalsAPI.askEditGoal({todo_id: goal_id, option: 1})
     }
     is_edit_change = false
+
 }
 
 $(document).on('mouseup', '#sideProjectGoals .todo', function () {
@@ -141,6 +142,11 @@ function build_sidebar_project_edit(that) {
         prepare_edit(that, 0)
         is_from_project = true
         goal_id = Number($(base).find('.todoId').text())
+
+        if ($('#todosAll').length) dragula_day_view()
+        else if ($('.weekDay').length) dragula_week_view()
+        else dragula_month_view()
+
         window.goalsAPI.askEditGoal({todo_id: goal_id, option: 2})
     }
     is_edit_change = false
@@ -181,22 +187,25 @@ function prepare_edit(that, todo_type) {
 
     if (todo_type === 0) {
         goal_id = Number($(that).find('.todoId').text())
-        goal_pos = $('.todo').index(that)
     } else if (todo_type === 1) {
         goal_id = Number($(base).find('.monthTodoId').text())
-        goal_pos = $('.monthTodo').index(this)
     }
 
     goal_pressed = true
     let right_bar = $('#rightbar')
     if ($('#editClose').length === 0) saved_sidebar = right_bar.html()
     if (right_bar.css('display') === 'none') show_hide_sidebar()
+
+
 }
 
 $(document).on('blur', '#editText', function () {
     change_goal_name()
 })
 
+/**
+ * changes main name of selected goal
+ */
 function change_goal_name() {
     let selected_base = base
     let selected_goal_id = goal_id
@@ -214,14 +223,14 @@ function change_goal_name() {
         edit_text.css('height', `${edit_text[0].scrollHeight}px`)
     } else if ($(selected_base).find('.task').text().trim() !== input) {
         goal_text = input
+
         $(selected_base).find('.task').text(input)
         $(selected_base).find('.monthTodoText').text(input)
+
         let converted_text = encode_text(input)
-
-        if (is_from_sidebar) sidebar_change_goal = {text: input, id: selected_goal_id}
-
-        window.goalsAPI.changeTextGoal({input: converted_text, id: selected_goal_id})
+        window.goalsAPI.changeTextGoal({input: converted_text, id: selected_goal_id, is_previous: is_edit_change})
     }
+
     is_edit_change = false
 }
 
@@ -258,17 +267,22 @@ function change_step(that) {
             _change_counter(index, 0, 1, selected_base)
 
             steps_count++
-            window.goalsAPI.addStep({input: converted_step, id: selected_goal_id})
+            window.goalsAPI.addStep({input: converted_step, id: selected_goal_id, is_previous: is_edit_change})
             last_step = input
         } else {
             $(selected_base).find('.step_text').eq(index).text(input)
-            window.goalsAPI.changeStep({input: converted_step, id: selected_goal_id, step_id: index})
+            window.goalsAPI.changeStep({
+                input: converted_step,
+                id: selected_goal_id,
+                step_id: index,
+                is_previous: is_edit_change
+            })
         }
     } else {
         if ((!is_new_step && index + 1 !== edit_text_step.length) || (last_step !== "" && !is_new_step)) {
             _change_counter(index, -1, -1, selected_base)
             _remove_step(index, selected_base)
-            window.goalsAPI.removeStep({id: selected_goal_id, step_id: index})
+            window.goalsAPI.removeStep({id: selected_goal_id, step_id: index, is_previous: is_edit_change})
         }
         is_new_step = false
     }
@@ -320,20 +334,21 @@ function change_goal_check() {
     let state = Number($('#editCheck').prop('checked'))
     $(base).find('.check_task').prop('checked', state)
 
+    let position = $('#main .todo').index(base)
 
     if (is_from_sidebar) {
         window.sidebarAPI.sideChangeChecks({id: goal_id, state: state, option: 1})
     } else if (is_from_project) {
         window.sidebarAPI.sideChangeChecks({id: goal_id, state: state, option: 2})
     } else {
-        change_main_check(goal_id)
+        change_main_check(position)
     }
 
     if (!is_from_sidebar && !is_from_project) {
         if (!$('#todosAll').length) close_edit()
-        if (state) goal_pos = $('.todo').length - 1
-        else goal_pos = $('#todosArea').children().length - 1
-        base = document.getElementsByClassName("todo")[goal_pos]
+        if (state) position = $('#main .todo').length - 1
+        else position = $('#todosArea .todo').length - 1
+        base = $('#main .todo').eq(position)
     }
 }
 
@@ -423,10 +438,11 @@ $(document).on('click', '#editDiff', () => {
  * changes img of difficulty
  */
 function change_difficulty() {
+    let position = $('#main .todo').index(base)
     let difficulty = $('#editDiff').val()
     let url = `images/goals/rank${difficulty}.svg`
     if (!is_from_sidebar) {
-        $('.todoCheck').eq(goal_pos).css('backgroundImage', `url("${url}")`)
+        $('.todoCheck').eq(position).css('backgroundImage', `url("${url}")`)
     }
     window.goalsAPI.changeDifficulty({id: goal_id, difficulty: difficulty})
 }
@@ -440,9 +456,10 @@ $(document).on('click', '#editImportance', () => {
  * changes importance of selected goal based on goal position
  */
 function change_importance() {
+    let position = $('#main .todo').index(base)
     let importance = $('#editImportance').val()
     if (!is_from_sidebar) {
-        $('.checkDot').eq(goal_pos).css('borderColor', check_border[importance])
+        $('.checkDot').eq(position).css('borderColor', check_border[importance])
     }
     window.goalsAPI.changeImportance({id: goal_id, importance: importance})
 }
@@ -623,7 +640,6 @@ function _edit_html(goal_config, steps_html) {
  */
 function _get_goal_config(that) {
     let goal_config = {}
-
     goal_config["goal"] = $(that).find('.task').text().trim()
     goal_config["check_state"] = $(that).find('.check_task').prop('checked') === true ? "checked" : ""
     goal_config["category"] = getIdByColor(categories, $(that).find('.todoCheck').css('backgroundColor'))
@@ -749,10 +765,6 @@ function _project_picker_HTML() {
     return picks_HTML
 }
 
-export function set_goal_pos(id) {
-    goal_pos = id
-}
-
 $(document).on('click', '.viewOption', function () {
     is_edit_change = false
 })
@@ -760,9 +772,11 @@ $(document).on('click', '.viewOption', function () {
 $(document).on('mousedown', '#main, #editClose, #editBack', () => close_edit())
 
 /**
- * closes edit
+ * closes edit sidebar
  * if there was previous sidebar, it returns to prevuous state
  * else it hides
+ * if history goal was edited, resets history sidebar
+ * if project goal was edited, resets project sidebar
  */
 export function close_edit() {
     if (goal_pressed === true) {
@@ -777,7 +791,8 @@ export function close_edit() {
             else if ($('.weekDay').length) dragula_week_view()
             else dragula_month_view()
         }
-        if (is_from_sidebar) $('.historyText').eq(sidebar_change_goal['id']).text(sidebar_change_goal['text'])
+        if ($('#days').length) window.sidebarAPI.askHistory({date: l_date.day_sql})
+        else if ($('#sideProjectGoals').length) fix_project_sidebar()
     } else goal_pressed = false
 }
 
@@ -792,3 +807,20 @@ function _fix_main_goal_edit() {
         this.style.height = `${this.scrollHeight}px`
     })
 }
+
+
+export function fix_goal_pos() {
+    if (!is_from_sidebar && !is_from_project) {
+        let position = $('#main .todoId').index($(base).find('.todoId'))
+        base = $('#main .todo').eq(position)
+        previous_base = $('#main .todo').eq(position)
+
+        if ($('#monthGrid').length) {
+            position = Number($(base).find('.monthTodoId').text())
+            base = $('#main .monthTodo').eq(position)
+            previous_base = $('#main .monthTodo').eq(position)
+        }
+    }
+    is_edit_change = false
+}
+

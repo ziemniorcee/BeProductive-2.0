@@ -174,7 +174,6 @@ export function create_today_graphs() {
             maintainAspectRatio: false
         },
     });
-    console.log("lolol1");
     let prev_day = new Date(l_date.today);
     let dates = [l_date.sql_format(prev_day)];
     for (let i=0; i<11; i++) {
@@ -183,7 +182,6 @@ export function create_today_graphs() {
     }
     window.goalsAPI.askProductivity(dates);
     window.goalsAPI.askCategoriesCounts();
-    console.log("lolol2");
 }
 
 window.goalsAPI.getProductivity((productivities) => update_productivity_graph(productivities));
@@ -205,9 +203,7 @@ window.goalsAPI.getCategoriesCounts((counts) => update_categories_graph(counts))
 function update_categories_graph(counts) {
     let ctx = $('#dashGraph2')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
-    for (let val of counts) {
-        console.log(val);
-    }
+
     let colors = [];
     let names = [];
     let quantities = [];

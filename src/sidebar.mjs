@@ -27,6 +27,7 @@ function show_history_sidebar() {
         </div>
     `)
 
+
     window.sidebarAPI.askHistory({date: l_date.day_sql})
 }
 

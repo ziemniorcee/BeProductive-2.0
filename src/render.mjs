@@ -1,12 +1,8 @@
 import {l_date} from './date.js'
 import {categories, check_border, decode_text, encode_text, getIdByColor, weekdays2} from "./data.mjs";
-import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
-import {
-    already_emblem_HTML,
-    build_project_goal, project_emblem_html,
-    project_pos
-} from "./project.mjs";
-import { create_today_graphs } from './graph.mjs';
+import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
+import {already_emblem_HTML, build_project_goal, project_emblem_html, project_pos} from "./project.mjs";
+import {create_today_graphs} from './graph.mjs';
 
 
 export let is_day_drag = 0
@@ -226,37 +222,42 @@ function get_repeat_option() {
 
         window.goalsAPI.followingRemoved({id: id, date: date})
 
-        if ($('#todosAll').length) {
-            let goals = $('.todoId')
-            for (let i = 0; i < goals.length; i++) {
-                if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
-            }
-            selected_div.remove()
-        }
+        selected_div.remove()
+
         close_edit()
     })
 
     /**
-     * removes repeating goals
+     * removes repeating goals and fixes ids
      */
     window.goalsAPI.getFollowingRemoved((positions) => {
         let month_grid = $('#monthGrid')
         let elements_ids = month_grid.length ? $('.monthTodoId') : $('.todoId')
         let todo_type = month_grid.length ? '.monthTodo' : '.todo'
 
-        let saved = []
         for (let i = 0; i < elements_ids.length; i++) {
-            if (positions.includes(Number(elements_ids.eq(i).text()))) {
+            let current_id = Number(elements_ids.eq(i).text())
+            if (!positions.includes(current_id)) {
+                let shift = get_shift(current_id, positions)
+                elements_ids.eq(i).text(current_id - shift)
+            } else {
                 elements_ids.eq(i).closest(todo_type).remove()
-            } else saved.push(Number(elements_ids.eq(i).text()))
-        }
-        saved = saved.sort()
-
-        elements_ids = month_grid.length ? $('.monthTodoId') : $('.todoId')
-        for (let i = 0; i < elements_ids.length; i++) {
-            elements_ids.eq(i).text((saved.indexOf(Number(elements_ids.eq(i).text()))))
+            }
         }
     })
+
+    /**
+     * finds how many positions are lesser than selected position
+     * @param value checked goal
+     * @param array positions of goals to delete
+     * @returns position of sorte
+     */
+    function get_shift(value, array){
+        let new_arr = array.slice()
+        new_arr.push(value)
+        new_arr.sort((a, b) => a - b)
+        return new_arr.indexOf(value)
+    }
 
     /**
      * removes history goal
@@ -314,7 +315,8 @@ function select_repeat_option(that) {
     }
 }
 
-$(document).on('click', '.category', function () {
+$(document).on('click', '.category', function (event) {
+    event.stopPropagation()
     select_category(this)
 });
 
@@ -419,7 +421,7 @@ $(document).on('click', '#todosAll .check_task', function () {
 export function change_main_check(position) {
     const check_task = $('.check_task').eq(position)
     const dot = $('.checkDot').eq(position)
-    let todo = $('.todo')
+    let todo = $('.todo').eq(position)
     let goal_id = $('.todoId')
 
     if ($('#monthGrid').length) {
@@ -432,8 +434,10 @@ export function change_main_check(position) {
     let category_color = $(dot).css('borderColor')
     $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
     check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
-    $(state ? "#todosFinished" : "#todosArea").append(todo.eq(position).prop("outerHTML"))
-    todo.eq(position).remove()
+    $(state ? "#todosFinished" : "#todosArea").append(todo.prop("outerHTML"))
+    todo.remove()
+
+
 
     let new_tasks = goal_id.map(function () {
         return $(this).text();
@@ -493,7 +497,6 @@ export function dragula_day_view() {
     let rightbar = $('#rightbar')
     let is_project_sidebar = $('#sideProjectHeader').length
 
-    rightbar.html(rightbar.html())
     if (is_project_sidebar) {
         dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
     } else {
@@ -525,7 +528,6 @@ export function dragula_day_view() {
         todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
         let new_goal_pos = $('.todo').index($(event))
-        set_goal_pos(new_goal_pos)
         let todos_area_after = Array.from($('#todosArea').children())
 
         if (todos_area_after.length !== todos_area_before.length) {
@@ -536,6 +538,8 @@ export function dragula_day_view() {
         } else {
             change_order()
         }
+        fix_goal_pos()
+
     });
 }
 

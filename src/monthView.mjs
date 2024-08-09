@@ -1,7 +1,7 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2, decode_text} from "./data.mjs";
 import {_repeat_label_HTML, build_view, day_view, } from "./render.mjs";
-import {close_edit, set_goal_pos} from "./edit.mjs";
+import {close_edit, fix_goal_pos} from "./edit.mjs";
 
 let block_prev_drag = 0
 let mousedown_month = false
@@ -214,8 +214,6 @@ export function dragula_month_view() {
             } else return false
         },
     }).on('drag', function (event) {
-        let new_goal_id = $('.monthTodo').index($(event))
-        set_goal_pos(new_goal_id)
 
         drag_sidebar_task = $(event)
         block_prev_drag = 0
@@ -245,6 +243,7 @@ export function dragula_month_view() {
             if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
             else drag_sidebar_task.closest('.day').remove()
         }
+        fix_goal_pos()
     })
 }
 

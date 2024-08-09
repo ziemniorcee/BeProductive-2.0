@@ -129,13 +129,19 @@ $(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn, #dashDay, #dashWeek', 
     fix_project_sidebar(this)
 })
 
+/**
+ * refreshes currently selected project sidebar option
+ * @param selected_button clicked project sidebar option
+ */
 export function fix_project_sidebar(selected_button){
     if ($('#sideProjectHeader').length) {
         let options = $('.sideProjectOption')
         let project_option
+        let background_color = $('#sideProjectTitle').css("background-color")
         for (let i = 0; i < options.length; i++) {
-            if (options.eq(i).css('background-color') === 'rgb(0, 34, 68)') project_option = i
+            if (options.eq(i).css('background-color') === background_color) project_option = i
         }
+
         window.goalsAPI.askProjectSidebar({
             project_pos: project_pos,
             option: project_option,

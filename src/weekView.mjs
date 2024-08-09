@@ -1,7 +1,7 @@
 import {l_date} from "./date.js";
 import {categories, check_border, decode_text, weekdays2, weekdays_grid} from "./data.mjs";
 import {_repeat_label_HTML, build_view, day_view} from "./render.mjs";
-import {close_edit, set_goal_pos} from "./edit.mjs";
+import {close_edit, fix_goal_pos} from "./edit.mjs";
 import {already_emblem_HTML, project_pos, reset_project_pos} from "./project.mjs";
 
 export let is_week_drag = 0
@@ -181,8 +181,6 @@ export function dragula_week_view() {
     let dragula_array
     let dragged_task
 
-    let rightbar = $('#rightbar')
-    rightbar.html(rightbar.html())
     let is_project_sidebar = $('#sideProjectHeader').length
     if (is_project_sidebar) {
         dragula_array = Array.from($('#sideProjectGoals')).concat(Array.from($('.weekDayGoals')))
@@ -216,15 +214,16 @@ export function dragula_week_view() {
         goals_length_before = $('#main .todo').length
     }).on('drop', function (event) {
         let todos = $('#main .todo')
-        let new_goal_pos = todos.index($(event))
-        set_goal_pos(new_goal_pos)
         let goals_length_after = todos.length
+        let new_goal_pos = todos.index($(event))
 
         if (event.className.includes("todo")) {
             if (goals_length_before !== goals_length_after) {
                 _get_from_project(event, new_goal_pos, dragged_task)
             } else if (dragged_task.parentNode.id !== "sideProjectGoals") _change_order(event)
         } else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
+
+        fix_goal_pos()
     })
 }
 
