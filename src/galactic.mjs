@@ -2,6 +2,13 @@ import { categories, categories2, projects } from "./data.mjs";
 
 $(document).on('click', '#strategy', function () {
     $('#galactics').css('display', 'block');
+    add_galactic_category_boxes();
+})
+
+/**
+ * Creates category windows in main galactic screen
+ */
+function add_galactic_category_boxes() {
     let galactics = '';
     const len = Object.keys(categories).length + 1;
     let counter = 0;
@@ -33,4 +40,4 @@ $(document).on('click', '#strategy', function () {
     let box = $('#galacticContainer');
     box.empty();
     box.html(galactics);
-})
+}
