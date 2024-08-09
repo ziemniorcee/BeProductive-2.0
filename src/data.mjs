@@ -1,5 +1,6 @@
 export let categories = {};
 export let categories2 = {};
+export let projects = [];
 
 export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
 

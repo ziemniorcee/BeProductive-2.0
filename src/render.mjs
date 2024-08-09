@@ -1,5 +1,5 @@
 import {l_date} from './date.js'
-import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2} from "./data.mjs";
+import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2, projects} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
@@ -19,14 +19,24 @@ window.addEventListener('DOMContentLoaded', function () {
 
 window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
 
+window.goalsAPI.getAllProjects((projects) => wait_for_projects(projects));
+
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
-        categories2[c.id] = `rgb(${Math.min(c.r * 4 / 3, 255)}, 
-                                ${Math.min(c.g * 4 / 3, 255)}, 
-                                ${Math.min(c.b * 4 / 3, 255)})`;
+        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 4 / 3), 255)}, 
+                                ${Math.min(Math.floor(c.g * 4 / 3), 255)}, 
+                                ${Math.min(Math.floor(c.b * 4 / 3), 255)})`;
     }
-    day_view()
+    window.goalsAPI.askAllProjects();
+}
+
+function wait_for_projects(projs) {
+    for (let proj of projs) {
+        projects.push(proj);
+    }
+    console.log(projects);
+    day_view();
     create_today_graphs();
     $('#graphLine1').show();
 }

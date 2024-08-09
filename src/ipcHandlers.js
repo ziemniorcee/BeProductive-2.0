@@ -846,6 +846,17 @@ function todoHandlers(db) {
             VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
     })
 
+    ipcMain.on('ask-all-projects', (event) => {
+        db.all(`SELECT *
+        FROM projects
+        ORDER BY id`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                console.log(rows);
+                event.reply('get-all-projects', rows);
+            }
+        })
+    })
 }
 
 

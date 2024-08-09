@@ -63,6 +63,9 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
 
     addCategory: (params) => ipcRenderer.send('add-category', params),
+
+    askAllProjects: () => ipcRenderer.send('ask-all-projects'),
+    getAllProjects: (func) => ipcRenderer.on('get-all-projects', (event, projects) => func(projects)),
 })
 
 
