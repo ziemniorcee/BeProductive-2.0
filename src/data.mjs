@@ -23,6 +23,28 @@ export function hsvToRgb(h, s, v) {
     return [Math.round(f(5) * 255), Math.round(f(3) * 255), Math.round(f(1) * 255)];
 }
 
+/**
+ * Creates containtment list for jQuery UI draggable.
+ * @param {HTMLElement} that - targeted element.
+ * @param {HTMLElement} parent - targeted element.
+ * @param {Array} limits - offset array (from 0 to 1) (left, top, right, bottom).
+ * */
+export function calculateContainment(that, parent, limits) {
+    var parentOffset = $(parent).offset();
+    var parentWidth = $(parent).width();
+    var parentHeight = $(parent).height();
+    var elementWidth = $(that).width();
+    var elementHeight = $(that).height();
+    let res = [
+        parentOffset.left + parentWidth * limits[0] - elementWidth / 2,
+        parentOffset.top + parentHeight * limits[1] - elementHeight / 2,
+        parentOffset.left + parentWidth * (1 - limits[2]) - elementWidth / 2,
+        parentOffset.top + parentHeight * (1 - limits[3]) - elementHeight / 2
+    ];
+    console.log(res);
+    return res;
+}
+
 export const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const weekdays2 = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 export const month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
