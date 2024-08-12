@@ -71,7 +71,9 @@ function create_galactic_editor(key) {
     box.html(editor);
     $('.galactic-editor-project').each(function(index, element) {
         $(element).draggable({
+            cursorAt: {left: 0, top: 0},
             containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
+            scroll: false,
             stop: function(event, ui) {
                 var position = ui.position;
                 console.log("Pozycja elementu:", position);

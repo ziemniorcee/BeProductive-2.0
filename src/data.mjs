@@ -36,10 +36,10 @@ export function calculateContainment(that, parent, limits) {
     var elementWidth = $(that).width();
     var elementHeight = $(that).height();
     let res = [
-        parentOffset.left + parentWidth * limits[0] - elementWidth / 2,
-        parentOffset.top + parentHeight * limits[1] - elementHeight / 2,
-        parentOffset.left + parentWidth * (1 - limits[2]) - elementWidth / 2,
-        parentOffset.top + parentHeight * (1 - limits[3]) - elementHeight / 2
+        parentOffset.left + parentWidth * limits[0],
+        parentOffset.top + parentHeight * limits[1],
+        parentOffset.left + parentWidth * (1 - limits[2]),
+        parentOffset.top + parentHeight * (1 - limits[3])
     ];
     console.log(res);
     return res;
