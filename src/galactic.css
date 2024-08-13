@@ -97,4 +97,9 @@
     color: azure;
     padding: 10px;
     font-size: 30px;
+    z-index:5;
+}
+
+#galactic-editor-canv {
+    z-index: 55;
 }

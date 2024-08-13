@@ -1,4 +1,6 @@
-import { calculateContainment, categories, categories2, projects } from "./data.mjs";
+import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers } from "./data.mjs";
+
+let clicked_project = '';
 
 $(document).on('click', '#strategy', function () {
     $('#galactics').css('display', 'block');
@@ -55,6 +57,7 @@ $(document).on('click', '.galactic', function() {
  * */
 function create_galactic_editor(key) {
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
+    <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
     <span class='galactic-editor-text' style='color: ${categories2[key]}'>${categories[key][1]}</span>`;
     for (const proj of projects) {
         if (proj.category == key) {
@@ -77,6 +80,35 @@ function create_galactic_editor(key) {
             stop: function(event, ui) {
                 var position = ui.position;
                 console.log("Pozycja elementu:", position);
+            }
+        })
+        $(element).on('mousedown', function (event) {
+            if (event.button === 2) {
+                clicked_project = $(element).attr('id');
+            }
+        })
+        $(element).on('mouseup', function (event) {
+            if (event.button === 2) {
+                let released_project = $(element).attr('id');
+                console.log(`${clicked_project}, ${released_project}`)
+                if (released_project !== clicked_project) {
+                    let conn = [extractNumbers(clicked_project)[0], extractNumbers(released_project)[0]];
+                    conn.sort();
+                    if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
+                    else {
+                        let offset1 = $(`#${clicked_project}`).offset();
+                        let offset2 = $(`#${released_project}`).offset();
+                        let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                        line.setAttribute('x1', offset1.left - $(`#${clicked_project}`).outerWidth() / 2);
+                        line.setAttribute('y1', offset1.top + $(`#${clicked_project}`).outerHeight() / 2);
+                        line.setAttribute('x2', offset2.left - $(`#${released_project}`).outerWidth() / 2);
+                        line.setAttribute('y2', offset2.top + $(`#${released_project}`).outerHeight() / 2);
+                        line.setAttribute('stroke', categories2[key]);
+                        line.setAttribute('stroke-width', 8);
+                        $("#galactic-editor-canv").append(line);
+                    }
+                    project_conn.push([conn[0], conn[1]])
+                }
             }
         })
     })

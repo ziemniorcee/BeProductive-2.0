@@ -1,6 +1,7 @@
 export let categories = {};
 export let categories2 = {};
 export let projects = [];
+export let project_conn = [];
 
 export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
 
@@ -8,6 +9,10 @@ export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201,
 
 export let range1_backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
 export let range2_backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
+
+export function extractNumbers(str) {
+    return str.match(/\d+/g).map(Number);
+}
 
 export function getIdByColor(dict, color) {
     for (let id in dict) {
