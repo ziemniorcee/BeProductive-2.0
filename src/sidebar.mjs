@@ -27,7 +27,11 @@ function show_history_sidebar() {
         </div>
     `)
 
-    window.sidebarAPI.askHistory({date: l_date.day_sql})
+    let date = ""
+    if ($('#todosAll').length) date = l_date.day_sql
+    else if ($('.weekDay').length) date = l_date.week_now[0]
+    else if ($('#monthGrid').length) date = l_date.get_sql_month(l_date.day_sql)[0]
+    window.sidebarAPI.askHistory({date: date})
 }
 
 window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
@@ -37,7 +41,6 @@ window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
  * @param data data from sql
  */
 function build_history_sidebar(data) {
-
     let grouped_goals = data.reduce((acc, curr) => {
         if (!acc[curr.addDate]) {
             acc[curr.addDate] = [];

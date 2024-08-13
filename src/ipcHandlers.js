@@ -12,6 +12,7 @@ function todoHandlers(db) {
     let project_sidebar_ids = []
     let current_goal_pos = 0
 
+    let ids_array_previous = []
     let ids_array = []
 
 
@@ -36,6 +37,7 @@ function todoHandlers(db) {
             else {
                 set_goal_ids(goals)
                 ids_array = goal_ids
+                ids_array_previous = ids_array
                 let ids_string = `( ${goal_ids} )`
                 db.all(`SELECT id, goal_id, step_text, step_check
                         FROM steps
@@ -86,9 +88,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('ask-project-sidebar', (event, params) => {
-        console.log(params)
         let option_sql = where_option(params.option, params.project_pos)
-        console.log(params.current_dates)
 
         const current_dates_str = params.current_dates.map(date => `'${date}'`).join(', ');
 
@@ -166,8 +166,6 @@ function todoHandlers(db) {
 
 
     ipcMain.on('ask-week-goals', (event, params) => {
-        const weekdays = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
-
         db.all(`SELECT G.id,
                        G.goal,
                        G.addDate,
@@ -184,15 +182,7 @@ function todoHandlers(db) {
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
-                goal_ids = []
-
-                for (let i = 0; i < 4; i++) {
-                    for (let j = 0; j < weekdays[i].length; j++) {
-                        let filtred = goals.filter(record => record.addDate === params.dates[i + j * 3])
-                        let ids = filtred.map(record => record.id)
-                        goal_ids.push(...ids)
-                    }
-                }
+                goal_ids = goals.map(item => item.id);
 
                 let safe_goals = goals.map(goal => {
                     let {id, ...rest} = goal;
@@ -267,8 +257,7 @@ function todoHandlers(db) {
                     else step_ids[steps[i].goal_id] = [steps[i].id]
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                project_sidebar_ids.splice(params.sidebar_pos, 1)
-
+                if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;
                     return rest;
@@ -332,10 +321,13 @@ function todoHandlers(db) {
     })
 
 
-    ipcMain.on('ask-goal-info', (event, params) => {
+    ipcMain.on('ask-edit-goal', (event, params) => {
+        ids_array_previous = ids_array
+
         if (params.option === 0) ids_array = goal_ids
         else if (params.option === 1) ids_array = history_ids
         else if (params.option === 2) ids_array = project_sidebar_ids
+
 
         db.all(`SELECT G.goal,
                        G.check_state,
@@ -365,7 +357,7 @@ function todoHandlers(db) {
                             return rest;
                         })
 
-                        event.reply('get-edit-info', goal[0], safe_steps)
+                        event.reply('get-edit-goal', goal[0], safe_steps)
                     }
                 })
             }
@@ -374,6 +366,7 @@ function todoHandlers(db) {
 
 
     ipcMain.on('set-default-edit', (event, params) => {
+        ids_array_previous = ids_array
         ids_array = goal_ids
     })
 
@@ -506,18 +499,20 @@ function todoHandlers(db) {
                     }
                 }
 
-                event.reply('get-following-removed', goals_positions)
-
                 for (let i = goals_positions.length - 1; i >= 0; i--) {
                     delete step_ids[goal_ids[goals_positions[i]]]
                     goal_ids.splice(goals_positions[i], 1)
                 }
+
+                // goals_positions = goals_positions.filter(function (item){
+                //     return item !== Number(params.id)
+                // })
+                event.reply('get-following-removed', goals_positions)
             }
         })
     })
 
     ipcMain.on('change-checks-goal', (event, params) => {
-
         let array_ids = goal_ids
         if (params.option === 1){
             array_ids = project_sidebar_ids
@@ -532,24 +527,40 @@ function todoHandlers(db) {
         }
     })
 
+    ipcMain.on('change-week-goal-check', (event, params) => {
+        db.run(`UPDATE goals
+                SET check_state="${Number(params.state)}"
+                WHERE id = ${goal_ids[params.id]}`)
+
+        goal_ids.splice(params.id, 1)
+    })
+
     ipcMain.on('change-checks-step', (event, params) => {
-        console.log(step_ids)
-        console.log(ids_array)
-        console.log(params)
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('change-text-goal', (event, params) => {
+        let selected_array = ids_array
+        if (params.is_previous){
+            selected_array = ids_array_previous
+        }
+
         db.run(`UPDATE goals
                 SET goal="${params.input}"
-                WHERE id = ${ids_array[params.id]}`)
+                WHERE id = ${selected_array[params.id]}`)
     })
 
     ipcMain.on('add-step', (event, params) => {
+        let selected_array = ids_array
+
+        if (params.is_previous){
+            selected_array = ids_array_previous
+        }
+
         db.run(`INSERT INTO steps (step_text, goal_id)
-                VALUES ("${params.input}", ${ids_array[params.id]})`)
+                VALUES ("${params.input}", ${selected_array[params.id]})`)
 
         db.all(`SELECT id
                 from steps
@@ -557,23 +568,35 @@ function todoHandlers(db) {
                 LIMIT 1`, (err, rows) => {
             if (err) console.error(err)
             else {
-                if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
-                step_ids[ids_array[params.id]].push(rows[0].id)
+                if (!(selected_array[params.id] in step_ids)) step_ids[selected_array[params.id]] = [rows[0].id]
+                step_ids[selected_array[params.id]].push(rows[0].id)
             }
         })
     })
 
     ipcMain.on('change-step', (event, params) => {
+        let selected_array = ids_array
+
+        if (params.is_previous){
+            selected_array = ids_array_previous
+        }
+
         db.run(`UPDATE steps
                 SET step_text="${params.input}"
-                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
+                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
     })
 
     ipcMain.on('remove-step', (event, params) => {
+        let selected_array = ids_array
+
+        if (params.is_previous){
+            selected_array = ids_array_previous
+        }
+
         db.run(`DELETE
                 FROM steps
-                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
-        step_ids[ids_array[params.id]].splice(params.step_id, 1)
+                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
+        step_ids[selected_array[params.id]].splice(params.step_id, 1)
     })
 
     ipcMain.on('change-category', (event, params) => {
@@ -776,7 +799,6 @@ function todoHandlers(db) {
                     ORDER BY G.addDate DESC;`, (err2, rows2) => {
                         if (err2) console.error(err2);
                         else {
-                            console.log(rows2)
                             let res = [];
                             for (let date of params) {
                                 let flag = true;
@@ -788,7 +810,6 @@ function todoHandlers(db) {
                                     }
                                 }
                                 if (flag) {
-                                    console.log(date);
                                     let sum_done = 0;
                                     let sum_all = 0;
                                     for (let task of rows2) {
@@ -799,7 +820,6 @@ function todoHandlers(db) {
                                             sum_all += task.difficulty * task.importance;
                                         }
                                     }
-                                    console.log(sum_all);
                                     let sum = 0;
                                     if (sum_all != 0) {
                                         sum = Math.round(sum_done * 100 / sum_all);

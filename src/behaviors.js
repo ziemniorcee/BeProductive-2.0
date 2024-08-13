@@ -82,3 +82,22 @@ $(document).on('click', "#projectSettingsIcon", function (event){
     icon_picker.css("visibility", state ? 'visible' : "hidden")
 })
 
+$(document).on('click', '.dashViewOption', function (){
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(this).css('backgroundColor', '#FF5D00')
+})
+
+$(document).on('click', '#dashWeek', function () {
+    $('#content').css('flexDirection', 'row')
+});
+
+
+$(document).on('click', '#editSelectProject', function (event) {
+    event.stopPropagation()
+    $('#editProjectPicker').toggle()
+})
+
+$(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn', function (){
+    $('.dashViewOption').css('background-color', 'rgb(85, 66, 59)')
+    $('#dashDay').css('background-color', '#FF5D00')
+})
