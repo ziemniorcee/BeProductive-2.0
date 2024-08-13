@@ -247,7 +247,6 @@ function todoHandlers(db) {
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
 
-
         db.all(`SELECT id, goal_id, step_text, step_check
                 FROM steps
                 WHERE goal_id = ${project_sidebar_ids[params.sidebar_pos]}`, (err2, steps) => {
@@ -259,7 +258,6 @@ function todoHandlers(db) {
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
                 if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
-
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;
                     return rest;
@@ -330,8 +328,6 @@ function todoHandlers(db) {
         else if (params.option === 1) ids_array = history_ids
         else if (params.option === 2) ids_array = project_sidebar_ids
 
-        console.log(ids_array)
-        console.log(params.todo_id)
 
         db.all(`SELECT G.goal,
                        G.check_state,
@@ -479,8 +475,6 @@ function todoHandlers(db) {
                 let goals_repeat = []
                 let goals_format = "("
 
-                console.log(goals)
-                console.log(params)
                 for (let i = 0; i < goals.length; i++) {
                     goals_repeat.push(goals[i].id)
                     goals_format += goals[i].id
@@ -505,8 +499,6 @@ function todoHandlers(db) {
                     }
                 }
 
-                console.log(goals_positions)
-                console.log(goal_ids)
                 for (let i = goals_positions.length - 1; i >= 0; i--) {
                     delete step_ids[goal_ids[goals_positions[i]]]
                     goal_ids.splice(goals_positions[i], 1)
@@ -515,7 +507,6 @@ function todoHandlers(db) {
                 // goals_positions = goals_positions.filter(function (item){
                 //     return item !== Number(params.id)
                 // })
-                console.log(goal_ids)
                 event.reply('get-following-removed', goals_positions)
             }
         })

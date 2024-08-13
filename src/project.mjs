@@ -125,7 +125,7 @@ function get_goal_from_sidebar(steps, position) {
 }
 
 
-$(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn, #dashDay, #dashWeek', function () {
+$(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn, .dashViewOption', function () {
     fix_project_sidebar(this)
 })
 

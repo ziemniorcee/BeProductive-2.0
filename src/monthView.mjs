@@ -1,9 +1,10 @@
 import {l_date} from "./date.js";
-import {weekdays2, categories, categories2, decode_text} from "./data.mjs";
-import {_repeat_label_HTML, build_view, day_view, } from "./render.mjs";
+import {weekdays2, categories, categories2, decode_text, getIdByColor} from "./data.mjs";
+import {_repeat_label_HTML, build_view, day_view,} from "./render.mjs";
 import {close_edit, fix_goal_pos} from "./edit.mjs";
+import {already_emblem_HTML} from "./project.mjs";
 
-let block_prev_drag = 0
+let is_month_drag = 0
 let mousedown_month = false
 
 $(document).on('click', '#dashMonth', function () {
@@ -16,7 +17,11 @@ $(document).on('click', '#dashMonth', function () {
 export function month_view() {
     build_view(_month_content_HTML(), _month_header_HTML())
     set_today()
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month()})
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(l_date.day_sql)})
+    window.sidebarAPI.askHistory({date: l_date.get_history_month()})
+
+    let rightbar = $('#rightbar')
+    rightbar.html(rightbar.html())
 
     dragula_month_view()
     close_edit()
@@ -194,59 +199,138 @@ export function build_month_goal(goals_dict) {
  * allows drag&drop for month view
  */
 export function dragula_month_view() {
-    block_prev_drag = 0
-    let drag_sidebar_task
-    let dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.monthGoals')))
+    is_month_drag = 0
+    let dragula_array
+    let dragged_task
+
+    let is_project_sidebar = $('#sideProjectHeader').length
+    if (is_project_sidebar) {
+        dragula_array = Array.from($('#sideProjectGoals')).concat(Array.from($('.monthGoals')))
+    } else {
+        dragula_array = Array.from($('.historyTasks')).concat(Array.from($('.monthGoals')))
+    }
 
     dragula(dragula_array, {
         copy: function (el) {
-            return el.className === "sidebarTask";
+            return !el.parentNode.className.includes("monthGoals");
         },
         accepts: function (el, target) {
-            block_prev_drag = 0
-            return target.className !== "historyTasks";
+            is_month_drag = 0
+            return target.className.includes("monthGoals");
         },
-        moves: function () {
-
-            if (block_prev_drag === 0) {
-                block_prev_drag = 1
+        moves: function (el) {
+            let is_in = $(el).find('.alreadyEmblem').length
+            let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
+            if (is_month_drag === 0 && is_in === 0 && !is_done) {
+                is_month_drag = 1
                 return true
             } else return false
         },
     }).on('drag', function (event) {
-
-        drag_sidebar_task = $(event)
-        block_prev_drag = 0
-
+        dragged_task = $(event)
+        is_month_drag = 0
     }).on('drop', (event) => {
+        let todos = $('#main .monthTodo')
+        let new_goal_pos = todos.index($(event))
+
         if (event.className.includes("monthTodo")) {
-            let goal_id = $(event).find('.monthTodoId').text()
-            let day = Number($(event).closest('.monthDay').find('.monthDate').text())
-            let date = l_date.get_sql_month_day(day)
-            let day_goals = $(event).parent().children()
-
-            let order = []
-            for (let i = 0; i < day_goals.length; i++) {
-                order.push(Number(day_goals.eq(i).find('.monthTodoId').text()))
-            }
-
-            window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+            _change_order(event)
+        } else if (event.className.includes("todo") && $('#main .todo').length) {
+            _get_from_project(event, new_goal_pos, dragged_task)
         } else if (event.parentNode !== null) {
-            let new_goal_pos = -1;
-            let todos = $(event).closest('.monthGoals').children()
-            for (let i = 0; i < todos.length; i++) if (todos[i].className !== "monthTodo") new_goal_pos = i
-
-            let month_day = Number($('.monthGoals .sidebarTask').closest('.monthDay').find('.monthDate').text())
-            let date = l_date.get_sql_month_day(month_day)
-
-            window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
-            if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
-            else drag_sidebar_task.closest('.day').remove()
+            _get_from_sidebar(event, dragged_task)
         }
         fix_goal_pos()
     })
 }
 
+/**
+ * Fixes order based on goals positions
+ * @param event dropped goal
+ */
+function _change_order(event) {
+    let goal_id = $(event).find('.monthTodoId').text()
+    let day = Number($(event).closest('.monthDay').find('.monthDate').text())
+    let date = l_date.get_sql_month_day(day)
+    let day_goals = $(event).parent().children()
+
+    let order = []
+    for (let i = 0; i < day_goals.length; i++) {
+        order.push(Number(day_goals.eq(i).find('.monthTodoId').text()))
+    }
+
+    window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+}
+
+function _get_from_project(event, new_goal_pos, dragged_task) {
+    let sidebar_pos = $('#rightbar .todo').index(dragged_task)
+    let new_goal_index = 0
+    let selected_month_day = 0
+    let item_found = false
+    let month_day_position = 0
+    let item_day_before = null
+    let jq_monthGoals = $('.monthGoals')
+
+    for (let i = 0; i < jq_monthGoals.length; i++) {
+        month_day_position = 0
+        let todos = jq_monthGoals.eq(i).children()
+        for (let j = 0; j < todos.length; j++) {
+            if (todos.eq(j).attr('class').includes("todo")) {
+                item_found = true
+                break
+            } else {
+                new_goal_index++
+                month_day_position += 1
+            }
+        }
+        if (item_found) {
+            selected_month_day = i
+            if (month_day_position !== 0) item_day_before = todos.eq(month_day_position)
+            break
+        }
+    }
+
+    let is_sidebar_to_delete = $('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)'
+
+    if (is_sidebar_to_delete) $(dragged_task).remove()
+    else $(dragged_task).append(already_emblem_HTML())
+
+    let category_id = getIdByColor(categories, $(event).find('.todoCheck').css('background-color'))
+    let goal_dict = {
+        goal: $(event).find('.task').text(),
+        category: category_id,
+    }
+    if (item_day_before === null) {
+        jq_monthGoals.eq(selected_month_day).append(build_month_goal(goal_dict))
+    } else{
+        $(item_day_before).after(build_month_goal(goal_dict))
+    }
+
+    let day = Number($(event).closest('.monthDay').find('.monthDate').text())
+    let add_date = l_date.sql_sql_month_day(day)
+
+    window.goalsAPI.getFromProject({
+        date: add_date,
+        sidebar_pos: sidebar_pos,
+        main_pos: new_goal_index,
+        to_delete: is_sidebar_to_delete
+    })
+
+    $(event).remove()
+}
+
+function _get_from_sidebar(event, drag_sidebar_task) {
+    let new_goal_pos = -1;
+    let todos = $(event).closest('.monthGoals').children()
+    for (let i = 0; i < todos.length; i++) if (todos[i].className !== "monthTodo") new_goal_pos = i
+
+    let month_day = Number($('.monthGoals .sidebarTask').closest('.monthDay').find('.monthDate').text())
+    let date = l_date.get_sql_month_day(month_day)
+
+    window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
+    if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
+    else drag_sidebar_task.closest('.day').remove()
+}
 
 $(document).on('mousedown', '.monthDay', function (event) {
     if (event.which === 1 && event.target.className === "monthGoals") {
@@ -263,14 +347,15 @@ $(document).on('mouseup', '.monthDay', function (event) {
  * @param event mouse press
  * @param that selected day
  */
-function open_day_from_month(event, that){
+function open_day_from_month(event, that) {
     if (event.which === 1 && event.target.className === "monthGoals" && mousedown_month) {
+        $('.dashViewOption').css('background-color', 'rgb(85, 66, 59)')
+        $('#dashDay').css('background-color', '#FF5D00')
+
         let day_index = Number($(that).find('.monthDate').text())
         l_date.set_sql_month(day_index)
         day_view()
 
-        $('.dashViewOption').css('backgroundColor', '#55423B')
-        $('#dashDay').css('backgroundColor', '#FF5D00')
         l_date.get_day_view_header()
 
         mousedown_month = false
@@ -278,9 +363,9 @@ function open_day_from_month(event, that){
 }
 
 export function set_block_prev_drag_month(option) {
-    block_prev_drag = option
+    is_month_drag = option
 }
 
 $(document).on('click', '.sidebarTask', function () {
-    block_prev_drag = 0
+    is_month_drag = 0
 })

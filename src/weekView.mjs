@@ -14,11 +14,19 @@ $(document).on('click', '#dashWeek', function () {
  * Displays week view in #main
  * builds view, gets goals, allows drag&drop and closes edit
  */
-function week_view() {
-    window.goalsAPI.askWeekGoals({dates: l_date.week_now})
+export function week_view() {
     build_view(_week_content_HTML(), _week_header_HTML())
+    window.goalsAPI.askWeekGoals({dates: l_date.week_now})
+    window.sidebarAPI.askHistory({date: l_date.get_history_week()})
+    l_date.get_history_week()
+
+    let rightbar = $('#rightbar')
+    rightbar.html(rightbar.html())
+
     dragula_week_view()
     close_edit()
+
+    $('#content').css('flex-direction', 'row')
 }
 
 window.goalsAPI.getWeekGoals((goals) => {
@@ -83,6 +91,9 @@ export function build_week_goal(goal) {
 
     $(document).on('mouseup', '.weekDay', function (event) {
         if (event.which === 1 && event.target.className.includes("weekDayGoals") && mousedown_weekday) {
+            $('.dashViewOption').css('background-color', 'rgb(85, 66, 59)')
+            $('#dashDay').css('background-color', '#FF5D00')
+
             let day_index = weekdays2.indexOf($(this).find('.weekDayText').text())
             l_date.get_week_day(day_index)
             day_view()
@@ -99,6 +110,7 @@ export function build_week_goal(goal) {
  * @returns {string} HTML of content
  */
 function _week_content_HTML() {
+
     let today_sql = l_date.sql_format(l_date.today)
 
     let week_columns = ""
@@ -210,7 +222,6 @@ export function dragula_week_view() {
         drag_sidebar_task = $(event)
         is_week_drag = 0
 
-        dragged_task = event
         goals_length_before = $('#main .todo').length
     }).on('drop', function (event) {
         let todos = $('#main .todo')
@@ -219,8 +230,10 @@ export function dragula_week_view() {
 
         if (event.className.includes("todo")) {
             if (goals_length_before !== goals_length_after) {
-                _get_from_project(event, new_goal_pos, dragged_task)
-            } else if (dragged_task.parentNode.id !== "sideProjectGoals") _change_order(event)
+                _get_from_project(event, new_goal_pos, drag_sidebar_task)
+            } else if (drag_sidebar_task.parent().attr('id') !== "sideProjectGoals") {
+                _change_order(event)
+            }
         } else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
 
         fix_goal_pos()

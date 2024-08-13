@@ -100,7 +100,6 @@ $(document).on('mouseup', '#monthGrid .monthTodo', function () {
  */
 function build_month_edit(that) {
     if (is_edit_change) {
-        console.log("launch")
         prepare_edit(that, 1)
         window.goalsAPI.askEditGoal({todo_id: goal_id, option: 0})
         set_block_prev_drag_month(0)
@@ -141,8 +140,7 @@ function build_sidebar_project_edit(that) {
     if (is_edit_change) {
         prepare_edit(that, 0)
         is_from_project = true
-        goal_id = Number($(base).find('.todoId').text())
-
+        goal_id = $('#rightbar .todo').index(that)
         if ($('#todosAll').length) dragula_day_view()
         else if ($('.weekDay').length) dragula_week_view()
         else dragula_month_view()
@@ -475,10 +473,11 @@ $(document).on('click', '.editPickProject', function () {
 function change_project(that) {
     let selected_project_pos = $('.editPickProject').index(that) - 1
 
-    if ($("#todosAll").length) {
+    if ($("#todosAll").length || $('.weekDay').length || $('#monthGrid').length) {
         change_project_emblem(goal_id, selected_project_pos)
         _fix_project_display(selected_project_pos)
-    } else if ($('#projectContent').length) {
+    }
+    else if ($('#projectContent').length) {
         if (selected_project_pos < 0) {
             _ask_delete()
         } else if (selected_project_pos !== project_pos) {
@@ -757,7 +756,7 @@ function _project_picker_HTML() {
         picks_HTML += `
             <div class="editPickProject">
                 <div class="editProjectIcon" style="background-color: ${icon_color}">
-                    <img class="editPickProjectIcon" src="${icon_src}">
+                    <img class="editPickProjectIcon" alt="" src="${icon_src}">
                 </div>
                 <div class="editProjectName">${$('.dashProjectName').eq(i).text()}</div>
             </div>`

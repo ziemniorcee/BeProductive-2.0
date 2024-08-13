@@ -33,9 +33,16 @@ $(document).on('click', '#dashDay', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    window.goalsAPI.askGoals({date: l_date.day_sql})
     build_view(_day_content_HTML(), _day_header_HTML())
-    dragula_day_view()
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+    let rightbar = $('#rightbar')
+    rightbar.html(rightbar.html())
+
+    if ($('#days').length){
+        window.sidebarAPI.askHistory({date: l_date.get_history_day()})
+    } else if (!$('#sideProjectGoals').length) {
+        dragula_day_view()
+    }
     close_edit()
 }
 
@@ -494,7 +501,7 @@ export function dragula_day_view() {
     let dragula_array
     let todos_area_before
 
-    let rightbar = $('#rightbar')
+
     let is_project_sidebar = $('#sideProjectHeader').length
 
     if (is_project_sidebar) {
@@ -502,7 +509,6 @@ export function dragula_day_view() {
     } else {
         dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
     }
-
     dragula(dragula_array, {
         copy: function (el) {
             return el.parentNode.id !== "todosArea";
@@ -514,7 +520,6 @@ export function dragula_day_view() {
         moves: function (el) {
             let is_in = $(el).find('.alreadyEmblem').length
             let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
-
             if (is_day_drag === 0 && is_in === 0 && !is_done) {
                 is_day_drag = 1
                 return true
@@ -523,7 +528,6 @@ export function dragula_day_view() {
     }).on('drag', function (event) {
         dragged_task = $(event)
         is_day_drag = 0
-
 
         todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
@@ -578,10 +582,11 @@ function _get_from_project(new_goal_index, dragged_task) {
  */
 export function change_order() {
     let goals = $('#main .todoId')
+    if ($('#monthGrid').length) goals = $('#main .monthTodoId')
     let order = []
     for (let i = 0; i < goals.length; i++) order.push(goals.eq(i).text())
-    window.goalsAPI.rowsChange({after: order})
 
+    window.goalsAPI.rowsChange({after: order})
 }
 
 /**

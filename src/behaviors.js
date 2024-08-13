@@ -96,3 +96,8 @@ $(document).on('click', '#editSelectProject', function (event) {
     event.stopPropagation()
     $('#editProjectPicker').toggle()
 })
+
+$(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn', function (){
+    $('.dashViewOption').css('background-color', 'rgb(85, 66, 59)')
+    $('#dashDay').css('background-color', '#FF5D00')
+})
