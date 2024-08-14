@@ -187,7 +187,7 @@ export function build_month_goal(goals_dict) {
     let goal_id = $('#main, .monthTodo').length - 1
 
     return `
-        <div class="monthTodo" style="background-color: ${categories2[goals_dict['category'] - 1]}">
+        <div class="monthTodo" style="background-color: ${categories2[goals_dict['category']]}">
             <div class="monthTodoId">${goal_id}</div>
             <div class="monthTodoLabel" style="background-color: ${categories[goals_dict['category']][0]}"></div>
             <div class="monthTodoText" >${converted_text} ${repeat}</div>

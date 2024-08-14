@@ -58,6 +58,11 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     askCategoriesCounts: () => ipcRenderer.send('ask-categories-counts'),
     getCategoriesCounts: (func) => ipcRenderer.on('get-categories-counts', (event, counts) => func(counts)),
+
+    askCategories: () => ipcRenderer.send('ask-categories'),
+    getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
+
+    addCategory: (params) => ipcRenderer.send('add-category', params),
 })
 
 
