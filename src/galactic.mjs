@@ -63,7 +63,7 @@ function create_galactic_editor(key) {
         if (proj.category == key) {
             let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
             let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}"
+            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
             style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
             >${proj.name}</div>`
         }
@@ -72,40 +72,89 @@ function create_galactic_editor(key) {
     let box = $('#galacticContainer');
     box.empty();
     box.html(editor);
+    
+    $(document).on('mousemove', '#galactic-editor', function (event) {
+        if (clicked_project !== '') {
+            let line = document.getElementById('galactic-editor-line-moving');
+            if (line) {
+                let offset = $(this).offset();
+                line.x2.baseVal.value = event.pageX - offset.left;
+                line.y2.baseVal.value = event.pageY - offset.top;
+            } 
+        }
+    })
+
+    $(document).on('mouseup', '#galactic-editor', function () {
+        $('#galactic-editor-line-moving').remove();
+        clicked_project = '';
+    })
+
     $('.galactic-editor-project').each(function(index, element) {
+
         $(element).draggable({
             cursorAt: {left: 0, top: 0},
             containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
+            drag: function(event, ui) {
+                let number = $(element).data('project-number');
+                for (let conn of project_conn) {
+                    if (conn[0] == number) {
+                        let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
+                        let pos = $(element).position();
+                        line.x1.baseVal.value = pos.left + $(element).outerWidth() / 2;
+                        line.y1.baseVal.value = pos.top + $(element).outerHeight() / 2;
+                    }
+                    else if (conn[1] == number) {
+                        let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
+                        let pos = $(element).position();
+                        line.x2.baseVal.value = pos.left + $(element).outerWidth() / 2;
+                        line.y2.baseVal.value = pos.top + $(element).outerHeight() / 2;
+                    }
+                }
+            },
             stop: function(event, ui) {
                 var position = ui.position;
                 console.log("Pozycja elementu:", position);
             }
         })
+
         $(element).on('mousedown', function (event) {
             if (event.button === 2) {
                 clicked_project = $(element).attr('id');
+                let pos = $(element).position();
+                let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                line.setAttribute('id', 'galactic-editor-line-moving');
+                line.setAttribute('x1', pos.left + $(element).outerWidth() / 2);
+                line.setAttribute('y1', pos.top + $(element).outerHeight() / 2);
+                line.setAttribute('x2', pos.left + $(element).outerWidth() / 2);
+                line.setAttribute('y2', pos.top + $(element).outerHeight() / 2);
+                line.setAttribute('stroke', categories2[key]);
+                line.setAttribute('stroke-width', 8);
+                $("#galactic-editor-canv").append(line);
             }
         })
+
         $(element).on('mouseup', function (event) {
             if (event.button === 2) {
                 let released_project = $(element).attr('id');
                 console.log(`${clicked_project}, ${released_project}`)
                 if (released_project !== clicked_project) {
-                    let conn = [extractNumbers(clicked_project)[0], extractNumbers(released_project)[0]];
+                    let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
                     conn.sort();
                     if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
                     else {
-                        let offset1 = $(`#${clicked_project}`).offset();
-                        let offset2 = $(`#${released_project}`).offset();
+                        let pos1 = $(`#${clicked_project}`).position();
+                        let pos2 = $(`#${released_project}`).position();
                         let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-                        line.setAttribute('x1', offset1.left - $(`#${clicked_project}`).outerWidth() / 2);
-                        line.setAttribute('y1', offset1.top + $(`#${clicked_project}`).outerHeight() / 2);
-                        line.setAttribute('x2', offset2.left - $(`#${released_project}`).outerWidth() / 2);
-                        line.setAttribute('y2', offset2.top + $(`#${released_project}`).outerHeight() / 2);
+                        line.setAttribute('id', `galactic-editor-line${conn[0]}-${conn[1]}`)
+                        line.setAttribute('x1', pos1.left + $(`#galacticEditorProject${conn[0]}`).outerWidth() / 2);
+                        line.setAttribute('y1', pos1.top + $(`#galacticEditorProject${conn[0]}`).outerHeight() / 2);
+                        line.setAttribute('x2', pos2.left + $(`#galacticEditorProject${conn[1]}`).outerWidth() / 2);
+                        line.setAttribute('y2', pos2.top + $(`#galacticEditorProject${conn[1]}`).outerHeight() / 2);
                         line.setAttribute('stroke', categories2[key]);
                         line.setAttribute('stroke-width', 8);
                         $("#galactic-editor-canv").append(line);
+
                     }
                     project_conn.push([conn[0], conn[1]])
                 }
