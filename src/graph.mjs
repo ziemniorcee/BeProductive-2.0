@@ -1,6 +1,12 @@
 import {l_date} from "./date.js";
 import { categories } from "./data.mjs";
 
+let flag_graph_1 = true;
+let flag_graph_2 = true;
+
+/**
+ * creates both of todays graphs and updates them
+ */
 export function create_today_graphs() {
     let date1 = new Date(l_date.today);
     let date2 = new Date();
@@ -80,8 +86,9 @@ export function create_today_graphs() {
         }
     });
 
-    function toggle_graph_1() {
-        if (!$("#dashGraph1BG").hasClass('expanded')) {
+    function grow_graph_1() {
+        if (!$('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && flag_graph_1) {
+            flag_graph_1 = false;
             $('#dashGraph2BG').toggle();
             $('#graphLine1').toggle();
             $('#dashMyDayBtn').toggle();
@@ -89,29 +96,34 @@ export function create_today_graphs() {
             graph.options.scales.y.display = true;
             graph.options.scales.x.display = true;
             graph.update();
-        } else {
+            $('#dashGraph1BG').toggleClass('expanded');
+        }
+    }
+
+    $(document).on('mouseenter', '.dash-graph-1BG', () => {
+        grow_graph_1();
+    });
+
+    function shrink_graph_1() {
+        if ($('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && !flag_graph_1) {
             graph.options.plugins.title.display = false;
             graph.options.scales.y.display = false;
             graph.options.scales.x.display = false;
             graph.update();
-        }
-        $('#dashGraph1BG').toggleClass('expanded');
-        setTimeout(function() {
-            graph.resize();
-            if (!$("#dashGraph1BG").hasClass('expanded')) {
+            $('#dashGraph1BG').toggleClass('expanded');
+            setTimeout(function() {
+                graph.resize();
                 $('#dashGraph2BG').toggle();
                 $('#graphLine1').toggle();
                 $('#dashMyDayBtn').toggle();
-            } else {
-                
-            }
-        }, 500);
-    };
+                flag_graph_1 = true;
+            }, 500);
+        }
+    }
 
-    $(document).on('click', '#dashGraph1', () => {
-        toggle_graph_1();
+    $(document).on('mouseleave', '.dash-graph-1BG', () => {
+        shrink_graph_1();
     });
-
 
     const canv2 = $('#dashGraph2')[0].getContext('2d');
     const graph2 = new Chart(canv2, {
@@ -174,6 +186,47 @@ export function create_today_graphs() {
             maintainAspectRatio: false
         },
     });
+
+    
+    function grow_graph_2() {
+        if (!$('#dashGraph1BG').hasClass('expanded') && !$('#dashGraph2BG').hasClass('expanded') && flag_graph_2) {
+            flag_graph_2 = false;
+            $('#dashGraph1BG').toggle();
+            $('#graphLine1').toggle();
+            $('#dashMyDayBtn').toggle();
+            graph2.options.plugins.title.display = true;
+            graph2.options.scales.y.display = true;
+            graph2.options.scales.x.display = true;
+            graph2.update();
+            $('#dashGraph2BG').toggleClass('expanded');
+        }
+    }
+
+    $(document).on('mouseenter', '.dash-graph-2BG', () => {
+        grow_graph_2();
+    });
+
+    function shrink_graph_2() {
+        if (!$('#dashGraph1BG').hasClass('expanded') && $('#dashGraph2BG').hasClass('expanded') && !flag_graph_2) {
+            graph2.options.plugins.title.display = false;
+            graph2.options.scales.y.display = false;
+            graph2.options.scales.x.display = false;
+            graph2.update();
+            $('#dashGraph2BG').toggleClass('expanded');
+            setTimeout(function() {
+                graph2.resize();
+                $('#dashGraph1BG').toggle();
+                $('#graphLine1').toggle();
+                $('#dashMyDayBtn').toggle();
+                flag_graph_2 = true;
+            }, 500);
+        }
+    }
+    
+    $(document).on('mouseleave', '.dash-graph-2BG', () => {
+        shrink_graph_2();
+    });
+
     let prev_day = new Date(l_date.today);
     let dates = [l_date.sql_format(prev_day)];
     for (let i=0; i<11; i++) {
@@ -186,6 +239,10 @@ export function create_today_graphs() {
 
 window.goalsAPI.getProductivity((productivities) => update_productivity_graph(productivities));
 
+/**
+ * updates first graph with given data of last days productivity
+ * @param productivities number of productivities in last 11 days
+ */
 function update_productivity_graph(productivities) {
     let ctx = $('#dashGraph1')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
@@ -200,10 +257,13 @@ function update_productivity_graph(productivities) {
 
 window.goalsAPI.getCategoriesCounts((counts) => update_categories_graph(counts));
 
+/**
+ * updates second graph with given data of categories tasks quantity
+ * @param counts quantities of tasks in each category
+ */
 function update_categories_graph(counts) {
     let ctx = $('#dashGraph2')[0].getContext('2d');
     let chart = Chart.getChart(ctx);
-
     let colors = [];
     let names = [];
     let quantities = [];

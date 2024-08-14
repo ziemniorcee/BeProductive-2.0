@@ -1,18 +1,34 @@
 import {l_date} from './date.js'
-import {categories, check_border, decode_text, encode_text, getIdByColor, weekdays2} from "./data.mjs";
+import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2} from "./data.mjs";
+import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
+import {
+    already_emblem_HTML,
+    build_project_goal, project_emblem_html,
+    project_pos
+} from "./project.mjs";
+import { create_today_graphs } from './graph.mjs';
 
-import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
-import {already_emblem_HTML, build_project_goal, project_emblem_html, project_pos} from "./project.mjs";
-import {create_today_graphs} from './graph.mjs';
 
 export let is_day_drag = 0
 
 
 window.addEventListener('DOMContentLoaded', function () {
+    window.goalsAPI.askCategories();
+});
+
+window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
+
+function wait_for_categories(cats) {
+    for (let c of cats) {
+        categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
+        categories2[c.id] = `rgb(${Math.min(c.r * 4 / 3, 255)}, 
+                                ${Math.min(c.g * 4 / 3, 255)}, 
+                                ${Math.min(c.b * 4 / 3, 255)})`;
+    }
     day_view()
     create_today_graphs();
     $('#graphLine1').show();
-});
+}
 
 $(document).on('click', '#dashMyDayBtn', () => {
     l_date.set_attributes(l_date.today)
@@ -33,16 +49,9 @@ $(document).on('click', '#dashDay', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    build_view(_day_content_HTML(), _day_header_HTML())
     window.goalsAPI.askGoals({date: l_date.day_sql})
-    let rightbar = $('#rightbar')
-    rightbar.html(rightbar.html())
-
-    if ($('#days').length){
-        window.sidebarAPI.askHistory({date: l_date.get_history_day()})
-    } else if (!$('#sideProjectGoals').length) {
-        dragula_day_view()
-    }
+    build_view(_day_content_HTML(), _day_header_HTML())
+    dragula_day_view()
     close_edit()
 }
 
@@ -322,8 +331,46 @@ function select_repeat_option(that) {
     }
 }
 
+
+$(document).on('click', '#newCategoryCreate', function () {
+    create_new_category();
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+})
+
+/**
+ * Creates new category from newCategory box and resets categories pickers
+ */
+function create_new_category() {
+    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.7);
+    console.log(rgb);
+    const len = Object.keys(categories).length + 1;
+    let index = len;
+    for (let i = 1; i < len; i++) {
+        if (!(i in categories)) {
+            index = i;
+            break;
+        }
+    }
+    let name = $('#newCategoryName').val();
+    categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
+    categories2[index] = `rgb(${Math.min(rgb[0] * 4 / 3, 255)}, 
+                            ${Math.min(rgb[1] * 4 / 3, 255)}, 
+                            ${Math.min(rgb[2] * 4 / 3, 255)})`;
+    
+    window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
+    $('#newCategoryName').val('');
+    let html_categories = _categories_HTML();
+    $('#categoryPicker').empty();
+    $('#categoryPicker2').empty();
+    $('#categoryPicker3').empty();
+    $('#categoryPicker').html(html_categories);
+    $('#categoryPicker2').html(html_categories);
+    $('#categoryPicker3').html(html_categories);
+}
+
 $(document).on('click', '.category', function (event) {
-    event.stopPropagation()
+    event.stopPropagation();
     select_category(this)
 });
 
@@ -334,17 +381,24 @@ $(document).on('click', '.category', function (event) {
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
     let select_category = $('#selectCategory')
-
-    if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
+    if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
+        select_category = $('#selectCategory')
+        $('#categoryPicker').css('display', 'none')
+    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
         select_category = $('#selectCategory2')
-        change_category(index)
+        $('#categoryPicker2').css('display', 'none')
+        if (index !== 1) change_category(index)
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
         select_category = $('#selectCategory3')
         $('#categoryPicker3').css('display', 'none')
     }
-
-    select_category.css('background', categories[index][0])
-    select_category.text(categories[index][1])
+    if (index === 1) {
+        $("#vignette").css('display', 'block')
+        $("#newCategory").css('display', 'block')
+    } else {
+        select_category.css('background', categories[index - 1][0])
+        select_category.text(categories[index - 1][1])
+    }
 }
 
 
@@ -821,6 +875,11 @@ export function _steps_HTML(steps, category_id) {
  */
 export function _categories_HTML() {
     let categories_html = ""
+    categories_html +=
+            `<div class="category">
+                <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
+                <span class="categoryName">New Category</span>
+            </div>`
     for (let i = 0; i < Object.keys(categories).length; i++) {
         categories_html +=
             `<div class="category">

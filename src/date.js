@@ -1,9 +1,8 @@
 import {weekdays, month_names} from "./data.mjs";
 import {reset_project_pos} from "./project.mjs";
 import {close_edit} from "./edit.mjs";
-import {dragula_week_view, week_view} from "./weekView.mjs";
+import {dragula_week_view} from "./weekView.mjs";
 import {dragula_month_view, month_view} from "./monthView.mjs";
-import {day_view} from "./render.mjs";
 
 class CurrentDate {
     constructor() {
@@ -23,7 +22,7 @@ class CurrentDate {
         this.month_next = new Date(this.today.getFullYear(), this.today.getMonth() + 1, 1)
 
         this.month_current = this.set_current_month()
-        this.glory_month = this.get_sql_month(this.day_sql)
+        this.glory_month = this.get_sql_month()
     }
 
     get_day_view_header() {
@@ -97,8 +96,8 @@ class CurrentDate {
         return this.sql_format(last_history_date)
     }
 
-    get_sql_month(selected_date) {
-        let date = new Date(selected_date)
+    get_sql_month() {
+        let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
         let last_history_date = new Date(date)
         last_history_date.setDate(last_history_date.getDate() - 1)
@@ -123,15 +122,6 @@ class CurrentDate {
         date.setDate(date.getDate() + day - 1)
 
         this.set_attributes(date)
-    }
-
-    sql_sql_month_day(day){
-        let date = new Date(this.day_sql)
-        date.setDate(date.getDate() - date.getDate() + 1)
-
-        date.setDate(date.getDate() + day - 1)
-
-        return this.sql_format(date)
     }
 
     this_month() {
@@ -269,7 +259,7 @@ class CurrentDate {
     }
 
     get_month_array() {
-        let dates = this.get_sql_month(this.day_sql)
+        let dates = this.get_sql_month()
         let range = this.get_format_month()
         let base = dates[0].substring(0, 8)
 
@@ -281,39 +271,39 @@ class CurrentDate {
 
         return month_array
     }
-
-    get_history_day() {
-        let selected_date = new Date(this.day_sql)
-        let current_date = new Date(this.today_sql)
-
-        if (selected_date < current_date) return this.day_sql
-        else return this.today_sql
-    }
-
-    get_history_week() {
-        let selected_date = new Date(this.week_now[0])
-        let current_date = new Date(this.week_current[0])
-        if (selected_date < current_date) return this.week_now[0]
-        else return this.week_current[0]
-    }
-
-    get_history_month() {
-        let selected_sql = this.get_sql_month(this.day_sql)[0]
-        let selected_date = new Date(selected_sql)
-
-        let current_sql = this.get_sql_month(this.today_sql)[0]
-        let current_date = new Date(current_sql)
-
-        if (selected_date < current_date) return selected_sql
-        else return current_sql
-
-    }
 }
 
 export let l_date = new CurrentDate()
 
+
+function date_change(option) {
+    if (option === 0) this.set_attributes(this.today)
+    else if (option === 1) this.set_attributes(this.tomorrow)
+
+    $('.todo').remove()
+
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+}
+
+function week_change(option) {
+    if (option === 0) l_date.this_week()
+    else if (option === 1) l_date.next_week()
+
+    window.goalsAPI.askWeekGoals({dates: l_date.week_now})
+}
+
+function month_change(option) {
+    if (option === 0) l_date.this_month()
+    else if (option === 1) l_date.next_month()
+
+    month_view()
+}
+
+
 $("#datePicker").datepicker({
     onSelect: function () {
+        reset_project_pos()
+
         l_date.set_attributes($(this).datepicker('getDate'))
         if ($('#todosAll').length) {
             date_change(2)
@@ -330,23 +320,3 @@ $("#datePicker").datepicker({
     }
 });
 
-function date_change(option) {
-    if (option === 0) this.set_attributes(this.today)
-    else if (option === 1) this.set_attributes(this.tomorrow)
-
-    day_view()
-}
-
-function week_change(option) {
-    if (option === 0) l_date.this_week()
-    else if (option === 1) l_date.next_week()
-
-    week_view()
-}
-
-function month_change(option) {
-    if (option === 0) l_date.this_month()
-    else if (option === 1) l_date.next_month()
-
-    month_view()
-}
