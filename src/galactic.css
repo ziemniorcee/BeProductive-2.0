@@ -75,7 +75,7 @@
     border-radius: 5px;
 }
 
-.galactic-editor-text {
+#galactic-editor-text {
     position: absolute;
     width: 40%;
     top: 5%;
@@ -83,6 +83,19 @@
     justify-content: center;
     text-align: center;
     font-size: 48px;
+}
+
+#galactic-editor-confirm {
+    position: absolute;
+    width: 10%;
+    right: 5%;
+    top: 5%;
+    border-width: 5px;
+    border-style:solid;
+    border-radius: 5px;
+    justify-content: center;
+    text-align: center;
+    font-size: 36px;
 }
 
 .galactic-editor-project {

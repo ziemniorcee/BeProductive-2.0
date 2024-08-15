@@ -28,6 +28,28 @@ export function hsvToRgb(h, s, v) {
     return [Math.round(f(5) * 255), Math.round(f(3) * 255), Math.round(f(1) * 255)];
 }
 
+export function calculateChildPosition(childSelector, parentSelector) {
+    var child = $(childSelector);
+    var parent = $(parentSelector);
+
+    var childOffset = child.offset();
+    var parentOffset = parent.offset();
+
+    var childCenterX = childOffset.left + (child.outerWidth() / 2);
+    var childCenterY = childOffset.top + (child.outerHeight() / 2);
+
+    var relativeX = childCenterX - parentOffset.left;
+    var relativeY = childCenterY - parentOffset.top;
+
+    var parentWidth = parent.width();
+    var parentHeight = parent.height();
+
+    var percentX = (relativeX / parentWidth) * 100;
+    var percentY = (relativeY / parentHeight) * 100;
+
+    return { x: percentX, y: percentY };
+}
+
 /**
  * Creates containtment list for jQuery UI draggable.
  * @param {HTMLElement} that - targeted element.
