@@ -1,5 +1,5 @@
 import {l_date} from './date.js'
-import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2, projects} from "./data.mjs";
+import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2, projects, project_conn} from "./data.mjs";
 import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
@@ -21,6 +21,8 @@ window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
 
 window.goalsAPI.getAllProjects((projects) => wait_for_projects(projects));
 
+window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connections(connections));
+
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
@@ -36,6 +38,14 @@ function wait_for_projects(projs) {
         projects.push(proj);
     }
     console.log(projects);
+    window.goalsAPI.askGalacticConnections();
+}
+
+function wait_for_galactic_connections(connections) {
+    for (let conn of connections) {
+        project_conn.push(conn);
+    }
+    console.log(project_conn);
     day_view();
     create_today_graphs();
     $('#graphLine1').show();

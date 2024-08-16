@@ -4,11 +4,9 @@ let clicked_project = '';
 let changes_lines = [];
 let changes_projects = [];
 let connections = [];
+let current_project = 0;
 
 $(document).on('click', '#strategy', function () {
-    for (let conn of project_conn) {
-        connections.push(conn['from'], conn['to']);
-    }
     $('#galactics').css('display', 'block');
     add_galactic_category_boxes();
     $('#galactic-editor').remove();
@@ -63,6 +61,9 @@ $(document).on('click', '.galactic', function() {
  * @param {number} galactic - galactic window.
  * */
 function create_galactic_editor(key) {
+    changes_lines = [];
+    changes_projects = [];
+    current_project = key;
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
     <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
@@ -84,21 +85,23 @@ function create_galactic_editor(key) {
     box.html(editor);
     
     for (let conn of project_conn) {
-        if (conn['project'] === key) {
-            let pos1 = $(`#galacticEditorProject${conn['from']}`).position();
-            let pos2 = $(`#galacticEditorProject${conn['to']}`).position();
+        if (conn['category'] === key) {
+            let pos1 = $(`#galacticEditorProject${conn['project_from']}`).position();
+            let pos2 = $(`#galacticEditorProject${conn['project_to']}`).position();
             let line = document.createElementNS('http://www.w3.org/2000/svg','line');
             line.setAttribute('class', `galactic-editor-line`);
-            line.setAttribute('id', `galactic-editor-line${conn['from']}-${conn['to']}`);
-            line.setAttribute('x1', pos1.left + $(`#galacticEditorProject${conn['from']}`).outerWidth() / 2);
-            line.setAttribute('y1', pos1.top + $(`#galacticEditorProject${conn['from']}`).outerHeight() / 2);
-            line.setAttribute('x2', pos2.left + $(`#galacticEditorProject${conn['to']}`).outerWidth() / 2);
-            line.setAttribute('y2', pos2.top + $(`#galacticEditorProject${conn['to']}`).outerHeight() / 2);
+            line.setAttribute('id', `galactic-editor-line${conn['project_from']}-${conn['project_to']}`);
+            line.setAttribute('x1', pos1.left + $(`#galacticEditorProject${conn['project_from']}`).outerWidth() / 2);
+            line.setAttribute('y1', pos1.top + $(`#galacticEditorProject${conn['project_from']}`).outerHeight() / 2);
+            line.setAttribute('x2', pos2.left + $(`#galacticEditorProject${conn['project_to']}`).outerWidth() / 2);
+            line.setAttribute('y2', pos2.top + $(`#galacticEditorProject${conn['project_to']}`).outerHeight() / 2);
             line.setAttribute('stroke', categories2[key]);
             line.setAttribute('stroke-width', 8);
             $("#galactic-editor-canv").append(line);
+            connections.push([conn['project_from'], conn['project_to']]);
         }
     }
+    console.log(connections);
 
     $(document).on('click', '#galactic-editor-confirm', function () {
         console.log(changes_lines);
@@ -201,7 +204,7 @@ function create_galactic_editor(key) {
                         line.setAttribute('stroke', categories2[key]);
                         line.setAttribute('stroke-width', 8);
                         $("#galactic-editor-canv").append(line);
-                        changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1]});
+                        changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1], 'add': true});
                         connections.push([conn[0], conn[1]]);
                     }
                     
@@ -213,15 +216,20 @@ function create_galactic_editor(key) {
 }
 
 $(document).on('click', '.galactic-editor-line', function () {
-    let index = $(this).data('project-number');
+    let index = extractNumbers($(this).attr('id'));
+    let flag = true;
     for (let i = 0; i < changes_lines.length; i++) {
-        if (changes_lines[i].project === index) {
+        if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
             changes_lines.splice(i, 1);
+            flag = false;
             break;
         }
     }
+    if (flag) {
+        changes_lines.push({'project': current_project, 'from': index[0], 'to': index[1], 'add': false});
+    }
     for (let i = 0; i < connections.length; i++) {
-        if (connections[i][0] === index && connections[i][1] === index) {
+        if (connections[i][0] === index[0] && connections[i][1] === index[1]) {
             connections.splice(i, 1);
             break;
         }

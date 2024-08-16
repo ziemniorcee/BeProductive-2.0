@@ -857,6 +857,18 @@ function todoHandlers(db) {
             }
         })
     })
+
+    ipcMain.on('ask-galactic-conn', (event) => {
+        db.all(`SELECT *
+        FROM galactic_connections
+        ORDER BY category`, (err, rows) => {
+            if (err) console.error(err)
+            else {
+                console.log(rows);
+                event.reply('get-galactic-conn', rows);
+            }
+        })
+    })
 }
 
 
