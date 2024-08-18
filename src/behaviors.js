@@ -106,6 +106,10 @@ $(document).on('click', '#vignette', function () {
     $('#vignette').css('display', 'none');
 })
 
-$(document).on('click', '#newCategory', function (event){
-    event.stopPropagation()
+$(document).on('click', '#newCategory', function(event) {
+    event.stopPropagation();
+})
+
+$(document).on('click', '#to-do', function () {
+    $('#galactics').css('display', 'none');
 })

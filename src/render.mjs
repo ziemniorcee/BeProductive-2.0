@@ -7,7 +7,9 @@ import {
     encode_text,
     getIdByColor,
     hsvToRgb,
-    weekdays2
+    weekdays2, 
+    projects, 
+    project_conn
 } from "./data.mjs";
 import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
 import {
@@ -27,15 +29,34 @@ window.addEventListener('DOMContentLoaded', function () {
 
 window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
 
+window.goalsAPI.getAllProjects((projects) => wait_for_projects(projects));
+
+window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connections(connections));
+
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
-        categories2[c.id] = `rgb(${Math.min(c.r * 4 / 3, 255)}, 
-                                ${Math.min(c.g * 4 / 3, 255)}, 
-                                ${Math.min(c.b * 4 / 3, 255)})`;
+        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 4 / 3), 255)}, 
+                                ${Math.min(Math.floor(c.g * 4 / 3), 255)}, 
+                                ${Math.min(Math.floor(c.b * 4 / 3), 255)})`;
     }
-    console.log(categories)
-    day_view()
+    window.goalsAPI.askAllProjects();
+}
+
+function wait_for_projects(projs) {
+    for (let proj of projs) {
+        projects.push(proj);
+    }
+    console.log(projects);
+    window.goalsAPI.askGalacticConnections();
+}
+
+function wait_for_galactic_connections(connections) {
+    for (let conn of connections) {
+        project_conn.push(conn);
+    }
+    console.log(project_conn);
+    day_view();
     create_today_graphs();
     $('#graphLine1').show();
 }
@@ -376,10 +397,10 @@ function create_new_category() {
     }
     let name = $('#newCategoryName').val();
     categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
-    categories2[index] = `rgb(${Math.min(rgb[0] * 4 / 3, 255)}, 
-                            ${Math.min(rgb[1] * 4 / 3, 255)}, 
-                            ${Math.min(rgb[2] * 4 / 3, 255)})`;
-
+    categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
+                            ${Math.min(rgb[1] * 5 / 3, 255)}, 
+                            ${Math.min(rgb[2] * 5 / 3, 255)})`;
+    
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
@@ -920,3 +941,5 @@ export function set_block_prev_drag_day(option) {
 // document.getElementById("laurels").addEventListener('click', () => {
 //     window.appAPI.changeWindow()
 // })
+
+
