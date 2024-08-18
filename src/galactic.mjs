@@ -204,7 +204,17 @@ function create_galactic_editor(key) {
                         line.setAttribute('stroke', categories2[key]);
                         line.setAttribute('stroke-width', 8);
                         $("#galactic-editor-canv").append(line);
-                        changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1], 'add': true});
+                        let flag = true;
+                        for (let i = 0; i < changes_lines.length; i++) {
+                            if (changes_lines[i].project_from === conn[0] 
+                                && changes_lines[i].project_to === conn[1]
+                                && changes_lines[i].add === false) {
+                                changes_lines.splice(i, 1);
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag) changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1], 'add': true});
                         connections.push([conn[0], conn[1]]);
                     }
                     
