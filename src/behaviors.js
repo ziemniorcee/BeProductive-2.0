@@ -91,6 +91,11 @@ $(document).on('click', '#dashWeek', function () {
     $('#content').css('flexDirection', 'row')
 });
 
+$(document).on('click', '#editSelectProject', function (event) {
+    event.stopPropagation()
+    $('#editProjectPicker').toggle()
+})
+
 $(document).on('input', '#newCategoryColor', function () {
     let rgb = hsvToRgb(this.value * 2, 0.7, 0.7);
     $('#newCategoryColor').css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}`);
