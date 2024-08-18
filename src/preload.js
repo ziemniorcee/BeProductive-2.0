@@ -30,8 +30,8 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     askWeekGoals: (params) => ipcRenderer.send('ask-week-goals', params),
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
-    askGoalInfo: (params) => ipcRenderer.send('ask-goal-info', params),
-    getEditInfo: (func) => ipcRenderer.on('get-edit-info', (event, goal, steps) => func(goal, steps)),
+    askEditGoal: (params) => ipcRenderer.send('ask-edit-goal', params),
+    getEditGoal: (func) => ipcRenderer.on('get-edit-goal', (event, goal, steps) => func(goal, steps)),
     changeWeekGoalCheck: (params) => ipcRenderer.send('change-week-goal-check', params),
 
     setDefaultEdit: (params) => ipcRenderer.send('set-default-edit', params),
@@ -58,6 +58,11 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     askCategoriesCounts: () => ipcRenderer.send('ask-categories-counts'),
     getCategoriesCounts: (func) => ipcRenderer.on('get-categories-counts', (event, counts) => func(counts)),
+
+    askCategories: () => ipcRenderer.send('ask-categories'),
+    getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
+
+    addCategory: (params) => ipcRenderer.send('add-category', params),
 })
 
 

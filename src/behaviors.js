@@ -106,3 +106,6 @@ $(document).on('click', '#vignette', function () {
     $('#vignette').css('display', 'none');
 })
 
+$(document).on('click', '#newCategory', function (event){
+    event.stopPropagation()
+})

@@ -1,12 +1,21 @@
 import {l_date} from './date.js'
-import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2} from "./data.mjs";
-import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
+import {
+    categories,
+    categories2,
+    check_border,
+    decode_text,
+    encode_text,
+    getIdByColor,
+    hsvToRgb,
+    weekdays2
+} from "./data.mjs";
+import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
     build_project_goal, project_emblem_html,
     project_pos
 } from "./project.mjs";
-import { create_today_graphs } from './graph.mjs';
+import {create_today_graphs} from './graph.mjs';
 
 
 export let is_day_drag = 0
@@ -25,6 +34,7 @@ function wait_for_categories(cats) {
                                 ${Math.min(c.g * 4 / 3, 255)}, 
                                 ${Math.min(c.b * 4 / 3, 255)})`;
     }
+    console.log(categories)
     day_view()
     create_today_graphs();
     $('#graphLine1').show();
@@ -49,9 +59,16 @@ $(document).on('click', '#dashDay', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    window.goalsAPI.askGoals({date: l_date.day_sql})
     build_view(_day_content_HTML(), _day_header_HTML())
-    dragula_day_view()
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+    let rightbar = $('#rightbar')
+    rightbar.html(rightbar.html())
+
+    if ($('#days').length){
+        window.sidebarAPI.askHistory({date: l_date.get_history_day()})
+    } else if (!$('#sideProjectGoals').length) {
+        dragula_day_view()
+    }
     close_edit()
 }
 
@@ -333,11 +350,16 @@ function select_repeat_option(that) {
 
 
 $(document).on('click', '#newCategoryCreate', function () {
+
     create_new_category();
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
 })
 
+$(document).on('click', '#newCategoryDiscard', function () {
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+});
 /**
  * Creates new category from newCategory box and resets categories pickers
  */
@@ -357,7 +379,7 @@ function create_new_category() {
     categories2[index] = `rgb(${Math.min(rgb[0] * 4 / 3, 255)}, 
                             ${Math.min(rgb[1] * 4 / 3, 255)}, 
                             ${Math.min(rgb[2] * 4 / 3, 255)})`;
-    
+
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
@@ -450,7 +472,7 @@ $(document).on('keydown', '.stepEntry', function (event) {
  * @param that selected step in new goal input
  * @param event event of .stepEntry
  */
-function change_step_entry(that, event){
+function change_step_entry(that, event) {
     if (event.which === 9) {
         let step_entry = $('.stepEntry')
         if (step_entry.index(that) === step_entry.length - 1 && $(that).val() !== "") {
@@ -499,7 +521,6 @@ export function change_main_check(position) {
     todo.remove()
 
 
-
     let new_tasks = goal_id.map(function () {
         return $(this).text();
     }).get()
@@ -521,7 +542,7 @@ $(document).on('click', '.stepCheck', function () {
  * changes check of selected step
  * @param that selected step
  */
-function change_step_check(that){
+function change_step_check(that) {
     const step_check = $('.stepCheck')
     let step_id_rel = $(that).closest('.step').index()
     let goal_id = $(that).closest('.todo').find('.todoId').text()
@@ -876,7 +897,7 @@ export function _steps_HTML(steps, category_id) {
 export function _categories_HTML() {
     let categories_html = ""
     categories_html +=
-            `<div class="category">
+        `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
             </div>`
@@ -894,7 +915,6 @@ export function _categories_HTML() {
 export function set_block_prev_drag_day(option) {
     is_day_drag = option
 }
-
 
 
 // document.getElementById("laurels").addEventListener('click', () => {
