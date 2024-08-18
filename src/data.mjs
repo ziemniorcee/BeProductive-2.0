@@ -5,6 +5,7 @@ export let project_conn = [];
 
 export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
 
+
 export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
 
 export let range1_backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
@@ -87,5 +88,5 @@ export function encode_text(text){
 }
 
 export let colors = [
-    
+
 ]

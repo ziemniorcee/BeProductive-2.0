@@ -1,16 +1,26 @@
 import {l_date} from './date.js'
-import {categories, categories2, check_border, decode_text, encode_text, getIdByColor, hsvToRgb, weekdays2, projects, project_conn} from "./data.mjs";
-import {change_category, close_edit, set_goal_pos} from "./edit.mjs";
+import {
+    categories,
+    categories2,
+    check_border,
+    decode_text,
+    encode_text,
+    getIdByColor,
+    hsvToRgb,
+    weekdays2, 
+    projects, 
+    project_conn
+} from "./data.mjs";
+import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
     build_project_goal, project_emblem_html,
     project_pos
 } from "./project.mjs";
-import { create_today_graphs } from './graph.mjs';
+import {create_today_graphs} from './graph.mjs';
 
 
-export let todo_dragged = false
-let block_prev_drag = 0
+export let is_day_drag = 0
 
 
 window.addEventListener('DOMContentLoaded', function () {
@@ -70,9 +80,16 @@ $(document).on('click', '#dashDay', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    window.goalsAPI.askGoals({date: l_date.day_sql})
     build_view(_day_content_HTML(), _day_header_HTML())
-    dragula_day_view()
+    window.goalsAPI.askGoals({date: l_date.day_sql})
+    let rightbar = $('#rightbar')
+    rightbar.html(rightbar.html())
+
+    if ($('#days').length){
+        window.sidebarAPI.askHistory({date: l_date.get_history_day()})
+    } else if (!$('#sideProjectGoals').length) {
+        dragula_day_view()
+    }
     close_edit()
 }
 
@@ -259,37 +276,42 @@ function get_repeat_option() {
 
         window.goalsAPI.followingRemoved({id: id, date: date})
 
-        if ($('#todosAll').length) {
-            let goals = $('.todoId')
-            for (let i = 0; i < goals.length; i++) {
-                if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
-            }
-            selected_div.remove()
-        }
+        selected_div.remove()
+
         close_edit()
     })
 
     /**
-     * removes repeating goals
+     * removes repeating goals and fixes ids
      */
     window.goalsAPI.getFollowingRemoved((positions) => {
         let month_grid = $('#monthGrid')
         let elements_ids = month_grid.length ? $('.monthTodoId') : $('.todoId')
         let todo_type = month_grid.length ? '.monthTodo' : '.todo'
 
-        let saved = []
         for (let i = 0; i < elements_ids.length; i++) {
-            if (positions.includes(Number(elements_ids.eq(i).text()))) {
+            let current_id = Number(elements_ids.eq(i).text())
+            if (!positions.includes(current_id)) {
+                let shift = get_shift(current_id, positions)
+                elements_ids.eq(i).text(current_id - shift)
+            } else {
                 elements_ids.eq(i).closest(todo_type).remove()
-            } else saved.push(Number(elements_ids.eq(i).text()))
-        }
-        saved = saved.sort()
-
-        elements_ids = month_grid.length ? $('.monthTodoId') : $('.todoId')
-        for (let i = 0; i < elements_ids.length; i++) {
-            elements_ids.eq(i).text((saved.indexOf(Number(elements_ids.eq(i).text()))))
+            }
         }
     })
+
+    /**
+     * finds how many positions are lesser than selected position
+     * @param value checked goal
+     * @param array positions of goals to delete
+     * @returns position of sorte
+     */
+    function get_shift(value, array){
+        let new_arr = array.slice()
+        new_arr.push(value)
+        new_arr.sort((a, b) => a - b)
+        return new_arr.indexOf(value)
+    }
 
     /**
      * removes history goal
@@ -349,11 +371,16 @@ function select_repeat_option(that) {
 
 
 $(document).on('click', '#newCategoryCreate', function () {
+
     create_new_category();
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
 })
 
+$(document).on('click', '#newCategoryDiscard', function () {
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+});
 /**
  * Creates new category from newCategory box and resets categories pickers
  */
@@ -466,7 +493,7 @@ $(document).on('keydown', '.stepEntry', function (event) {
  * @param that selected step in new goal input
  * @param event event of .stepEntry
  */
-function change_step_entry(that, event){
+function change_step_entry(that, event) {
     if (event.which === 9) {
         let step_entry = $('.stepEntry')
         if (step_entry.index(that) === step_entry.length - 1 && $(that).val() !== "") {
@@ -498,7 +525,7 @@ $(document).on('click', '#todosAll .check_task', function () {
 export function change_main_check(position) {
     const check_task = $('.check_task').eq(position)
     const dot = $('.checkDot').eq(position)
-    let todo = $('.todo')
+    let todo = $('.todo').eq(position)
     let goal_id = $('.todoId')
 
     if ($('#monthGrid').length) {
@@ -511,8 +538,9 @@ export function change_main_check(position) {
     let category_color = $(dot).css('borderColor')
     $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
     check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
-    $(state ? "#todosFinished" : "#todosArea").append(todo.eq(position).prop("outerHTML"))
-    todo.eq(position).remove()
+    $(state ? "#todosFinished" : "#todosArea").append(todo.prop("outerHTML"))
+    todo.remove()
+
 
     let new_tasks = goal_id.map(function () {
         return $(this).text();
@@ -535,7 +563,7 @@ $(document).on('click', '.stepCheck', function () {
  * changes check of selected step
  * @param that selected step
  */
-function change_step_check(that){
+function change_step_check(that) {
     const step_check = $('.stepCheck')
     let step_id_rel = $(that).closest('.step').index()
     let goal_id = $(that).closest('.todo').find('.todoId').text()
@@ -555,7 +583,7 @@ function change_step_check(that){
 }
 
 $(document).on('click', '.sidebarTask', function () {
-    block_prev_drag = 0
+    is_day_drag = 0
 })
 
 /**
@@ -564,47 +592,42 @@ $(document).on('click', '.sidebarTask', function () {
  * depends if project sidebar is on, dragula elements are selected
  */
 export function dragula_day_view() {
-    block_prev_drag = 0
+    is_day_drag = 0
     let dragged_task
     let dragula_array
     let todos_area_before
 
-    let rightbar = $('#rightbar')
+
     let is_project_sidebar = $('#sideProjectHeader').length
 
-    rightbar.html(rightbar.html())
     if (is_project_sidebar) {
         dragula_array = Array.from($('#sideProjectGoals')).concat([document.querySelector("#todosArea")])
     } else {
         dragula_array = Array.from($('.historyTasks')).concat([document.querySelector("#todosArea")])
     }
-
     dragula(dragula_array, {
         copy: function (el) {
             return el.parentNode.id !== "todosArea";
         },
         accepts: function (el, target) {
-            block_prev_drag = 0
+            is_day_drag = 0
             return target.parentNode.id === "todosAll";
         },
         moves: function (el) {
             let is_in = $(el).find('.alreadyEmblem').length
             let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
-
-            if (block_prev_drag === 0 && is_in === 0 && !is_done) {
-                block_prev_drag = 1
+            if (is_day_drag === 0 && is_in === 0 && !is_done) {
+                is_day_drag = 1
                 return true
             } else return false
         },
     }).on('drag', function (event) {
-        todo_dragged = true
         dragged_task = $(event)
-        block_prev_drag = 0
+        is_day_drag = 0
 
         todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
         let new_goal_pos = $('.todo').index($(event))
-        set_goal_pos(new_goal_pos)
         let todos_area_after = Array.from($('#todosArea').children())
 
         if (todos_area_after.length !== todos_area_before.length) {
@@ -615,6 +638,8 @@ export function dragula_day_view() {
         } else {
             change_order()
         }
+        fix_goal_pos()
+
     });
 }
 
@@ -652,12 +677,12 @@ function _get_from_project(new_goal_index, dragged_task) {
  * fixes order of goals and saves it
  */
 export function change_order() {
-    console.log("chuj")
     let goals = $('#main .todoId')
+    if ($('#monthGrid').length) goals = $('#main .monthTodoId')
     let order = []
     for (let i = 0; i < goals.length; i++) order.push(goals.eq(i).text())
-    window.goalsAPI.rowsChange({after: order})
 
+    window.goalsAPI.rowsChange({after: order})
 }
 
 /**
@@ -893,7 +918,7 @@ export function _steps_HTML(steps, category_id) {
 export function _categories_HTML() {
     let categories_html = ""
     categories_html +=
-            `<div class="category">
+        `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
             </div>`
@@ -909,11 +934,7 @@ export function _categories_HTML() {
 
 
 export function set_block_prev_drag_day(option) {
-    block_prev_drag = option
-}
-
-export function set_todo_dragged(bool) {
-    todo_dragged = bool
+    is_day_drag = option
 }
 
 
