@@ -69,6 +69,9 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
     getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
+
+    changeProjectCoords: (params) => ipcRenderer.send('change-projects-coords', params),
+    changeGalacticConnections: (params) => ipcRenderer.send('change-galactic-connections', params),
 })
 
 

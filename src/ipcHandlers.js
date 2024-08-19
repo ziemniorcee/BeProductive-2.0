@@ -889,6 +889,30 @@ function todoHandlers(db) {
             }
         })
     })
+
+    ipcMain.on('change-projects-coords', (event, params) => {
+        for (let change of params.changes) {
+            db.run(`UPDATE projects
+                SET x="${change.x}",
+                y="${change.y}"
+                WHERE id = ${change.id}`)
+        }
+    })
+
+    ipcMain.on('change-galactic-connections', (event, params) => {
+        for (let change of params.changes) {
+            if (change.add) {
+                db.run(`INSERT INTO galactic_connections (category, project_from, project_to)
+                    VALUES ("${change.category}", "${change.from}", "${change.to}")`)
+            } else {
+                db.run(`DELETE
+                    FROM galactic_connections
+                    WHERE category = ${change.category} 
+                    AND project_from = ${change.from}
+                    AND project_to = ${change.to}`)
+            }
+        }
+    })
 }
 
 

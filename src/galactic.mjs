@@ -106,6 +106,33 @@ function create_galactic_editor(key) {
     $(document).on('click', '#galactic-editor-confirm', function () {
         console.log(changes_lines);
         console.log(changes_projects);
+        window.goalsAPI.changeProjectCoords({'changes': changes_projects});
+        window.goalsAPI.changeGalacticConnections({'changes': changes_lines});
+        for (let change of changes_projects) {
+            for (let i = 0; i < projects.length; i++) {
+                if (projects[i].id === change.id) {
+                    projects[i].x = change.x;
+                    projects[i].y = change.y;
+                }
+            }
+        }
+        for (let change of changes_lines) {
+            if (change.add) {
+                project_conn.push({
+                    'category': change.category,
+                    'project_from': change.from,
+                    'project_to': change.to
+                })
+            } else {
+                for (let i = 0; i < project_conn.length; i++) {
+                    if (project_conn[i].category === change.category &&
+                        project_conn[i].project_from === change.from &&
+                        project_conn[i].project_to === change.to)
+                        project_conn.splice(i, 1);
+                }
+            }
+        }
+        add_galactic_category_boxes();
     })
 
     $(document).on('mousemove', '#galactic-editor', function (event) {
@@ -184,7 +211,6 @@ function create_galactic_editor(key) {
         $(element).on('mouseup', function (event) {
             if (event.button === 2) {
                 let released_project = $(element).attr('id');
-                console.log(`${clicked_project}, ${released_project}`)
                 if (released_project !== clicked_project) {
                     let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
                     conn.sort();
@@ -206,15 +232,15 @@ function create_galactic_editor(key) {
                         $("#galactic-editor-canv").append(line);
                         let flag = true;
                         for (let i = 0; i < changes_lines.length; i++) {
-                            if (changes_lines[i].project_from === conn[0] 
-                                && changes_lines[i].project_to === conn[1]
+                            if (changes_lines[i].from === conn[0] 
+                                && changes_lines[i].to === conn[1]
                                 && changes_lines[i].add === false) {
                                 changes_lines.splice(i, 1);
                                 flag = false;
                                 break;
                             }
                         }
-                        if (flag) changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1], 'add': true});
+                        if (flag) changes_lines.push({'category': key, 'from': conn[0], 'to': conn[1], 'add': true});
                         connections.push([conn[0], conn[1]]);
                     }
                     
@@ -236,7 +262,7 @@ $(document).on('click', '.galactic-editor-line', function () {
         }
     }
     if (flag) {
-        changes_lines.push({'project': current_project, 'from': index[0], 'to': index[1], 'add': false});
+        changes_lines.push({'category': current_project, 'from': index[0], 'to': index[1], 'add': false});
     }
     for (let i = 0; i < connections.length; i++) {
         if (connections[i][0] === index[0] && connections[i][1] === index[1]) {

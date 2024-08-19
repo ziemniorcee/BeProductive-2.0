@@ -430,7 +430,7 @@ function select_category(that) {
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
         select_category = $('#selectCategory2')
         $('#categoryPicker2').css('display', 'none')
-        if (index !== 1) change_category(index)
+        if (index !== 1) change_category(index - 1)
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
         select_category = $('#selectCategory3')
         $('#categoryPicker3').css('display', 'none')
