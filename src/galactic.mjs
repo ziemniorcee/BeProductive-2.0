@@ -58,46 +58,24 @@ $(document).on('click', '.galactic', function() {
 
 /**
  * Creates editor of certain galactic in galactics div.
- * @param {number} galactic - galactic window.
+ * @param {number} key - galactic window.
  * */
 function create_galactic_editor(key) {
     changes_lines = [];
     changes_projects = [];
     current_project = key;
-    let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
-    <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
-    <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
-    <div id="galactic-editor-confirm"
-    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>`;
-    
-    for (const proj of projects) {
-        if (proj.category == key) {
-            let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
-            style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-            >${proj.name}</div>`
-        }
-    }
-    editor += `</div>`;
     let box = $('#galacticContainer');
     box.empty();
-    box.html(editor);
+    box.html(_galactic_editor_HTML(key));
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
-            let pos1 = $(`#galacticEditorProject${conn['project_from']}`).position();
-            let pos2 = $(`#galacticEditorProject${conn['project_to']}`).position();
-            let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-            line.setAttribute('class', `galactic-editor-line`);
-            line.setAttribute('id', `galactic-editor-line${conn['project_from']}-${conn['project_to']}`);
-            line.setAttribute('x1', pos1.left + $(`#galacticEditorProject${conn['project_from']}`).outerWidth() / 2);
-            line.setAttribute('y1', pos1.top + $(`#galacticEditorProject${conn['project_from']}`).outerHeight() / 2);
-            line.setAttribute('x2', pos2.left + $(`#galacticEditorProject${conn['project_to']}`).outerWidth() / 2);
-            line.setAttribute('y2', pos2.top + $(`#galacticEditorProject${conn['project_to']}`).outerHeight() / 2);
-            line.setAttribute('stroke', categories2[key]);
-            line.setAttribute('stroke-width', 8);
-            $("#galactic-editor-canv").append(line);
+            $("#galactic-editor-canv").append(create_line(
+                `#galacticEditorProject${conn['project_from']}`,
+                `#galacticEditorProject${conn['project_to']}`,
+                `galactic-editor-line`,
+                `galactic-editor-line${conn['project_from']}-${conn['project_to']}`, key
+            ));
             connections.push([conn['project_from'], conn['project_to']]);
         }
     }
@@ -150,7 +128,53 @@ function create_galactic_editor(key) {
         $('#galactic-editor-line-moving').remove();
         clicked_project = '';
     })
+    bind_editor_projects(key);
+}
 
+
+
+$(document).on('click', '.galactic-editor-line', function () {
+    let index = extractNumbers($(this).attr('id'));
+    let flag = true;
+    for (let i = 0; i < changes_lines.length; i++) {
+        if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
+            changes_lines.splice(i, 1);
+            flag = false;
+            break;
+        }
+    }
+    if (flag) {
+        changes_lines.push({'category': current_project, 'from': index[0], 'to': index[1], 'add': false});
+    }
+    for (let i = 0; i < connections.length; i++) {
+        if (connections[i][0] === index[0] && connections[i][1] === index[1]) {
+            connections.splice(i, 1);
+            break;
+        }
+    }
+    $(this).remove();
+})
+
+
+
+function create_line(div_from, div_to, line_class, line_id, key) {
+    let pos1 = $(div_from).position();
+    let pos2 = $(div_to).position();
+    let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('class', line_class)
+    line.setAttribute('id', line_id)
+    line.setAttribute('x1', pos1.left + $(div_from).outerWidth() / 2);
+    line.setAttribute('y1', pos1.top + $(div_from).outerHeight() / 2);
+    line.setAttribute('x2', pos2.left + $(div_to).outerWidth() / 2);
+    line.setAttribute('y2', pos2.top + $(div_to).outerHeight() / 2);
+    line.setAttribute('stroke', categories2[key]);
+    line.setAttribute('stroke-width', 8);
+    return line;
+}
+
+
+
+function bind_editor_projects(key) {
     $('.galactic-editor-project').each(function(index, element) {
 
         $(element).draggable({
@@ -216,20 +240,12 @@ function create_galactic_editor(key) {
                     conn.sort();
                     if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
                     else {
-                        let proj1 = `#galacticEditorProject${conn[0]}`;
-                        let proj2 = `#galacticEditorProject${conn[1]}`;
-                        let pos1 = $(proj1).position();
-                        let pos2 = $(proj2).position();
-                        let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-                        line.setAttribute('class', `galactic-editor-line`)
-                        line.setAttribute('id', `galactic-editor-line${conn[0]}-${conn[1]}`)
-                        line.setAttribute('x1', pos1.left + $(proj1).outerWidth() / 2);
-                        line.setAttribute('y1', pos1.top + $(proj1).outerHeight() / 2);
-                        line.setAttribute('x2', pos2.left + $(proj2).outerWidth() / 2);
-                        line.setAttribute('y2', pos2.top + $(proj2).outerHeight() / 2);
-                        line.setAttribute('stroke', categories2[key]);
-                        line.setAttribute('stroke-width', 8);
-                        $("#galactic-editor-canv").append(line);
+                        $("#galactic-editor-canv").append(create_line(
+                            `#galacticEditorProject${conn[0]}`,
+                            `#galacticEditorProject${conn[1]}`,
+                            `galactic-editor-line`,
+                            `galactic-editor-line${conn[0]}-${conn[1]}`, key
+                        ));
                         let flag = true;
                         for (let i = 0; i < changes_lines.length; i++) {
                             if (changes_lines[i].from === conn[0] 
@@ -248,27 +264,24 @@ function create_galactic_editor(key) {
             }
         })
     })
-
 }
 
-$(document).on('click', '.galactic-editor-line', function () {
-    let index = extractNumbers($(this).attr('id'));
-    let flag = true;
-    for (let i = 0; i < changes_lines.length; i++) {
-        if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
-            changes_lines.splice(i, 1);
-            flag = false;
-            break;
+function _galactic_editor_HTML(key) {
+    let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
+    <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
+    <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
+    <div id="galactic-editor-confirm"
+    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>`;
+    
+    for (const proj of projects) {
+        if (proj.category == key) {
+            let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+            let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
+            style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
+            >${proj.name}</div>`
         }
     }
-    if (flag) {
-        changes_lines.push({'category': current_project, 'from': index[0], 'to': index[1], 'add': false});
-    }
-    for (let i = 0; i < connections.length; i++) {
-        if (connections[i][0] === index[0] && connections[i][1] === index[1]) {
-            connections.splice(i, 1);
-            break;
-        }
-    }
-    $(this).remove();
-})
+    editor += `</div>`;
+    return editor;
+}
