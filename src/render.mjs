@@ -36,9 +36,9 @@ window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connec
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
-        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 4 / 3), 255)}, 
-                                ${Math.min(Math.floor(c.g * 4 / 3), 255)}, 
-                                ${Math.min(Math.floor(c.b * 4 / 3), 255)})`;
+        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 3 / 2), 255)}, 
+                                ${Math.min(Math.floor(c.g * 3 / 2), 255)}, 
+                                ${Math.min(Math.floor(c.b * 3 / 2), 255)})`;
     }
     window.goalsAPI.askAllProjects();
 }

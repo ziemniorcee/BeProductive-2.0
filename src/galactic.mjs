@@ -16,37 +16,21 @@ $(document).on('click', '#strategy', function () {
  * Creates category windows in main galactic screen
  */
 function add_galactic_category_boxes() {
-    let galactics = '';
-    const len = Object.keys(categories).length + 1;
-    let counter = 0;
-    const height = Math.floor(100 / Math.ceil(len / 5));
-    $('<style>')
-        .prop('type', 'text/css')
-        .html(`.galacticBox {height: ${height}%; }`)
-        .appendTo('head');
-    for (const key in categories) {
-        if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
-        else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
-        galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>`
-        for (const proj of projects) {
-            console.log(`${proj.category}, ${key}`)
-            if (proj.category == key) {
-                let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-                let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-                console.log(`${h},    ${w}`)
-                galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
-                style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-                >${proj.name}</div>`
-            }
-        }
-        galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
-        if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
-        
-        counter++;
-    }
     let box = $('#galacticContainer');
     box.empty();
-    box.html(galactics);
+    box.html(_galactic_display_HTML());
+    for (const key in categories) {
+        for (const conn of project_conn) {
+            if (conn.category == key) {
+                $(`#galactic-canv${key}`).append(create_line(
+                    `#galactic${key}Project-${conn.project_from}`,
+                    `#galactic${key}Project-${conn.project_to}`,
+                    `galactic-project-line`,
+                    `galactic${key}Line${conn.project_from}-${conn.project_to}`, key
+                ));
+            }
+        }
+    }
 }
 
 $(document).on('click', '.galactic', function() {
@@ -266,6 +250,8 @@ function bind_editor_projects(key) {
     })
 }
 
+
+
 function _galactic_editor_HTML(key) {
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
@@ -284,4 +270,37 @@ function _galactic_editor_HTML(key) {
     }
     editor += `</div>`;
     return editor;
+}
+
+
+
+function _galactic_display_HTML() {
+    let galactics = '';
+    const len = Object.keys(categories).length + 1;
+    let counter = 0;
+    const height = Math.floor(100 / Math.ceil(len / 5));
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`.galacticBox {height: ${height}%; }`)
+        .appendTo('head');
+    for (const key in categories) {
+        if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
+        else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
+        galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
+        <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
+        for (const proj of projects) {
+            if (proj.category == key) {
+                let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+                let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+                console.log(`${h},    ${w}`)
+                galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
+                style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
+                >${proj.name}</div>`
+            }
+        }
+        galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
+        if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
+        counter++;
+    }
+    return galactics;
 }
