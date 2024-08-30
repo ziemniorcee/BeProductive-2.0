@@ -385,7 +385,7 @@ $(document).on('click', '#newCategoryDiscard', function () {
  * Creates new category from newCategory box and resets categories pickers
  */
 function create_new_category() {
-    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.7);
+    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
     console.log(rgb);
     const len = Object.keys(categories).length + 1;
     let index = len;
@@ -404,12 +404,15 @@ function create_new_category() {
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
-    $('#categoryPicker').empty();
-    $('#categoryPicker2').empty();
-    $('#categoryPicker3').empty();
-    $('#categoryPicker').html(html_categories);
-    $('#categoryPicker2').html(html_categories);
-    $('#categoryPicker3').html(html_categories);
+    for (let i of ['', '2', '3']) {
+        $(`#categoryPicker${i}`).empty();
+        $(`#categoryPicker${i}`).html(html_categories);
+        if ($(`#categoryPicker${i}`).css('display') === 'block') {
+            $(`#selectCategory${i}`).css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+            $(`#selectCategory${i}`).text(name);
+            $(`#categoryPicker${i}`).css('display', 'none');
+        }
+    }
 }
 
 $(document).on('click', '.category', function (event) {
@@ -419,26 +422,25 @@ $(document).on('click', '.category', function (event) {
 
 /**
  * Checks which category picker and by cetegory id it sets category selection
- * @param that selected cateogry
+ * @param that selected category
  */
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-    let select_category = $('#selectCategory')
+    let picker = '';
     if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
-        select_category = $('#selectCategory')
-        $('#categoryPicker').css('display', 'none')
+        picker = ''
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
-        select_category = $('#selectCategory2')
-        $('#categoryPicker2').css('display', 'none')
+        picker = '2'
         if (index !== 1) change_category(index - 1)
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
-        select_category = $('#selectCategory3')
-        $('#categoryPicker3').css('display', 'none')
+        picker = '3'
     }
+    let select_category = $(`#selectCategory${picker}`)
     if (index === 1) {
         $("#vignette").css('display', 'block')
         $("#newCategory").css('display', 'block')
     } else {
+        $(`#categoryPicker${picker}`).css('display', 'none')
         select_category.css('background', categories[index - 1][0])
         select_category.text(categories[index - 1][1])
     }
