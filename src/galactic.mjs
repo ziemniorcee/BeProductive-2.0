@@ -1,4 +1,4 @@
-import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition } from "./data.mjs";
+import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition, divide_to_boxes } from "./data.mjs";
 
 let clicked_project = '';
 let changes_lines = [];
@@ -275,32 +275,72 @@ function _galactic_editor_HTML(key) {
 
 
 function _galactic_display_HTML() {
+    // let galactics = '';
+    // const len = Object.keys(categories).length + 1;
+    // let counter = 0;
+    // const height = Math.floor(100 / Math.ceil(len / 5));
+    // $('<style>')
+    //     .prop('type', 'text/css')
+    //     .html(`.galacticBox {height: ${height}%; }`)
+    //     .appendTo('head');
+    // for (const key in categories) {
+    //     if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
+    //     else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
+    //     galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
+    //     <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
+    //     for (const proj of projects) {
+    //         if (proj.category == key) {
+    //             let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+    //             let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+    //             console.log(`${h},    ${w}`)
+    //             galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
+    //             style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
+    //             >${proj.name}</div>`
+    //         }
+    //     }
+    //     galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
+    //     if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
+    //     counter++;
+    // }
+    // return galactics;
     let galactics = '';
-    const len = Object.keys(categories).length + 1;
-    let counter = 0;
-    const height = Math.floor(100 / Math.ceil(len / 5));
+    const len = Object.keys(categories).length;
+    const height = Math.floor(100 / Math.ceil((len - 1) / 5));
     $('<style>')
         .prop('type', 'text/css')
         .html(`.galacticBox {height: ${height}%; }`)
         .appendTo('head');
+    let counts = divide_to_boxes(len);
+    let boxes = [];
+    for (let i = 0; i < counts.length; i++) {
+        boxes.push(`<div class='galacticBox' id='galacticBox${i + 1}' style='grid-template-columns: repeat(${counts[i]}, 1fr)'>`)
+    }
+    let pointer = 0;
+    let box_counter = 0;
+    console.log(counts)
     for (const key in categories) {
-        if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
-        else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
-        galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
+        boxes[pointer] += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
         <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
         for (const proj of projects) {
             if (proj.category == key) {
                 let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
                 let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
                 console.log(`${h},    ${w}`)
-                galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
+                boxes[pointer] += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
                 style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
                 >${proj.name}</div>`
             }
         }
-        galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
-        if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
-        counter++;
+        boxes[pointer] +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
+        box_counter++;
+        if (box_counter === counts[pointer]) {
+            pointer++;
+            box_counter = 0;
+        }
+    }
+    for (let i = 0; i < counts.length; i++) {
+        galactics += boxes[i]
+        galactics += '</div>'
     }
     return galactics;
 }

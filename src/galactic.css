@@ -24,14 +24,6 @@
     display: grid;
 }
 
-.galacticBoxOdd {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-.galacticBoxEven {
-    grid-template-columns: repeat(3, 1fr);
-}
-
 .galactic {
     position: relative;
     margin: 0px;
