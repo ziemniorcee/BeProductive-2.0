@@ -29,6 +29,12 @@ export function hsvToRgb(h, s, v) {
     return [Math.round(f(5) * 255), Math.round(f(3) * 255), Math.round(f(1) * 255)];
 }
 
+/**
+ * Calculates percentage position of child in parent div.
+ * @param {HTMLElement} childSelector - child's element
+ * @param {HTMLElement} parentSelector - parent's element
+ * @returns {Array} array od x and y percentages
+ * */
 export function calculateChildPosition(childSelector, parentSelector) {
     var child = $(childSelector);
     var parent = $(parentSelector);
@@ -73,6 +79,11 @@ export function calculateContainment(that, parent, limits) {
     return res;
 }
 
+/**
+ * Splits integer into few integers ones close to each other.
+ * @param {number} n - given number
+ * @returns {Array} splitted integers
+ * */
 export function divide_to_boxes(n) {
     let res = []
     let q = Math.ceil(Math.sqrt(n))

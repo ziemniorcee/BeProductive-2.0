@@ -26,7 +26,8 @@ function add_galactic_category_boxes() {
                     `#galactic${key}Project-${conn.project_from}`,
                     `#galactic${key}Project-${conn.project_to}`,
                     `galactic-project-line`,
-                    `galactic${key}Line${conn.project_from}-${conn.project_to}`, key
+                    `galactic${key}Line${conn.project_from}-${conn.project_to}`, key,
+                    4, `rgb(240, 255, 255)`
                 ));
             }
         }
@@ -42,7 +43,7 @@ $(document).on('click', '.galactic', function() {
 
 /**
  * Creates editor of certain galactic in galactics div.
- * @param {number} key - galactic window.
+ * @param {number} key - galactic id.
  * */
 function create_galactic_editor(key) {
     changes_lines = [];
@@ -140,8 +141,18 @@ $(document).on('click', '.galactic-editor-line', function () {
 })
 
 
-
-function create_line(div_from, div_to, line_class, line_id, key) {
+/**
+ * Creates editor of certain galactic in galactics div.
+ * @param {string} div_from - div id by first edge of line
+ * @param {string} div_to - div id by the other edge of line
+ * @param {string} line_class - class of line
+ * @param {string} line_id - id of line
+ * @param {number} key - galactic id
+ * @param {number} w - line width
+ * @param {string} color - galactic id
+ * @returns {SVGLineElement} svg line element
+ * */
+function create_line(div_from, div_to, line_class, line_id, key, w = 8, color = undefined) {
     let pos1 = $(div_from).position();
     let pos2 = $(div_to).position();
     let line = document.createElementNS('http://www.w3.org/2000/svg','line');
@@ -151,13 +162,16 @@ function create_line(div_from, div_to, line_class, line_id, key) {
     line.setAttribute('y1', pos1.top + $(div_from).outerHeight() / 2);
     line.setAttribute('x2', pos2.left + $(div_to).outerWidth() / 2);
     line.setAttribute('y2', pos2.top + $(div_to).outerHeight() / 2);
-    line.setAttribute('stroke', categories2[key]);
-    line.setAttribute('stroke-width', 8);
+    line.setAttribute('stroke', (color === undefined) ? categories2[key] : color);
+    line.setAttribute('stroke-width', w);
     return line;
 }
 
 
-
+/**
+ * Binds projects to draggable event and line linking events.
+ * @param {number} key - galactic id
+ * */
 function bind_editor_projects(key) {
     $('.galactic-editor-project').each(function(index, element) {
 
@@ -251,7 +265,11 @@ function bind_editor_projects(key) {
 }
 
 
-
+/**
+ * Returns html of galactic editor.
+ * @param {number} key - galactic id
+ * @returns {string} html of galactic editor for given category
+ * */
 function _galactic_editor_HTML(key) {
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
@@ -273,36 +291,11 @@ function _galactic_editor_HTML(key) {
 }
 
 
-
+/**
+ * Returns html of galactics.
+ * @returns {string} html of galactics display
+ * */
 function _galactic_display_HTML() {
-    // let galactics = '';
-    // const len = Object.keys(categories).length + 1;
-    // let counter = 0;
-    // const height = Math.floor(100 / Math.ceil(len / 5));
-    // $('<style>')
-    //     .prop('type', 'text/css')
-    //     .html(`.galacticBox {height: ${height}%; }`)
-    //     .appendTo('head');
-    // for (const key in categories) {
-    //     if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
-    //     else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
-    //     galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
-    //     <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
-    //     for (const proj of projects) {
-    //         if (proj.category == key) {
-    //             let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-    //             let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-    //             console.log(`${h},    ${w}`)
-    //             galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
-    //             style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-    //             >${proj.name}</div>`
-    //         }
-    //     }
-    //     galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
-    //     if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
-    //     counter++;
-    // }
-    // return galactics;
     let galactics = '';
     const len = Object.keys(categories).length;
     const height = Math.floor(100 / Math.ceil((len - 1) / 5));
@@ -327,8 +320,8 @@ function _galactic_display_HTML() {
                 let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
                 console.log(`${h},    ${w}`)
                 boxes[pointer] += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
-                style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-                >${proj.name}</div>`
+                style="top: ${h}%; left: ${w}%;"
+                ></div>`
             }
         }
         boxes[pointer] +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`

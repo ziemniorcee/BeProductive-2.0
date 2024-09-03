@@ -46,15 +46,15 @@
 .galactic-project-icon {
     position: absolute;
     transform: translate(-50%, -50%);
-    height: 30px;
+    height: 16px;
+    width: 16px;
     overflow: hidden;
-    width: auto;
     border-width: 5px;
     border-style:solid;
-    border-radius: 5px;
+    border-radius: 16px;
+    border-color: azure;
     color: azure;
-    padding: 10px;
-    font-size: 24px;
+    background-color: rgb(240, 255, 255);
 }
 
 #galactic-editor {
