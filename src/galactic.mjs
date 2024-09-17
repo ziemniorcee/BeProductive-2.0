@@ -15,7 +15,7 @@ $(document).on('click', '#strategy', function () {
 /**
  * Creates category windows in main galactic screen
  */
-function add_galactic_category_boxes() {
+export function add_galactic_category_boxes() {
     let box = $('#galacticContainer');
     box.empty();
     box.html(_galactic_display_HTML());
@@ -335,5 +335,14 @@ function _galactic_display_HTML() {
         galactics += boxes[i]
         galactics += '</div>'
     }
+    galactics += `<div id='galactic-display-options-btn'>
+    <img src="images/goals/more.png">
+    <div id='galactic-display-options'>
+    <div id='galactic-display-new-category' class='galacticOption'>New category</div>
+    <div id='galactic-display-delete-category' class='galacticOption'>Remove category</div>
+    </div>
+    </div>`
     return galactics;
 }
+
+

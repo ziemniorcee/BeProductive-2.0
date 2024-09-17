@@ -118,3 +118,8 @@ $(document).on('click', '#newCategory', function(event) {
 $(document).on('click', '#to-do', function () {
     $('#galactics').css('display', 'none');
 })
+
+$(document).on('click', '#galactic-display-new-category', function () {
+    $("#vignette").css('display', 'block')
+    $("#newCategory").css('display', 'block')
+})

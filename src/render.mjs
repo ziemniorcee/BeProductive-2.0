@@ -18,6 +18,7 @@ import {
     project_pos
 } from "./project.mjs";
 import {create_today_graphs} from './graph.mjs';
+import {add_galactic_category_boxes} from './galactic.mjs';
 
 
 export let is_day_drag = 0
@@ -413,6 +414,9 @@ function create_new_category() {
             $(`#categoryPicker${i}`).css('display', 'none');
         }
     }
+    if ($('#galactics').css('display') !== 'none') {
+        add_galactic_category_boxes();
+    }
 }
 
 $(document).on('click', '.category', function (event) {
@@ -426,7 +430,7 @@ $(document).on('click', '.category', function (event) {
  */
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-    let picker = '';
+    let picker = '0';
     if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
         picker = ''
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
@@ -435,11 +439,11 @@ function select_category(that) {
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
         picker = '3'
     }
-    let select_category = $(`#selectCategory${picker}`)
     if (index === 1) {
         $("#vignette").css('display', 'block')
         $("#newCategory").css('display', 'block')
-    } else {
+    } else if (picker !== '0') {
+        let select_category = $(`#selectCategory${picker}`)
         $(`#categoryPicker${picker}`).css('display', 'none')
         select_category.css('background', categories[index - 1][0])
         select_category.text(categories[index - 1][1])
