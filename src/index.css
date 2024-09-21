@@ -1249,7 +1249,7 @@ body {
     display: none;
 }
 
-#newCategory{
+#newCategory, #removeCategory{
     position: absolute;
     color: black;
     width: 40%;
@@ -1262,7 +1262,7 @@ body {
     display: none;
 }
 
-#newCategoryContent{
+#newCategoryContent, #removeCategoryContent{
     padding: 10px;
     height: 200px;
     display:flex;
@@ -1270,7 +1270,7 @@ body {
     align-items: center;
 }
 
-#newCategoryTitle{
+#newCategoryTitle, #removeCategoryTitle{
     width:60%;
     height:8%;
     font-size: 25px;
@@ -1309,7 +1309,7 @@ body {
     flex: 1;
 }
 
-#newCategoryButtons{
+#newCategoryButtons, #removeCategoryButtons{
     position: absolute;
     bottom: 8%;
     left:10%;
@@ -1317,7 +1317,7 @@ body {
     height: 10%;
 }
 
-.new-category-btn{
+.new-category-btn, .remove-category-btn{
     position: absolute;
     text-align: center;
     font-size: 100%;
@@ -1329,17 +1329,17 @@ body {
     align-items: center;
 }
 
-#newCategoryDiscard{
+#newCategoryDiscard, #removeCategoryDiscard{
     left:0%;
     background-color: red;
     color: white;
 }
 
-#newCategoryCreate{
+#newCategoryCreate, #removeCategoryCreate{
     right:0%;
 }
 
-#newCategoryError{
+#newCategoryError, #removeCategoryError{
     text-align: center;
     background-color: red;
     position: relative;

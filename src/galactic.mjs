@@ -338,8 +338,12 @@ function _galactic_display_HTML() {
     galactics += `<div id='galactic-display-options-btn'>
     <img src="images/goals/more.png">
     <div id='galactic-display-options'>
-    <div id='galactic-display-new-category' class='galacticOption'>New category</div>
-    <div id='galactic-display-delete-category' class='galacticOption'>Remove category</div>
+    <div id='galactic-display-new-category' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>New category</span></div>
+    <div id='galactic-display-remove-category' class='galacticOption'>
+    <img src="images/goals/minus.png">
+    <span>Remove category</span></div>
     </div>
     </div>`
     return galactics;

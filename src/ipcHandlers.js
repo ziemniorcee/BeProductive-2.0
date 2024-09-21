@@ -913,6 +913,13 @@ function todoHandlers(db) {
             }
         }
     })
+
+    ipcMain.on('remove-category', (event, params) => {
+        db.run(`DELETE FROM categories WHERE id = ${params.id}`);
+        db.run(`DELETE FROM galactic_connections WHERE category = ${params.id}`);
+        db.run(`DELETE FROM projects WHERE category = ${params.id}`);
+        db.run(`DELETE FROM goals WHERE category = ${params.id}`);
+    })
 }
 
 

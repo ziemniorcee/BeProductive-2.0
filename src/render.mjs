@@ -405,7 +405,7 @@ function create_new_category() {
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
-    for (let i of ['', '2', '3']) {
+    for (let i of ['', '2', '3', '4']) {
         $(`#categoryPicker${i}`).empty();
         $(`#categoryPicker${i}`).html(html_categories);
         if ($(`#categoryPicker${i}`).css('display') === 'block') {
@@ -438,6 +438,8 @@ function select_category(that) {
         if (index !== 1) change_category(index - 1)
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
         picker = '3'
+    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker4") {
+        picker = '4'
     }
     if (index === 1) {
         $("#vignette").css('display', 'block')
@@ -948,4 +950,32 @@ export function set_block_prev_drag_day(option) {
 //     window.appAPI.changeWindow()
 // })
 
+function open_remove_category() {
+    $("#vignette").css('display', 'block')
+    $("#removeCategory").css('display', 'block')
+    let picker = $("#categoryPicker4");
+    picker.empty();
+    picker.html(_categories_HTML())
+}
 
+$(document).on('click', '#galactic-display-remove-category', function () {
+    open_remove_category()
+})
+
+function remove_category() {
+    let category = getIdByColor(categories, $('#selectCategory4').css('backgroundColor'))
+    delete categories[category];
+    let new_projects = projects.filter(item => item.category !== category);
+    projects.splice(0, projects.length);
+    for (let e of new_projects) {
+        projects.push(e);
+    }
+    window.goalsAPI.removeCategory({id: category});
+    add_galactic_category_boxes();
+    $("#removeCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+}
+
+$(document).on('click', '#removeCategoryCreate', function () {
+    remove_category()
+})
