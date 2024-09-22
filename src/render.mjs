@@ -440,6 +440,7 @@ function select_category(that) {
         picker = '3'
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker4") {
         picker = '4'
+        index++;
     }
     if (index === 1) {
         $("#vignette").css('display', 'block')
@@ -923,13 +924,15 @@ export function _steps_HTML(steps, category_id) {
  * creates categories for goals
  * @returns {string} HTML of categories
  */
-export function _categories_HTML() {
+export function _categories_HTML(with_new_category) {
     let categories_html = ""
-    categories_html +=
+    if (with_new_category === undefined) {
+        categories_html +=
         `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
             </div>`
+    }
     for (let i = 0; i < Object.keys(categories).length; i++) {
         categories_html +=
             `<div class="category">
@@ -955,7 +958,7 @@ function open_remove_category() {
     $("#removeCategory").css('display', 'block')
     let picker = $("#categoryPicker4");
     picker.empty();
-    picker.html(_categories_HTML())
+    picker.html(_categories_HTML(true))
 }
 
 $(document).on('click', '#galactic-display-remove-category', function () {
@@ -964,6 +967,7 @@ $(document).on('click', '#galactic-display-remove-category', function () {
 
 function remove_category() {
     let category = getIdByColor(categories, $('#selectCategory4').css('backgroundColor'))
+    console.log(category)
     delete categories[category];
     let new_projects = projects.filter(item => item.category !== category);
     projects.splice(0, projects.length);

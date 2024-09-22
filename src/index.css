@@ -1368,3 +1368,24 @@ body {
     background: #04AA6D;
     cursor: pointer;
 }
+
+#removeCategoryPicker {
+    width: 200px;
+    height:auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#categoryPicker4 {
+    width: 100%;
+    bottom: auto;
+    border: 1px solid black;
+}
+
+#selectCategory4 {
+    font-size: 20px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid black;
+}

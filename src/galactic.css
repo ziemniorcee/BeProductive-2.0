@@ -4,7 +4,7 @@
     left: 100px;
     width: calc(100vw - 100px);
     height: 100%;
-    background: #FF5D00 url("https://www.pixel4k.com/wp-content/uploads/2018/10/space-sky-star-cosmic-night-4k_1540140109.jpg.webp");
+    background: #FF5D00 url("images/galactic_bg.png");
     z-index: 50;
     display: none;
 }
