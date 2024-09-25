@@ -18,6 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@panzoom/panzoom": "^4.5.1",
     "dragula": "^3.7.3",
     "electron-squirrel-startup": "^1.0.0",
     "interactjs": "^1.10.18",

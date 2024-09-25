@@ -77,10 +77,9 @@
     font-size: 48px;
 }
 
-#galactic-editor-confirm {
+#galactic-editor-confirm, #galactic-editor-cancel {
     position: absolute;
     width: 10%;
-    right: 5%;
     top: 5%;
     border-width: 5px;
     border-style:solid;
@@ -88,6 +87,48 @@
     justify-content: center;
     text-align: center;
     font-size: 36px;
+}
+
+#galactic-editor-confirm {left: 22%;}
+#galactic-editor-cancel {left: 5%;}
+
+#galactic-editor-slider-box {
+    position: absolute;
+    width: 10%;
+    top: 5%;
+    right: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+#galactic-editor-slider-box span {
+    color: aliceblue;
+    font-size: 48px;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 100%;
+}
+
+#galactic-editor-slider {
+    -webkit-appearance: none;
+    flex-grow: 1;
+    width: 300px;
+    height: 10px;
+    border-radius: 5px;
+    background: aliceblue;
+    outline: none;
+}
+
+#galactic-editor-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #FF5D00;
+    cursor: pointer;
+    border-radius: 50%;
 }
 
 .galactic-editor-project {

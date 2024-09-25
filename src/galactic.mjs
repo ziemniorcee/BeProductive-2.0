@@ -52,6 +52,15 @@ function create_galactic_editor(key) {
     let box = $('#galacticContainer');
     box.empty();
     box.html(_galactic_editor_HTML(key));
+
+    // const canv = document.getElementById('galactic-editor')
+    // const panzoom = Panzoom(canv, {
+    //     contain: 'outside',
+    //     maxScale: 5,
+    //     minScale: 1,
+    //     startScale: 1,
+    // })
+    // canv.addEventListener('wheel', panzoom.zoomWithWheel);
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -98,6 +107,10 @@ function create_galactic_editor(key) {
         add_galactic_category_boxes();
     })
 
+    $(document).on('click', '#galactic-editor-cancel', function () {
+        add_galactic_category_boxes()
+    })
+
     $(document).on('mousemove', '#galactic-editor', function (event) {
         if (clicked_project !== '') {
             let line = document.getElementById('galactic-editor-line-moving');
@@ -139,6 +152,22 @@ $(document).on('click', '.galactic-editor-line', function () {
     }
     $(this).remove();
 })
+
+$(document).on('input', '#galactic-editor-slider', function () {
+    const val = $('#galactic-editor-slider').val()
+    console.log(val)
+})
+
+
+// $(document).on('mouseenter', '.galactic-editor-items', function () {
+//     const canv = document.getElementById('galactic-editor')
+//     canv.panzoom('disable')
+// })
+
+// $(document).on('mouseleave', '.galactic-editor-items', function () {
+//     const canv = document.getElementById('galactic-editor')
+//     canv.panzoom('enable')
+// })
 
 
 /**
@@ -271,17 +300,28 @@ function bind_editor_projects(key) {
  * @returns {string} html of galactic editor for given category
  * */
 function _galactic_editor_HTML(key) {
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`#galactic-editor-slider::-webkit-slider-thumb {
+            background: ${categories2[key]}}`)
+        .appendTo('head');
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
     <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
     <div id="galactic-editor-confirm"
-    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>`;
-    
+    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>
+    <div id="galactic-editor-cancel"
+    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Cancel</div>
+    <div id="galactic-editor-slider-box">
+    <span>-</span>
+    <input type="range" id="galactic-editor-slider" min="0" max="100" value="50" style="">
+    <span>+</span>
+    </div>`;
     for (const proj of projects) {
         if (proj.category == key) {
             let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
             let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
+            editor += `<div class="galactic-editor-project galactic-editor-items" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
             style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
             >${proj.name}</div>`
         }
