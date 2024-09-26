@@ -134,7 +134,7 @@
 .galactic-editor-project {
     position: absolute;
     transform: translate(-50%, -50%);
-    height: 40px;
+    height: auto;
     overflow: hidden;
     width: auto;
     border-width: 5px;
@@ -144,6 +144,7 @@
     padding: 10px;
     font-size: 30px;
     z-index:5;
+    cursor: grab;
 }
 
 #galactic-editor-canv {

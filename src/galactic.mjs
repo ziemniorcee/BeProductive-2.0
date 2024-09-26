@@ -54,13 +54,15 @@ function create_galactic_editor(key) {
     box.html(_galactic_editor_HTML(key));
 
     // const canv = document.getElementById('galactic-editor')
-    // const panzoom = Panzoom(canv, {
+    // const p = Panzoom(canv, {
     //     contain: 'outside',
     //     maxScale: 5,
     //     minScale: 1,
     //     startScale: 1,
+    //     disablePan: true,
+    //     disableZoom: true,
     // })
-    // canv.addEventListener('wheel', panzoom.zoomWithWheel);
+    // canv.addEventListener('wheel', p.zoomWithWheel);
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -156,6 +158,8 @@ $(document).on('click', '.galactic-editor-line', function () {
 $(document).on('input', '#galactic-editor-slider', function () {
     const val = $('#galactic-editor-slider').val()
     console.log(val)
+    $('.galactic-editor-project').css('font-size', `${Number(val) + 15}px`);
+    $('.galactic-editor-line').attr('stroke-width', `${3 + Math.ceil(Number(val) / 3)}`);
 })
 
 
@@ -314,7 +318,7 @@ function _galactic_editor_HTML(key) {
     style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Cancel</div>
     <div id="galactic-editor-slider-box">
     <span>-</span>
-    <input type="range" id="galactic-editor-slider" min="0" max="100" value="50" style="">
+    <input type="range" id="galactic-editor-slider" min="0" max="30" value="15">
     <span>+</span>
     </div>`;
     for (const proj of projects) {
