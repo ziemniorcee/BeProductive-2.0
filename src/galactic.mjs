@@ -5,6 +5,7 @@ let changes_lines = [];
 let changes_projects = [];
 let connections = [];
 let current_project = 0;
+let scale = 1;
 
 $(document).on('click', '#strategy', function () {
     $('#galactics').css('display', 'block');
@@ -46,6 +47,7 @@ $(document).on('click', '.galactic', function() {
  * @param {number} key - galactic id.
  * */
 function create_galactic_editor(key) {
+    scale = 1;
     changes_lines = [];
     changes_projects = [];
     current_project = key;
@@ -63,6 +65,19 @@ function create_galactic_editor(key) {
     //     disableZoom: true,
     // })
     // canv.addEventListener('wheel', p.zoomWithWheel);
+
+    $('#galactic-editor').on('wheel', function(event) {
+        event.preventDefault();
+
+        let elementOffset = $(this).offset();
+        let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
+        let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
+        let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
+        scale = Math.min(Math.max(scale + multiplier, 1), 5)
+        // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
+        $(this).css('transform', 'scale(' + scale + ')');
+        console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
+    });
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -209,13 +224,18 @@ function bind_editor_projects(key) {
     $('.galactic-editor-project').each(function(index, element) {
 
         $(element).draggable({
+            // cursorAt: {left: $(element).outerWidth() / 2, top: $(element).outerHeight() / 2},
             cursorAt: {left: 0, top: 0},
             containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
             start: function(event, ui) {
                 console.log($(element).data('project-number'));
+                console.log($(element).outerWidth())
+                console.log(scale)
             },
             drag: function(event, ui) {
+                ui.position.left -= (event.pageX * (scale - 1));
+                ui.position.top -= (event.pageY * (scale - 1));
                 let number = $(element).data('project-number');
                 for (let conn of connections) {
                     if (conn[0] == number) {
