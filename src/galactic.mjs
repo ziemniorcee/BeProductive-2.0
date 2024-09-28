@@ -66,18 +66,18 @@ function create_galactic_editor(key) {
     // })
     // canv.addEventListener('wheel', p.zoomWithWheel);
 
-    $('#galactic-editor').on('wheel', function(event) {
-        event.preventDefault();
+    // $('#galactic-editor').on('wheel', function(event) {
+    //     event.preventDefault();
 
-        let elementOffset = $(this).offset();
-        let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
-        let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
-        let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
-        scale = Math.min(Math.max(scale + multiplier, 1), 5)
-        // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
-        $(this).css('transform', 'scale(' + scale + ')');
-        console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
-    });
+    //     let elementOffset = $(this).offset();
+    //     let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
+    //     let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
+    //     let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
+    //     scale = Math.min(Math.max(scale + multiplier, 1), 5)
+    //     // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
+    //     $(this).css('transform', 'scale(' + scale + ')');
+    //     console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
+    // });
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -177,18 +177,6 @@ $(document).on('input', '#galactic-editor-slider', function () {
     $('.galactic-editor-line').attr('stroke-width', `${3 + Math.ceil(Number(val) / 3)}`);
 })
 
-
-// $(document).on('mouseenter', '.galactic-editor-items', function () {
-//     const canv = document.getElementById('galactic-editor')
-//     canv.panzoom('disable')
-// })
-
-// $(document).on('mouseleave', '.galactic-editor-items', function () {
-//     const canv = document.getElementById('galactic-editor')
-//     canv.panzoom('enable')
-// })
-
-
 /**
  * Creates editor of certain galactic in galactics div.
  * @param {string} div_from - div id by first edge of line
@@ -224,18 +212,16 @@ function bind_editor_projects(key) {
     $('.galactic-editor-project').each(function(index, element) {
 
         $(element).draggable({
-            // cursorAt: {left: $(element).outerWidth() / 2, top: $(element).outerHeight() / 2},
             cursorAt: {left: 0, top: 0},
             containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
             start: function(event, ui) {
-                console.log($(element).data('project-number'));
-                console.log($(element).outerWidth())
-                console.log(scale)
             },
             drag: function(event, ui) {
-                ui.position.left -= (event.pageX * (scale - 1));
-                ui.position.top -= (event.pageY * (scale - 1));
+                // let offset = $('#galactic-editor').position()
+                // ui.position.left -= ((event.pageX + offset.left) * (scale - 1) - offset.left);
+                // ui.position.top -= ((event.pageY + offset.top) * (scale - 1) - offset.top);
+                // console.log(`${Number(ui.position.left - event.pageX)} \n`)
                 let number = $(element).data('project-number');
                 for (let conn of connections) {
                     if (conn[0] == number) {
@@ -340,7 +326,20 @@ function _galactic_editor_HTML(key) {
     <span>-</span>
     <input type="range" id="galactic-editor-slider" min="0" max="30" value="15">
     <span>+</span>
-    </div>`;
+    </div>
+    <div id='galactic-editor-options-btn'>
+    <img src="images/goals/more.png">
+    <div id='galactic-editor-options'>
+    <div id='galactic-editor-new-category' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>New project</span></div>
+    <div id='galactic-editor-remove-category' class='galacticOption'>
+    <img src="images/goals/minus.png">
+    <span>Remove project</span></div>
+    <div id='galactic-editor-open-projects' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>Open not placed projects</span></div>
+    </div></div>`;
     for (const proj of projects) {
         if (proj.category == key) {
             let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;

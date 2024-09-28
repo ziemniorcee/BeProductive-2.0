@@ -151,7 +151,8 @@
     z-index: 55;
 }
 
-#galactic-display-options-btn {
+#galactic-display-options-btn,
+#galactic-editor-options-btn{
     position: absolute;
     bottom: 5%;
     left: 3%;
@@ -162,19 +163,21 @@
     display: block;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     display: flex;
+    cursor: pointer;
     background: radial-gradient(circle, black 98%, transparent 100%);
 }
 
-#galactic-display-options-btn > img {
+#galactic-display-options-btn > img, 
+#galactic-editor-options-btn > img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
 }
 
-#galactic-display-options {
+#galactic-display-options,
+#galactic-editor-options {
     position: absolute;
     bottom: calc(5% + 90px);
     left: 3%;
@@ -184,9 +187,11 @@
     background-color: rgba(255, 93, 0, 0);
     z-index: 60;
     display: none;
+    cursor: default;
 }
 
-#galactic-display-options-btn:hover #galactic-display-options {
+#galactic-display-options-btn:hover #galactic-display-options,
+#galactic-editor-options-btn:hover #galactic-editor-options {
     display: block;
 }
 
@@ -206,7 +211,7 @@
     padding-right: 20px;
     border-radius: 30px;
     background-color: aliceblue;
-    
+    cursor: pointer;
 }
 
 .galacticOption img {
