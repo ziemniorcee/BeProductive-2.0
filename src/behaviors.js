@@ -118,3 +118,12 @@ $(document).on('click', '#newCategory', function(event) {
 $(document).on('click', '#to-do', function () {
     $('#galactics').css('display', 'none');
 })
+
+$(document).on('click', '#testPanelShowIds', function () {
+    $('.todoId').toggle();
+})
+
+$(document).on('click', '#testPanelShowSidebars', function () {
+    $('.sidebars').toggle();
+    $('#projectTypes').toggle()
+})
