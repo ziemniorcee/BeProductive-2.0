@@ -1,0 +1,118 @@
+#galactics {
+    position: absolute;
+    top: 0%;
+    left: 100px;
+    width: calc(100vw - 100px);
+    height: 100%;
+    background: #FF5D00 url("https://www.pixel4k.com/wp-content/uploads/2018/10/space-sky-star-cosmic-night-4k_1540140109.jpg.webp");
+    z-index: 50;
+    display: none;
+}
+
+#galacticContainer {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.galacticBox {
+    width: 100%;
+    height: 10%;
+    display: grid;
+}
+
+.galacticBoxOdd {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.galacticBoxEven {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.galactic {
+    position: relative;
+    margin: 0px;
+    text-align: center;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    height: 100%;
+}
+
+.galactic-text {
+    position: absolute;
+    width: 40%;
+    top: 5%;
+    left: 30%;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.galactic-project-icon {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    height: 30px;
+    overflow: hidden;
+    width: auto;
+    border-width: 5px;
+    border-style:solid;
+    border-radius: 5px;
+    color: azure;
+    padding: 10px;
+    font-size: 24px;
+}
+
+#galactic-editor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    border-width: 10px;
+    border-style:solid;
+    border-radius: 5px;
+}
+
+#galactic-editor-text {
+    position: absolute;
+    width: 40%;
+    top: 5%;
+    left: 30%;
+    justify-content: center;
+    text-align: center;
+    font-size: 48px;
+}
+
+#galactic-editor-confirm {
+    position: absolute;
+    width: 10%;
+    right: 5%;
+    top: 5%;
+    border-width: 5px;
+    border-style:solid;
+    border-radius: 5px;
+    justify-content: center;
+    text-align: center;
+    font-size: 36px;
+}
+
+.galactic-editor-project {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    height: 40px;
+    overflow: hidden;
+    width: auto;
+    border-width: 5px;
+    border-style:solid;
+    border-radius: 5px;
+    color: azure;
+    padding: 10px;
+    font-size: 30px;
+    z-index:5;
+}
+
+#galactic-editor-canv {
+    z-index: 55;
+}

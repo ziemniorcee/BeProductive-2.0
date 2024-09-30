@@ -1,4 +1,4 @@
-import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
+import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
 
 
 // #main behaviors
@@ -56,6 +56,10 @@ import {range1_backgrounds, range2_backgrounds} from "./data.mjs";
     })
 })();
 
+$(document).on('click', '#dashClose, #dashOpen', () => {
+    $('#dashboard').toggle()
+    $('#dashOpen').toggle();
+})
 
 
 $(document).on('click', '#rightbar', function () {
@@ -78,3 +82,48 @@ $(document).on('click', "#projectSettingsIcon", function (event){
     icon_picker.css("visibility", state ? 'visible' : "hidden")
 })
 
+$(document).on('click', '.dashViewOption', function (){
+    $('.dashViewOption').css('backgroundColor', '#55423B')
+    $(this).css('backgroundColor', '#FF5D00')
+})
+
+$(document).on('click', '#dashWeek', function () {
+    $('#content').css('flexDirection', 'row')
+});
+
+$(document).on('click', '#editSelectProject', function (event) {
+    event.stopPropagation()
+    $('#editProjectPicker').toggle()
+})
+
+$(document).on('input', '#newCategoryColor', function () {
+    let rgb = hsvToRgb(this.value * 2, 0.7, 0.7);
+    $('#newCategoryColor').css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}`);
+})
+
+$(document).on('click', '#newCategoryDiscard', function () {
+    $("#newCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+});
+
+$(document).on('click', '#vignette', function () {
+    $('#vignette').children().css('display', 'none');
+    $('#vignette').css('display', 'none');
+})
+
+$(document).on('click', '#newCategory', function(event) {
+    event.stopPropagation();
+})
+
+$(document).on('click', '#to-do', function () {
+    $('#galactics').css('display', 'none');
+})
+
+$(document).on('click', '#testPanelShowIds', function () {
+    $('.todoId').toggle();
+})
+
+$(document).on('click', '#testPanelShowSidebars', function () {
+    $('.sidebars').toggle();
+    $('#projectTypes').toggle()
+})

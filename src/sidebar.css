@@ -13,12 +13,10 @@
 
 #dashOpen{
     display: none;
+    right: 150px;
 }
 #sideOptions {
     right: 0;
-}
-#dashOpen {
-    right: 150px;
 }
 
 #sideOptions img, #projectShowed img , #dashOpen img{

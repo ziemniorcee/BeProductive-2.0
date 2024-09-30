@@ -8,12 +8,15 @@
     <link rel="stylesheet" href="project.css"/>
     <link rel="stylesheet" href="sidebar.css"/>
     <link rel="stylesheet" href="dashboard.css"/>
+    <link rel="stylesheet" href="galactic.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
     <script type="module" src="date.js"></script>
     <script type="module" src="edit.mjs"></script>
     <script type="module" src="render.mjs"></script>
@@ -23,6 +26,8 @@
     <script type="module" src="glory.mjs"></script>
     <script type="module" src="behaviors.js"></script>
     <script type="module" src="project.mjs"></script>
+    <script type="module" src="graph.mjs"></script>
+    <script type="module" src="galactic.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
@@ -32,7 +37,7 @@
 
     <div id="leftbar">
         <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
-        <a><img src="images/goal0.png" draggable="false" alt="laurels"><span>TO DO</span></a>
+        <a><img src="images/goal0.png" draggable="false" alt="laurels" id="to-do"><span>TO DO</span></a>
         <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
         <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
         <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
@@ -47,6 +52,13 @@
                 <img src="images/goals/today0.png">
                 My day
             </div>
+            <div class="dash-graph-1BG" id="dashGraph1BG">
+                <canvas id="dashGraph1"></canvas>
+            </div>
+            <div class="dash-graph-2BG" id="dashGraph2BG">
+                <canvas id="dashGraph2"></canvas>
+            </div>
+            <div id="graphLine1" style="display: none"></div>
         </div>
         <div id="dashTomorrowBG">
             <div id="dashTomorrowBtn">
@@ -80,6 +92,39 @@
     <div id="resizer"></div>
     <div id="rightbar">
 
+    </div>
+    <div id="galactics">
+        <div id="galacticContainer">
+
+        </div>
+    </div>
+    <div id="vignette">
+
+        <div id="newCategory">
+            <div id="newCategoryContent">
+                <div id="newCategoryTitle">Create new category</div>
+                <div id="newCategorySettingsNames">
+                    <div id="newCategoryNameLabel" for="newCategoryName">Category name</div>
+                    <input type="text" id="newCategoryName" placeholder="Enter name">
+                </div>
+                <div id="newCategorySettingsColor">
+                    <div id="newCategoryColorLabel" for="newCategoryColor">Category color</div>
+                    <input id="newCategoryColor" type="range" min="0" max="180">
+                </div>
+            </div>
+            <div id="newCategoryButtons">
+                <div id="newCategoryDiscard" class="new-category-btn">Discard</div>
+                <div id="newCategoryCreate" class="new-category-btn">Create</div>
+            </div>
+        </div>
+        <div id="newCategoryError"></div>
+    </div>
+    <div id="testPanel" style="opacity: 0">
+        <div id="testPanelClear"></div>
+        <div id="testPanelShowIds"></div>
+        <div id="testPanelShowSidebars"></div>
+        <div id="testPanelRemoveHistory"></div>
+        <div id="testPanelRemoveIdea"></div>
     </div>
 </div>
 

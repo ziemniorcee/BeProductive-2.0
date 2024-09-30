@@ -1,4 +1,4 @@
-import {_steps_html, build_goal, dragula_day_view} from "./render.mjs";
+import {_steps_HTML, build_goal, dragula_day_view} from "./render.mjs";
 import {l_date} from './date.js'
 import {build_week_goal, dragula_week_view} from "./weekView.mjs";
 import {build_month_goal, dragula_month_view} from "./monthView.mjs";
@@ -27,7 +27,11 @@ function show_history_sidebar() {
         </div>
     `)
 
-    window.sidebarAPI.askHistory({date: l_date.day_sql})
+    let date = ""
+    if ($('#todosAll').length) date = l_date.day_sql
+    else if ($('.weekDay').length) date = l_date.week_now[0]
+    else if ($('#monthGrid').length) date = l_date.get_sql_month(l_date.day_sql)[0]
+    window.sidebarAPI.askHistory({date: date})
 }
 
 window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
@@ -37,7 +41,6 @@ window.sidebarAPI.getHistory((data) => build_history_sidebar(data))
  * @param data data from sql
  */
 function build_history_sidebar(data) {
-
     let grouped_goals = data.reduce((acc, curr) => {
         if (!acc[curr.addDate]) {
             acc[curr.addDate] = [];
@@ -124,7 +127,7 @@ function history_to_goal(goal, steps) {
     let todos
 
     if ($('#todosAll').length) {
-        goal['steps'] = _steps_html(_prepare_steps(steps), goal.category)
+        goal['steps'] = _steps_HTML(_prepare_steps(steps), goal.category)
         goal['goal'] = decode_text(goal['goal'])
 
         $("#todosArea").append(build_goal(goal))
@@ -353,4 +356,3 @@ function resize(event) {
     let width = document.getElementById('container').offsetWidth
     sidebar.style.flexBasis = `${width - event.x}px`;
 }
-
