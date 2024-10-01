@@ -1249,7 +1249,7 @@ body {
     display: none;
 }
 
-#newCategory, #removeCategory{
+.vignetteWindow1{
     position: absolute;
     color: black;
     width: 40%;
@@ -1262,7 +1262,7 @@ body {
     display: none;
 }
 
-#newCategoryContent, #removeCategoryContent{
+.vignetteWindow1Content{
     padding: 10px;
     height: 200px;
     display:flex;
@@ -1270,7 +1270,7 @@ body {
     align-items: center;
 }
 
-#newCategoryTitle, #removeCategoryTitle{
+.vignetteWindow1Title{
     width:60%;
     height:8%;
     font-size: 25px;
@@ -1298,7 +1298,8 @@ body {
     align-items: center;
 }
 
-#newCategoryName{
+#newCategoryName,
+#newProjectName{
     position: relative;
     font-size: 20px;
     background-color: #D8E1E7;
@@ -1309,7 +1310,7 @@ body {
     flex: 1;
 }
 
-#newCategoryButtons, #removeCategoryButtons{
+.vignetteWindow1ButtonBox{
     position: absolute;
     bottom: 8%;
     left:10%;
@@ -1317,7 +1318,7 @@ body {
     height: 10%;
 }
 
-.new-category-btn, .remove-category-btn{
+.vignetteWindow1Button{
     position: absolute;
     text-align: center;
     font-size: 100%;
@@ -1329,17 +1330,17 @@ body {
     align-items: center;
 }
 
-#newCategoryDiscard, #removeCategoryDiscard{
+.vignetteWindow1BtnDiscard{
     left:0%;
     background-color: red;
     color: white;
 }
 
-#newCategoryCreate, #removeCategoryCreate{
+.vignetteWindow1BtnCreate{
     right:0%;
 }
 
-#newCategoryError, #removeCategoryError{
+.vignetteWindow1Error{
     text-align: center;
     background-color: red;
     position: relative;
