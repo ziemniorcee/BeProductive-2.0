@@ -9,7 +9,9 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "wdio": "wdio run ./wdio.conf.ts",
+    "build": "electron-builder"
   },
   "keywords": [],
   "author": {
@@ -26,9 +28,11 @@
     "jquery": "^3.7.1",
     "js-datepicker": "^5.18.2",
     "npm": "^10.1.0",
+    "package": "^1.0.1",
     "panzoom": "^9.4.3",
     "php": "^1.0.2",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "wdio-electron-service": "^7.0.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.4.1",
@@ -37,7 +41,11 @@
     "@electron-forge/maker-squirrel": "^6.4.1",
     "@electron-forge/maker-zip": "^6.4.1",
     "@electron-forge/plugin-auto-unpack-natives": "^6.4.1",
-    "electron": "^26.6.10",
+    "@wdio/cli": "^9.0.9",
+    "@wdio/local-runner": "^9.0.9",
+    "@wdio/mocha-framework": "^9.0.8",
+    "electron": "^26.1.0",
+    "electron-builder": "^25.0.5",
     "electron-rebuild": "^3.2.9"
   }
 }

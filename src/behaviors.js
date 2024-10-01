@@ -120,6 +120,14 @@ $(document).on('click', '#to-do', function () {
     $('#galactics').css('display', 'none');
 })
 
+$(document).on('click', '#testPanelShowIds', function () {
+    $('.todoId').toggle();
+})
+
+$(document).on('click', '#testPanelShowSidebars', function () {
+    $('.sidebars').toggle();
+    $('#projectTypes').toggle()
+})
 $(document).on('click', '#galactic-display-new-category', function () {
     $("#vignette").css('display', 'block')
     $("#newCategory").css('display', 'block')

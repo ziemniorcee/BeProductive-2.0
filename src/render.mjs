@@ -204,6 +204,7 @@ function get_repeat_option() {
     return Number(repeat_path[lastDotIndex - 1])
 }
 
+
 // removing functions
 (function () {
     let selected_div = null
@@ -234,11 +235,18 @@ function get_repeat_option() {
         selected_div = event.target
     })
 
+    $(document).on('click', '#testPanelClear', function (){
+        remove_goal()
+    })
 
     /**
      * removes goal after context menu click
      */
     window.goalsAPI.removingGoal(() => {
+        remove_goal()
+    })
+
+    function remove_goal(){
         let id = $(selected_div).find('.todoId').text()
         if ($('#monthGrid').length) id = $(selected_div).find('.monthTodoId').text()
 
@@ -257,7 +265,7 @@ function get_repeat_option() {
             if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
         }
         close_edit()
-    })
+    }
 
     /**
      * removes goal and asks to remove the repeat goals after context menu click
@@ -307,31 +315,48 @@ function get_repeat_option() {
      * @param array positions of goals to delete
      * @returns position of sorte
      */
-    function get_shift(value, array){
+    function get_shift(value, array) {
         let new_arr = array.slice()
         new_arr.push(value)
         new_arr.sort((a, b) => a - b)
         return new_arr.indexOf(value)
     }
 
+    $(document).on('click', '#testPanelRemoveHistory', () =>{
+        remove_history()
+    })
+
+    window.sidebarAPI.removingHistory(() => {
+        remove_history()
+    })
+
     /**
      * removes history goal
      */
-    window.sidebarAPI.removingHistory(() => {
+    function remove_history(){
         window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
         if ($(selected_div).closest('.historyTasks').children().length === 1) {
             selected_div = $(selected_div).closest('.day')
         }
         selected_div.remove()
+    }
+
+    $(document).on('click', '#testPanelRemoveIdea', () =>{
+        remove_idea()
+    })
+
+    window.sidebarAPI.removingIdea(() => {
+        remove_idea()
     })
 
     /**
      * removes idea goal
      */
-    window.sidebarAPI.removingIdea(() => {
+    function remove_idea(){
         window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
-    })
+    }
+
 
     /**
      * removes project goal

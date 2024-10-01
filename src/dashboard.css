@@ -392,3 +392,51 @@
     top: 5px;
     color: white;
 }
+
+
+#testPanel{
+    position: absolute;
+    height: 80px;
+    width: 80px;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+    z-index: 15;
+    border: 1px solid red;
+    padding: 10px;
+}
+
+#testPanelClear{
+    height: 15px;
+    width: 15px;
+    background-color: blue;
+    cursor: pointer;
+}
+
+#testPanelShowIds{
+    height: 15px;
+    width: 15px;
+    background-color: red;
+    cursor: pointer;
+}
+
+#testPanelShowSidebars{
+    height: 15px;
+    width: 15px;
+    background-color: green;
+    cursor: pointer;
+}
+
+#testPanelRemoveHistory{
+    height: 15px;
+    width: 15px;
+    background-color: yellow;
+    cursor: pointer;
+}
+
+#testPanelRemoveIdea{
+    height: 15px;
+    width: 15px;
+    background-color: purple;
+    cursor: pointer;
+}
