@@ -1,10 +1,11 @@
-import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition } from "./data.mjs";
+import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition, divide_to_boxes } from "./data.mjs";
 
 let clicked_project = '';
 let changes_lines = [];
 let changes_projects = [];
 let connections = [];
 let current_project = 0;
+let scale = 1;
 
 $(document).on('click', '#strategy', function () {
     $('#galactics').css('display', 'block');
@@ -15,38 +16,23 @@ $(document).on('click', '#strategy', function () {
 /**
  * Creates category windows in main galactic screen
  */
-function add_galactic_category_boxes() {
-    let galactics = '';
-    const len = Object.keys(categories).length + 1;
-    let counter = 0;
-    const height = Math.floor(100 / Math.ceil(len / 5));
-    $('<style>')
-        .prop('type', 'text/css')
-        .html(`.galacticBox {height: ${height}%; }`)
-        .appendTo('head');
-    for (const key in categories) {
-        if (counter % 5 == 0) galactics += `<div class='galacticBox galacticBoxOdd'>`;
-        else if (counter % 5 == 2) galactics += `<div class='galacticBox galacticBoxEven'>`;
-        galactics += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>`
-        for (const proj of projects) {
-            console.log(`${proj.category}, ${key}`)
-            if (proj.category == key) {
-                let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-                let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-                console.log(`${h},    ${w}`)
-                galactics += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
-                style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-                >${proj.name}</div>`
-            }
-        }
-        galactics +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
-        if ((counter % 5 == 1) || (counter % 5 == 4)) galactics += `</div>`;
-        
-        counter++;
-    }
+export function add_galactic_category_boxes() {
     let box = $('#galacticContainer');
     box.empty();
-    box.html(galactics);
+    box.html(_galactic_display_HTML());
+    for (const key in categories) {
+        for (const conn of project_conn) {
+            if (conn.category == key) {
+                $(`#galactic-canv${key}`).append(create_line(
+                    `#galactic${key}Project-${conn.project_from}`,
+                    `#galactic${key}Project-${conn.project_to}`,
+                    `galactic-project-line`,
+                    `galactic${key}Line${conn.project_from}-${conn.project_to}`, key,
+                    4, `rgb(240, 255, 255)`
+                ));
+            }
+        }
+    }
 }
 
 $(document).on('click', '.galactic', function() {
@@ -58,46 +44,49 @@ $(document).on('click', '.galactic', function() {
 
 /**
  * Creates editor of certain galactic in galactics div.
- * @param {number} galactic - galactic window.
+ * @param {number} key - galactic id.
  * */
 function create_galactic_editor(key) {
+    scale = 1;
     changes_lines = [];
     changes_projects = [];
     current_project = key;
-    let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
-    <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
-    <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
-    <div id="galactic-editor-confirm"
-    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>`;
-    
-    for (const proj of projects) {
-        if (proj.category == key) {
-            let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-            editor += `<div class="galactic-editor-project" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
-            style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
-            >${proj.name}</div>`
-        }
-    }
-    editor += `</div>`;
     let box = $('#galacticContainer');
     box.empty();
-    box.html(editor);
+    box.html(_galactic_editor_HTML(key));
+
+    // const canv = document.getElementById('galactic-editor')
+    // const p = Panzoom(canv, {
+    //     contain: 'outside',
+    //     maxScale: 5,
+    //     minScale: 1,
+    //     startScale: 1,
+    //     disablePan: true,
+    //     disableZoom: true,
+    // })
+    // canv.addEventListener('wheel', p.zoomWithWheel);
+
+    // $('#galactic-editor').on('wheel', function(event) {
+    //     event.preventDefault();
+
+    //     let elementOffset = $(this).offset();
+    //     let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
+    //     let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
+    //     let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
+    //     scale = Math.min(Math.max(scale + multiplier, 1), 5)
+    //     // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
+    //     $(this).css('transform', 'scale(' + scale + ')');
+    //     console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
+    // });
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
-            let pos1 = $(`#galacticEditorProject${conn['project_from']}`).position();
-            let pos2 = $(`#galacticEditorProject${conn['project_to']}`).position();
-            let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-            line.setAttribute('class', `galactic-editor-line`);
-            line.setAttribute('id', `galactic-editor-line${conn['project_from']}-${conn['project_to']}`);
-            line.setAttribute('x1', pos1.left + $(`#galacticEditorProject${conn['project_from']}`).outerWidth() / 2);
-            line.setAttribute('y1', pos1.top + $(`#galacticEditorProject${conn['project_from']}`).outerHeight() / 2);
-            line.setAttribute('x2', pos2.left + $(`#galacticEditorProject${conn['project_to']}`).outerWidth() / 2);
-            line.setAttribute('y2', pos2.top + $(`#galacticEditorProject${conn['project_to']}`).outerHeight() / 2);
-            line.setAttribute('stroke', categories2[key]);
-            line.setAttribute('stroke-width', 8);
-            $("#galactic-editor-canv").append(line);
+            $("#galactic-editor-canv").append(create_line(
+                `#galacticEditorProject${conn['project_from']}`,
+                `#galacticEditorProject${conn['project_to']}`,
+                `galactic-editor-line`,
+                `galactic-editor-line${conn['project_from']}-${conn['project_to']}`, key
+            ));
             connections.push([conn['project_from'], conn['project_to']]);
         }
     }
@@ -106,6 +95,37 @@ function create_galactic_editor(key) {
     $(document).on('click', '#galactic-editor-confirm', function () {
         console.log(changes_lines);
         console.log(changes_projects);
+        window.goalsAPI.changeProjectCoords({'changes': changes_projects});
+        window.goalsAPI.changeGalacticConnections({'changes': changes_lines});
+        for (let change of changes_projects) {
+            for (let i = 0; i < projects.length; i++) {
+                if (projects[i].id === change.id) {
+                    projects[i].x = change.x;
+                    projects[i].y = change.y;
+                }
+            }
+        }
+        for (let change of changes_lines) {
+            if (change.add) {
+                project_conn.push({
+                    'category': change.category,
+                    'project_from': change.from,
+                    'project_to': change.to
+                })
+            } else {
+                for (let i = 0; i < project_conn.length; i++) {
+                    if (project_conn[i].category === change.category &&
+                        project_conn[i].project_from === change.from &&
+                        project_conn[i].project_to === change.to)
+                        project_conn.splice(i, 1);
+                }
+            }
+        }
+        add_galactic_category_boxes();
+    })
+
+    $(document).on('click', '#galactic-editor-cancel', function () {
+        add_galactic_category_boxes()
     })
 
     $(document).on('mousemove', '#galactic-editor', function (event) {
@@ -123,7 +143,72 @@ function create_galactic_editor(key) {
         $('#galactic-editor-line-moving').remove();
         clicked_project = '';
     })
+    bind_editor_projects(key);
+}
 
+
+
+$(document).on('click', '.galactic-editor-line', function () {
+    let index = extractNumbers($(this).attr('id'));
+    let flag = true;
+    for (let i = 0; i < changes_lines.length; i++) {
+        if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
+            changes_lines.splice(i, 1);
+            flag = false;
+            break;
+        }
+    }
+    if (flag) {
+        changes_lines.push({'category': current_project, 'from': index[0], 'to': index[1], 'add': false});
+    }
+    for (let i = 0; i < connections.length; i++) {
+        if (connections[i][0] === index[0] && connections[i][1] === index[1]) {
+            connections.splice(i, 1);
+            break;
+        }
+    }
+    $(this).remove();
+})
+
+$(document).on('input', '#galactic-editor-slider', function () {
+    const val = $('#galactic-editor-slider').val()
+    console.log(val)
+    $('.galactic-editor-project').css('font-size', `${Number(val) + 15}px`);
+    $('.galactic-editor-line').attr('stroke-width', `${3 + Math.ceil(Number(val) / 3)}`);
+})
+
+/**
+ * Creates editor of certain galactic in galactics div.
+ * @param {string} div_from - div id by first edge of line
+ * @param {string} div_to - div id by the other edge of line
+ * @param {string} line_class - class of line
+ * @param {string} line_id - id of line
+ * @param {number} key - galactic id
+ * @param {number} w - line width
+ * @param {string} color - galactic id
+ * @returns {SVGLineElement} svg line element
+ * */
+function create_line(div_from, div_to, line_class, line_id, key, w = 8, color = undefined) {
+    let pos1 = $(div_from).position();
+    let pos2 = $(div_to).position();
+    let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('class', line_class)
+    line.setAttribute('id', line_id)
+    line.setAttribute('x1', pos1.left + $(div_from).outerWidth() / 2);
+    line.setAttribute('y1', pos1.top + $(div_from).outerHeight() / 2);
+    line.setAttribute('x2', pos2.left + $(div_to).outerWidth() / 2);
+    line.setAttribute('y2', pos2.top + $(div_to).outerHeight() / 2);
+    line.setAttribute('stroke', (color === undefined) ? categories2[key] : color);
+    line.setAttribute('stroke-width', w);
+    return line;
+}
+
+
+/**
+ * Binds projects to draggable event and line linking events.
+ * @param {number} key - galactic id
+ * */
+function bind_editor_projects(key) {
     $('.galactic-editor-project').each(function(index, element) {
 
         $(element).draggable({
@@ -131,9 +216,12 @@ function create_galactic_editor(key) {
             containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
             start: function(event, ui) {
-                console.log($(element).data('project-number'));
             },
             drag: function(event, ui) {
+                // let offset = $('#galactic-editor').position()
+                // ui.position.left -= ((event.pageX + offset.left) * (scale - 1) - offset.left);
+                // ui.position.top -= ((event.pageY + offset.top) * (scale - 1) - offset.top);
+                // console.log(`${Number(ui.position.left - event.pageX)} \n`)
                 let number = $(element).data('project-number');
                 for (let conn of connections) {
                     if (conn[0] == number) {
@@ -184,27 +272,28 @@ function create_galactic_editor(key) {
         $(element).on('mouseup', function (event) {
             if (event.button === 2) {
                 let released_project = $(element).attr('id');
-                console.log(`${clicked_project}, ${released_project}`)
                 if (released_project !== clicked_project) {
                     let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
                     conn.sort();
                     if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
                     else {
-                        let proj1 = `#galacticEditorProject${conn[0]}`;
-                        let proj2 = `#galacticEditorProject${conn[1]}`;
-                        let pos1 = $(proj1).position();
-                        let pos2 = $(proj2).position();
-                        let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-                        line.setAttribute('class', `galactic-editor-line`)
-                        line.setAttribute('id', `galactic-editor-line${conn[0]}-${conn[1]}`)
-                        line.setAttribute('x1', pos1.left + $(proj1).outerWidth() / 2);
-                        line.setAttribute('y1', pos1.top + $(proj1).outerHeight() / 2);
-                        line.setAttribute('x2', pos2.left + $(proj2).outerWidth() / 2);
-                        line.setAttribute('y2', pos2.top + $(proj2).outerHeight() / 2);
-                        line.setAttribute('stroke', categories2[key]);
-                        line.setAttribute('stroke-width', 8);
-                        $("#galactic-editor-canv").append(line);
-                        changes_lines.push({'project': key, 'from': conn[0], 'to': conn[1], 'add': true});
+                        $("#galactic-editor-canv").append(create_line(
+                            `#galacticEditorProject${conn[0]}`,
+                            `#galacticEditorProject${conn[1]}`,
+                            `galactic-editor-line`,
+                            `galactic-editor-line${conn[0]}-${conn[1]}`, key
+                        ));
+                        let flag = true;
+                        for (let i = 0; i < changes_lines.length; i++) {
+                            if (changes_lines[i].from === conn[0] 
+                                && changes_lines[i].to === conn[1]
+                                && changes_lines[i].add === false) {
+                                changes_lines.splice(i, 1);
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag) changes_lines.push({'category': key, 'from': conn[0], 'to': conn[1], 'add': true});
                         connections.push([conn[0], conn[1]]);
                     }
                     
@@ -212,27 +301,115 @@ function create_galactic_editor(key) {
             }
         })
     })
-
 }
 
-$(document).on('click', '.galactic-editor-line', function () {
-    let index = extractNumbers($(this).attr('id'));
-    let flag = true;
-    for (let i = 0; i < changes_lines.length; i++) {
-        if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
-            changes_lines.splice(i, 1);
-            flag = false;
-            break;
+
+/**
+ * Returns html of galactic editor.
+ * @param {number} key - galactic id
+ * @returns {string} html of galactic editor for given category
+ * */
+function _galactic_editor_HTML(key) {
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`#galactic-editor-slider::-webkit-slider-thumb {
+            background: ${categories2[key]}}`)
+        .appendTo('head');
+    let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
+    <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
+    <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
+    <div id="galactic-editor-confirm"
+    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>
+    <div id="galactic-editor-cancel"
+    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Cancel</div>
+    <div id="galactic-editor-slider-box">
+    <span>-</span>
+    <input type="range" id="galactic-editor-slider" min="0" max="30" value="15">
+    <span>+</span>
+    </div>
+    <div id='galactic-editor-options-btn'>
+    <img src="images/goals/more.png">
+    <div id='galactic-editor-options'>
+    <div id='galactic-editor-new-category' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>New project</span></div>
+    <div id='galactic-editor-remove-category' class='galacticOption'>
+    <img src="images/goals/minus.png">
+    <span>Remove project</span></div>
+    <div id='galactic-editor-open-projects' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>Open not placed projects</span></div>
+    </div></div>`;
+    for (const proj of projects) {
+        if (proj.category == key) {
+            let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+            let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+            editor += `<div class="galactic-editor-project galactic-editor-items" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
+            style="top: ${h}%; left: ${w}%; border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
+            >${proj.name}</div>`
         }
     }
-    if (flag) {
-        changes_lines.push({'project': current_project, 'from': index[0], 'to': index[1], 'add': false});
+    editor += `</div>`;
+    return editor;
+}
+
+
+/**
+ * Returns html of galactics.
+ * @returns {string} html of galactics display
+ * */
+function _galactic_display_HTML() {
+    let galactics = '';
+    const len = Object.keys(categories).length;
+    const height = Math.floor(100 / Math.ceil((len - 1) / 5));
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`.galacticBox {height: ${height}%; }`)
+        .appendTo('head');
+    let counts = divide_to_boxes(len);
+    let boxes = [];
+    for (let i = 0; i < counts.length; i++) {
+        boxes.push(`<div class='galacticBox' id='galacticBox${i + 1}' style='grid-template-columns: repeat(${counts[i]}, 1fr)'>`)
     }
-    for (let i = 0; i < connections.length; i++) {
-        if (connections[i][0] === index[0] && connections[i][1] === index[1]) {
-            connections.splice(i, 1);
-            break;
+    let pointer = 0;
+    let box_counter = 0;
+    console.log(counts)
+    for (const key in categories) {
+        boxes[pointer] += `<div class='galactic' id="galactic${key}" style='border-color: ${categories2[key]}'>
+        <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
+        for (const proj of projects) {
+            if (proj.category == key) {
+                let h = (proj.y !== null) ? proj.y : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+                let w = (proj.x !== null) ? proj.x : Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+                console.log(`${h},    ${w}`)
+                boxes[pointer] += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
+                style="top: ${h}%; left: ${w}%;"
+                ></div>`
+            }
+        }
+        boxes[pointer] +=`<span class='galactic-text' style='color: ${categories2[key]}'>${categories[key][1]}</span></div>`
+        box_counter++;
+        if (box_counter === counts[pointer]) {
+            pointer++;
+            box_counter = 0;
         }
     }
-    $(this).remove();
-})
+    for (let i = 0; i < counts.length; i++) {
+        galactics += boxes[i]
+        galactics += '</div>'
+    }
+    galactics += `<div id='galactic-display-options-btn'>
+    <img src="images/goals/more.png">
+    <div id='galactic-display-options'>
+    <div id='galactic-display-new-category' class='galacticOption'>
+    <img src="images/goals/plus.png">
+    <span>New category</span></div>
+    <div id='galactic-display-remove-category' class='galacticOption'>
+    <img src="images/goals/minus.png">
+    <span>Remove category</span></div>
+    </div>
+    </div>`
+    return galactics;
+}
+
+

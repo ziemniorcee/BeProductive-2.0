@@ -24,7 +24,7 @@ body {
 
 #leftbar {
     background: #D8E1E7;
-    z-index: 10;
+    z-index: 1000;
     width: 100px;
 }
 
@@ -1249,7 +1249,7 @@ body {
     display: none;
 }
 
-#newCategory{
+#newCategory, #removeCategory{
     position: absolute;
     color: black;
     width: 40%;
@@ -1262,7 +1262,7 @@ body {
     display: none;
 }
 
-#newCategoryContent{
+#newCategoryContent, #removeCategoryContent{
     padding: 10px;
     height: 200px;
     display:flex;
@@ -1270,7 +1270,7 @@ body {
     align-items: center;
 }
 
-#newCategoryTitle{
+#newCategoryTitle, #removeCategoryTitle{
     width:60%;
     height:8%;
     font-size: 25px;
@@ -1309,7 +1309,7 @@ body {
     flex: 1;
 }
 
-#newCategoryButtons{
+#newCategoryButtons, #removeCategoryButtons{
     position: absolute;
     bottom: 8%;
     left:10%;
@@ -1317,7 +1317,7 @@ body {
     height: 10%;
 }
 
-.new-category-btn{
+.new-category-btn, .remove-category-btn{
     position: absolute;
     text-align: center;
     font-size: 100%;
@@ -1329,17 +1329,17 @@ body {
     align-items: center;
 }
 
-#newCategoryDiscard{
+#newCategoryDiscard, #removeCategoryDiscard{
     left:0%;
     background-color: red;
     color: white;
 }
 
-#newCategoryCreate{
+#newCategoryCreate, #removeCategoryCreate{
     right:0%;
 }
 
-#newCategoryError{
+#newCategoryError, #removeCategoryError{
     text-align: center;
     background-color: red;
     position: relative;
@@ -1367,4 +1367,25 @@ body {
     height: 25px;
     background: #04AA6D;
     cursor: pointer;
+}
+
+#removeCategoryPicker {
+    width: 200px;
+    height:auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#categoryPicker4 {
+    width: 100%;
+    bottom: auto;
+    border: 1px solid black;
+}
+
+#selectCategory4 {
+    font-size: 20px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid black;
 }

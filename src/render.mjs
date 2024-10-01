@@ -18,6 +18,7 @@ import {
     project_pos
 } from "./project.mjs";
 import {create_today_graphs} from './graph.mjs';
+import {add_galactic_category_boxes} from './galactic.mjs';
 
 
 export let is_day_drag = 0
@@ -36,9 +37,9 @@ window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connec
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
-        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 4 / 3), 255)}, 
-                                ${Math.min(Math.floor(c.g * 4 / 3), 255)}, 
-                                ${Math.min(Math.floor(c.b * 4 / 3), 255)})`;
+        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 3 / 2), 255)}, 
+                                ${Math.min(Math.floor(c.g * 3 / 2), 255)}, 
+                                ${Math.min(Math.floor(c.b * 3 / 2), 255)})`;
     }
     window.goalsAPI.askAllProjects();
 }
@@ -410,7 +411,7 @@ $(document).on('click', '#newCategoryDiscard', function () {
  * Creates new category from newCategory box and resets categories pickers
  */
 function create_new_category() {
-    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.7);
+    let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
     console.log(rgb);
     const len = Object.keys(categories).length + 1;
     let index = len;
@@ -429,12 +430,18 @@ function create_new_category() {
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
-    $('#categoryPicker').empty();
-    $('#categoryPicker2').empty();
-    $('#categoryPicker3').empty();
-    $('#categoryPicker').html(html_categories);
-    $('#categoryPicker2').html(html_categories);
-    $('#categoryPicker3').html(html_categories);
+    for (let i of ['', '2', '3', '4']) {
+        $(`#categoryPicker${i}`).empty();
+        $(`#categoryPicker${i}`).html(html_categories);
+        if ($(`#categoryPicker${i}`).css('display') === 'block') {
+            $(`#selectCategory${i}`).css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+            $(`#selectCategory${i}`).text(name);
+            $(`#categoryPicker${i}`).css('display', 'none');
+        }
+    }
+    if ($('#galactics').css('display') !== 'none') {
+        add_galactic_category_boxes();
+    }
 }
 
 $(document).on('click', '.category', function (event) {
@@ -444,26 +451,28 @@ $(document).on('click', '.category', function (event) {
 
 /**
  * Checks which category picker and by cetegory id it sets category selection
- * @param that selected cateogry
+ * @param that selected category
  */
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-    let select_category = $('#selectCategory')
+    let picker = '0';
     if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
-        select_category = $('#selectCategory')
-        $('#categoryPicker').css('display', 'none')
+        picker = ''
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
-        select_category = $('#selectCategory2')
-        $('#categoryPicker2').css('display', 'none')
-        if (index !== 1) change_category(index)
+        picker = '2'
+        if (index !== 1) change_category(index - 1)
     } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
-        select_category = $('#selectCategory3')
-        $('#categoryPicker3').css('display', 'none')
+        picker = '3'
+    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker4") {
+        picker = '4'
+        index++;
     }
     if (index === 1) {
         $("#vignette").css('display', 'block')
         $("#newCategory").css('display', 'block')
-    } else {
+    } else if (picker !== '0') {
+        let select_category = $(`#selectCategory${picker}`)
+        $(`#categoryPicker${picker}`).css('display', 'none')
         select_category.css('background', categories[index - 1][0])
         select_category.text(categories[index - 1][1])
     }
@@ -940,13 +949,15 @@ export function _steps_HTML(steps, category_id) {
  * creates categories for goals
  * @returns {string} HTML of categories
  */
-export function _categories_HTML() {
+export function _categories_HTML(with_new_category) {
     let categories_html = ""
-    categories_html +=
+    if (with_new_category === undefined) {
+        categories_html +=
         `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
             </div>`
+    }
     for (let i = 0; i < Object.keys(categories).length; i++) {
         categories_html +=
             `<div class="category">
@@ -967,4 +978,33 @@ export function set_block_prev_drag_day(option) {
 //     window.appAPI.changeWindow()
 // })
 
+function open_remove_category() {
+    $("#vignette").css('display', 'block')
+    $("#removeCategory").css('display', 'block')
+    let picker = $("#categoryPicker4");
+    picker.empty();
+    picker.html(_categories_HTML(true))
+}
 
+$(document).on('click', '#galactic-display-remove-category', function () {
+    open_remove_category()
+})
+
+function remove_category() {
+    let category = getIdByColor(categories, $('#selectCategory4').css('backgroundColor'))
+    console.log(category)
+    delete categories[category];
+    let new_projects = projects.filter(item => item.category !== category);
+    projects.splice(0, projects.length);
+    for (let e of new_projects) {
+        projects.push(e);
+    }
+    window.goalsAPI.removeCategory({id: category});
+    add_galactic_category_boxes();
+    $("#removeCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+}
+
+$(document).on('click', '#removeCategoryCreate', function () {
+    remove_category()
+})

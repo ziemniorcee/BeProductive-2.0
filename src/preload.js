@@ -63,12 +63,16 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
 
     addCategory: (params) => ipcRenderer.send('add-category', params),
+    removeCategory: (params) => ipcRenderer.send('remove-category', params),
 
     askAllProjects: () => ipcRenderer.send('ask-all-projects'),
     getAllProjects: (func) => ipcRenderer.on('get-all-projects', (event, projects) => func(projects)),
 
     askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
     getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
+
+    changeProjectCoords: (params) => ipcRenderer.send('change-projects-coords', params),
+    changeGalacticConnections: (params) => ipcRenderer.send('change-galactic-connections', params),
 })
 
 

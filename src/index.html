@@ -17,6 +17,7 @@
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <script type="module" src="date.js"></script>
     <script type="module" src="edit.mjs"></script>
     <script type="module" src="render.mjs"></script>
@@ -99,7 +100,20 @@
         </div>
     </div>
     <div id="vignette">
-
+        <div id="removeCategory">
+            <div id="removeCategoryContent">
+                <div id="removeCategoryTitle">Remove category</div>
+                <div id="removeCategoryPicker">
+                    <div id="selectCategory4" class="selectCategory">General</div>
+                    <div class="categoryPicker" id="categoryPicker4"></div>
+                </div>
+            </div>
+            <div id="removeCategoryButtons">
+                <div id="removeCategoryDiscard" class="remove-category-btn">Discard</div>
+                <div id="removeCategoryCreate" class="remove-category-btn">Remove</div>
+            </div>
+            <div id="removeCategoryError"></div>
+        </div>
         <div id="newCategory">
             <div id="newCategoryContent">
                 <div id="newCategoryTitle">Create new category</div>
@@ -116,8 +130,26 @@
                 <div id="newCategoryDiscard" class="new-category-btn">Discard</div>
                 <div id="newCategoryCreate" class="new-category-btn">Create</div>
             </div>
+            <div id="newCategoryError"></div>
         </div>
-        <div id="newCategoryError"></div>
+        <div id="newProject"></div>
+            <div id="newProjectContent">
+                <div id="newProjectTitle">Create new project</div>
+                <div id="newProjectSettingsNames">
+                    <div id="newProjectNameLabel" for="newProjectName">Project name</div>
+                    <input type="text" id="newProjectName" placeholder="Enter name">
+                </div>
+                <div id="newProjectSettingsColor">
+                    <div id="newProjectColorLabel" for="newProjectColor">Project color</div>
+                    <input id="newProjectColor" type="range" min="0" max="180">
+                </div>
+            </div>
+            <div id="newProjectButtons">
+                <div id="newProjectDiscard" class="new-project-btn">Discard</div>
+                <div id="newProjectCreate" class="new-project-btn">Create</div>
+            </div>
+            <div id="newCategoryError"></div>
+        </div>
     </div>
     <div id="testPanel" style="opacity: 0">
         <div id="testPanelClear"></div>

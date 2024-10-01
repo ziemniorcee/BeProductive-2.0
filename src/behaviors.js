@@ -32,6 +32,7 @@ import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
         if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
         else if ($(this).attr('id') === "selectCategory2") $('#categoryPicker2').toggle()
         else if ($(this).attr('id') === "selectCategory3") $('#categoryPicker3').toggle()
+        else if ($(this).attr('id') === "selectCategory4") $('#categoryPicker4').toggle()
     });
 
     $(document).on('click', '#main, #todoInput', function () {
@@ -127,3 +128,16 @@ $(document).on('click', '#testPanelShowSidebars', function () {
     $('.sidebars').toggle();
     $('#projectTypes').toggle()
 })
+$(document).on('click', '#galactic-display-new-category', function () {
+    $("#vignette").css('display', 'block')
+    $("#newCategory").css('display', 'block')
+})
+
+$(document).on('click', '#removeCategory', function(event) {
+    event.stopPropagation();
+})
+
+$(document).on('click', '#removeCategoryDiscard', function () {
+    $("#removeCategory").css('display', 'none');
+    $("#vignette").css('display', 'none');
+});

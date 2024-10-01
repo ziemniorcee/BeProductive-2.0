@@ -20,6 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@panzoom/panzoom": "^4.5.1",
     "dragula": "^3.7.3",
     "electron-squirrel-startup": "^1.0.0",
     "interactjs": "^1.10.18",
@@ -28,6 +29,7 @@
     "js-datepicker": "^5.18.2",
     "npm": "^10.1.0",
     "package": "^1.0.1",
+    "panzoom": "^9.4.3",
     "php": "^1.0.2",
     "sqlite3": "^5.1.6",
     "wdio-electron-service": "^7.0.2"
