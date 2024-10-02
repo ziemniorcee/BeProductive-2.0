@@ -131,7 +131,7 @@
     border-radius: 50%;
 }
 
-.galactic-editor-project {
+.galactic-editor-project, .galactic-editor-to-place{
     position: absolute;
     transform: translate(-50%, -50%);
     height: auto;
@@ -166,6 +166,7 @@
     display: flex;
     cursor: pointer;
     background: radial-gradient(circle, black 98%, transparent 100%);
+    z-index: 60;
 }
 
 #galactic-display-options-btn > img, 
@@ -212,6 +213,7 @@
     border-radius: 30px;
     background-color: aliceblue;
     cursor: pointer;
+    z-index: 60;
 }
 
 .galacticOption img {
@@ -226,4 +228,27 @@
     line-height: 1;
     display: flex;
     align-items: center;
+}
+
+#galactic-editor-project-picker {
+    position: absolute;
+    right: 1%;
+    top:20%;
+    height: 500px;
+    width: fit-content;
+    min-width: 1px;
+    border-width: 10px;
+    border-radius: 20px;
+    border-style: solid;
+    display: none;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    z-index: 4;
+}
+
+.galactic-editor-to-place {
+    position: relative;
+    transform: translate(0, 0);
+    margin: 10px;
 }
