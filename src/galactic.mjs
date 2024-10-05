@@ -149,6 +149,7 @@ $(document).on('click', '.galactic-editor-line', function () {
 $(document).on('input', '#galactic-editor-slider', function () {
     const val = $('#galactic-editor-slider').val()
     $('.galactic-editor-project').css('font-size', `${Number(val) + 15}px`);
+    $('.galactic-editor-project').css('min-width', `${Number(val) * 10}px`);
     $('.galactic-editor-line').attr('stroke-width', `${3 + Math.ceil(Number(val) / 3)}`);
 })
 
@@ -324,10 +325,8 @@ function _galactic_editor_HTML(key) {
     let editor = `<div id="galactic-editor" style="border-color: ${categories[key][0]};">
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>
     <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
-    <div id="galactic-editor-confirm"
-    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Confirm</div>
-    <div id="galactic-editor-cancel"
-    style="border-color: ${categories[key][0]}; background-color: ${categories2[key]}; color: ${categories[key][0]};">Cancel</div>
+    <div id="galactic-editor-cancel">
+    <img src="images/goals/arrow0.png"></div>
     <div id="galactic-editor-slider-box">
     <span>-</span>
     <input type="range" id="galactic-editor-slider" min="0" max="30" value="15">
@@ -359,7 +358,8 @@ function _galactic_editor_HTML(key) {
             }
         }
     }
-    editor += `<div id="galactic-editor-project-picker" style="border-color: ${categories[key][0]}; background-color: aliceblue">`
+    editor += `<div id="galactic-editor-project-picker" style="border-color: ${categories[key][0]};">
+    <span>Stash</span>`
     for (const proj of not_placed_projects) {
         editor += `<div class="galactic-editor-to-place" data-project-number="${proj.id}"
                 style="border-color: ${categories[key][0]}; background-color: ${categories2[key]};"
