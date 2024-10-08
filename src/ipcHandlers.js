@@ -872,7 +872,6 @@ function todoHandlers(db) {
         ORDER BY id`, (err, rows) => {
             if (err) console.error(err)
             else {
-                console.log(rows);
                 event.reply('get-all-projects', rows);
             }
         })
@@ -884,7 +883,6 @@ function todoHandlers(db) {
         ORDER BY category`, (err, rows) => {
             if (err) console.error(err)
             else {
-                console.log(rows);
                 event.reply('get-galactic-conn', rows);
             }
         })

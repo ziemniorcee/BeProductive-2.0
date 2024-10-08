@@ -27,7 +27,12 @@ let goal_text = ""
 let last_step = ""
 
 $(document).on('mousedown', '.todo, .monthTodo, .sidebarTask', function (event) {
-    begin_edit(event)
+    event.stopPropagation()
+    let is_different_goal = base !== this || $('#rightbar').css('display') === 'none'
+
+    if (is_different_goal){
+        begin_edit(event)
+    }
 })
 
 function begin_edit(event) {
@@ -50,13 +55,18 @@ $(document).on('mouseup', '#todosAll .todo, #projectContent .todo', function () 
  * @param that selected task
  */
 function build_standard_edit(that) {
+
     if (is_edit_change) {
         prepare_edit(that, 0)
         window.goalsAPI.setDefaultEdit()
         set_block_prev_drag_day(0)
+
         _build_edit()
     }
     is_edit_change = false
+
+    $('#editText').blur();
+    $('.editTextStep').blur();
 }
 
 /**
@@ -253,7 +263,7 @@ function change_step(that) {
     let index = edit_text_step.index(that)
     let input = edit_text_step.eq(index).val()
     let converted_step = encode_text(input)
-
+    let current_text = $(selected_base).find('.step_text').eq(index).text()
 
     if (input !== "") {
         is_new_step = false
@@ -263,11 +273,10 @@ function change_step(that) {
         if ((steps_count < edit_text_step.length && index === edit_text_step.length - 1) || steps_count === edit_text_step.length - 2) {
             $(selected_base).find('.steps').append(_step_html(input))
             _change_counter(index, 0, 1, selected_base)
-
             steps_count++
             window.goalsAPI.addStep({input: converted_step, id: selected_goal_id, is_previous: is_edit_change})
             last_step = input
-        } else {
+        } else if (current_text !== input){
             $(selected_base).find('.step_text').eq(index).text(input)
             window.goalsAPI.changeStep({
                 input: converted_step,
