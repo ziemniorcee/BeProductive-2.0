@@ -31,6 +31,7 @@
     "package": "^1.0.1",
     "panzoom": "^9.4.3",
     "php": "^1.0.2",
+    "resedit": "^2.0.2",
     "sqlite3": "^5.1.6",
     "wdio-electron-service": "^7.0.2"
   },
@@ -44,7 +45,7 @@
     "@wdio/cli": "^9.0.9",
     "@wdio/local-runner": "^9.0.9",
     "@wdio/mocha-framework": "^9.0.8",
-    "electron": "^26.1.0",
+    "electron": "^26.6.10",
     "electron-builder": "^25.0.5",
     "electron-rebuild": "^3.2.9"
   }
