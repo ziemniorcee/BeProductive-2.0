@@ -223,9 +223,33 @@ describe('edit', () =>{
 
         await delete_todo(0, 2)
     })
+
+    it('new step, the same todo click', async()=>{
+        await add_todo_main("edit 7")
+
+        let task = $$('.todo')
+        await task[0].click()
+
+        let new_step = $('#editNewStep')
+        await new_step.click()
+
+        let step_entry = $$('.editTextStep')[0]
+        await step_entry.setValue("step1")
+
+        await task[0].click()
+
+        await browser.pause(5000)
+
+        let edit_steps = await $$('.editStep')
+        await expect(edit_steps.length).toEqual(1)
+
+        await delete_todo(0)
+    })
+
+
     // it('change difficulty and importance', async() =>{
-    //     await add_todo_main("edit 7")
-    //     await add_todo_main("edit 8")
+    //     await add_todo_main("edit 9")
+    //     await add_todo_main("edit 10")
     //     let tasks_to_do = $$('.todo')
     //     await tasks_to_do[0].click()
     //
