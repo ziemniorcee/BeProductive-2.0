@@ -53,6 +53,19 @@ function create_galactic_editor(key) {
     let box = $('#galacticContainer');
     box.empty();
     box.html(_galactic_editor_HTML(key));
+
+    // $('#galactic-editor').on('wheel', function(event) {
+    //     event.preventDefault();
+
+    //     let elementOffset = $(this).offset();
+    //     let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
+    //     let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
+    //     let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
+    //     scale = Math.min(Math.max(scale + multiplier, 1), 5)
+    //     // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
+    //     $(this).css('transform', 'scale(' + scale + ')');
+    //     console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
+    // });
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -79,18 +92,32 @@ function create_galactic_editor(key) {
                 if (event.pageX > boundingBox[0] && event.pageX < boundingBox[2] &&
                     event.pageY > boundingBox[1] && event.pageY < boundingBox[3]) {
                     console.log("mhm")
+                    let offset = $("#galactic-editor").offset();
+                    $(element).appendTo("#galactic-editor");
+                    $(element).removeClass("galactic-editor-to-place");
+                    $(element).addClass("galactic-editor-project");
+                    $(element).attr("id", `galacticEditorProject${$(element).data('project-number')}`)
+                    $(element).css("left", `${event.pageX - offset.left}px`);
+                    $(element).css("top", `${event.pageY - offset.top}px`);
+                    bind_editor_project(key, element);
+                    change_editor_project_position(element);
+                    if ($('#galactic-editor-project-picker').children().length === 1) {
+                        $('#galactic-editor-project-picker').css('display', 'none');
+                    }
                 } else {
                     console.log("aha")
+                    $(element).css('position', 'relative');
+                    $(element).css('top', 'auto');
+                    $(element).css('left', 'auto');
+                    $(element).css('transform', 'translate(0, 0)');
                 }
-                $(element).css('position', 'relative');
-                $(element).css('top', 'auto');
-                $(element).css('left', 'auto');
-                $(element).css('transform', 'translate(0, 0)');
+                
             }
         })
     })
-
-    bind_editor_projects(key);
+    $('.galactic-editor-project').each(function(index, element) { 
+        bind_editor_project(key, element);
+    })
 }
 
 $(document).on('click', '#galactic-editor-confirm', function () {
@@ -99,8 +126,14 @@ $(document).on('click', '#galactic-editor-confirm', function () {
 })
 
 $(document).on('click', '#galactic-editor-open-projects', function () {
-    if (!$('galactic-editor-project-picker').is(':empty')) {
-        $('#galactic-editor-project-picker').css('display', 'flex');
+    let element = $('#galactic-editor-project-picker')
+    if (($(element).children().length > 1) && !$(element).is(":visible")) {
+        $(element).css('display', 'flex');
+        console.log('lol1')
+    }
+    else if ($(element).is(":visible")) {
+        $(element).css('display', 'none');
+        console.log('lol2')
     }
 })
 
@@ -184,99 +217,102 @@ function create_line(div_from, div_to, line_class, line_id, key, w = 8, color = 
  * Binds projects to draggable event and line linking events.
  * @param {number} key - galactic id
  * */
-function bind_editor_projects(key) {
-    $('.galactic-editor-project').each(function(index, element) {
-
-        $(element).draggable({
-            cursorAt: {left: 0, top: 0},
-            containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
-            scroll: false,
-            start: function(event, ui) {
-            },
-            drag: function(event, ui) {
-                // let offset = $('#galactic-editor').position()
-                // ui.position.left -= ((event.pageX + offset.left) * (scale - 1) - offset.left);
-                // ui.position.top -= ((event.pageY + offset.top) * (scale - 1) - offset.top);
-                // console.log(`${Number(ui.position.left - event.pageX)} \n`)
-                let number = $(element).data('project-number');
-                for (let conn of connections) {
-                    if (conn[0] == number) {
-                        let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
-                        let pos = $(element).position();
-                        line.x1.baseVal.value = pos.left + $(element).outerWidth() / 2;
-                        line.y1.baseVal.value = pos.top + $(element).outerHeight() / 2;
-                    }
-                    else if (conn[1] == number) {
-                        let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
-                        let pos = $(element).position();
-                        line.x2.baseVal.value = pos.left + $(element).outerWidth() / 2;
-                        line.y2.baseVal.value = pos.top + $(element).outerHeight() / 2;
-                    }
+function bind_editor_project(key, element) {
+    $(element).draggable({
+        cursorAt: {left: 0, top: 0},
+        containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
+        scroll: false,
+        start: function(event, ui) {
+        },
+        drag: function(event, ui) {
+            // let offset = $('#galactic-editor').position()
+            // ui.position.left -= ((event.pageX - offset.left) * (scale - 1) - offset.left);
+            // ui.position.top -= ((event.pageY - offset.top) * (scale - 1) - offset.top);
+            // console.log(event.pageX)
+            // console.log($(element).position().left)
+            // console.log(`${Number(ui.position.left - event.pageX)} \n`)
+            let number = $(element).data('project-number');
+            for (let conn of connections) {
+                if (conn[0] == number) {
+                    let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
+                    let pos = $(element).position();
+                    line.x1.baseVal.value = pos.left + $(element).outerWidth() / 2;
+                    line.y1.baseVal.value = pos.top + $(element).outerHeight() / 2;
                 }
-            },
-            stop: function(event, ui) {
-                let n = $(element).data('project-number');
-                let position = calculateChildPosition(element, $('#galactic-editor'));
-                let flag = true;
-                for (let i = 0; i < changes_projects.length; i++) {
-                    if (changes_projects[i].id === n) {
-                        flag = false;
-                        changes_projects[i].x = Math.floor(position.x);
-                        changes_projects[i].y = Math.floor(position.y);
-                    }
-                }
-                if (flag) changes_projects.push({'id': n, 'x': Math.floor(position.x), 'y': Math.floor(position.y)});
-            }
-        })
-
-        $(element).on('mousedown', function (event) {
-            if (event.button === 2) {
-                clicked_project = $(element).attr('id');
-                let pos = $(element).position();
-                let line = document.createElementNS('http://www.w3.org/2000/svg','line');
-                line.setAttribute('id', 'galactic-editor-line-moving');
-                line.setAttribute('x1', pos.left + $(element).outerWidth() / 2);
-                line.setAttribute('y1', pos.top + $(element).outerHeight() / 2);
-                line.setAttribute('x2', pos.left + $(element).outerWidth() / 2);
-                line.setAttribute('y2', pos.top + $(element).outerHeight() / 2);
-                line.setAttribute('stroke', categories2[key]);
-                line.setAttribute('stroke-width', 8);
-                $("#galactic-editor-canv").append(line);
-            }
-        })
-
-        $(element).on('mouseup', function (event) {
-            if (event.button === 2) {
-                let released_project = $(element).attr('id');
-                if (released_project !== clicked_project) {
-                    let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
-                    conn.sort();
-                    if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
-                    else {
-                        $("#galactic-editor-canv").append(create_line(
-                            `#galacticEditorProject${conn[0]}`,
-                            `#galacticEditorProject${conn[1]}`,
-                            `galactic-editor-line`,
-                            `galactic-editor-line${conn[0]}-${conn[1]}`, key
-                        ));
-                        let flag = true;
-                        for (let i = 0; i < changes_lines.length; i++) {
-                            if (changes_lines[i].from === conn[0] 
-                                && changes_lines[i].to === conn[1]
-                                && changes_lines[i].add === false) {
-                                changes_lines.splice(i, 1);
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag) changes_lines.push({'category': key, 'from': conn[0], 'to': conn[1], 'add': true});
-                        connections.push([conn[0], conn[1]]);
-                    }
-                    
+                else if (conn[1] == number) {
+                    let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
+                    let pos = $(element).position();
+                    line.x2.baseVal.value = pos.left + $(element).outerWidth() / 2;
+                    line.y2.baseVal.value = pos.top + $(element).outerHeight() / 2;
                 }
             }
-        })
+        },
+        stop: function(event, ui) {
+            change_editor_project_position(element);
+        }
     })
+
+    $(element).on('mousedown', function (event) {
+        if (event.button === 2) {
+            clicked_project = $(element).attr('id');
+            let pos = $(element).position();
+            let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.setAttribute('id', 'galactic-editor-line-moving');
+            line.setAttribute('x1', pos.left + $(element).outerWidth() / 2);
+            line.setAttribute('y1', pos.top + $(element).outerHeight() / 2);
+            line.setAttribute('x2', pos.left + $(element).outerWidth() / 2);
+            line.setAttribute('y2', pos.top + $(element).outerHeight() / 2);
+            line.setAttribute('stroke', categories2[key]);
+            line.setAttribute('stroke-width', 8);
+            $("#galactic-editor-canv").append(line);
+        }
+    })
+
+    $(element).on('mouseup', function (event) {
+        if (event.button === 2) {
+            let released_project = $(element).attr('id');
+            if (released_project !== clicked_project) {
+                let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
+                conn.sort();
+                if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
+                else {
+                    $("#galactic-editor-canv").append(create_line(
+                        `#galacticEditorProject${conn[0]}`,
+                        `#galacticEditorProject${conn[1]}`,
+                        `galactic-editor-line`,
+                        `galactic-editor-line${conn[0]}-${conn[1]}`, key
+                    ));
+                    let flag = true;
+                    for (let i = 0; i < changes_lines.length; i++) {
+                        if (changes_lines[i].from === conn[0] 
+                            && changes_lines[i].to === conn[1]
+                            && changes_lines[i].add === false) {
+                            changes_lines.splice(i, 1);
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) changes_lines.push({'category': key, 'from': conn[0], 'to': conn[1], 'add': true});
+                    connections.push([conn[0], conn[1]]);
+                }
+                
+            }
+        }
+    })
+}
+
+export function change_editor_project_position(element) {
+    let n = $(element).data('project-number');
+    let position = calculateChildPosition(element, $('#galactic-editor'));
+    let flag = true;
+    for (let i = 0; i < changes_projects.length; i++) {
+        if (changes_projects[i].id === n) {
+            flag = false;
+            changes_projects[i].x = Math.floor(position.x);
+            changes_projects[i].y = Math.floor(position.y);
+        }
+    }
+    if (flag) changes_projects.push({'id': n, 'x': Math.floor(position.x), 'y': Math.floor(position.y)});
 }
 
 
