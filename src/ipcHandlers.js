@@ -198,7 +198,7 @@ function todoHandlers(db) {
                 FROM goals G
                          LEFT JOIN knots KN ON KN.goal_id = G.id
                 WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
-                  and check_state = 0
+                  and check_state = ${params.goal_check}
                 ORDER BY addDate, goal_pos`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -211,19 +211,18 @@ function todoHandlers(db) {
                         "goal": goals[i].goal,
                         "category": goals[i].category,
                         "knot_id": goals[i].knot_id,
-                        "difficulty": goals[i].Difficulty
+                        "difficulty": goals[i].difficulty
                     })
                     else goals_dict[day] = [{
                         "goal": goals[i].goal,
                         "category": goals[i].category,
                         "knot_id": goals[i].knot_id,
-                        "difficulty": goals[i].Difficulty
+                        "difficulty": goals[i].difficulty
                     }]
                 }
-
+                console.log(goals_dict)
                 if (params.goal_check) event.reply('get-month-goals-done', goals_dict)
                 else event.reply('get-month-goals', goals_dict)
-
             }
         })
     })
@@ -703,6 +702,7 @@ function todoHandlers(db) {
         db.run(`UPDATE goals
                 SET check_state=${params.state}
                 WHERE id = ${local_ids_array[params.id]}`)
+        local_ids_array.splice(params.id, 1)
     })
 
     ipcMain.on('history-removed', (event, params) => {
