@@ -50,6 +50,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
 
     newProject: (params) => ipcRenderer.send('new-project', params),
+    deleteProject: (params) => ipcRenderer.send('delete-project', params),
 
     goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
 

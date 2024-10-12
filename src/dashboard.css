@@ -206,7 +206,7 @@
     display: inline-block;
     font-size: 20px;
     color: black;
-    width: 195px;
+    width: 194px;
     height: 50px;
     background-color: #D8E1E7;
     position: relative;
@@ -249,6 +249,20 @@
 
 #dashProjects{
     position: relative;
+    height: 400px;
+    overflow-y: scroll;
+}
+
+#dashProjects::-webkit-scrollbar {
+    width: 0.2em;
+}
+
+#dashProjects::-webkit-scrollbar-thumb {
+    background-color: #888;
+}
+
+#dashProjects::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 #dashNewProject{

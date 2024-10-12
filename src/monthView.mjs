@@ -17,7 +17,7 @@ $(document).on('click', '#dashMonth', function () {
 export function month_view() {
     build_view(_month_content_HTML(), _month_header_HTML())
     set_today()
-    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(l_date.day_sql)})
+    window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(l_date.day_sql), goal_check: 0})
     window.sidebarAPI.askHistory({date: l_date.get_history_month()})
 
     let rightbar = $('#rightbar')

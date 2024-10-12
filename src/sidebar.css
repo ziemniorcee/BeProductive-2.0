@@ -34,9 +34,17 @@
     top: 1px;
 }
 
+#sideHistory{
+    z-index: 2;
+}
 #sideHistory, #sideIdeas{
     height: 50px;
 }
+
+#sideHistory img, #sideIdeas img{
+    pointer-events: none;
+}
+
 
 .sidebars{
     height: 50px;
@@ -55,6 +63,11 @@
 /* --------- Project Sidebar Picker --------- */
 #projectShowed {
     right: 75px;
+    z-index: 2;
+}
+
+.projectType img{
+    pointer-events: none;
 }
 
 .projectType{
