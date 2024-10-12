@@ -20,7 +20,7 @@ function show_history_sidebar() {
             <div id="sidebarClose">⨉</div>
             <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
             <span id="head_text">History</span>
-            <img src="images/goals/polaura.png" id="polaura2" alt="polaura" width="25" height="50">
+            <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
         </div>
         <div id="days">
 
@@ -193,10 +193,14 @@ $(document).on('click', '.historyCheck', function () {
  */
 function change_history_check(that){
     setTimeout(function () {
-        if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
-        else $(that).closest('.day').remove()
+        let check_state = $(that).prop('checked')
+        if (check_state){
+            window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(that), state:1})
+
+            if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
+            else $(that).closest('.day').remove()
+        }
     }, 1000)
-    window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(this), state:1})
 }
 
 $(document).on('click', '#sideIdeas', () => show_ideas_sidebar())
@@ -214,7 +218,7 @@ function show_ideas_sidebar(){
             <div id="sidebarClose">⨉</div>
             <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
             <span id="head_text">Ideas</span>
-            <img src="images/goals/polaura.png" id="polaura2" alt="polaura" width="25" height="50">
+            <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
         </div>
         <div id="days">
             <div id='ideas'></div>

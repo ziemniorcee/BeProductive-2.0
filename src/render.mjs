@@ -86,7 +86,7 @@ export function day_view() {
     let rightbar = $('#rightbar')
     rightbar.html(rightbar.html())
 
-    if ($('#days').length){
+    if ($('#days').length && $('#head_text') === "History"){
         window.sidebarAPI.askHistory({date: l_date.get_history_day()})
     } else if (!$('#sideProjectGoals').length) {
         dragula_day_view()
@@ -407,6 +407,7 @@ $(document).on('click', '#newCategoryDiscard', function () {
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
 });
+
 /**
  * Creates new category from newCategory box and resets categories pickers
  */
@@ -547,8 +548,10 @@ function change_step_entry(that, event) {
 }
 
 $(document).on('click', '#todosAll .check_task', function () {
+    console.log("XPP")
     let position = $('.check_task').index(this)
     change_main_check(position)
+    close_edit()
 });
 
 

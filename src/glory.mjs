@@ -51,7 +51,7 @@ function build_glory(goals_dict){
             <div>
                 <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
                 <span>Hall of glory</span>
-                <img src="images/goals/polaura2.png" alt="polaura" width="25" height="50">
+                <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
             </div>
         </div>
         <div id="gloryContent">
@@ -103,6 +103,7 @@ function _build_columns(goals_dict, days, start){
         let goals = ""
         if(goals_dict[day] !== undefined) {
             for (let j = 0; j < goals_dict[day].length; j++) {
+                console.log(goals_dict[day][j])
                 let url = `images/goals/glory${goals_dict[day][j].difficulty}.svg`
                 goals += `<div class="gloryGoal" style='background: ${categories[goals_dict[day][j].category][0]}  url(${url}) center'></div>`
             }

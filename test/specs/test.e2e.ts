@@ -238,7 +238,6 @@ describe('edit', () =>{
 
         await task[0].click()
 
-        await browser.pause(5000)
 
         let edit_steps = await $$('.editStep')
         await expect(edit_steps.length).toEqual(1)
