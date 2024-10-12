@@ -777,7 +777,11 @@ $(document).on('click', '.viewOption', function () {
     is_edit_change = false
 })
 
-$(document).on('mousedown', '#main, #editClose, #editBack', () => close_edit())
+$(document).on('mousedown', '#main, #editClose, #editBack', () => {
+    if (!$(event.target).is('#sideHistory') && !$(event.target).is('#sideIdeas') && !$(event.target).is('.projectType'))  {
+        close_edit()
+    }
+})
 
 /**
  * closes edit sidebar
@@ -787,6 +791,7 @@ $(document).on('mousedown', '#main, #editClose, #editBack', () => close_edit())
  * if project goal was edited, resets project sidebar
  */
 export function close_edit() {
+    base = null
     if (goal_pressed === true) {
         goal_pressed = false
         if (saved_sidebar.trim() === "") {

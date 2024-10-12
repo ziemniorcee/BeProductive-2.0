@@ -618,8 +618,7 @@ body {
 
 }
 
-#polaura2{
-    -webkit-transform: scaleX(-1);
+.polaura2{
     transform: scaleX(-1);
 }
 

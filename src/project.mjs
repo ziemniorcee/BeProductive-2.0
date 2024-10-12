@@ -39,7 +39,7 @@ function show_project_sidebar(that) {
             <div id="sideProjectTitle" style="background-color: ${project_color}">
                 <img src="images/goals/polaura.png" alt="">
                 <span>${project_name}</span>
-                <img id="polaura2" src="images/goals/polaura.png" alt="">
+                <img class="polaura2" src="images/goals/polaura.png" alt="">
             </div>
         </div>
         <div id="sideProjectOptions">
@@ -586,6 +586,7 @@ $(document).on('click', '#projectDelete', () => {
 $(document).on('click', '#projectDeleteConfirm', () => {
     delete_project()
 })
+
 function delete_project(){
     window.goalsAPI.deleteProject({position:project_pos})
     day_view()
