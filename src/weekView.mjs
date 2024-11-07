@@ -1,7 +1,6 @@
 import {l_date} from "./date.js";
 import {categories, check_border, decode_text, weekdays2, weekdays_grid} from "./data.mjs";
 import {_repeat_label_HTML, build_view, day_view} from "./render.mjs";
-import {close_edit, fix_goal_pos} from "./edit.mjs";
 import {already_emblem_HTML, project_pos, reset_project_pos} from "./project.mjs";
 
 export let is_week_drag = 0
@@ -24,7 +23,6 @@ export function week_view() {
     rightbar.html(rightbar.html())
 
     dragula_week_view()
-    close_edit()
 
     $('#content').css('flex-direction', 'row')
 }
@@ -236,7 +234,6 @@ export function dragula_week_view() {
             }
         } else if (event.parentNode !== null) _get_from_sidebar(event, drag_sidebar_task)
 
-        fix_goal_pos()
     })
 }
 

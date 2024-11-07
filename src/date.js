@@ -1,6 +1,5 @@
 import {weekdays, month_names} from "./data.mjs";
 import {reset_project_pos} from "./project.mjs";
-import {close_edit} from "./edit.mjs";
 import {dragula_week_view, week_view} from "./weekView.mjs";
 import {dragula_month_view, month_view} from "./monthView.mjs";
 import {day_view} from "./render.mjs";
@@ -326,7 +325,6 @@ $("#datePicker").datepicker({
         } else {
             month_change(2)
         }
-        close_edit()
     }
 });
 

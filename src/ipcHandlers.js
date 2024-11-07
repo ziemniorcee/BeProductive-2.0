@@ -112,7 +112,7 @@ function todoHandlers(db) {
         })
     })
 
-    function where_option(option, project_pos){
+    function where_option(option, project_pos) {
         if (option === 0) {
             return `WHERE G.project_id = ${project_ids[project_pos]} 
                         AND G.check_state = 1`
@@ -220,7 +220,6 @@ function todoHandlers(db) {
                         "difficulty": goals[i].difficulty
                     }]
                 }
-                console.log(goals_dict)
                 if (params.goal_check) event.reply('get-month-goals-done', goals_dict)
                 else event.reply('get-month-goals', goals_dict)
             }
@@ -293,15 +292,16 @@ function todoHandlers(db) {
     ipcMain.on('goal-remove-date', (event, params) => {
         let empty = ""
         let array_ids = goal_ids
-        if (params.option === 1){
+        if (params.option === 1) {
             array_ids = project_sidebar_ids
         }
 
         db.run(`UPDATE goals
-                SET addDate="${empty}", check_state=0 
+                SET addDate="${empty}",
+                    check_state=0
                 WHERE id = ${array_ids[params.id]}`)
 
-        if (params.option === 1){
+        if (params.option === 1) {
             project_sidebar_ids.splice(params.id, 1)
         }
 
@@ -323,7 +323,6 @@ function todoHandlers(db) {
 
     ipcMain.on('ask-edit-goal', (event, params) => {
         ids_array_previous = ids_array
-
         if (params.option === 0) ids_array = goal_ids
         else if (params.option === 1) ids_array = history_ids
         else if (params.option === 2) ids_array = project_sidebar_ids
@@ -334,6 +333,7 @@ function todoHandlers(db) {
                        G.category,
                        G.difficulty,
                        G.importance,
+                       G.note,
                        PR.id as pr_id
                 FROM goals G
                          LEFT JOIN projects PR ON PR.id = G.project_id
@@ -510,7 +510,7 @@ function todoHandlers(db) {
 
     ipcMain.on('change-checks-goal', (event, params) => {
         let array_ids = goal_ids
-        if (params.option === 1){
+        if (params.option === 1) {
             array_ids = project_sidebar_ids
         }
 
@@ -518,7 +518,7 @@ function todoHandlers(db) {
                 SET check_state="${Number(params.state)}"
                 WHERE id = ${array_ids[params.id]}`)
 
-        if (params.option === 1){
+        if (params.option === 1) {
             project_sidebar_ids.splice(params.id, 1)
         }
     })
@@ -539,7 +539,7 @@ function todoHandlers(db) {
 
     ipcMain.on('change-text-goal', (event, params) => {
         let selected_array = ids_array
-        if (params.is_previous){
+        if (params.is_previous) {
             selected_array = ids_array_previous
         }
 
@@ -551,7 +551,7 @@ function todoHandlers(db) {
     ipcMain.on('add-step', (event, params) => {
         let selected_array = ids_array
 
-        if (params.is_previous){
+        if (params.is_previous) {
             selected_array = ids_array_previous
         }
 
@@ -573,7 +573,7 @@ function todoHandlers(db) {
     ipcMain.on('change-step', (event, params) => {
         let selected_array = ids_array
 
-        if (params.is_previous){
+        if (params.is_previous) {
             selected_array = ids_array_previous
         }
 
@@ -585,7 +585,7 @@ function todoHandlers(db) {
     ipcMain.on('remove-step', (event, params) => {
         let selected_array = ids_array
 
-        if (params.is_previous){
+        if (params.is_previous) {
             selected_array = ids_array_previous
         }
 
@@ -619,6 +619,59 @@ function todoHandlers(db) {
         db.run(`UPDATE goals
                 SET project_id="${new_project_id}"
                 WHERE id = ${ids_array[params.id]}`)
+    })
+
+    ipcMain.on('edit-goal', (event, params) => {
+        db.run(`UPDATE goals
+                SET goal       = '${params.changes['goal']}',
+                    category   = ${params.changes['category']},
+                    difficulty = ${params.changes['difficulty']},
+                    importance = ${params.changes['importance']},
+                    note       = '${params.changes['note']}',
+                    project_id = ${params.changes['project_id']}
+                WHERE id = ${ids_array[params.id]}`)
+
+        let new_steps = params.changes['steps']
+
+        let current_steps_length = step_ids[ids_array[params.id]].length
+        let new_steps_length = params.changes['steps'].length
+
+        for (let i = 0; i < current_steps_length; i++) {
+            if (i < new_steps_length) {
+                db.run(`UPDATE steps
+                        SET step_text="${new_steps[i]['step_text']}",
+                            step_check="${new_steps[i]['step_check']}"
+                        WHERE id = ${step_ids[ids_array[params.id]][i]}`)
+            } else {
+                db.run(`DELETE
+                        FROM steps
+                        WHERE id = ${step_ids[ids_array[params.id]][i]}`)
+                step_ids[ids_array[params.id]].splice(i, 1)
+            }
+        }
+
+        if (new_steps_length > current_steps_length) {
+            for (let i = 0; i < new_steps_length - current_steps_length; i++) {
+                let array_pos = i + current_steps_length
+                db.run(`INSERT INTO steps (step_text, step_check, goal_id)
+                VALUES ("${new_steps[array_pos]['step_text']}",
+                        ${new_steps[array_pos]['step_check']},
+                        ${ids_array[params.id]})`)
+
+                db.all(`SELECT id
+                from steps
+                ORDER BY id DESC
+                LIMIT 1`, (err, rows) => {
+                    if (err) console.error(err)
+                    else {
+                        if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
+                        step_ids[ids_array[params.id]].push(rows[0].id)
+                    }
+                })
+            }
+        }
+
+
     })
 
     ipcMain.on('ask-history', (event, params) => {
@@ -670,8 +723,8 @@ function todoHandlers(db) {
                 delete goal[0]["pr_id"]
 
                 db.all(`SELECT id, goal_id, step_text, step_check
-                FROM steps
-                WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
+                        FROM steps
+                        WHERE goal_id = ${history_ids[params.id]}`, (err2, steps) => {
                     if (err2) console.error(err2)
                     else {
                         for (let i = 0; i < steps.length; i++) {
@@ -697,7 +750,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('side-check-change', (event, params) => {
-        let local_ids_array =  history_ids
+        let local_ids_array = history_ids
         if (params.option === 2) local_ids_array = project_sidebar_ids
         db.run(`UPDATE goals
                 SET check_state=${params.state}
@@ -776,73 +829,75 @@ function todoHandlers(db) {
 
     ipcMain.on('ask-productivity', (event, params) => {
         db.all(`SELECT date_col, prod
-        FROM productivity
-        WHERE date_col >= "${params[params.length - 1]}" AND date_col <= "${params[0]}"
-        ORDER BY date_col DESC;`, (err, rows) => {
+                FROM productivity
+                WHERE date_col >= "${params[params.length - 1]}"
+                  AND date_col <= "${params[0]}"
+                ORDER BY date_col DESC;`, (err, rows) => {
             if (err) console.error(err)
             else {
-                db.all(`SELECT G.addDate, 
-                        G.difficulty,
-                        G.importance,
-                        G.check_state
-                    FROM goals G
-                    WHERE G.addDate NOT IN (SELECT P.date_col
-                                      FROM productivity P
-                                      WHERE P.date_col >= "${params[params.length - 1]}" AND P.date_col < "${params[0]}"
-                                      GROUP BY P.date_col
-                                      ORDER BY P.date_col DESC) 
-                                      AND G.addDate >= "${params[params.length - 1]}" 
-                                      AND G.addDate < "${params[0]}"
-                    ORDER BY G.addDate DESC;`, (err2, rows2) => {
-                        if (err2) console.error(err2);
-                        else {
-                            let res = [];
-                            for (let date of params) {
-                                let flag = true;
-                                for (let prod of rows) {
-                                    if (date == prod.date_col) {
-                                        flag = false;
-                                        res.push(prod.prod);
-                                        break;
-                                    }
+                db.all(`SELECT G.addDate,
+                               G.difficulty,
+                               G.importance,
+                               G.check_state
+                        FROM goals G
+                        WHERE G.addDate NOT IN (SELECT P.date_col
+                                                FROM productivity P
+                                                WHERE P.date_col >= "${params[params.length - 1]}"
+                                                  AND P.date_col < "${params[0]}"
+                                                GROUP BY P.date_col
+                                                ORDER BY P.date_col DESC)
+                          AND G.addDate >= "${params[params.length - 1]}"
+                          AND G.addDate < "${params[0]}"
+                        ORDER BY G.addDate DESC;`, (err2, rows2) => {
+                    if (err2) console.error(err2);
+                    else {
+                        let res = [];
+                        for (let date of params) {
+                            let flag = true;
+                            for (let prod of rows) {
+                                if (date == prod.date_col) {
+                                    flag = false;
+                                    res.push(prod.prod);
+                                    break;
                                 }
-                                if (flag) {
-                                    let sum_done = 0;
-                                    let sum_all = 0;
-                                    for (let task of rows2) {
-                                        if (date == task.addDate && task.importance > 2) {
-                                            if (task.check_state == 1) {
-                                                sum_done += task.difficulty * task.importance;
-                                            }
-                                            sum_all += task.difficulty * task.importance;
-                                        }
-                                    }
-                                    let sum = 0;
-                                    if (sum_all != 0) {
-                                        sum = Math.round(sum_done * 100 / sum_all);
-                                    } else {
-                                        sum = 0;
-                                    }
-                                    db.run(`INSERT INTO productivity (date_col, prod)
-                                            VALUES ("${date}", "${sum}")`)
-                                    res.push(sum);
-                                }
-
                             }
-                            event.reply('get-productivity', res);
+                            if (flag) {
+                                let sum_done = 0;
+                                let sum_all = 0;
+                                for (let task of rows2) {
+                                    if (date == task.addDate && task.importance > 2) {
+                                        if (task.check_state == 1) {
+                                            sum_done += task.difficulty * task.importance;
+                                        }
+                                        sum_all += task.difficulty * task.importance;
+                                    }
+                                }
+                                let sum = 0;
+                                if (sum_all != 0) {
+                                    sum = Math.round(sum_done * 100 / sum_all);
+                                } else {
+                                    sum = 0;
+                                }
+                                db.run(`INSERT INTO productivity (date_col, prod)
+                                        VALUES ("${date}", "${sum}")`)
+                                res.push(sum);
+                            }
+
                         }
-                    })
+                        event.reply('get-productivity', res);
+                    }
+                })
             }
         })
     })
 
 
     ipcMain.on('ask-categories-counts', (event) => {
-        db.all(`SELECT COUNT(goal) AS counts, 
-            category
-        FROM goals
-        GROUP BY category
-        ORDER BY category;`, (err, rows) => {
+        db.all(`SELECT COUNT(goal) AS counts,
+                       category
+                FROM goals
+                GROUP BY category
+                ORDER BY category;`, (err, rows) => {
             if (err) console.error(err)
             else {
                 event.reply('get-categories-counts', rows);
@@ -852,8 +907,8 @@ function todoHandlers(db) {
 
     ipcMain.on('ask-categories', (event) => {
         db.all(`SELECT *
-        FROM categories
-        ORDER BY id`, (err, rows) => {
+                FROM categories
+                ORDER BY id`, (err, rows) => {
             if (err) console.error(err)
             else {
                 event.reply('get-categories', rows);
@@ -863,13 +918,13 @@ function todoHandlers(db) {
 
     ipcMain.on('add-category', (event, params) => {
         db.run(`INSERT INTO categories (id, name, r, g, b)
-            VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
+                VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
     })
 
     ipcMain.on('ask-all-projects', (event) => {
         db.all(`SELECT *
-        FROM projects
-        ORDER BY id`, (err, rows) => {
+                FROM projects
+                ORDER BY id`, (err, rows) => {
             if (err) console.error(err)
             else {
                 event.reply('get-all-projects', rows);
@@ -879,8 +934,8 @@ function todoHandlers(db) {
 
     ipcMain.on('ask-galactic-conn', (event) => {
         db.all(`SELECT *
-        FROM galactic_connections
-        ORDER BY category`, (err, rows) => {
+                FROM galactic_connections
+                ORDER BY category`, (err, rows) => {
             if (err) console.error(err)
             else {
                 event.reply('get-galactic-conn', rows);
@@ -891,9 +946,9 @@ function todoHandlers(db) {
     ipcMain.on('change-projects-coords', (event, params) => {
         for (let change of params.changes) {
             db.run(`UPDATE projects
-                SET x="${change.x}",
-                y="${change.y}"
-                WHERE id = ${change.id}`)
+                    SET x="${change.x}",
+                        y="${change.y}"
+                    WHERE id = ${change.id}`)
         }
     })
 
@@ -901,28 +956,32 @@ function todoHandlers(db) {
         for (let change of params.changes) {
             if (change.add) {
                 db.run(`INSERT INTO galactic_connections (category, project_from, project_to)
-                    VALUES ("${change.category}", "${change.from}", "${change.to}")`)
+                        VALUES ("${change.category}", "${change.from}", "${change.to}")`)
             } else {
                 db.run(`DELETE
-                    FROM galactic_connections
-                    WHERE category = ${change.category} 
-                    AND project_from = ${change.from}
-                    AND project_to = ${change.to}`)
+                        FROM galactic_connections
+                        WHERE category = ${change.category}
+                          AND project_from = ${change.from}
+                          AND project_to = ${change.to}`)
             }
         }
     })
 
     ipcMain.on('remove-category', (event, params) => {
-        db.run(`DELETE FROM categories WHERE id = ${params.id}`);
-        db.run(`DELETE FROM galactic_connections WHERE category = ${params.id}`);
-        db.run(`DELETE FROM projects WHERE category = ${params.id}`);
-        db.run(`DELETE FROM goals WHERE category = ${params.id}`);
+        db.run(`DELETE
+                FROM categories
+                WHERE id = ${params.id}`);
+        db.run(`DELETE
+                FROM galactic_connections
+                WHERE category = ${params.id}`);
+        db.run(`DELETE
+                FROM projects
+                WHERE category = ${params.id}`);
+        db.run(`DELETE
+                FROM goals
+                WHERE category = ${params.id}`);
     })
 }
-
-
-
-
 
 
 function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
@@ -986,5 +1045,4 @@ function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt
     })
 
 
-    
 }

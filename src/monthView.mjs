@@ -1,7 +1,6 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2, decode_text, getIdByColor} from "./data.mjs";
 import {_repeat_label_HTML, build_view, day_view,} from "./render.mjs";
-import {close_edit, fix_goal_pos} from "./edit.mjs";
 import {already_emblem_HTML} from "./project.mjs";
 
 let is_month_drag = 0
@@ -24,7 +23,6 @@ export function month_view() {
     rightbar.html(rightbar.html())
 
     dragula_month_view()
-    close_edit()
 }
 
 window.goalsAPI.getMonthGoals((goals_dict) => {
@@ -240,7 +238,6 @@ export function dragula_month_view() {
         } else if (event.parentNode !== null) {
             _get_from_sidebar(event, dragged_task)
         }
-        fix_goal_pos()
     })
 }
 

@@ -29,14 +29,15 @@ import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
 
     $(document).on('click', '.selectCategory', function (event) {
         event.stopPropagation()
-        if ($(this).attr('id') === "selectCategory") $('#categoryPicker').toggle()
+        if ($(this).attr('id') === "selectCategory1") $('#categoryPicker1').toggle()
         else if ($(this).attr('id') === "selectCategory2") $('#categoryPicker2').toggle()
+        else if ($(this).attr('id') === "selectCategory22") $('#categoryPicker22').toggle()
         else if ($(this).attr('id') === "selectCategory3") $('#categoryPicker3').toggle()
         else if ($(this).attr('id') === "selectCategory4") $('#categoryPicker4').toggle()
     });
 
     $(document).on('click', '#main, #todoInput', function () {
-        $('#categoryPicker').css('display', 'none')
+        $('#categoryPicker1').css('display', 'none')
         $('#categoryPicker3').css('display', 'none')
         $('#newProjectIconPicker').css("visibility", "hidden")
     })
@@ -93,7 +94,6 @@ $(document).on('click', '#dashWeek', function () {
 });
 
 $(document).on('click', '#editSelectProject', function (event) {
-    event.stopPropagation()
     $('#editProjectPicker').toggle()
 })
 
@@ -110,6 +110,7 @@ $(document).on('click', '#newCategoryDiscard', function () {
 $(document).on('click', '#vignette', function () {
     $('#vignette').children().css('display', 'none');
     $('#vignette').css('display', 'none');
+    $('#categoryPicker22').css('display', 'none')
 })
 
 $(document).on('click', '#newCategory', function(event) {
@@ -141,3 +142,11 @@ $(document).on('click', '#removeCategoryDiscard', function () {
     $("#removeCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
 });
+
+$(document).on('click', '#taskEdit', function (event){
+    event.stopPropagation()
+})
+
+$(document).on('click', '#taskEdit', function (event){
+    $('#categoryPicker22').css('display', 'none')
+})

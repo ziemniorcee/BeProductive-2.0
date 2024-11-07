@@ -7,11 +7,10 @@ import {
     encode_text,
     getIdByColor,
     hsvToRgb,
-    weekdays2, 
-    projects, 
+    weekdays2,
+    projects,
     project_conn
 } from "./data.mjs";
-import {change_category, close_edit, fix_goal_pos} from "./edit.mjs";
 import {
     already_emblem_HTML,
     build_project_goal, project_emblem_html,
@@ -19,6 +18,7 @@ import {
 } from "./project.mjs";
 import {create_today_graphs} from './graph.mjs';
 import {add_galactic_category_boxes} from './galactic.mjs';
+import {set_edit} from "./edit2.mjs";
 
 
 export let is_day_drag = 0
@@ -37,9 +37,11 @@ window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connec
 function wait_for_categories(cats) {
     for (let c of cats) {
         categories[c.id] = [`rgb(${c.r}, ${c.g}, ${c.b})`, c.name];
-        categories2[c.id] = `rgb(${Math.min(Math.floor(c.r * 3 / 2), 255)}, 
-                                ${Math.min(Math.floor(c.g * 3 / 2), 255)}, 
-                                ${Math.min(Math.floor(c.b * 3 / 2), 255)})`;
+        categories2[c.id] = 'rgb(' +
+            Math.min(Math.floor(c.r * 3 / 2), 255) + ', ' +
+            Math.min(Math.floor(c.g * 3 / 2), 255) + ', ' +
+            Math.min(Math.floor(c.b * 3 / 2), 255) + ')';
+
     }
     window.goalsAPI.askAllProjects();
 }
@@ -48,15 +50,14 @@ function wait_for_projects(projs) {
     for (let proj of projs) {
         projects.push(proj);
     }
-    console.log(projects);
     window.goalsAPI.askGalacticConnections();
+    set_edit()
 }
 
 function wait_for_galactic_connections(connections) {
     for (let conn of connections) {
         project_conn.push(conn);
     }
-    console.log(project_conn);
     day_view();
     create_today_graphs();
     $('#graphLine1').show();
@@ -86,12 +87,11 @@ export function day_view() {
     let rightbar = $('#rightbar')
     rightbar.html(rightbar.html())
 
-    if ($('#days').length && $('#head_text') === "History"){
+    if ($('#days').length && $('#head_text') === "History") {
         window.sidebarAPI.askHistory({date: l_date.get_history_day()})
     } else if (!$('#sideProjectGoals').length) {
         dragula_day_view()
     }
-    close_edit()
 }
 
 window.goalsAPI.getGoals((goals) => get_goals(goals))
@@ -235,7 +235,7 @@ function get_repeat_option() {
         selected_div = event.target
     })
 
-    $(document).on('click', '#testPanelClear', function (){
+    $(document).on('click', '#testPanelClear', function () {
         remove_goal()
     })
 
@@ -246,7 +246,7 @@ function get_repeat_option() {
         remove_goal()
     })
 
-    function remove_goal(){
+    function remove_goal() {
         let id = $(selected_div).find('.todoId').text()
         if ($('#monthGrid').length) id = $(selected_div).find('.monthTodoId').text()
 
@@ -264,7 +264,6 @@ function get_repeat_option() {
         for (let i = 0; i < goals.length; i++) {
             if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
         }
-        close_edit()
     }
 
     /**
@@ -287,7 +286,6 @@ function get_repeat_option() {
 
         selected_div.remove()
 
-        close_edit()
     })
 
     /**
@@ -322,7 +320,7 @@ function get_repeat_option() {
         return new_arr.indexOf(value)
     }
 
-    $(document).on('click', '#testPanelRemoveHistory', () =>{
+    $(document).on('click', '#testPanelRemoveHistory', () => {
         remove_history()
     })
 
@@ -333,7 +331,7 @@ function get_repeat_option() {
     /**
      * removes history goal
      */
-    function remove_history(){
+    function remove_history() {
         window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(selected_div)})
         if ($(selected_div).closest('.historyTasks').children().length === 1) {
             selected_div = $(selected_div).closest('.day')
@@ -341,7 +339,7 @@ function get_repeat_option() {
         selected_div.remove()
     }
 
-    $(document).on('click', '#testPanelRemoveIdea', () =>{
+    $(document).on('click', '#testPanelRemoveIdea', () => {
         remove_idea()
     })
 
@@ -352,7 +350,7 @@ function get_repeat_option() {
     /**
      * removes idea goal
      */
-    function remove_idea(){
+    function remove_idea() {
         window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(selected_div)})
         selected_div.remove()
     }
@@ -413,7 +411,6 @@ $(document).on('click', '#newCategoryDiscard', function () {
  */
 function create_new_category() {
     let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
-    console.log(rgb);
     const len = Object.keys(categories).length + 1;
     let index = len;
     for (let i = 1; i < len; i++) {
@@ -427,7 +424,7 @@ function create_new_category() {
     categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
                             ${Math.min(rgb[1] * 5 / 3, 255)}, 
                             ${Math.min(rgb[2] * 5 / 3, 255)})`;
-    
+
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
@@ -457,23 +454,19 @@ $(document).on('click', '.category', function (event) {
 function select_category(that) {
     let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
     let picker = '0';
-    if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker") {
-        picker = ''
-    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker2") {
-        picker = '2'
-        if (index !== 1) change_category(index - 1)
-    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker3") {
-        picker = '3'
-    } else if ($(that).closest('.categoryPicker').attr('id') === "categoryPicker4") {
-        picker = '4'
-        index++;
-    }
+
+    let picker_id = $(that).closest('.categoryPicker').attr('id')
+    const id = picker_id.match(/categoryPicker(\d+)/)[1];
+
+
+    if (id === '4') index++
+
     if (index === 1) {
         $("#vignette").css('display', 'block')
         $("#newCategory").css('display', 'block')
-    } else if (picker !== '0') {
-        let select_category = $(`#selectCategory${picker}`)
-        $(`#categoryPicker${picker}`).css('display', 'none')
+    } else if (id !== '0') {
+        let select_category = $(`#selectCategory${id}`)
+        $(`#categoryPicker${id}`).css('display', 'none')
         select_category.css('background', categories[index - 1][0])
         select_category.text(categories[index - 1][1])
     }
@@ -547,11 +540,10 @@ function change_step_entry(that, event) {
     }
 }
 
-$(document).on('click', '#todosAll .check_task', function () {
-    console.log("XPP")
+$(document).on('click', '#todosAll .check_task', function (event) {
+    event.stopPropagation()
     let position = $('.check_task').index(this)
     change_main_check(position)
-    close_edit()
 });
 
 
@@ -675,7 +667,6 @@ export function dragula_day_view() {
         } else {
             change_order()
         }
-        fix_goal_pos()
 
     });
 }
@@ -837,12 +828,12 @@ export function _input_HTML() {
                 </div>
                 <div id="todoSettings">
                     <div class="todoLabel">Category</div>
-                    <div id="selectCategory" class="selectCategory">General</div>
+                    <div id="selectCategory1" class="selectCategory">General</div>
                     <div class="todoLabel" id="label1">Difficulty</div>
                     <input type="range" class="todoRange" id="range1" min="0" max="4">
                     <div class="todoLabel" id="label2">Importance</div>
                     <input type="range" class="todoRange" id="range2" min="0" max="4">   
-                    <div class="categoryPicker" id="categoryPicker">
+                    <div class="categoryPicker" id="categoryPicker1">
                         ${categories_html}
                     </div>
                 </div>
@@ -874,7 +865,7 @@ function _new_goal_dict(goal_text, steps, repeat) {
     let difficulty = $('#range1').val()
     let importance = $('#range2').val()
 
-    let new_category = getIdByColor(categories, $('#selectCategory').css('backgroundColor'))
+    let new_category = getIdByColor(categories, $('#selectCategory1').css('backgroundColor'))
     return {
         goal: goal_text,
         steps: _steps_HTML(steps, new_category),
@@ -956,7 +947,7 @@ export function _categories_HTML(with_new_category) {
     let categories_html = ""
     if (with_new_category === undefined) {
         categories_html +=
-        `<div class="category">
+            `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
             </div>`
@@ -995,7 +986,6 @@ $(document).on('click', '#galactic-display-remove-category', function () {
 
 function remove_category() {
     let category = getIdByColor(categories, $('#selectCategory4').css('backgroundColor'))
-    console.log(category)
     delete categories[category];
     let new_projects = projects.filter(item => item.category !== category);
     projects.splice(0, projects.length);

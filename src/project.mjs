@@ -1,4 +1,4 @@
-import {categories, check_border, decode_text, getIdByColor, icons} from "./data.mjs";
+import {categories, check_border, decode_text, getIdByColor, icons, projects} from "./data.mjs";
 import {
     _categories_HTML,
     change_order,
@@ -74,8 +74,12 @@ function change_sidebar_option(that) {
 
 
 $(document).on('click', '#sideProjectGoals .check_task', function () {
-    let check_state = !$(this).prop('checked')
-    let goal_index = $('#sideProjectGoals .check_task').index(this)
+    check_sidebar_project_goal(this)
+});
+
+function check_sidebar_project_goal(selected_check){
+    let check_state = !$(selected_check).prop('checked')
+    let goal_index = $('#sideProjectGoals .check_task').index(selected_check)
 
     let todo = $('#sideProjectGoals .todo').eq(goal_index)
     let is_in = todo.find(".alreadyEmblem").length
@@ -91,7 +95,7 @@ $(document).on('click', '#sideProjectGoals .check_task', function () {
     if (is_in) {
         day_view()
     }
-});
+}
 
 window.goalsAPI.getProjectSidebar((goals) => {
     build_project_sidebar(goals)
@@ -257,7 +261,7 @@ function project_view(project_pos) {
  */
 function _set_input_category(project_color) {
     let category_id = getIdByColor(categories, project_color)
-    let select_category = $('#selectCategory')
+    let select_category = $('#selectCategory1')
 
     select_category.css('background-color', categories[category_id][0])
     select_category.text(categories[category_id][1])
@@ -449,6 +453,7 @@ function dragula_project_view() {
  * @param dragged_task pressed task
  */
 function move_to_done(new_goal_pos, dragged_task) {
+
     let goal_id = $(dragged_task).find('.todoId').text()
     $(dragged_task).remove()
     window.goalsAPI.changeChecksGoal({id: goal_id, state: 1, option: 0})
@@ -470,29 +475,27 @@ function move_to_todo(new_goal_pos, dragged_task) {
 }
 
 
-$(document).on('click', '#projectContent .check_task', function () {
-    change_project_check(this)
+$(document).on('click', '#projectContent .check_task', function (event) {
+    event.stopPropagation()
+    let selected_goal = $(this).closest('.todo')
+    change_project_check(selected_goal)
 });
 
 /**
  * changes check of project goal on checkbox click
  * @param that pressed checkbox of goal
  */
-function change_project_check(that) {
-    let check_task = $('.check_task')
-    let id = check_task.index(that)
-    let check_state = !check_task.eq(id).prop('checked')
-
-    let goal_id = $('.todoId').eq(id).text()
-    let todo = $('.todo').eq(id)
+export function change_project_check(selected_goal) {
+    let check_state = !selected_goal.find('.check_task').prop('checked')
+    let goal_id = selected_goal.find('.todoId').text()
 
     if (check_state) {
-        $('.checkDot').eq(id).css('background-image', ``)
-        $('#projectTodo .projectSectionGoals').append(todo)
+        selected_goal.find('.checkDot').css('background-image', ``)
+        $('#projectTodo .projectSectionGoals').append(selected_goal)
         window.goalsAPI.goalRemoveDate({id: goal_id})
     } else {
-        $('.checkDot').eq(id).css('background-image', `url('images/goals/check.png')`)
-        $('#projectDone .projectSectionGoals').append(todo)
+        selected_goal.find('.checkDot').css('background-image', `url('images/goals/check.png')`)
+        $('#projectDone .projectSectionGoals').append(selected_goal)
         window.goalsAPI.changeChecksGoal({id: goal_id, state: 1})
     }
     dragula_project_view()
@@ -636,18 +639,28 @@ export function reset_project_pos() {
 
 $(document).on('click', '#sideProjectClose', () => _hide_sidebar())
 
-/**
- * Changes visual project emblem in to do
- * @param goal_pos
- * @param project_id id of new selected category
- */
-export function change_project_emblem(goal_pos, project_id) {
-    $('.projectEmblem').eq(goal_pos).remove()
-    if (project_id >= 0) {
-        if ($('#todosAll').length) {
-            $('.todo').eq(goal_pos).append(project_emblem_html(project_id))
-        }
-    }
 
-    window.goalsAPI.changeProject({id: goal_pos, project_pos: project_id})
+/**
+ * creates picker based on existing projects
+ * @returns {string} HTML of project picker
+ */
+export function _project_picker_HTML() {
+    let picks_HTML = `
+        <div class="editPickProject">
+            <div class="editProjectIcon"></div>
+            <div class="editProjectName">None</div>
+        </div>`
+
+    for (let i = 0; i < projects.length; i++) {
+        let icon_color = categories[projects[i]['category']][0]
+        let icon_src =  `images/goals/projects/${projects[i]["icon"]}.png`
+        picks_HTML += `
+            <div class="editPickProject">
+                <div class="editProjectIcon" style="background-color: ${icon_color}">
+                    <img class="editPickProjectIcon" alt="" src="${icon_src}">
+                </div>
+                <div class="editProjectName">${projects[i]["name"]}</div>
+            </div>`
+    }
+    return picks_HTML
 }

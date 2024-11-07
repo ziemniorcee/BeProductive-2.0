@@ -25,7 +25,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeCategory: (params) => ipcRenderer.send('change-category', params),
     changeDifficulty: (params) => ipcRenderer.send('change-difficulty', params),
     changeImportance: (params) => ipcRenderer.send('change-importance', params),
-    changeProject: (params) => ipcRenderer.send('change-project', params),
+    editGoal: (params) => ipcRenderer.send('edit-goal', params),
 
     askWeekGoals: (params) => ipcRenderer.send('ask-week-goals', params),
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
