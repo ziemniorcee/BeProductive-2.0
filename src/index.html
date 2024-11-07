@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <script type="module" src="date.js"></script>
-    <script type="module" src="edit.mjs"></script>
+    <script type="module" src="edit2.mjs"></script>
     <script type="module" src="render.mjs"></script>
     <script type="module" src="sidebar.mjs"></script>
     <script type="module" src="weekView.mjs"></script>
@@ -149,6 +149,53 @@
                 <div id="newProjectCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
             </div>
             <div id="newCategoryError" class="vignetteWindow1Error"></div>
+        </div>
+        <div id="taskEdit" class="vignetteWindow2">
+            <div id="editHead">
+                <div id="editTitle">My day</div>
+            </div>
+            <div id="editBody">
+                <div id="editLeft">
+                    <div id="editMain2">
+                        <input type="checkbox" id="editMainCheck">
+                        <textarea id="editMainEntry" rows="1" spellcheck="false"></textarea>
+                    </div>
+                    <div id="editNote">
+                        <img src="images/goals/notes.png" id="editNoteImg">
+                        <textarea rows="1" id="editNoteEntry" spellcheck="false" placeholder="Note"></textarea>
+                    </div>
+                    <div id="editStepsTitle">Steps</div>
+                    <div id="editSteps2">
+
+                    </div>
+                    <div id="editNewStep">
+                        <span>+</span>New Step
+                    </div>
+                </div>
+                <div id="editRight">
+                    <div class="editLabel">Category</div>
+                    <div id="selectCategory22" class="selectCategory">General</div>
+                    <div class="categoryPicker" id="categoryPicker22">
+                    </div>
+                    <div class="editLabel">Difficulty</div>
+                    <input type="range" class="todoRange" id="editDiff" min="0" max="4" value="2"
+                           style="background-color: #FFFFFF">
+                    <div class="editLabel">Importance</div>
+                    <input type="range" class="todoRange" id="editImportance" min="0" max="4" value="2"
+                           style="background-color: #FFFFFF">
+                    <div class="editLabel">Project</div>
+                    <div id="editSelectProject" style="background-color: #FF5D00">
+                        <div class="editProjectIcon" style="background-color: #D8E1E7">
+                            <img class="editPickProjectIcon" alt="" src="images/goals/projects/book.png">
+                        </div>
+                        <div class="editProjectName">None</div>
+                    </div>
+                    <div id="editProjectPicker">
+                    </div>
+                    <div class="editLabel">Deadline</div>
+                </div>
+            </div>
+
         </div>
     </div>
     <div id="testPanel" style="opacity: 0">

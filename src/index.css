@@ -429,7 +429,7 @@ body {
     color: white;
 }
 
-#selectCategory {
+#selectCategory1 {
     background-color: #3B151F
 }
 
@@ -494,7 +494,7 @@ body {
 
 
 .todoRange {
-    width: 198px;
+    width: 250px;
     -webkit-appearance: none;
     outline: none;
 }
@@ -505,7 +505,7 @@ body {
     appearance: none;
     width: 25px;
     height: 25px;
-    background: #FF5D00;
+    background: #2A231F;
     cursor: pointer;
 }
 
@@ -930,16 +930,33 @@ body {
     line-height: 40px;
 }
 
-#editSelectProject, .editPickProject{
+#editSelectProject{
     line-height: 40px;
     height: 40px;
-    width: 200px;
+    width: 250px;
+    text-align: center;
+    margin-right: 8px;
+    background-color: #FF5D00;
+    border: 1px solid #D8E1E7;
+    position: relative;
+    margin-left: 25px;
+}
+
+.editPickProject{
+    line-height: 40px;
+    height: 40px;
+    width: 250px;
     text-align: center;
     margin-right: 8px;
     background-color: #FF5D00;
     border: 1px solid #D8E1E7;
     position: relative;
 }
+
+#editSelectProject{
+    margin-top: 10px;
+}
+
 
 .editProjectIcon{
     width: 30px;
@@ -958,16 +975,17 @@ body {
 }
 
 #editProjectPicker{
-    width: 200px;
+    height: 200px;
+    width: 250px;
     max-height: 160px;
     position: absolute;
     background-color: #2A231F;
     border: 1px solid #D8E1E7;
-    right: 18px;
-    top: 51px;
+    right: 23px;
+    top: 346px;
+    display: none;
     overflow-y: scroll;
     overflow-x: hidden;
-    display: none;
 }
 
 .editPickProject{
@@ -1069,6 +1087,7 @@ body {
     position: relative;
     bottom: 2px;
     cursor: pointer;
+    margin-left: 30px;
 }
 
 #gloryHead {
@@ -1388,4 +1407,196 @@ body {
     width: 100%;
     padding: 10px;
     border: 1px solid black;
+}
+
+#taskEdit {
+    display: block;
+}
+
+.vignetteWindow2{
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #2A231F;
+    border: #000000 3px solid;
+    border-radius: 10px;
+    display: none;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 20px;
+}
+
+#editHead{
+    height: 50px;
+    width: 100%;
+    line-height: 50px;
+    border-bottom: 3px solid black;
+    box-sizing: border-box;
+}
+
+
+#editTitle{
+    text-align: center;
+}
+
+
+#editBody{
+    height: calc(100% - 50px);
+    width: 100%;
+    display: flex;
+}
+#editLeft{
+    width: calc(100% - 300px);
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+
+#editMain2{
+    width: 100%;
+    display: flex;
+    margin-bottom: 5px;
+}
+
+#editMainCheck{
+    position: relative;
+    top: 1px;
+    display: block;
+    margin: 0 10px auto 0;
+    min-width: 30px;
+    min-height: 30px;
+    clip-path: circle(46% at 50% 50%);
+    accent-color: #343638;
+}
+
+#editMainEntry{
+    color: white;
+    width: 100%;
+    background: #2A231F;
+    border-radius: 7px;
+    font-size: 24px;
+    border: transparent;
+    overflow-y: hidden;
+    resize: none;
+    outline: none;
+    font-family: Arial, serif;
+    min-height: 30px;
+
+}
+
+#editNote{
+    width: 100%;
+    display: flex;
+    margin-left: 40px;
+    margin-bottom: 10px;
+}
+
+#editNoteImg {
+    height: 25px;
+    width: 25px;
+    display: block;
+}
+
+#editNoteEntry{
+    color: white;
+    width: calc(100% - 40px);
+    background: #2A231F;
+    border-radius: 7px;
+    font-size: 16px;
+    border: transparent;
+    overflow-y: hidden;
+    resize: none;
+    outline: none;
+    font-family: Arial, serif;
+}
+#editSteps2{
+    display: block;
+    margin-left: 13px;
+}
+
+#editStepsTitle{
+    margin-left: 42px;
+    border-bottom: 2px solid #FF5D00;
+    width: max-content;
+    margin-bottom: 10px;
+}
+
+.editStep2{
+    display: flex;
+    margin-bottom: 2px;
+    padding-top: 5px;
+}
+
+.editStepDrag{
+    height: 25px;
+    width: 25px;
+}
+
+.editStepCheck{
+    margin-bottom: auto;
+    display: block;
+    min-width: 20px;
+    min-height: 20px;
+    margin-right: 10px;
+    position: relative;
+    top: 0;
+    margin-left: 5px;
+}
+
+.editStepEntry{
+    color: white;
+    background: #2A231F;
+    border-radius: 7px;
+    font-size: 20px;
+    border: transparent;
+    outline: none;
+    width: calc(100% - 40px);
+    overflow-y: hidden;
+    resize: none;
+    font-family: Arial, serif;
+}
+
+#editRight{
+    width: 300px;
+    height: 100%;
+    background-color: #55423B;
+    border-left: 3px solid black;
+    overflow: hidden;
+    border-radius: 0 0 10px 0;
+    font-size: 24px;
+    text-align: center;
+    position: relative;
+}
+
+#selectCategory22{
+    display: block;
+    width: 250px;
+    margin: 10px auto 0;
+}
+
+#categoryPicker22{
+    width: 250px;
+    text-align: center;
+    margin-right: 10px;
+    top: 83px;
+    left: 25px;
+    position: absolute;
+    box-sizing: border-box;
+}
+
+#editDiff{
+    margin-top: 10px;
+}
+
+#editImportance{
+    margin-top: 10px;
+}
+
+.editLabel{
+    margin-top: 15px;
 }
