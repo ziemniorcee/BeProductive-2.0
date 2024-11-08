@@ -492,6 +492,9 @@ body {
     bottom: 5px
 }
 
+#todoSettings .todoRange{
+    width: 200px;
+}
 
 .todoRange {
     width: 250px;
