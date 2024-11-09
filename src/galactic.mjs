@@ -54,18 +54,24 @@ function create_galactic_editor(key) {
     box.empty();
     box.html(_galactic_editor_HTML(key));
 
-    // $('#galactic-editor').on('wheel', function(event) {
-    //     event.preventDefault();
+    $('#galactic-editor').on('wheel', function(event) {
+        event.preventDefault();
 
-    //     let elementOffset = $(this).offset();
-    //     let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
-    //     let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
-    //     let multiplier = event.originalEvent.deltaY > 0 ? 0.1 : -0.1
-    //     scale = Math.min(Math.max(scale + multiplier, 1), 5)
-    //     // $(this).css('transform-origin', mouseXInElement + 'px ' + mouseYInElement + 'px');
-    //     $(this).css('transform', 'scale(' + scale + ')');
-    //     console.log('Pozycja myszy względem elementu: ', mouseXInElement, mouseYInElement);
-    // });
+        let elementOffset = $('#galacticContainer').offset();
+        let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
+        let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
+        let multiplier = event.originalEvent.deltaY > 0 ? -0.05 : 0.05;
+        scale = Math.min(Math.max(scale + multiplier, 1), 5);
+        const [x, y] = $(this).css('transform-origin').split(' ');
+        const oldX = parseFloat(x);
+        const oldY = parseFloat(y);
+        const formattedX = (mouseXInElement + oldX) / 2;
+        const formattedY = (mouseYInElement + oldY) / 2;
+        $(this).css('transform', 'scale(' + scale + ')');
+        $(this).css('transform-origin', formattedX + 'px ' + formattedY + 'px');
+        console.log('Pozycja myszy względem elementu: ', formattedX, formattedY);
+    });
+    
     
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -223,6 +229,10 @@ function bind_editor_project(key, element) {
         containment: calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
         scroll: false,
         start: function(event, ui) {
+            ui.helper.data("pointer", {
+                y: (event.pageY - $('#galactic-editor').offset().top) / scale - parseInt($(event.target).css('top')),
+                x: (event.pageX - $('#galactic-editor').offset().left) / scale - parseInt($(event.target).css('left'))
+            })
         },
         drag: function(event, ui) {
             // let offset = $('#galactic-editor').position()
@@ -231,19 +241,39 @@ function bind_editor_project(key, element) {
             // console.log(event.pageX)
             // console.log($(element).position().left)
             // console.log(`${Number(ui.position.left - event.pageX)} \n`)
+            var pointer = ui.helper.data("pointer");
+            var canvasTop = $('#galactic-editor').offset().top;
+            var canvasLeft = $('#galactic-editor').offset().left;
+            var canvasHeight = $('#galactic-editor').height();
+            var canvasWidth = $('#galactic-editor').width();
+        
+            // Fix for zoom
+            ui.position.top = Math.round((event.pageY - canvasTop) / scale - pointer.y); 
+            ui.position.left = Math.round((event.pageX - canvasLeft) / scale - pointer.x); 
+        
+            // Check if element is outside canvas
+            if (ui.position.left < 0) ui.position.left = 0;
+            if (ui.position.left + $(this).width() > canvasWidth) ui.position.left = canvasWidth - $(this).width();  
+            if (ui.position.top < 0) ui.position.top = 0;
+            if (ui.position.top + $(this).height() > canvasHeight) ui.position.top = canvasHeight - $(this).height();  
+        
+            // Finally, make sure offset aligns with position
+            ui.offset.top = Math.round(ui.position.top + canvasTop);
+            ui.offset.left = Math.round(ui.position.left + canvasLeft);
+
             let number = $(element).data('project-number');
             for (let conn of connections) {
                 if (conn[0] == number) {
                     let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
-                    let pos = $(element).position();
-                    line.x1.baseVal.value = pos.left + $(element).outerWidth() / 2;
-                    line.y1.baseVal.value = pos.top + $(element).outerHeight() / 2;
+                    let pos = ui.position;
+                    line.x1.baseVal.value = pos.left;
+                    line.y1.baseVal.value = pos.top;
                 }
                 else if (conn[1] == number) {
                     let line = document.getElementById(`galactic-editor-line${conn[0]}-${conn[1]}`);
-                    let pos = $(element).position();
-                    line.x2.baseVal.value = pos.left + $(element).outerWidth() / 2;
-                    line.y2.baseVal.value = pos.top + $(element).outerHeight() / 2;
+                    let pos = ui.position;
+                    line.x2.baseVal.value = pos.left;
+                    line.y2.baseVal.value = pos.top;
                 }
             }
         },
