@@ -151,9 +151,10 @@ $(document).on('mousemove', '#galactic-editor', function (event) {
     if (clicked_project !== '') {
         let line = document.getElementById('galactic-editor-line-moving');
         if (line) {
-            let offset = $(this).offset();
-            line.x2.baseVal.value = event.pageX - offset.left;
-            line.y2.baseVal.value = event.pageY - offset.top;
+            let canvasTop = $('#galactic-editor').offset().top;
+            let canvasLeft = $('#galactic-editor').offset().left;
+            line.x2.baseVal.value = Math.round((event.pageX - canvasLeft) / scale);
+            line.y2.baseVal.value = Math.round((event.pageY - canvasTop) / scale);
         } 
     }
 })
@@ -235,12 +236,6 @@ function bind_editor_project(key, element) {
             })
         },
         drag: function(event, ui) {
-            // let offset = $('#galactic-editor').position()
-            // ui.position.left -= ((event.pageX - offset.left) * (scale - 1) - offset.left);
-            // ui.position.top -= ((event.pageY - offset.top) * (scale - 1) - offset.top);
-            // console.log(event.pageX)
-            // console.log($(element).position().left)
-            // console.log(`${Number(ui.position.left - event.pageX)} \n`)
             var pointer = ui.helper.data("pointer");
             var canvasTop = $('#galactic-editor').offset().top;
             var canvasLeft = $('#galactic-editor').offset().left;
@@ -260,6 +255,8 @@ function bind_editor_project(key, element) {
             // Finally, make sure offset aligns with position
             ui.offset.top = Math.round(ui.position.top + canvasTop);
             ui.offset.left = Math.round(ui.position.left + canvasLeft);
+            
+            $(element).css({top: `${ui.position.top}px`, left:`${ui.position.left}`})
 
             let number = $(element).data('project-number');
             for (let conn of connections) {
@@ -285,7 +282,8 @@ function bind_editor_project(key, element) {
     $(element).on('mousedown', function (event) {
         if (event.button === 2) {
             clicked_project = $(element).attr('id');
-            let pos = $(element).position();
+            let pos = {top: parseFloat($(element).css('top')) - $(element).outerHeight() / 2, 
+                       left: parseFloat($(element).css('left')) - $(element).outerWidth() / 2};
             let line = document.createElementNS('http://www.w3.org/2000/svg','line');
             line.setAttribute('id', 'galactic-editor-line-moving');
             line.setAttribute('x1', pos.left + $(element).outerWidth() / 2);

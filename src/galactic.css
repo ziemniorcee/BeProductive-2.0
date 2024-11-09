@@ -9,6 +9,15 @@
     display: none;
 }
 
+/* @keyframes scrollBackground {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  } */
+
 #galacticContainer {
     position: relative;
     height: 100%;
