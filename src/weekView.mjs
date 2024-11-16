@@ -149,7 +149,6 @@ function _week_content_HTML() {
  * @returns {string} HTML of header
  */
 function _week_header_HTML() {
-    window.goalsAPI.askProjectsInfo()
     let header_params = l_date.get_header_week()
 
     return `

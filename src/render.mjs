@@ -14,7 +14,7 @@ import {
 import {
     already_emblem_HTML,
     build_project_goal, project_emblem_html,
-    project_pos
+    project_pos, set_projects_options
 } from "./project.mjs";
 import {create_today_graphs} from './graph.mjs';
 import {add_galactic_category_boxes} from './galactic.mjs';
@@ -30,7 +30,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
 window.goalsAPI.getCategories((cats) => wait_for_categories(cats));
 
-window.goalsAPI.getAllProjects((projects) => wait_for_projects(projects));
+window.projectsAPI.getAllProjects((projects) => wait_for_projects(projects));
 
 window.goalsAPI.getGalacticConnections((connections) => wait_for_galactic_connections(connections));
 
@@ -43,7 +43,7 @@ function wait_for_categories(cats) {
             Math.min(Math.floor(c.b * 3 / 2), 255) + ')';
 
     }
-    window.goalsAPI.askAllProjects();
+    window.projectsAPI.askAllProjects();
 }
 
 function wait_for_projects(projs) {
@@ -52,6 +52,7 @@ function wait_for_projects(projs) {
     }
     window.goalsAPI.askGalacticConnections();
     set_edit()
+
 }
 
 function wait_for_galactic_connections(connections) {
@@ -83,6 +84,7 @@ $(document).on('click', '#dashDay', function () {
  */
 export function day_view() {
     build_view(_day_content_HTML(), _day_header_HTML())
+
     window.goalsAPI.askGoals({date: l_date.day_sql})
     let rightbar = $('#rightbar')
     rightbar.html(rightbar.html())
@@ -693,7 +695,7 @@ function _get_from_project(new_goal_index, dragged_task) {
 
     $('.todoId').eq(new_goal_index).text(todos.length - 1)
     todos.eq(new_goal_index).append(project_emblem_html(project_pos))
-    window.goalsAPI.getFromProject({date: l_date.day_sql, sidebar_pos: sidebar_pos, main_pos: new_goal_index})
+    window.projectsAPI.getFromProject({date: l_date.day_sql, sidebar_pos: sidebar_pos, main_pos: new_goal_index})
 
     if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(dragged_task).remove()
     else {
@@ -726,6 +728,7 @@ export function build_view(content, header) {
         ${content}`
 
     $('#main').html(html)
+    set_projects_options()
 }
 
 /**
@@ -756,7 +759,6 @@ function _day_content_HTML() {
  * @returns {string} HTML of header
  */
 function _day_header_HTML() {
-    window.goalsAPI.askProjectsInfo()
     let main_title = l_date.get_day_view_header()
     let date = l_date.get_display_format(l_date.day_sql)
 

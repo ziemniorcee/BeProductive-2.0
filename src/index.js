@@ -125,7 +125,7 @@ ctxMenuNormal.append(new MenuItem({
 
 
 ipcMain.on('context-menu-open', (event, params) => {
-    if(params.repeat) ctxMenuRepeat.popup(mainWindow)
+    if (params.repeat) ctxMenuRepeat.popup(mainWindow)
     else {
         context_option = params.option
         ctxMenuNormal.popup(mainWindow)

@@ -537,81 +537,6 @@ function todoHandlers(db) {
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
-    ipcMain.on('change-text-goal', (event, params) => {
-        let selected_array = ids_array
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`UPDATE goals
-                SET goal="${params.input}"
-                WHERE id = ${selected_array[params.id]}`)
-    })
-
-    ipcMain.on('add-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`INSERT INTO steps (step_text, goal_id)
-                VALUES ("${params.input}", ${selected_array[params.id]})`)
-
-        db.all(`SELECT id
-                from steps
-                ORDER BY id DESC
-                LIMIT 1`, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                if (!(selected_array[params.id] in step_ids)) step_ids[selected_array[params.id]] = [rows[0].id]
-                step_ids[selected_array[params.id]].push(rows[0].id)
-            }
-        })
-    })
-
-    ipcMain.on('change-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`UPDATE steps
-                SET step_text="${params.input}"
-                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
-    })
-
-    ipcMain.on('remove-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`DELETE
-                FROM steps
-                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
-        step_ids[selected_array[params.id]].splice(params.step_id, 1)
-    })
-
-    ipcMain.on('change-category', (event, params) => {
-        db.run(`UPDATE goals
-                SET category="${params.new_category}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
-
-    ipcMain.on('change-difficulty', (event, params) => {
-        db.run(`UPDATE goals
-                SET Difficulty="${params.difficulty}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
-
-    ipcMain.on('change-importance', (event, params) => {
-        db.run(`UPDATE goals
-                SET Importance="${params.importance}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
 
     ipcMain.on('change-project', (event, params) => {
         let new_project_id = 0
@@ -654,14 +579,14 @@ function todoHandlers(db) {
             for (let i = 0; i < new_steps_length - current_steps_length; i++) {
                 let array_pos = i + current_steps_length
                 db.run(`INSERT INTO steps (step_text, step_check, goal_id)
-                VALUES ("${new_steps[array_pos]['step_text']}",
-                        ${new_steps[array_pos]['step_check']},
-                        ${ids_array[params.id]})`)
+                        VALUES ("${new_steps[array_pos]['step_text']}",
+                                ${new_steps[array_pos]['step_check']},
+                                ${ids_array[params.id]})`)
 
                 db.all(`SELECT id
-                from steps
-                ORDER BY id DESC
-                LIMIT 1`, (err, rows) => {
+                        from steps
+                        ORDER BY id DESC
+                        LIMIT 1`, (err, rows) => {
                     if (err) console.error(err)
                     else {
                         if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
@@ -927,6 +852,7 @@ function todoHandlers(db) {
                 ORDER BY id`, (err, rows) => {
             if (err) console.error(err)
             else {
+                project_ids = rows.map((project) => project.id)
                 event.reply('get-all-projects', rows);
             }
         })

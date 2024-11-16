@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Hello World!</title>
-    <link rel="stylesheet" href="index.css"/>
-    <link rel="stylesheet" href="week.css"/>
-    <link rel="stylesheet" href="project.css"/>
-    <link rel="stylesheet" href="sidebar.css"/>
-    <link rel="stylesheet" href="dashboard.css"/>
-    <link rel="stylesheet" href="galactic.css"/>
+    <link rel="stylesheet" href="css/index.css"/>
+    <link rel="stylesheet" href="css/inbox.css"/>
+    <link rel="stylesheet" href="css/week.css"/>
+    <link rel="stylesheet" href="css/project.css"/>
+    <link rel="stylesheet" href="css/sidebar.css"/>
+    <link rel="stylesheet" href="css/dashboard.css"/>
+    <link rel="stylesheet" href="css/galactic.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -29,6 +30,7 @@
     <script type="module" src="project.mjs"></script>
     <script type="module" src="graph.mjs"></script>
     <script type="module" src="galactic.mjs"></script>
+    <script type="module" src="inbox.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
@@ -48,6 +50,10 @@
             <img src="images/goals/left_arrow.png">
         </div>
         <div id="dashTitle">TO DO</div>
+        <div id="dashInbox">
+            <img src="images/goals/inbox.png">
+            Inbox
+        </div>
         <div id="dashMyDayBG">
             <div id="dashMyDayBtn">
                 <img src="images/goals/today0.png">
@@ -87,6 +93,19 @@
 
         </div>
     </div>
+
+    <template id="inboxTodoTemplate">
+        <div class="inboxTodo">
+            <div class="inboxTodoId">i</div>
+            <div class="inboxTodoCheck">
+                <div class="inboxCheckDot"></div>
+                <input type="checkbox" class="check_task">
+            </div>
+            <div class="taskText">
+                <span class="task"></span>
+            </div>
+        </div>
+    </template>
     <div id="main">
 
     </div>
@@ -208,4 +227,7 @@
 </div>
 
 </body>
+
 </html>
+
+

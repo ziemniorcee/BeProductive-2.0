@@ -51,7 +51,7 @@ function show_project_sidebar(that) {
             
         </div>
     `)
-    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
+    window.projectsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
 }
 
 $(document).on('click', '.sideProjectOption', function () {
@@ -69,7 +69,7 @@ function change_sidebar_option(that) {
     let color = $('.dashProjectIcon').eq(project_pos).css('background-color')
     side_project_option.css('background-color', '#2A231F')
     $(that).css('background-color', color)
-    window.goalsAPI.askProjectSidebar({project_pos: project_pos, option: option, current_dates: l_date.get_current_dates()})
+    window.projectsAPI.askProjectSidebar({project_pos: project_pos, option: option, current_dates: l_date.get_current_dates()})
 }
 
 
@@ -97,7 +97,7 @@ function check_sidebar_project_goal(selected_check){
     }
 }
 
-window.goalsAPI.getProjectSidebar((goals) => {
+window.projectsAPI.getProjectSidebar((goals) => {
     build_project_sidebar(goals)
 })
 
@@ -114,7 +114,7 @@ function build_project_sidebar(goals) {
     else dragula_month_view()
 }
 
-window.goalsAPI.projectToGoal((steps, position) => get_goal_from_sidebar(steps, position))
+window.projectsAPI.projectToGoal((steps, position) => get_goal_from_sidebar(steps, position))
 
 /**
  * adds steps to the project from project sidebar
@@ -142,7 +142,7 @@ export function fix_project_sidebar(selected_button){
             if (options.eq(i).css('background-color') === background_color) project_option = i
         }
 
-        window.goalsAPI.askProjectSidebar({
+        window.projectsAPI.askProjectSidebar({
             project_pos: project_pos,
             option: project_option,
             current_dates: l_date.get_current_dates(selected_button)
@@ -150,13 +150,13 @@ export function fix_project_sidebar(selected_button){
     }
 }
 
-window.goalsAPI.getProjectsInfo((projects) => set_projects_options(projects))
 
 /**
  * sets projects options on dashboard and sidebar
  * @param projects data of projects ,
  */
-function set_projects_options(projects) {
+export function set_projects_options() {
+    console.log(projects)
     let projects_HTML = ""
     let project_types_HTML = ""
 
@@ -225,7 +225,6 @@ function _type_project_HTML(icon_color, icon, name) {
 
 $(document).on('click', '.dashProject', function () {
     let jq_dash_project = $('.dashProject')
-
     project_pos = jq_dash_project.index(this)
     let how_many_projects = jq_dash_project.length
     if (project_pos < how_many_projects - 1) {
@@ -248,7 +247,7 @@ function project_view(project_pos) {
 
     _hide_sidebar()
     build_view(_project_view_main(project_color), _project_view_header(project_color, project_icon, project_name))
-    window.goalsAPI.askProjectGoals({project_pos: project_pos})
+    window.projectsAPI.askProjectGoals({project_pos: project_pos})
 
     _set_input_category(project_color)
 
@@ -382,11 +381,11 @@ function new_project() {
         $('#newProjectError').text("NO ICON SELECTED")
     } else {
         $('#dashNewProject').remove()
-        window.goalsAPI.newProject({category: category, name: name, icon: icon})
+        window.projectsAPI.newProject({category: category, name: name, icon: icon})
     }
 }
 
-window.goalsAPI.getProjectGoals((goals) => build_project_view(goals))
+window.projectsAPI.getProjectGoals((goals) => build_project_view(goals))
 
 /**
  * Builds project view using received goals data
@@ -591,7 +590,7 @@ $(document).on('click', '#projectDeleteConfirm', () => {
 })
 
 function delete_project(){
-    window.goalsAPI.deleteProject({position:project_pos})
+    window.projectsAPI.deleteProject({position:project_pos})
     day_view()
 }
 

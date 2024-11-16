@@ -139,7 +139,6 @@ function set_today() {
  * @returns {string} HTML of month header
  */
 function _month_header_HTML() {
-    window.goalsAPI.askProjectsInfo()
 
     let date = l_date.get_month_display_format(l_date.day_sql)
     let main_title = l_date.get_fixed_header_month()

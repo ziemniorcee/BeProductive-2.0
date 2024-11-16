@@ -1,0 +1,76 @@
+#inboxHeader{
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#inboxBody{
+    height: 100%;
+}
+
+#inboxEntry {
+    background: #55423B;
+    display: flex;
+    margin-bottom: 30px;
+}
+
+#inboxInput {
+    color: white;
+    width: 100%;
+    margin-left: 10px;
+    background: #55423B;
+    font-size: 20px;
+    border: none;
+    outline: none;
+}
+
+#inboxAdd {
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    font-size: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+#inboxList{
+    height: calc(100% - 80px);
+    overflow: hidden;
+}
+
+.inboxTodo {
+    margin-right: 5px;
+    min-height: 50px;
+    background: #2A231F;
+    font-size: 25px;
+    color: white;
+    margin-bottom: 7px;
+    border: 1px solid #D8E1E7;
+    display: flex;
+    cursor: default;
+    position: relative;
+}
+
+.inboxTodoId {
+    display: none;
+}
+
+.inboxTodoCheck {
+    border-right: 1px solid #D8E1E7;
+    pointer-events: none;
+    position: relative;
+
+}
+
+.inboxCheckDot{
+    height: 28px;
+    width: 28px;
+
+    border-radius: 50%;
+    right: 9px;
+    top: 9px;
+    display: inline-block;
+    position: absolute;
+    z-index: 1;
+    border: 2px #55423B solid;
+    background: #1E1E1E no-repeat center;
+}
