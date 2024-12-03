@@ -277,7 +277,7 @@ function todoHandlers(db) {
                 let {id, ...rest} = project;
                 return rest;
             })
-            event.reply('get-projects-info', safe_projects)
+            event.reply('new-project-created', safe_projects)
         })
     })
 
@@ -287,6 +287,7 @@ function todoHandlers(db) {
                 WHERE id = ${project_ids[params.position]}`)
 
         project_ids.splice(params.position, 1)
+
     })
 
     ipcMain.on('goal-remove-date', (event, params) => {
@@ -381,13 +382,13 @@ function todoHandlers(db) {
             }
 
             values += `("${params.goal}", "${date}", ${current_goal_pos}, ${params.category},
-                        ${params.difficulty}, ${params.importance}, ${project_id})`
+                        ${params.difficulty}, ${params.importance}, ${project_id}, "${params.note}")`
             if (i < params.dates.length - 1) values += ","
             current_goal_pos++
         }
         values += ";"
 
-        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id)
+        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
                 VALUES ${values}`)
 
         db.all(`SELECT id
@@ -547,19 +548,24 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('edit-goal', (event, params) => {
+        let project_id = params.changes['project_id']
+        if (project_id !== -1) project_id = project_ids[params.changes['project_id']]
+
         db.run(`UPDATE goals
                 SET goal       = '${params.changes['goal']}',
                     category   = ${params.changes['category']},
                     difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${params.changes['project_id']}
+                    project_id = ${project_id}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
 
         let current_steps_length = step_ids[ids_array[params.id]].length
         let new_steps_length = params.changes['steps'].length
+
+        let how_many_deleted = 0
 
         for (let i = 0; i < current_steps_length; i++) {
             if (i < new_steps_length) {
@@ -570,8 +576,9 @@ function todoHandlers(db) {
             } else {
                 db.run(`DELETE
                         FROM steps
-                        WHERE id = ${step_ids[ids_array[params.id]][i]}`)
+                        WHERE id = ${step_ids[ids_array[params.id]][i - how_many_deleted]}`)
                 step_ids[ids_array[params.id]].splice(i, 1)
+                how_many_deleted += 1
             }
         }
 
@@ -849,11 +856,15 @@ function todoHandlers(db) {
     ipcMain.on('ask-all-projects', (event) => {
         db.all(`SELECT *
                 FROM projects
-                ORDER BY id`, (err, rows) => {
+                ORDER BY id`, (err, projects) => {
             if (err) console.error(err)
             else {
-                project_ids = rows.map((project) => project.id)
-                event.reply('get-all-projects', rows);
+                project_ids = projects.map((project) => project.id)
+                let safe_projects = projects.map(project => {
+                    let {id, ...rest} = project;
+                    return rest;
+                })
+                event.reply('get-all-projects', safe_projects);
             }
         })
     })

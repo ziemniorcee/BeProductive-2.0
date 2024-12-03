@@ -8,7 +8,10 @@
 }
 
 #inboxEntry {
-    background: #55423B;
+    border: 1px solid #3A3A3A;
+    background: #2A2A2A;
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     margin-bottom: 30px;
 }
@@ -17,10 +20,33 @@
     color: white;
     width: 100%;
     margin-left: 10px;
-    background: #55423B;
+    background: #2A2A2A;
     font-size: 20px;
     border: none;
     outline: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#inboxInput:hover, #inboxEntry:hover, #inboxEntry:hover #inboxInput{
+    background-color: #1E1E1E !important;
+}
+
+#inboxEntry:hover{
+    border: 1px solid  #2979FF;
+}
+
+#inboxEntry::placeholder{
+    color: #B3B3B3;
+    opacity: 1;
+}
+
+#inboxInput:focus {
+    background-color: #1A3667;
+    border: none;
+}
+
+#inboxInput:focus #inboxEntry{
+    background-color: red!important;
 }
 
 #inboxAdd {
@@ -40,14 +66,18 @@
 .inboxTodo {
     margin-right: 5px;
     min-height: 50px;
-    background: #2A231F;
+    background: rgba(255, 255, 255, 0.05);
     font-size: 25px;
     color: white;
-    margin-bottom: 7px;
-    border: 1px solid #D8E1E7;
+    margin-bottom: 12px;
+    border: 1px solid #444444;
     display: flex;
     cursor: default;
     position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    border-radius: 10px;
 }
 
 .inboxTodoId {
@@ -55,7 +85,7 @@
 }
 
 .inboxTodoCheck {
-    border-right: 1px solid #D8E1E7;
+    border-right: 1px solid #444444;
     pointer-events: none;
     position: relative;
 
@@ -71,6 +101,6 @@
     display: inline-block;
     position: absolute;
     z-index: 1;
-    border: 2px #55423B solid;
+    border: 2px #2979FF solid;
     background: #1E1E1E no-repeat center;
 }

@@ -1,4 +1,8 @@
 import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
+import {dragula_day_view} from "./render.mjs";
+import {change_goal} from "./edit2.mjs";
+import {dragula_week_view} from "./weekView.mjs";
+import {dragula_month_view} from "./monthView.mjs";
 
 
 // #main behaviors
@@ -107,17 +111,13 @@ $(document).on('click', '#newCategoryDiscard', function () {
     $("#vignette").css('display', 'none');
 });
 
-$(document).on('click', '#vignette', function () {
-    $('#vignette').children().css('display', 'none');
-    $('#vignette').css('display', 'none');
-    $('#categoryPicker22').css('display', 'none')
-})
+
 
 $(document).on('click', '#newCategory', function(event) {
     event.stopPropagation();
 })
 
-$(document).on('click', '#to-do', function () {
+$(document).on('click', '#todoButton', function () {
     $('#galactics').css('display', 'none');
 })
 
@@ -149,4 +149,44 @@ $(document).on('click', '#taskEdit', function (event){
 
 $(document).on('click', '#taskEdit', function (event){
     $('#categoryPicker22').css('display', 'none')
+})
+
+$(document).on('focus', '#todoEntryGet', function (){
+    $('#todoEntrySimple').css('background-color', "#1A3667")
+    $('#todoEntrySimple').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('blur', '#todoEntryGet', function (){
+    $('#todoEntrySimple').css('background-color', "#2A2A2A")
+    $('#todoEntrySimple').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('focus', '#inboxInput', function (){
+    $('#inboxEntry').css('background-color', "#1A3667")
+    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('blur', '#inboxInput', function (){
+    $('#inboxEntry').css('background-color', "#2A2A2A")
+    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('mousedown', '#vignette', function () {
+    if ($('#taskEdit').length){
+        change_goal()
+        if ($('#todosAll').length){
+            dragula_day_view()
+        }
+        else if ($('.weekDay').length){
+            dragula_week_view()
+        }
+        else if ($('#monthGrid').length){
+            dragula_month_view()
+        }
+    }
+    $('#vignette').css('display', 'none');
+    $('#vignette').html('')
+})
+$(document).on('mousedown', '.vignetteWindow2, .vignetteWindow1', function (event){
+    event.stopPropagation()
 })

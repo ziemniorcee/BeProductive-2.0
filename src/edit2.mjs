@@ -2,7 +2,7 @@ import {_categories_HTML, _steps_HTML, change_main_check, dragula_day_view} from
 import {
     categories,
     categories2,
-    check_border,
+    check_border, decode_text, encode_text,
     getIdByColor,
     projects,
     range1_backgrounds,
@@ -14,10 +14,6 @@ let selected_goal = null
 let selected_goal_id = null
 let selected_project_id = null
 
-export function set_edit() {
-    $('#categoryPicker22').html(_categories_HTML())
-    $('#editProjectPicker').html(_project_picker_HTML())
-}
 
 edit_launch()
 
@@ -34,8 +30,8 @@ $(document).on('click', '.todo, .weekDay .todo, .monthTodo, .day .sidebarTask', 
 })
 
 $(document).on('click', '#vignette', () => {
-    change_goal()
-    dragula_day_view()
+
+
 })
 
 $(document).on('input', '#editMainEntry, #editNoteEntry, .editStepEntry', function () {
@@ -146,7 +142,6 @@ function get_goal_data(this_todo) {
         array_option = 2
     }
 
-
     window.goalsAPI.askEditGoal({todo_id: selected_goal_id, option: array_option})
 }
 
@@ -160,24 +155,33 @@ window.goalsAPI.getEditGoal((goal, steps) => {
  * @param steps data of steps of selected goal
  */
 function build_edit(goal, steps) {
-    $('#editMainEntry').val(goal["goal"])
-    $('#editNoteEntry').val(goal["note"])
-    $('#editMainCheck').prop("checked", goal['check_state'])
+
+    const edit_template = $('#editTemplate').prop('content');
+    let $edit_clone = $(edit_template).clone()
+
+    $edit_clone.find('#editMainEntry').val(decode_text(goal["goal"]))
+    $edit_clone.find('#editNoteEntry').val(decode_text(goal["note"]))
+    $edit_clone.find('#editMainCheck').prop("checked", goal['check_state'])
     is_note_img()
-    set_steps(steps)
+    $edit_clone.find('#editSteps2').html(set_steps(steps))
 
-    $('#selectCategory22').css('background-color', categories[goal["category"]][0])
-    $('#selectCategory22').text(categories[goal["category"]][1])
 
-    $('#editDiff').val(goal["difficulty"])
-    $('#editDiff').css('background-color', range1_backgrounds[goal["difficulty"]])
+    $edit_clone.find('#selectCategory22').css('background-color', categories[goal["category"]][0])
+    $edit_clone.find('#selectCategory22').text(categories[goal["category"]][1])
 
-    $('#editImportance').val(goal["importance"])
-    $('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
+    $edit_clone.find('#editDiff').val(goal["difficulty"])
+    $edit_clone.find('#editDiff').css('background-color', range1_backgrounds[goal["difficulty"]])
+
+    $edit_clone.find('#editImportance').val(goal["importance"])
+    $edit_clone.find('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
 
     selected_project_id = goal['pr_pos']
+    console.log("begin", selected_project_id) // dziwne
+    $("#vignette").append($edit_clone)
+    $('#categoryPicker22').html(_categories_HTML())
+    $('#editProjectPicker').html(_project_picker_HTML())
     set_project(goal['pr_pos'])
-
+    dragula_steps()
 }
 
 /**
@@ -185,18 +189,20 @@ function build_edit(goal, steps) {
  * @param steps data of steps, contains text and check_state of step
  */
 function set_steps(steps) {
-    $('.editStep2').remove()
+    let steps_formatted = ""
     for (let i = 0; i < steps.length; i++) {
         let check_state = ""
 
         if (steps[i]['step_check']) check_state = "checked"
-        $('#editSteps2').append(`
-        <div class="editStep2">
-            <img src="images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
-            <input type="checkbox" class="editStepCheck" ${check_state}>
-            <textarea rows="1" class="editStepEntry" spellcheck="false">${steps[i]['step_text']}</textarea>
-        </div>`)
+        $('#editSteps2').append()
+        steps_formatted += `
+            <div class="editStep2">
+                <img src="images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
+                <input type="checkbox" class="editStepCheck" ${check_state}>
+                <textarea rows="1" class="editStepEntry" spellcheck="false">${decode_text(steps[i]['step_text'])}</textarea>
+            </div>`
     }
+    return steps_formatted
 }
 
 $(document).on('click', '.editPickProject', function () {
@@ -209,10 +215,10 @@ $(document).on('click', '.editPickProject', function () {
  */
 function change_project(picked_project) {
     selected_project_id = $('.editPickProject').index(picked_project) - 1
-
+    console.log($('.editPickProject'))
+    console.log(selected_goal_id)
     set_project(selected_project_id)
     $('#editProjectPicker').toggle()
-
 }
 
 /**
@@ -220,10 +226,11 @@ function change_project(picked_project) {
  * @param project_id id of selected option
  */
 function set_project(project_id) {
+    console.log(project_id)
     if (project_id !== -1) {
         $('#editSelectProject').css('background-color', categories[projects[project_id]['category']][0])
         $('#editSelectProject .editProjectIcon').css('background-color', categories[projects[project_id]['category']][0])
-        $('#editSelectProject .editProjectName').text(categories[projects[project_id]['category']][1])
+        $('#editSelectProject .editProjectName').text(projects[project_id]["name"])
         $('#editSelectProject .editPickProjectIcon').attr('src', `images/goals/projects/${projects[project_id]["icon"]}.png`)
     } else {
         $('#editSelectProject .editProjectName').eq(0).text('None')
@@ -247,7 +254,7 @@ function change_project_emblem(project_id) {
  * Make changes to the app
  * Saves changes to the database
  */
-function change_goal() {
+export function change_goal() {
     let edit_main_entry = $('#editMainEntry').val()
     let edit_note_entry = $('#editNoteEntry').val()
     let category_color = $('#selectCategory22').css('background-color')
@@ -256,16 +263,18 @@ function change_goal() {
     let importance = $('#editImportance').val()
     let steps_array = get_steps()
 
+    console.log(projects)
     let changes = {
-        'goal': edit_main_entry,
+        'goal': encode_text(edit_main_entry),
         'category': category_id,
         'difficulty': difficulty,
         'importance': importance,
         'steps': steps_array,
-        'note': edit_note_entry,
-        'project_id': selected_project_id + 1
+        'note': encode_text(edit_note_entry),
+        'project_id': selected_project_id
     }
 
+    console.log(changes)
     if (selected_goal.attr('class') === 'todo') {
         set_todo_changes(selected_goal, changes)
         if (selected_goal.closest('#todosAll').length || $('#projectContent').length) {
@@ -289,7 +298,7 @@ function change_goal() {
 }
 
 function set_todo_changes(selected_goal, changes) {
-    selected_goal.find('.task').text(changes['goal'])
+    selected_goal.find('.task').text(decode_text(changes['goal']))
     selected_goal.find('.todoCheck').css('background-color', categories[changes['category']][0])
     let url = `images/goals/rank${changes['difficulty']}.svg`
     selected_goal.find('.todoCheck').css('background-image', `url("${url}")`)
@@ -298,8 +307,9 @@ function set_todo_changes(selected_goal, changes) {
 
 function set_monthTodo_changes(selected_goal, changes){
     selected_goal.find('.monthTodoText').text(changes['goal'])
-    selected_goal.find('.monthTodoLabel').css('background-color', categories[category_id][0])
-    selected_goal.css('background-color', categories2[category_id])
+    selected_goal.find('.monthTodoLabel').css('background-color', categories[changes['category']][0])
+    selected_goal.css('background-color', categories2[changes['category']])
+
 }
 
 function set_step_changes(selected_goal, changes) {
@@ -314,12 +324,14 @@ function get_steps() {
 
     let steps_array = []
     for (let i = 0; i < edit_steps.length; i++) {
-        steps_array.push({
-            'step_text': edit_steps.eq(i).val(),
-            'step_check': Number(edit_checks.eq(i).prop('checked'))
-        })
+        let step_input =  edit_steps.eq(i).val()
+        if (step_input !== ""){
+            steps_array.push({
+                'step_text': encode_text(step_input),
+                'step_check': Number(edit_checks.eq(i).prop('checked'))
+            })
+        }
     }
-
     return steps_array
 }
 

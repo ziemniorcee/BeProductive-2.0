@@ -1,11 +1,11 @@
 import {l_date} from "./date.js";
 import {categories, check_border, decode_text, weekdays2, weekdays_grid} from "./data.mjs";
-import {_repeat_label_HTML, build_view, day_view} from "./render.mjs";
+import {_repeat_label_HTML, day_view} from "./render.mjs";
 import {already_emblem_HTML, project_pos, reset_project_pos} from "./project.mjs";
 
 export let is_week_drag = 0
 
-$(document).on('click', '#dashWeek', function () {
+$(document).on('click', '#weekViewButton', function () {
     week_view()
 });
 
@@ -14,10 +14,13 @@ $(document).on('click', '#dashWeek', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function week_view() {
-    build_view(_week_content_HTML(), _week_header_HTML())
+    $('#main').html('')
+    _week_header_HTML()
+    $('#main').append(_week_content_HTML())
+
+
     window.goalsAPI.askWeekGoals({dates: l_date.week_now})
     window.sidebarAPI.askHistory({date: l_date.get_history_week()})
-    l_date.get_history_week()
 
     let rightbar = $('#rightbar')
     rightbar.html(rightbar.html())
@@ -151,30 +154,14 @@ function _week_content_HTML() {
 function _week_header_HTML() {
     let header_params = l_date.get_header_week()
 
-    return `
-        <div id="header">
-            <div id="mainTitle">${header_params[0]}</div>
-    
-            <div id="projectShowed">
-                <img src="images/goals/projects/project.png">
-                <div id="projectTypes"></div>
-            </div>
-    
-            <div id="sideOptions">
-                <div id="sideHistory">
-                    <img src="images/goals/history.png" alt="main">
-                </div>
-                <div class="sidebars">
-                    <div id="sideIdeas">
-                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
-                    </div>
-                </div>
-            </div>
-    
-            <div id="subHeader">
-                <span id="date">${header_params[1]}</span>
-            </div>
-        </div>`
+    const header_template = $('#viewHeaderTemplate').prop('content');
+    let $header_clone = $(header_template).clone()
+    $header_clone.find('.viewOption').css('background-color', '#121212')
+    $header_clone.find('#weekViewButton').css('background-color', '#2979FF')
+
+    $header_clone.find('#mainTitle').text(header_params[0])
+    $header_clone.find('#date').text(header_params[1])
+    $('#main').append($header_clone)
 }
 
 
@@ -219,9 +206,9 @@ export function dragula_week_view() {
         drag_sidebar_task = $(event)
         is_week_drag = 0
 
-        goals_length_before = $('#main .todo').length
+        goals_length_before = $('#main .goals').length
     }).on('drop', function (event) {
-        let todos = $('#main .todo')
+        let todos = $('#main .goals')
         let goals_length_after = todos.length
         let new_goal_pos = todos.index($(event))
 
@@ -243,8 +230,8 @@ export function dragula_week_view() {
  * @param dragged_task drag event of the task
  */
 function _get_from_project(event, new_goal_pos, dragged_task) {
-    let sidebar_pos = $('#rightbar .todo').index(dragged_task)
-    let new_goal_index = $('.weekDayGoals .todo').index(event)
+    let sidebar_pos = $('#rightbar .goals').index(dragged_task)
+    let new_goal_index = $('.weekDayGoals .goals').index(event)
 
     let display_week_day = $('.weekDayGoals').index(event.parentNode)
     let real_week_day = weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
@@ -259,7 +246,7 @@ function _get_from_project(event, new_goal_pos, dragged_task) {
     })
     if (is_sidebar_to_delete) $(dragged_task).remove()
     else $(dragged_task).append(already_emblem_HTML())
-    $('#main .todoId').eq(new_goal_pos).text($('#main .todo').length - 1)
+    $('#main .todoId').eq(new_goal_pos).text($('#main .goals').length - 1)
 }
 
 
@@ -308,7 +295,7 @@ $(document).on('click', '.weekDayGoals .check_task', function () {
 });
 
 /**
- * Changes check on week goals and fixes todo ids
+ * Changes check on week goals and fixes goals ids
  * @param that selected check in week view
  */
 function check_week_goal(that){
@@ -317,7 +304,7 @@ function check_week_goal(that){
     $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
     setTimeout(function () {
-        let todos = $('#main .todo')
+        let todos = $('#main .goals')
         todos.eq(rel_id).remove()
         window.goalsAPI.changeWeekGoalCheck({id: Number(goal_ids.eq(rel_id).html()), state: 1})
         dragula_week_view()

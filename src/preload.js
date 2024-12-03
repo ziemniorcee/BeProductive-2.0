@@ -63,6 +63,8 @@ contextBridge.exposeInMainWorld('projectsAPI', {
     getFromProject: (params) => ipcRenderer.send('get-from-project', params),
     projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
     newProject: (params) => ipcRenderer.send('new-project', params),
+
+
     deleteProject: (params) => ipcRenderer.send('delete-project', params),
 })
 

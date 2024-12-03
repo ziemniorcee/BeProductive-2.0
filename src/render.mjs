@@ -18,7 +18,6 @@ import {
 } from "./project.mjs";
 import {create_today_graphs} from './graph.mjs';
 import {add_galactic_category_boxes} from './galactic.mjs';
-import {set_edit} from "./edit2.mjs";
 
 
 export let is_day_drag = 0
@@ -51,8 +50,6 @@ function wait_for_projects(projs) {
         projects.push(proj);
     }
     window.goalsAPI.askGalacticConnections();
-    set_edit()
-
 }
 
 function wait_for_galactic_connections(connections) {
@@ -74,7 +71,7 @@ $(document).on('click', '#dashTomorrowBtn', () => {
     day_view()
 })
 
-$(document).on('click', '#dashDay', function () {
+$(document).on('click', '#dayViewButton', function () {
     day_view()
 })
 
@@ -83,7 +80,8 @@ $(document).on('click', '#dashDay', function () {
  * builds view, gets goals, allows drag&drop and closes edit
  */
 export function day_view() {
-    build_view(_day_content_HTML(), _day_header_HTML())
+    set_day_html()
+    set_projects_options()
 
     window.goalsAPI.askGoals({date: l_date.day_sql})
     let rightbar = $('#rightbar')
@@ -191,6 +189,7 @@ function new_goal() {
         goal['goal'] = encode_text(goal_text)
         goal['steps'] = steps
         goal['dates'] = l_date.get_repeat_dates(repeat_option)
+        goal['note'] = ""
 
         window.goalsAPI.newGoal(goal)
     }
@@ -212,7 +211,7 @@ function get_repeat_option() {
     let selected_div = null
 
     /**
-     * opens context menu for todo goal and saves selected goal
+     * opens context menu for goals goal and saves selected goal
      */
     $(document).on('contextmenu', '#main .todo, .monthTodo', function (event) {
         if ($(this).find('.repeatLabelShow').length) window.appAPI.contextMenuOpen({repeat: 1})
@@ -397,15 +396,16 @@ function select_repeat_option(that) {
 
 
 $(document).on('click', '#newCategoryCreate', function () {
-
     create_new_category();
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
+    $('#vignette').html('')
 })
 
 $(document).on('click', '#newCategoryDiscard', function () {
     $("#newCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
+    $('#vignette').html('')
 });
 
 /**
@@ -430,7 +430,7 @@ function create_new_category() {
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
-    for (let i of ['', '2', '3', '4']) {
+    for (let i of ['1', '2', '3', '4']) {
         $(`#categoryPicker${i}`).empty();
         $(`#categoryPicker${i}`).html(html_categories);
         if ($(`#categoryPicker${i}`).css('display') === 'block') {
@@ -465,7 +465,10 @@ function select_category(that) {
 
     if (index === 1) {
         $("#vignette").css('display', 'block')
-        $("#newCategory").css('display', 'block')
+        const add_category_template = $('#addCategoryTemplate').prop('content');
+        let $add_category_clone = $(add_category_template).clone()
+
+        $("#vignette").html($add_category_clone)
     } else if (id !== '0') {
         let select_category = $(`#selectCategory${id}`)
         $(`#categoryPicker${id}`).css('display', 'none')
@@ -475,7 +478,10 @@ function select_category(that) {
 }
 
 
-$(document).on('click', '.stepsShow', (event) => show_steps(event));
+$(document).on('click', '.stepsShow', (event) => {
+    event.stopPropagation()
+    show_steps(event)
+});
 
 /**
  * switches css steps of goal
@@ -586,7 +592,8 @@ export function change_main_check(position) {
 }
 
 
-$(document).on('click', '.stepCheck', function () {
+$(document).on('click', '.stepCheck', function (event) {
+    event.stopPropagation()
     change_step_check(this)
 });
 
@@ -645,6 +652,7 @@ export function dragula_day_view() {
             return target.parentNode.id === "todosAll";
         },
         moves: function (el) {
+
             let is_in = $(el).find('.alreadyEmblem').length
             let is_done = $('.sideProjectOption').eq(0).css('background-color') === 'rgb(0, 34, 68)'
             if (is_day_drag === 0 && is_in === 0 && !is_done) {
@@ -654,10 +662,13 @@ export function dragula_day_view() {
         },
     }).on('drag', function (event) {
         dragged_task = $(event)
-        is_day_drag = 0
+        dragged_task.css('background-color', "#141414")
 
+        is_day_drag = 0
         todos_area_before = Array.from($('#todosArea').children())
     }).on('drop', function (event) {
+        dragged_task.css('background-color', "rgba(255, 255, 255, 0.05)")
+
         let new_goal_pos = $('.todo').index($(event))
         let todos_area_after = Array.from($('#todosArea').children())
 
@@ -670,8 +681,14 @@ export function dragula_day_view() {
             change_order()
         }
 
+    }).on('cancel', function (){
+        dragged_task.css('background-color', "rgba(255, 255, 255, 0.05)")
     });
 }
+
+$(document).on('drop', '.todo', ()=>{
+    dragged_task.css('background-color', "#FFFFFF")
+})
 
 /**
  * Gets goal from history by drag
@@ -716,132 +733,33 @@ export function change_order() {
 }
 
 /**
- * Builds view from given components
- * @param content HTML main part of todo view
- * @param header HTML head part of todo view
+ * clones head and content from templates and makes day view
  */
-export function build_view(content, header) {
-    let html = `
-        <div id="onTopMain"></div>
-        <div id="mainBlur"></div>
-        ${header}
-        ${content}`
-
-    $('#main').html(html)
-    set_projects_options()
-}
-
-/**
- * creates body of day view
- * @returns {string} HTML of content
- */
-function _day_content_HTML() {
-    return `
-    <div id="content">
-        <div id="todosAll">
-            <div id="todosArea">
-            
-            </div>
-            <div id="finishedButton">
-                <img id="finishedImg" src="images/goals/down.png" alt="up"><span>Finished: </span><span
-                    id="finishedCount">0</span>
-            </div>
-            <div id="todosFinished">
-            
-            </div>
-        </div>
-        ${_input_HTML()}
-    </div>`
-}
-
-/**
- * creates head of day view
- * @returns {string} HTML of header
- */
-function _day_header_HTML() {
+function set_day_html() {
     let main_title = l_date.get_day_view_header()
     let date = l_date.get_display_format(l_date.day_sql)
 
-    return `
-        <div id="header">
-            <div id="mainTitle">${main_title}</div>
-    
-            <div id="projectShowed">
-                <img src="images/goals/projects/project.png">
-                <div id="projectTypes">
-    
-                </div>
-            </div>
-    
-            <div id="sideOptions">
-                <div id="sideHistory">
-                    <img src="images/goals/history.png" alt="main">
-                </div>
-                <div class="sidebars">
-                    <div id="sideIdeas">
-                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
-                    </div>
-                </div>
-            </div>
-    
-            <div id="subHeader">
-                <span id="date">
-                    ${date}
-                </span>
-            </div>
-            <div id="dashOpen">
-                <img src="images/goals/right_arrow.png">
-            </div>
-        </div>`
-}
+    const header_template = $('#viewHeaderTemplate').prop('content');
+    let $header_clone = $(header_template).clone()
 
-/**
- * creates input field for goals
- * @returns {string} HTML of input
- */
-export function _input_HTML() {
+    $header_clone.find('#mainTitle').text(main_title)
+    $header_clone.find('#date').text(date)
+
+    $header_clone.find('.viewOption').css('background-color', '#121212')
+    $header_clone.find('#dayViewButton').css('background-color', '#2979FF')
     let categories_html = _categories_HTML()
 
-    return `
-        <div id="todoInput">
-            <div id="repeatPicker">
-                <div class="repeatOption">
-                    <div class="repeatCount">1</div>
-                    <div class="repeatLabel">Every day</div>
-                </div>
-                <div class="repeatOption">
-                    <div class="repeatCount">7</div>
-                    <div class="repeatLabel">Every week</div>
-                </div>
-                <div class="repeatOption">
-                    <div class="repeatCount">31</div>
-                    <div class="repeatLabel">Every month</div>
-                </div>
-            </div>
-        
-            <div id="todoEntrySimple">
-                <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
-                <div id="todoRepeat"><img id="repeatImg" src="images/goals/repeat.png" alt=""></div>
-                <div id="todoAdd">+</div>
-            </div>
-            <div id="todoEntryComplex">
-                <div id="newSteps">
-                    <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>
-                </div>
-                <div id="todoSettings">
-                    <div class="todoLabel">Category</div>
-                    <div id="selectCategory1" class="selectCategory">General</div>
-                    <div class="todoLabel" id="label1">Difficulty</div>
-                    <input type="range" class="todoRange" id="range1" min="0" max="4">
-                    <div class="todoLabel" id="label2">Importance</div>
-                    <input type="range" class="todoRange" id="range2" min="0" max="4">   
-                    <div class="categoryPicker" id="categoryPicker1">
-                        ${categories_html}
-                    </div>
-                </div>
-            </div>
-        </div>
-    `
+    const content_template = $('#dayViewContentTemplate').prop('content');
+    let $content_clone = $(content_template).clone()
+
+
+    const input_template = $('#todoInputTemplate').prop('content');
+    let $input_clone = $(input_template).clone()
+    $input_clone.find('#categoryPicker1').html(categories_html)
+
+    $('#main').html($header_clone)
+    $('#main').append($content_clone)
+    $('#content').append($input_clone)
 }
 
 
@@ -954,11 +872,11 @@ export function _categories_HTML(with_new_category) {
                 <span class="categoryName">New Category</span>
             </div>`
     }
-    for (let i = 0; i < Object.keys(categories).length; i++) {
+    for (const id_key in categories){
         categories_html +=
             `<div class="category">
-                <span class="categoryButton" style="background: ${categories[i + 1][0]}"></span>
-                <span class="categoryName">${categories[i + 1][1]}</span>
+                <span class="categoryButton" style="background: ${categories[id_key][0]}"></span>
+                <span class="categoryName">${categories[id_key][1]}</span>
             </div>`
     }
     return categories_html
@@ -976,10 +894,14 @@ export function set_block_prev_drag_day(option) {
 
 function open_remove_category() {
     $("#vignette").css('display', 'block')
-    $("#removeCategory").css('display', 'block')
-    let picker = $("#categoryPicker4");
-    picker.empty();
-    picker.html(_categories_HTML(true))
+
+    const remove_category_template = $('#removeCategoryTemplate').prop('content');
+    let $remove_category_clone = $(remove_category_template).clone()
+    $remove_category_clone.find(".categoryPicker").html(_categories_HTML(false))
+    // $('#categoryPicker22').html(_categories_HTML())
+    $("#vignette").html($remove_category_clone)
+
+
 }
 
 $(document).on('click', '#galactic-display-remove-category', function () {
@@ -996,10 +918,20 @@ function remove_category() {
     }
     window.goalsAPI.removeCategory({id: category});
     add_galactic_category_boxes();
-    $("#removeCategory").css('display', 'none');
     $("#vignette").css('display', 'none');
+    $("#vignette").html('')
+    $("#categoryPicker1").html(_categories_HTML(true))
 }
 
 $(document).on('click', '#removeCategoryCreate', function () {
     remove_category()
 })
+
+$(document).on('click', '#goLeft', function (){
+    l_date.get_next_date(-1)
+})
+
+$(document).on('click', '#goRight', function (){
+    l_date.get_next_date(1)
+})
+

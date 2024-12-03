@@ -1,63 +1,92 @@
 /* --------- Sidebars Picker --------- */
 
-#sideOptions, #projectShowed, #dashOpen{
+#sideOptions, #projectShowed {
     top: 0;
-
+    z-index: 3;
     width: 50px;
     float: right;
     position: absolute;
     height: 50px;
-    background-color: #FF5D00;
-    border: 1px solid #D9D9D9;
+    background-color: #333333;
+    cursor: pointer;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
 }
 
-#dashOpen{
+
+#dashOpen {
     display: none;
-    right: 150px;
+    left: -40px;
+    position: absolute;
+    top: -30px;
+
 }
+
+#dashOpen img {
+    transform: scaleX(-1);
+}
+
 #sideOptions {
     right: 0;
 }
 
-#sideOptions img, #projectShowed img , #dashOpen img{
-    width: 40px;
-    height: 40px;
+#sideOptions img, #projectShowed img, #dashOpen img {
+    width: 35px;
+    height: 35px;
     position: relative;
-    top: 5px;
-    left: 5px;
+    top: 7px;
+    left: 8px;
 }
 
 #sideOptions:hover .sidebars {
     display: block;
 }
-#sideOptions .sidebars{
+
+#projectShowed:hover #projectTypes {
+    display: block;
+}
+
+#sideOptions:hover {
+    height: 100px;
+}
+
+#sideOptions .sidebars {
     top: 1px;
 }
 
-#sideHistory{
+#sideHistory {
     z-index: 2;
 }
-#sideHistory, #sideIdeas{
+
+#sideHistory, #sideIdeas {
     height: 50px;
 }
 
-#sideHistory img, #sideIdeas img{
+#sideIdeas {
+    border: 1px solid black;
+}
+
+#sideHistory img, #sideIdeas img {
     pointer-events: none;
 }
 
 
-.sidebars{
+.sidebars {
     height: 50px;
 }
 
 .sidebars, #projectTypes {
     z-index: 1;
     display: none;
-    background-color: #FF5D00;
+    background-color: #333333;
     position: relative;
     top: 4px;
     width: 52px;
     right: 1px;
+}
+
+#projectTypes {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
+    top: 8px;
 }
 
 /* --------- Project Sidebar Picker --------- */
@@ -66,22 +95,19 @@
     z-index: 2;
 }
 
-.projectType img{
+.projectType img {
     pointer-events: none;
 }
 
-.projectType{
-    border: 1px solid #D9D9D9;
+.projectType {
+    border: 1px solid black;
     position: relative;
     height: 50px;
     cursor: pointer;
 }
 
-#projectShowed:hover #projectTypes {
-    display: block;
-}
 
-.projectName{
+.projectName {
     background-color: #FF5D00;
     width: 170px;
     height: 50px;
@@ -89,7 +115,7 @@
     top: -1px;
     right: 51px;
     text-align: center;
-    border: 1px solid #D9D9D9;
+    border: 1px solid black;
     line-height: 50px;
     font-size: 24px;
     display: none;
@@ -99,7 +125,7 @@
     display: block;
 }
 
-#sidebarClose{
+#sidebarClose {
     background: transparent;
     font-size: 30px;
     width: 30px;
@@ -115,9 +141,4 @@
 #sidebarClose:hover {
     background: #323232;
 }
-
-/* --------- History Sidebar --------- */
-
-
-/* --------- Ideas Sidebar --------- */
 

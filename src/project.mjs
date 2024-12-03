@@ -2,9 +2,8 @@ import {categories, check_border, decode_text, getIdByColor, icons, projects} fr
 import {
     _categories_HTML,
     change_order,
-    _input_HTML,
     _steps_HTML,
-    build_view, day_view,
+    day_view,
     dragula_day_view,
 } from "./render.mjs";
 import {l_date} from "./date.js";
@@ -156,10 +155,8 @@ export function fix_project_sidebar(selected_button){
  * @param projects data of projects ,
  */
 export function set_projects_options() {
-    console.log(projects)
     let projects_HTML = ""
     let project_types_HTML = ""
-
     for (let i = 0; i < projects.length; i++) {
         let project_class = "dashProject"
         if (i % 2 === 0) project_class = "dashProject dashProjectRight"
@@ -197,11 +194,11 @@ function _dash_project_HTML(project_class, icon_color, icon, name) {
 
 function _dash_add_project_HTML() {
     return `
-        <div class="dashProject" style="background-color: #55423B; border: 1px #D8E1E7 dashed">
+        <div class="dashProject" style=" border: 1px #D8E1E7 dashed">
             <div class="dashProjectIcon" style="background-color: #D8E1E7">
-                <img src="images/goals/projects/plus.png" alt="">
+                <img src="images/goals/plus.png" alt="">
             </div>
-            <span class="dashProjectName" style="color: white">New</span>
+            <span class="dashProjectName">New</span>
         </div>`
 }
 
@@ -233,7 +230,6 @@ $(document).on('click', '.dashProject', function () {
         project_pos = null
         open_add_project()
     }
-
 })
 
 
@@ -246,11 +242,11 @@ function project_view(project_pos) {
     let project_name = $('.dashProjectName').eq(project_pos).text()
 
     _hide_sidebar()
-    build_view(_project_view_main(project_color), _project_view_header(project_color, project_icon, project_name))
+    set_project_view(project_color, project_icon, project_name)
+
     window.projectsAPI.askProjectGoals({project_pos: project_pos})
 
     _set_input_category(project_color)
-
 }
 
 
@@ -269,40 +265,14 @@ function _set_input_category(project_color) {
 /**
  * Builds new project creation window
  */
-function open_add_project() {
-    let categories_html = _categories_HTML()
-    let icon_picker_html = _icon_picker_HTML()
+export function open_add_project() {
+    $("#vignette").css('display', 'block')
+    const new_project_template = $('#newProjectTemplate').prop('content');
+    let $new_project_clone = $(new_project_template).clone()
 
-    $("#dashProjects").append(`
-        <div id="dashNewProject">
-            <div id="dashNewProjectContent">
-                <div id="newProjectTitle">Create new Project</div>
-                <div id="newProjectSettings">
-                    <div id="newProjectSettingsNames">
-                        <div>Category</div>
-                        <div>Project name</div>
-                        <div id="newProjectIconText">Icon</div>
-                    </div>
-                    <div id="projectSettings">
-                        <div class="selectCategory" id="selectCategory3">General</div>
-                        <input type="text" id="newProjectName" placeholder="Enter name">
-                        <div id="projectSettingsIcon">
-                            <img src="images/goals/projects/project.png">
-                        </div>
-                    </div>
-                </div>
-                <div class="categoryPicker" id="categoryPicker3">
-                    ${categories_html}
-                </div>
-                ${icon_picker_html}
-            </div>
-            <div id="newProjectButtons">
-                <div id="newProjectDiscard">Discard</div>
-                <div id="newProjectCreate">Create</div>
-            </div>
-            <div id="newProjectError"></div>
-        </div>
-    `)
+    $new_project_clone.find('.categoryPicker').html(_categories_HTML())
+    $new_project_clone.find('#newProjectIconPicker').html(_icon_picker_HTML())
+    $("#vignette").html($new_project_clone)
 }
 
 /**
@@ -331,15 +301,11 @@ function _icon_picker_HTML() {
             </div>`
     }
 
-    return `
-        <div id="newProjectIconPicker">
-            ${columns}
-        </div>
-    `
+    return columns
 }
 
 $(document).on('click', '#newProjectDiscard', () => {
-    $('#dashNewProject').remove()
+    $('#vignette').css('display', 'none')
 })
 
 $(document).on('click', '.iconOption', function (event) {
@@ -380,9 +346,13 @@ function new_project() {
     } else if (project_setting_icon.css('background-color') === 'rgba(0, 0, 0, 0)') {
         $('#newProjectError').text("NO ICON SELECTED")
     } else {
-        $('#dashNewProject').remove()
         window.projectsAPI.newProject({category: category, name: name, icon: icon})
+        $('#vignette').css('display', 'none')
+        console.log(projects)
+        projects.push({id: 0, name: name, category:category, icon:icon,x:null, y:null})
+        set_projects_options()
     }
+
 }
 
 window.projectsAPI.getProjectGoals((goals) => build_project_view(goals))
@@ -461,7 +431,7 @@ function move_to_done(new_goal_pos, dragged_task) {
 }
 
 /**
- * project goal type change to todo by drag
+ * project goal type change to goals by drag
  * @param new_goal_pos new position of moved goal
  * @param dragged_task pressed task
  */
@@ -500,14 +470,12 @@ export function change_project_check(selected_goal) {
     dragula_project_view()
 }
 
-$(document).on('click', '.projectEmblem', function () {
+$(document).on('click', '.projectEmblem', function (event) {
+    event.stopPropagation()
     project_pos = $(this).find('.projectPos').text()
     project_view(project_pos)
 });
 
-export function set_block_prev_drag_project(option) {
-    block_prev_drag = option
-}
 
 /**
  * creates HTML of project goal
@@ -538,61 +506,58 @@ export function build_project_goal(goal) {
 }
 
 /**
- * Creates header of project view HTML
- * @returns {string}
+ * BUild project view from templates
  */
-function _project_view_header(color, icon, name) {
-    return `
-        <div id="projectHeader" style="background-color: ${color}">
-            <img src="${icon}" alt="">
-            <div id="projectName">${name}</div>
-            <div id="projectAskDelete">Are you sure? <div id="projectDeleteConfirm">DELETE</div></div>
-            <img id="projectDelete" src="images/goals/delete.png" alt="">
-        </div>`
-}
+function set_project_view(color, icon, name) {
+    const header_template = $('#projectViewHeaderTemplate').prop('content');
+    let $header_clone = $(header_template).clone()
 
-/**
- * Creates main element of project view HTML
- * @param color bg color of project sections
- * @returns {string}
- */
-function _project_view_main(color) {
-    return `
-        <div id="projectContent">
-            <div class="projectSection" id="projectDone">
-                <div class="projectSectionTitle" style="background-color: ${color}">Done</div>
-                <div class="projectSectionGoals">
-                
-                </div>
-            </div>
-            <div class="projectSection" id="projectDoing">
-                <div class="projectSectionTitle" style="background-color: ${color}">Doing</div>
-                <div class="projectSectionGoals">
-                
-                </div>
-            </div>
-            <div class="projectSection" id="projectTodo">
-                <div class="projectSectionTitle" style="background-color: ${color}">To Do</div>
-                <div class="projectSectionGoals">
-                
-                </div>
-            </div>
-            ${_input_HTML()}
-        </div>`
+    $header_clone.find('#projectHeader').css('background-color', color)
+    $header_clone.find('#projectHeaderIcon').attr('src', icon)
+    $header_clone.find('#projectName').text(name)
+
+    const main_template = $('#projectViewMainTemplate').prop('content');
+    let $main_clone = $(main_template).clone()
+
+    $main_clone.find('.projectSectionTitle').css('background-color', color)
+
+    let categories_html = _categories_HTML()
+
+    const input_template = $('#todoInputTemplate').prop('content');
+    let $input_clone = $(input_template).clone()
+    $input_clone.find('#categoryPicker1').html(categories_html)
+    $('#main').html($header_clone)
+    $('#main').append($main_clone)
+    $('#projectContent').append($input_clone)
 }
 
 $(document).on('click', '#projectDelete', () => {
-    $('#projectAskDelete').css('visibility', "visible")
+    $("#vignette").css('display', 'block')
+    const delete_project_template = $('#deleteprojectTemplate').prop('content');
+    let $delete_clone = $(delete_project_template).clone()
+    $("#vignette").append($delete_clone)
 })
 
-$(document).on('click', '#projectDeleteConfirm', () => {
+$(document).on('click', '#deleteProjectConfirm', () => {
     delete_project()
 })
 
 function delete_project(){
     window.projectsAPI.deleteProject({position:project_pos})
+
+    $('#vignette').html('')
+    $('#vignette').css('display', 'none')
+    projects.splice(project_pos, 1)
+
+    set_projects_options()
     day_view()
 }
+
+
+$(document).on('click', '#deleteProjectCancel', () => {
+    $('#vignette').html('')
+    $('#vignette').css('display', 'none')
+})
 
 /**
  * builds html of project emblem

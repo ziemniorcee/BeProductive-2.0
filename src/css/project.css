@@ -79,7 +79,7 @@
 
 .projectSectionTitle {
     background-color: #002244;
-    border: 1px solid #D8E1E7;
+    border: 1px solid #444444;
     font-size: 20px;
     height: 30px;
     width: 80%;
@@ -207,8 +207,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #D8E1E7;
-    border-left: 2px solid #D8E1E7;
+    border-left: 1px solid #444444;
 }
 
 .projectEmblem img{

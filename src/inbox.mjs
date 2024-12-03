@@ -1,10 +1,17 @@
-import {build_view} from "./render.mjs";
+import {_hide_sidebar} from "./sidebar.mjs";
 
 $(document).on('click', "#dashInbox", () =>{
-    build_view(_inbox_body(), _inbox_head())
+    build_inbox()
+})
+
+function build_inbox(){
+    const main_template = $('#inboxMainTemplate').prop('content');
+    let $main_clone = $(main_template).clone()
+    _hide_sidebar()
+    $('#main').html($main_clone)
 
     load_inbox()
-})
+}
 
 function load_inbox(){
     let data = ["ebe", 'aba']
@@ -27,22 +34,3 @@ $(document).on('click', '#inboxAdd', ()=> {
     let name = $('#inboxInput').val()
     add_todo(name)
 })
-
-
-function _inbox_body(){
-    return `
-        <div id="inboxBody">
-            <div id="inboxEntry">
-                <input id="inboxInput" type="text" spellcheck="false" placeholder="Result">
-                <div id="inboxAdd">+</div>
-            </div>
-            <div id="inboxList">
-                
-            </div>
-        </div>`
-}
-
-function _inbox_head(){
-    return `<div id="inboxHeader">Inbox</div>`
-}
-

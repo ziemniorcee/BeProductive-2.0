@@ -4,8 +4,8 @@
     left: 100px;
     width: calc(100vw - 100px);
     height: 100%;
-    background: #FF5D00 url("images/galactic_bg.png");
-    z-index: 50;
+    background: black url("../images/galactic_bg.png");
+    z-index: 7;
     display: none;
 }
 

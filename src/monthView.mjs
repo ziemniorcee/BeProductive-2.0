@@ -1,12 +1,12 @@
 import {l_date} from "./date.js";
 import {weekdays2, categories, categories2, decode_text, getIdByColor} from "./data.mjs";
-import {_repeat_label_HTML, build_view, day_view,} from "./render.mjs";
+import {_repeat_label_HTML, day_view,} from "./render.mjs";
 import {already_emblem_HTML} from "./project.mjs";
 
 let is_month_drag = 0
 let mousedown_month = false
 
-$(document).on('click', '#dashMonth', function () {
+$(document).on('click', '#monthViewButton', function () {
     month_view()
 })
 
@@ -14,7 +14,10 @@ $(document).on('click', '#dashMonth', function () {
  * launches month view
  */
 export function month_view() {
-    build_view(_month_content_HTML(), _month_header_HTML())
+    $("#main").html('')
+    _month_header_HTML()
+    $("#main").append(_month_content_HTML())
+
     set_today()
     window.goalsAPI.askMonthGoals({dates: l_date.get_sql_month(l_date.day_sql), goal_check: 0})
     window.sidebarAPI.askHistory({date: l_date.get_history_month()})
@@ -139,37 +142,17 @@ function set_today() {
  * @returns {string} HTML of month header
  */
 function _month_header_HTML() {
-
     let date = l_date.get_month_display_format(l_date.day_sql)
     let main_title = l_date.get_fixed_header_month()
-    return `
-        <div id="header">
-            <div id="mainTitle">${main_title}</div>
-    
-            <div id="projectShowed">
-                <img src="images/goals/projects/project.png" alt="">
-                <div id="projectTypes">
-    
-                </div>
-            </div>
-    
-            <div id="sideOptions">
-                <div id="sideHistory">
-                    <img src="images/goals/history.png" alt="main">
-                </div>
-                <div class="sidebars">
-                    <div id="sideIdeas">
-                        <img src="images/goals/idea.png" alt="second" width="40" height="40">
-                    </div>
-                </div>
-            </div>
-    
-            <div id="subHeader">
-                <span id="date">
-                    ${date}
-                </span>
-            </div>
-        </div>`
+
+    const header_template = $('#viewHeaderTemplate').prop('content');
+    let $header_clone = $(header_template).clone()
+    $header_clone.find('.viewOption').css('background-color', '#121212')
+    $header_clone.find('#monthViewButton').css('background-color', '#2979FF')
+
+    $header_clone.find('#mainTitle').text(main_title)
+    $header_clone.find('#date').text(date)
+    $('#main').append($header_clone)
 }
 
 

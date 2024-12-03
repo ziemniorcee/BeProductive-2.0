@@ -1,4 +1,5 @@
 import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition, divide_to_boxes } from "./data.mjs";
+import {open_add_project} from "./project.mjs";
 
 let clicked_project = '';
 let changes_lines = [];
@@ -7,7 +8,7 @@ let connections = [];
 let current_project = 0;
 let scale = 1;
 
-$(document).on('click', '#strategy', function () {
+$(document).on('click', '#strategyButton', function () {
     $('#galactics').css('display', 'block');
     add_galactic_category_boxes();
     $('#galactic-editor').remove();
@@ -465,3 +466,18 @@ function _galactic_display_HTML() {
 }
 
 
+$(document).on('click', '#galactic-display-new-category', function (){
+    $("#vignette").css('display', 'block')
+    const add_category_template = $('#addCategoryTemplate').prop('content');
+    let $add_category_clone = $(add_category_template).clone()
+
+    $("#vignette").html($add_category_clone)
+})
+
+$(document).on('click', '#galactic-editor-new-category', function (){
+    open_add_project()
+})
+
+$(document).on('click', '.vignetteWindow1',function (event){
+    event.stopPropagation()
+})
