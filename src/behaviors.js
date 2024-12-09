@@ -81,12 +81,6 @@ $(document).on('click', '#dashNewProjectContent', function (){
     $('#newProjectIconPicker').css("visibility", "hidden")
 })
 
-$(document).on('click', "#projectSettingsIcon", function (event){
-    event.stopPropagation()
-    let icon_picker = $('#newProjectIconPicker')
-    let state = icon_picker.css("visibility") === "hidden"
-    icon_picker.css("visibility", state ? 'visible' : "hidden")
-})
 
 $(document).on('click', '.dashViewOption', function (){
     $('.dashViewOption').css('backgroundColor', '#55423B')
@@ -187,6 +181,12 @@ $(document).on('mousedown', '#vignette', function () {
     $('#vignette').css('display', 'none');
     $('#vignette').html('')
 })
+
+$(document).on('mousedown', '#vignette2', function (){
+    $('#vignette2').css('display', 'none');
+    $('#vignette2').html('')
+})
+
 $(document).on('mousedown', '.vignetteWindow2, .vignetteWindow1', function (event){
     event.stopPropagation()
 })

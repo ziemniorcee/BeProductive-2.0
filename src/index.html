@@ -377,7 +377,7 @@
                         <div class="selectCategory" id="selectCategory3">General</div>
                         <input type="text" id="newProjectName" placeholder="Enter name">
                         <div id="projectSettingsIcon">
-                            <img src="images/goals/project.png">
+                            <img id="projectSettingIconSrc" src="images/goals/project.png">
                         </div>
                     </div>
                 </div>
@@ -404,9 +404,28 @@
 
         </div>
     </template>
-    <div id="vignette">
+    <template id="iconPickerTemplate">
+        <div id="iconPicker">
+            <div id="iconPickerTitle">Select icon</div>
+            <div id="iconPickerAdd">
+                <img id="iconPickerPlus" src="images/goals/plus.png">
+                <div id="iconPickerAddText">Add icon</div>
+            </div>
+            <input type="file" id="iconUpload" accept="image/png">
+            <div id="iconPickerIcons">
+                <ul id="iconPickerList">
+
+                </ul>
+            </div>
+        </div>
+    </template>
+    <div id="vignette" class="vignetteLayer">
 
     </div>
+    <div id="vignette2" class="vignetteLayer">
+
+    </div>
+
     <div id="testPanel" style="opacity: 0">
         <div id="testPanelClear"></div>
         <div id="testPanelShowIds"></div>

@@ -1,5 +1,8 @@
-const {ipcMain, ipcRenderer} = require('electron')
+const {ipcMain, ipcRenderer, dialog} = require('electron')
 const electron = require("electron");
+const app = electron.app
+const path = require('path');
+const fsa = require('fs')
 
 module.exports = {todoHandlers, appHandlers}
 
@@ -918,6 +921,45 @@ function todoHandlers(db) {
                 FROM goals
                 WHERE category = ${params.id}`);
     })
+
+    ipcMain.handle('save-file', async (event, fileName, fileData) => {
+        try {
+            const appDataPath = path.join(app.getPath('userData'), 'icons');
+            if (!fsa.existsSync(appDataPath)) {
+                fsa.mkdirSync(appDataPath, {recursive: true});
+            }
+
+            const filePath = path.join(appDataPath, fileName);
+            const file = fileName.slice(0, fileName.lastIndexOf('.'))
+            fsa.writeFileSync(filePath, fileData, 'base64');
+            return {success: true, name: file, path: filePath};
+        } catch (err) {
+            console.error('Failed to save file:', err);
+            return {success: false, error: err.message};
+        }
+    });
+
+    ipcMain.handle('get-icons', async () => {
+        try {
+            const appDataPath = path.join(app.getPath('userData'), 'icons');
+
+            // Ensure the directory exists
+            if (!fsa.existsSync(appDataPath)) {
+                return {success: false, files: [], message: 'Icons folder does not exist.'};
+            }
+
+            // Read the contents of the directory
+            const files = fsa.readdirSync(appDataPath).map((file) => ({
+                name: file.slice(0, file.lastIndexOf('.')),
+                path: path.join(appDataPath, file),
+            }));
+
+            return {success: true, files};
+        } catch (err) {
+            console.error('Error reading icons folder:', err);
+            return {success: false, files: [], message: err.message};
+        }
+    });
 }
 
 

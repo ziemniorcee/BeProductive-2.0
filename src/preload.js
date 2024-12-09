@@ -99,3 +99,8 @@ contextBridge.exposeInMainWorld('appAPI', {
     showGoals: (params) => ipcRenderer.send('show_goals', params),
     returnState: (func) => ipcRenderer.on('return_state', (event, data) => func(data)),
 })
+
+contextBridge.exposeInMainWorld('electronAPI', {
+    saveFile: (fileName, fileData) => ipcRenderer.invoke('save-file', fileName, fileData),
+    getIcons: () => ipcRenderer.invoke('get-icons'),
+});

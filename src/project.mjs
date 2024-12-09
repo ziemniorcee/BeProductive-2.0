@@ -1,4 +1,11 @@
-import {categories, check_border, decode_text, getIdByColor, icons, projects} from "./data.mjs";
+import {
+    categories,
+    check_border,
+    decode_text, findNameByPath, findPathByName,
+    getIdByColor,
+    loadIcons, merged_icons,
+    projects
+} from "./data.mjs";
 import {
     _categories_HTML,
     change_order,
@@ -50,7 +57,11 @@ function show_project_sidebar(that) {
             
         </div>
     `)
-    window.projectsAPI.askProjectSidebar({project_pos: project_pos, option: 2, current_dates: l_date.get_current_dates()})
+    window.projectsAPI.askProjectSidebar({
+        project_pos: project_pos,
+        option: 2,
+        current_dates: l_date.get_current_dates()
+    })
 }
 
 $(document).on('click', '.sideProjectOption', function () {
@@ -68,7 +79,11 @@ function change_sidebar_option(that) {
     let color = $('.dashProjectIcon').eq(project_pos).css('background-color')
     side_project_option.css('background-color', '#2A231F')
     $(that).css('background-color', color)
-    window.projectsAPI.askProjectSidebar({project_pos: project_pos, option: option, current_dates: l_date.get_current_dates()})
+    window.projectsAPI.askProjectSidebar({
+        project_pos: project_pos,
+        option: option,
+        current_dates: l_date.get_current_dates()
+    })
 }
 
 
@@ -76,7 +91,7 @@ $(document).on('click', '#sideProjectGoals .check_task', function () {
     check_sidebar_project_goal(this)
 });
 
-function check_sidebar_project_goal(selected_check){
+function check_sidebar_project_goal(selected_check) {
     let check_state = !$(selected_check).prop('checked')
     let goal_index = $('#sideProjectGoals .check_task').index(selected_check)
 
@@ -132,7 +147,7 @@ $(document).on('click', '#dashMyDayBtn, #dashTomorrowBtn, #dashDay, #dashWeek', 
     fix_project_sidebar(this)
 })
 
-export function fix_project_sidebar(selected_button){
+export function fix_project_sidebar(selected_button) {
     if ($('#sideProjectHeader').length) {
         let options = $('.sideProjectOption')
         let project_option
@@ -162,8 +177,9 @@ export function set_projects_options() {
         if (i % 2 === 0) project_class = "dashProject dashProjectRight"
         let icon_color = categories[projects[i].category][0]
 
-        projects_HTML += _dash_project_HTML(project_class, icon_color, projects[i].icon, projects[i].name)
-        project_types_HTML += _type_project_HTML(icon_color, projects[i].icon, projects[i].name)
+        let icon_path = findPathByName(projects[i].icon)
+        projects_HTML += _dash_project_HTML(project_class, icon_color, icon_path, projects[i].name)
+        project_types_HTML += _type_project_HTML(icon_color, icon_path, projects[i].name)
     }
 
     projects_HTML += _dash_add_project_HTML()
@@ -181,12 +197,11 @@ export function set_projects_options() {
  * @returns {string} HTML format
  * @private
  */
-function _dash_project_HTML(project_class, icon_color, icon, name) {
-
+function _dash_project_HTML(project_class, icon_color, icon_path, name) {
     return `
         <div class="${project_class}">
             <div class="dashProjectIcon" style="background-color: ${icon_color}">
-                <img src="images/goals/projects/${icon}.png" alt="">
+                <img src="${icon_path}" alt="">
             </div>
             <span class="dashProjectName">${name}</span>
         </div>`
@@ -195,7 +210,7 @@ function _dash_project_HTML(project_class, icon_color, icon, name) {
 function _dash_add_project_HTML() {
     return `
         <div class="dashProject" style=" border: 1px #D8E1E7 dashed">
-            <div class="dashProjectIcon" style="background-color: #D8E1E7">
+            <div class="dashProjectIcon" style="background-color: #2979FF">
                 <img src="images/goals/plus.png" alt="">
             </div>
             <span class="dashProjectName">New</span>
@@ -213,7 +228,7 @@ function _dash_add_project_HTML() {
 function _type_project_HTML(icon_color, icon, name) {
     return `
         <div class="projectType" style="background-color: ${icon_color}">
-            <img class="projectTypeImg" src="images/goals/projects/${icon}.png" alt="">
+            <img class="projectTypeImg" src="${icon}" alt="">
             <div class="projectName" style="background-color: ${icon_color}">
                 ${name}
             </div>
@@ -271,38 +286,9 @@ export function open_add_project() {
     let $new_project_clone = $(new_project_template).clone()
 
     $new_project_clone.find('.categoryPicker').html(_categories_HTML())
-    $new_project_clone.find('#newProjectIconPicker').html(_icon_picker_HTML())
     $("#vignette").html($new_project_clone)
 }
 
-/**
- * Builds icon picker using icon names
- * @returns {string} HTML of icon picker
- */
-function _icon_picker_HTML() {
-    let columns = ""
-
-    for (let i = 0; i < icons.length; i += 2) {
-        let column_inner = `
-            <div class="iconOption">
-                <img src="images/goals/projects/${icons[i]}.png">
-            </div>`
-
-        if (icons[i + 1] !== undefined) {
-            column_inner += `
-                <div class="iconOption">
-                    <img src="images/goals/projects/${icons[i + 1]}.png">  
-                </div>`
-        }
-
-        columns += `
-            <div id="selectIconColumn">
-                ${column_inner}
-            </div>`
-    }
-
-    return columns
-}
 
 $(document).on('click', '#newProjectDiscard', () => {
     $('#vignette').css('display', 'none')
@@ -337,19 +323,18 @@ function new_project() {
 
     let name = $('#newProjectName').val()
 
-    let parts = project_setting_icon.find('img').attr('src').split('/');
-    let fileName = parts[parts.length - 1];
-    let icon = fileName.split('.')[0];
+    let icon_path = $('#projectSettingIconSrc').attr('src')
+    let icon_name = findNameByPath(icon_path);
 
     if (name === "") {
         $('#newProjectError').text("NO NAME GIVEN")
-    } else if (project_setting_icon.css('background-color') === 'rgba(0, 0, 0, 0)') {
+    } else if (icon_path === "images/goals/project.png") {
         $('#newProjectError').text("NO ICON SELECTED")
     } else {
-        window.projectsAPI.newProject({category: category, name: name, icon: icon})
+        window.projectsAPI.newProject({category: category, name: name, icon: icon_name})
         $('#vignette').css('display', 'none')
-        console.log(projects)
-        projects.push({id: 0, name: name, category:category, icon:icon,x:null, y:null})
+        console.log(icon_name)
+        projects.push({id: 0, name: name, category: category, icon: icon_name, x: null, y: null})
         set_projects_options()
     }
 
@@ -542,8 +527,8 @@ $(document).on('click', '#deleteProjectConfirm', () => {
     delete_project()
 })
 
-function delete_project(){
-    window.projectsAPI.deleteProject({position:project_pos})
+function delete_project() {
+    window.projectsAPI.deleteProject({position: project_pos})
 
     $('#vignette').html('')
     $('#vignette').css('display', 'none')
@@ -617,14 +602,119 @@ export function _project_picker_HTML() {
 
     for (let i = 0; i < projects.length; i++) {
         let icon_color = categories[projects[i]['category']][0]
-        let icon_src =  `images/goals/projects/${projects[i]["icon"]}.png`
+        let icon_path = findPathByName(projects[i].icon)
         picks_HTML += `
             <div class="editPickProject">
                 <div class="editProjectIcon" style="background-color: ${icon_color}">
-                    <img class="editPickProjectIcon" alt="" src="${icon_src}">
+                    <img class="editPickProjectIcon" alt="" src="${icon_path}">
                 </div>
                 <div class="editProjectName">${projects[i]["name"]}</div>
             </div>`
     }
     return picks_HTML
 }
+
+$(document).on('click', "#projectSettingIconSrc", async () => await open_icon_picker())
+
+async function open_icon_picker(){
+    if ($('#iconPicker').length === 0) {
+        await loadIcons()
+        const icon_picker_template = $('#iconPickerTemplate').prop('content');
+        let $icon_picker_clone = $(icon_picker_template).clone()
+        $("#projectSettingsIcon").append($icon_picker_clone)
+
+        let $icon_picker_list = $('#iconPickerList')
+
+        for (const key in merged_icons) {
+            $icon_picker_list.append(`
+            <li class="iconPickerListElement">
+                <img src="${merged_icons[key]['path']}">
+            </li>`)
+        }
+    }
+}
+
+
+$(document).on('click', '#iconUpload', (event) => {
+    event.stopPropagation()
+})
+
+$(document).on('change', '#iconUpload', async (event) => await icon_upload(event))
+
+/**
+ * Gets icon from user and changes it to white color
+ * @param event change event of file uploading
+ */
+async function icon_upload(event){
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.drawImage(img, 0, 0);
+
+                const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                const pixels = imageData.data;
+
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const alpha = pixels[i + 3];
+
+                    if (r < 50 && g < 50 && b < 50 && alpha > 0) {
+                        pixels[i] = 255;
+                        pixels[i + 1] = 255;
+                        pixels[i + 2] = 255;
+                    }
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+
+                const processedImageSrc = canvas.toDataURL();
+
+                const base64Data = processedImageSrc.split(',')[1];
+                const fileName = file.name;
+
+                const result = await window.electronAPI.saveFile(fileName, base64Data);
+                $('#projectSettingIconSrc').attr('src', result['path']);
+                if (result.success) {
+                    await loadIcons()
+
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            };
+        };
+
+        reader.readAsDataURL(file);
+    }
+    $('#iconPicker').remove()
+}
+
+$(document).on('click', '.iconPickerListElement', function () {
+    select_icon(this)
+})
+
+/**
+ * event of selecting icon
+ * @param that selected icon
+ */
+function select_icon(that){
+    let img_path = $(that).find('img').attr('src')
+
+    $("#projectSettingIconSrc").attr('src', img_path)
+    $('#iconPicker').remove()
+}
+
+$(document).on('click', '#dashNewProject', function () {
+    $('#iconPicker').remove()
+})

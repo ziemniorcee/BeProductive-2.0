@@ -3,8 +3,23 @@ export let categories2 = {};
 export let projects = [];
 export let project_conn = [];
 
-export let icons = ["book", "bug", "dashboard", "keys", "productivity"]
-
+let icons = [{
+    name: "book",
+    path: "images/goals/projects/book.png"
+}, {
+    name: "bug",
+    path: "images/goals/projects/bug.png"
+}, {
+    name: "dashboard",
+    path: "images/goals/projects/dashboard.png"
+}, {
+    name: "keys",
+    path: "images/goals/projects/keys.png"
+}, {
+    name: "productivity",
+    path: "images/goals/projects/productivity.png"
+}]
+export let merged_icons = []
 
 export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
 
@@ -54,7 +69,7 @@ export function calculateChildPosition(childSelector, parentSelector) {
     var percentX = (relativeX / parentWidth) * 100;
     var percentY = (relativeY / parentHeight) * 100;
 
-    return { x: percentX, y: percentY };
+    return {x: percentX, y: percentY};
 }
 
 /**
@@ -75,7 +90,6 @@ export function calculateContainment(that, parent, limits) {
         parentOffset.left + parentWidth * (1 - limits[2]),
         parentOffset.top + parentHeight * (1 - limits[3])
     ];
-    console.log(res);
     return res;
 }
 
@@ -94,8 +108,7 @@ export function divide_to_boxes(n) {
         if (flag && (n % (q - 1) === 0)) {
             flag = false
             q -= 1
-        }
-        else if (n < 0) {
+        } else if (n < 0) {
             break;
         }
     }
@@ -108,14 +121,32 @@ export const month_names = ["January", "February", "March", "April", "May", "Jun
 export const weekdays_grid = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
 
 
-export function decode_text(text){
+export function decode_text(text) {
     return text.replace(/`@`/g, "'").replace(/`@@`/g, '"')
 }
 
-export function encode_text(text){
+export function encode_text(text) {
     return text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
 }
 
-export let colors = [
+export let colors = []
 
-]
+export async function loadIcons() {
+    merged_icons = JSON.parse(JSON.stringify(icons));
+
+    const result = await window.electronAPI.getIcons();
+    let icons_imported = result['files']
+    for (let i = 0; i < icons_imported.length; i++){
+        merged_icons.push(icons_imported[i])
+    }
+}
+
+export const findNameByPath = (path) => {
+    const icon = merged_icons.find(icon => icon.path === path);
+    return icon ? icon.name : null;
+};
+
+export const findPathByName = (name) => {
+    const icon = merged_icons.find(icon => icon.name === name);
+    return icon ? icon.path : null;
+};

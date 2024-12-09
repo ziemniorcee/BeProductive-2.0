@@ -2,7 +2,7 @@ import {_categories_HTML, _steps_HTML, change_main_check, dragula_day_view} from
 import {
     categories,
     categories2,
-    check_border, decode_text, encode_text,
+    check_border, decode_text, encode_text, findPathByName,
     getIdByColor,
     projects,
     range1_backgrounds,
@@ -215,8 +215,6 @@ $(document).on('click', '.editPickProject', function () {
  */
 function change_project(picked_project) {
     selected_project_id = $('.editPickProject').index(picked_project) - 1
-    console.log($('.editPickProject'))
-    console.log(selected_goal_id)
     set_project(selected_project_id)
     $('#editProjectPicker').toggle()
 }
@@ -226,12 +224,12 @@ function change_project(picked_project) {
  * @param project_id id of selected option
  */
 function set_project(project_id) {
-    console.log(project_id)
     if (project_id !== -1) {
+        let icon_path = findPathByName(projects[project_id].icon)
         $('#editSelectProject').css('background-color', categories[projects[project_id]['category']][0])
         $('#editSelectProject .editProjectIcon').css('background-color', categories[projects[project_id]['category']][0])
         $('#editSelectProject .editProjectName').text(projects[project_id]["name"])
-        $('#editSelectProject .editPickProjectIcon').attr('src', `images/goals/projects/${projects[project_id]["icon"]}.png`)
+        $('#editSelectProject .editPickProjectIcon').attr('src', `${icon_path}`)
     } else {
         $('#editSelectProject .editProjectName').eq(0).text('None')
         $('#editSelectProject').css('background-color', "#FF5D00")
@@ -263,7 +261,6 @@ export function change_goal() {
     let importance = $('#editImportance').val()
     let steps_array = get_steps()
 
-    console.log(projects)
     let changes = {
         'goal': encode_text(edit_main_entry),
         'category': category_id,

@@ -9,7 +9,7 @@ import {
     hsvToRgb,
     weekdays2,
     projects,
-    project_conn
+    project_conn, loadIcons
 } from "./data.mjs";
 import {
     already_emblem_HTML,
@@ -22,6 +22,7 @@ import {add_galactic_category_boxes} from './galactic.mjs';
 
 export let is_day_drag = 0
 
+loadIcons()
 
 window.addEventListener('DOMContentLoaded', function () {
     window.goalsAPI.askCategories();
@@ -397,9 +398,17 @@ function select_repeat_option(that) {
 
 $(document).on('click', '#newCategoryCreate', function () {
     create_new_category();
+    let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+
     $("#newCategory").css('display', 'none');
-    $("#vignette").css('display', 'none');
-    $('#vignette').html('')
+    $vignette_layer.css('display', 'none');
+    $vignette_layer.html('')
+
+    console.log(categories)
+
+    let category_element = Object.keys(categories).at(-1)
+    $('#selectCategory22').css('background', categories[category_element][0])
+    $('#selectCategory22').text(categories[category_element][1])
 })
 
 $(document).on('click', '#newCategoryDiscard', function () {
@@ -430,7 +439,7 @@ function create_new_category() {
     window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
     $('#newCategoryName').val('');
     let html_categories = _categories_HTML();
-    for (let i of ['1', '2', '3', '4']) {
+    for (let i of ['1', '22', '3', '4']) {
         $(`#categoryPicker${i}`).empty();
         $(`#categoryPicker${i}`).html(html_categories);
         if ($(`#categoryPicker${i}`).css('display') === 'block') {
@@ -464,16 +473,21 @@ function select_category(that) {
     if (id === '4') index++
 
     if (index === 1) {
-        $("#vignette").css('display', 'block')
+        let $selected_vignette = $("#vignette")
+        if ($selected_vignette.css('display') === 'block'){
+            $selected_vignette = $('#vignette2')
+        }
+        $selected_vignette.css('display', 'block')
         const add_category_template = $('#addCategoryTemplate').prop('content');
         let $add_category_clone = $(add_category_template).clone()
 
-        $("#vignette").html($add_category_clone)
+        $selected_vignette.html($add_category_clone)
     } else if (id !== '0') {
-        let select_category = $(`#selectCategory${id}`)
+        let selected_category = $(`#selectCategory${id}`)
         $(`#categoryPicker${id}`).css('display', 'none')
-        select_category.css('background', categories[index - 1][0])
-        select_category.text(categories[index - 1][1])
+        let category_element = Object.keys(categories)[index - 2]
+        selected_category.css('background', categories[category_element][0])
+        selected_category.text(categories[category_element][1])
     }
 }
 

@@ -129,7 +129,7 @@ function set_today() {
             if (Number(monthDate.eq(i).text()) === today_day) {
                 let id = monthDate.index(monthDate.eq(i))
                 let month_day = $('.monthDay')
-                month_day.eq(id).css("border-color", "#FFC90E")
+                month_day.eq(id).css("border-color", "#2979FF")
                 month_day.eq(id).append("<div id='todayMonthText'>Today</div>")
                 break
             }
