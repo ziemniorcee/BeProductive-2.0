@@ -67,13 +67,28 @@
 }
 
 #galactic-editor {
-    position: relative;
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    text-align: center;
+    border-width: 12px;
+    border-style:solid;
+    border-radius: 5px;
+    border-color: aliceblue;
+}
+
+#galactic-editor-hud {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     text-align: center;
     border-width: 10px;
     border-style:solid;
     border-radius: 5px;
+    pointer-events: none;
+    z-index: 60;
 }
 
 #galactic-editor-text {
@@ -94,6 +109,7 @@
     height: 60px;
     justify-content: center;
     text-align: center;
+    pointer-events: auto;
 }
 
 #galactic-editor-cancel img {
@@ -110,6 +126,7 @@
     align-items: center;
     justify-content: center;
     flex-direction: row;
+    pointer-events: auto;
 }
 
 #galactic-editor-slider-box span {
@@ -156,6 +173,7 @@
     font-size: 30px;
     z-index:5;
     cursor: grab;
+    pointer-events: auto;
 }
 
 #galactic-editor-canv {
@@ -178,6 +196,7 @@
     cursor: pointer;
     background: radial-gradient(circle, black 98%, transparent 100%);
     z-index: 60;
+    pointer-events: auto;
 }
 
 #galactic-display-options-btn > img, 
