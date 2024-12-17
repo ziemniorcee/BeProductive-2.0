@@ -24,10 +24,10 @@ export function create_today_graphs() {
                     date1.toLocaleDateString()],
             datasets: [{
                 data: [3, 4, 6, 1, 7, 2, 9, 6, 13, 2],
-                borderColor: 'rgba(249, 67, 64, 1)',
+                borderColor: 'rgba(41, 121, 255, 1)',
                 borderWidth: 3,
                 pointRadius: 0,
-                backgroundColor: 'rgba(224, 193, 199, 1)',
+                backgroundColor: 'rgba(41, 121, 255, 0.2)',
                 fill: true,
                 tension: 0.4
             }]

@@ -4,6 +4,7 @@ const {ipcMain} = require('electron')
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 const path = require('path');
+
 const Menu = electron.Menu
 const MenuItem = electron.MenuItem
 
@@ -125,7 +126,7 @@ ctxMenuNormal.append(new MenuItem({
 
 
 ipcMain.on('context-menu-open', (event, params) => {
-    if(params.repeat) ctxMenuRepeat.popup(mainWindow)
+    if (params.repeat) ctxMenuRepeat.popup(mainWindow)
     else {
         context_option = params.option
         ctxMenuNormal.popup(mainWindow)

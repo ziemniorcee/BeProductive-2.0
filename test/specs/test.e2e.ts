@@ -26,7 +26,7 @@ describe('Input testing', () => {
     it('Simple input check', async () => {
         await add_todo_main('test')
 
-        let length = await $$('.todo').length
+        let length = await $$('.goals').length
         await expect(length).toBeGreaterThan(0)
 
         let todo_text = $$('.task')[0]
@@ -56,7 +56,7 @@ describe('Checking tests', ()=>{
         let todo_check = $$('.check_task')[0]
         await todo_check.click()
 
-        let how_many_finished = await $('#todosFinished').$$('.todo').length
+        let how_many_finished = await $('#todosFinished').$$('.goals').length
         await expect(how_many_finished).toBeGreaterThan(0)
 
         await delete_todo(0)
@@ -86,7 +86,7 @@ describe('history', ()=>{
         await history_task.dragAndDrop(target)
 
 
-        let how_many_todos = await $$('.todo').length
+        let how_many_todos = await $$('.goals').length
 
         await expect(how_many_todos).toBeGreaterThan(2)
 
@@ -138,7 +138,7 @@ describe('edit', () =>{
     it("main text", async () => {
         await add_todo_main("edit 1")
 
-        let task = $$('.todo')[0]
+        let task = $$('.goals')[0]
         await task.click()
 
         const entry = $('#editText')
@@ -155,7 +155,7 @@ describe('edit', () =>{
     it("new step", async () => {
         await add_todo_main("edit 2")
 
-        let task = $$('.todo')[0]
+        let task = $$('.goals')[0]
         await task.click()
 
         let new_step = $('#editNewStep')
@@ -178,7 +178,7 @@ describe('edit', () =>{
         await add_todo_main("edit 3")
         await add_todo_main("edit 4")
 
-        let task = $$('.todo')
+        let task = $$('.goals')
         await task[0].click()
 
         let new_step = $('#editNewStep')
@@ -205,13 +205,13 @@ describe('edit', () =>{
         await add_todo_main("edit 5")
         await add_todo_main("edit 6")
 
-        let tasks_to_do = $('#todosArea').$$('.todo')
+        let tasks_to_do = $('#todosArea').$$('.goals')
         await tasks_to_do[0].click()
 
         let edit_check = $('#editCheck')
         await edit_check.click()
 
-        let tasks_done = $('#todosFinished').$$('.todo')
+        let tasks_done = $('#todosFinished').$$('.goals')
         let tasks_done_length = await tasks_done.length
         await expect(tasks_done[0]).toHaveText("edit 5")
         await expect(tasks_done_length).toEqual(1)
@@ -224,10 +224,10 @@ describe('edit', () =>{
         await delete_todo(0, 2)
     })
 
-    it('new step, the same todo click', async()=>{
+    it('new step, the same goals click', async()=>{
         await add_todo_main("edit 7")
 
-        let task = $$('.todo')
+        let task = $$('.goals')
         await task[0].click()
 
         let new_step = $('#editNewStep')
@@ -249,7 +249,7 @@ describe('edit', () =>{
     // it('change difficulty and importance', async() =>{
     //     await add_todo_main("edit 9")
     //     await add_todo_main("edit 10")
-    //     let tasks_to_do = $$('.todo')
+    //     let tasks_to_do = $$('.goals')
     //     await tasks_to_do[0].click()
     //
     //
@@ -289,11 +289,11 @@ describe('project sidebar', () =>{
         let project_sidebar = $$('.projectType')[0]
         await project_sidebar.click()
 
-        let project_task = $('#rightbar').$$('.todo')[0]
+        let project_task = $('#rightbar').$$('.goals')[0]
         let target = await $('#todosArea')
         await project_task.dragAndDrop(target)
 
-        let how_many_todos = await $("#main").$$('.todo').length
+        let how_many_todos = await $("#main").$$('.goals').length
         await expect(how_many_todos).toBeGreaterThan(1)
 
         let show_ids_button = await $('#testPanelShowIds')
@@ -338,7 +338,7 @@ describe('ideas', () => {
         let ideas_add = $$('.ideasAdd')[0]
         await ideas_add.click()
 
-        let how_many_todos = await $$('.todo').length
+        let how_many_todos = await $$('.goals').length
         await expect(how_many_todos).toBeGreaterThan(1)
 
         let show_ids_button = await $('#testPanelShowIds')
@@ -392,7 +392,7 @@ async function show_yesterday() {
  */
 async function delete_todo(pos, how_many = 1) {
     for (let i = 0; i < how_many; i++) {
-        const todo = $$('.todo')[pos]
+        const todo = $$('.goals')[pos]
         await todo.click({button: 2})
         const button_delete = $('#testPanelClear')
         await button_delete.click()

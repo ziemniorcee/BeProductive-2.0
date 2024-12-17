@@ -1,6 +1,5 @@
 import {show_hide_sidebar} from "./sidebar.mjs";
 import {l_date} from "./date.js";
-import {day_view} from "./render.mjs";
 import {categories, month_names} from "./data.mjs";
 
 $(document).on('click','#gloryButton', function (){
@@ -31,7 +30,7 @@ $(document).on('click', '#nextMonth', function (){
     window.goalsAPI.askMonthGoals({dates: l_date.glory_month, goal_check: 1})
 })
 
-window.goalsAPI.getMonthGoalsDone((goals_dict)=>{
+window.goalsAPI.getMonthGoalsDone((goals_dict)=>{ // updated handler, needs return
     build_glory(goals_dict)
 })
 

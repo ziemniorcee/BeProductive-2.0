@@ -1,6 +1,7 @@
 import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
 
 
+
 // #main behaviors
 (function () {
     $(document).on('click', '#todoInput', (event) => {
@@ -77,12 +78,6 @@ $(document).on('click', '#dashNewProjectContent', function (){
     $('#newProjectIconPicker').css("visibility", "hidden")
 })
 
-$(document).on('click', "#projectSettingsIcon", function (event){
-    event.stopPropagation()
-    let icon_picker = $('#newProjectIconPicker')
-    let state = icon_picker.css("visibility") === "hidden"
-    icon_picker.css("visibility", state ? 'visible' : "hidden")
-})
 
 $(document).on('click', '.dashViewOption', function (){
     $('.dashViewOption').css('backgroundColor', '#55423B')
@@ -107,17 +102,13 @@ $(document).on('click', '#newCategoryDiscard', function () {
     $("#vignette").css('display', 'none');
 });
 
-$(document).on('click', '#vignette', function () {
-    $('#vignette').children().css('display', 'none');
-    $('#vignette').css('display', 'none');
-    $('#categoryPicker22').css('display', 'none')
-})
+
 
 $(document).on('click', '#newCategory', function(event) {
     event.stopPropagation();
 })
 
-$(document).on('click', '#to-do', function () {
+$(document).on('click', '#todoButton', function () {
     $('#galactics').css('display', 'none');
 })
 
@@ -149,4 +140,35 @@ $(document).on('click', '#taskEdit', function (event){
 
 $(document).on('click', '#taskEdit', function (event){
     $('#categoryPicker22').css('display', 'none')
+})
+
+$(document).on('focus', '#todoEntryGet', function (){
+    $('#todoEntrySimple').css('background-color', "#1A3667")
+    $('#todoEntrySimple').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('blur', '#todoEntryGet', function (){
+    $('#todoEntrySimple').css('background-color', "#2A2A2A")
+    $('#todoEntrySimple').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('focus', '#inboxInput', function (){
+    $('#inboxEntry').css('background-color', "#1A3667")
+    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+$(document).on('blur', '#inboxInput', function (){
+    $('#inboxEntry').css('background-color', "#2A2A2A")
+    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
+})
+
+
+
+$(document).on('mousedown', '#vignette2', function (){
+    $('#vignette2').css('display', 'none');
+    $('#vignette2').html('')
+})
+
+$(document).on('mousedown', '.vignetteWindow2, .vignetteWindow1', function (event){
+    event.stopPropagation()
 })

@@ -1,10 +1,6 @@
 import {weekdays, month_names} from "./data.mjs";
-import {reset_project_pos} from "./project.mjs";
-import {dragula_week_view, week_view} from "./weekView.mjs";
-import {dragula_month_view, month_view} from "./monthView.mjs";
-import {day_view} from "./render.mjs";
 
-class CurrentDate {
+export class CurrentDate {
     constructor() {
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
@@ -273,7 +269,8 @@ class CurrentDate {
         let base = dates[0].substring(0, 8)
 
         let month_array = []
-        for (let i = 1; i <= range[1]; i++) {
+        console.log(range[1] - range[0])
+        for (let i = 1; i <= range[1] - range[0]; i++) {
             if (i < 10) month_array.push(base + "0" + i)
             else month_array.push(base + i)
         }
@@ -305,7 +302,39 @@ class CurrentDate {
 
         if (selected_date < current_date) return selected_sql
         else return current_sql
+    }
 
+    get_next_date(direction){
+        if($('#todosAll').length){
+            let selected_date = new Date(this.day_sql)
+            selected_date.setDate(selected_date.getDate() + direction)
+            this.set_attributes(selected_date)
+        }
+        else if ($('.weekDay').length) {
+            let selected_date
+            if (direction === -1){
+                selected_date = new Date(this.week_now[0])
+            }
+            else if (direction === 1){
+                selected_date = new Date(this.week_now[6])
+            }
+            selected_date.setDate(selected_date.getDate() + direction)
+            this.set_attributes(selected_date)
+            week_view()
+        }
+        else if ($('#monthGrid').length){
+            let month_array =  this.get_month_array()
+            let selected_date
+            if (direction === -1){
+                selected_date = new Date(month_array[0])
+            }
+            else if (direction === 1){
+                selected_date = new Date(month_array[month_array.length-1])
+            }
+            selected_date.setDate(selected_date.getDate() + direction)
+            this.set_attributes(selected_date)
+            month_view()
+        }
     }
 }
 
@@ -314,6 +343,7 @@ export let l_date = new CurrentDate()
 $("#datePicker").datepicker({
     onSelect: function () {
         l_date.set_attributes($(this).datepicker('getDate'))
+
         if ($('#todosAll').length) {
             date_change(2)
             $('#mainTitle').text(l_date.get_day_view_header())
@@ -345,6 +375,5 @@ function week_change(option) {
 function month_change(option) {
     if (option === 0) l_date.this_month()
     else if (option === 1) l_date.next_month()
-
     month_view()
 }

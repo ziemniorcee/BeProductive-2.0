@@ -3,10 +3,14 @@
 
 const {contextBridge, ipcRenderer} = require('electron')
 
+
 contextBridge.exposeInMainWorld('goalsAPI', {
+    getDayView: (params) => ipcRenderer.invoke('get-day-view', params),
+    getWeekView: (params) => ipcRenderer.invoke('get-week-view', params),
+    getMonthView: (params) => ipcRenderer.invoke('get-month-view', params),
+    getProjectView: (params) => ipcRenderer.invoke('get-project-view', params),
+
     test: (params) => ipcRenderer.send('test', params),
-    askGoals: (params) => ipcRenderer.send('ask-goals', params),
-    getGoals: (func) => ipcRenderer.on('get-goals', (event, goals) => func(goals)),
     newGoal: (params) => ipcRenderer.send('new-goal', params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
     removingFollowing: (callback) => ipcRenderer.on("removing-following", callback),
@@ -18,39 +22,18 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     changeChecksStep: (params) => ipcRenderer.send('change-checks-step', params),
 
-    changeTextGoal: (params) => ipcRenderer.send('change-text-goal', params),
-    addStep: (params) => ipcRenderer.send('add-step', params),
-    changeStep: (params) => ipcRenderer.send('change-step', params),
-    removeStep: (params) => ipcRenderer.send('remove-step', params),
-    changeCategory: (params) => ipcRenderer.send('change-category', params),
-    changeDifficulty: (params) => ipcRenderer.send('change-difficulty', params),
-    changeImportance: (params) => ipcRenderer.send('change-importance', params),
     editGoal: (params) => ipcRenderer.send('edit-goal', params),
 
     askWeekGoals: (params) => ipcRenderer.send('ask-week-goals', params),
     getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
-    askEditGoal: (params) => ipcRenderer.send('ask-edit-goal', params),
+    askEditGoal: (params) => ipcRenderer.invoke('ask-edit-goal', params),
     getEditGoal: (func) => ipcRenderer.on('get-edit-goal', (event, goal, steps) => func(goal, steps)),
     changeWeekGoalCheck: (params) => ipcRenderer.send('change-week-goal-check', params),
-
-    setDefaultEdit: (params) => ipcRenderer.send('set-default-edit', params),
 
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals', params),
     getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
     getMonthGoalsDone: (func) => ipcRenderer.on('get-month-goals-done', (event, goals_dict) => func(goals_dict)),
-
-    askProjectsInfo: (params) => ipcRenderer.send('ask-projects-info', params),
-    getProjectsInfo: (func) => ipcRenderer.on('get-projects-info', (event, projects) => func(projects)),
-    askProjectGoals: (params) => ipcRenderer.send('ask-project-goals', params),
-    getProjectGoals: (func) => ipcRenderer.on('get-project-goals', (event, goals, steps) => func(goals, steps)),
-    askProjectSidebar: (params) => ipcRenderer.send('ask-project-sidebar', params),
-    getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
-    getFromProject: (params) => ipcRenderer.send('get-from-project', params),
-    projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
-
-    newProject: (params) => ipcRenderer.send('new-project', params),
-    deleteProject: (params) => ipcRenderer.send('delete-project', params),
 
     goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
 
@@ -61,13 +44,11 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getCategoriesCounts: (func) => ipcRenderer.on('get-categories-counts', (event, counts) => func(counts)),
 
     askCategories: () => ipcRenderer.send('ask-categories'),
-    getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
+    // getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
+
 
     addCategory: (params) => ipcRenderer.send('add-category', params),
     removeCategory: (params) => ipcRenderer.send('remove-category', params),
-
-    askAllProjects: () => ipcRenderer.send('ask-all-projects'),
-    getAllProjects: (func) => ipcRenderer.on('get-all-projects', (event, projects) => func(projects)),
 
     askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
     getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
@@ -76,9 +57,24 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeGalacticConnections: (params) => ipcRenderer.send('change-galactic-connections', params),
 })
 
+contextBridge.exposeInMainWorld('projectsAPI', {
+    askAllProjects: () => ipcRenderer.send('ask-all-projects'),
+    getAllProjects: (func) => ipcRenderer.on('get-all-projects', (event, projects) => func(projects)),
+
+    askProjectGoals: (params) => ipcRenderer.send('ask-project-goals', params),
+    getProjectGoals: (func) => ipcRenderer.on('get-project-goals', (event, goals, steps) => func(goals, steps)),
+    askProjectSidebar: (params) => ipcRenderer.invoke('ask-project-sidebar', params),
+    getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
+    getFromProject: (params) => ipcRenderer.send('get-from-project', params),
+    projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
+    newProject: (params) => ipcRenderer.send('new-project', params),
+
+
+    deleteProject: (params) => ipcRenderer.send('delete-project', params),
+})
 
 contextBridge.exposeInMainWorld('sidebarAPI', {
-    askHistory: (params) => ipcRenderer.send('ask-history', params),
+    askHistory: (params) => ipcRenderer.invoke('ask-history', params),
     getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
     deleteHistory: (params) => ipcRenderer.send('delete-history', params),
     historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, steps, goal) => func(steps, goal)),
@@ -108,3 +104,15 @@ contextBridge.exposeInMainWorld('appAPI', {
     showGoals: (params) => ipcRenderer.send('show_goals', params),
     returnState: (func) => ipcRenderer.on('return_state', (event, data) => func(data)),
 })
+
+contextBridge.exposeInMainWorld('electronAPI', {
+    saveFile: (fileName, fileData) => ipcRenderer.invoke('save-file', fileName, fileData),
+    getIcons: () => ipcRenderer.invoke('get-icons'),
+});
+
+contextBridge.exposeInMainWorld('dataAPI', {
+    getCategories: () => ipcRenderer.invoke('get-categories'),
+    getProjects: () => ipcRenderer.invoke('get-projects'),
+    getGalacticConnections: () => ipcRenderer.invoke('get-galactic-connections'),
+});
+

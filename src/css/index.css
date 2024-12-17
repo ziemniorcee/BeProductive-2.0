@@ -19,16 +19,16 @@ body {
     width: 100%;
     height: 100%;
     display: flex;
-    background-color: #2A231F;
+    background-color: #121212;
 }
 
 #leftbar {
-    background: #D8E1E7;
-    z-index: 1000;
+    background: #2979FF;
+    z-index: 5;
     width: 100px;
 }
 
-#leftbar a {
+.leftbarButton {
     left: 8px;
     margin-bottom: 60px;
     top: 150px;
@@ -41,31 +41,28 @@ body {
     white-space: nowrap;
     overflow: hidden;
     display: flex;
+
 }
 
-#leftbar a img {
+.leftbarButton img {
+    cursor: pointer;
     position: relative;
-    left: 2px;
+    left: 8px;
     top: 2px;
     margin-right: 5px;
-    height: 80px;
+    height: 70px;
 }
 
-#leftbar span {
-    position: relative;
-    color: white;
-    font-size: 40px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 200px;
-    text-align: center;
+#laurels img {
+    width: 100px;
+    height: 100px;
 }
 
 #main {
     color: white;
     display: flex;
     flex-direction: column;
-    background: #2A231F;
+    background: #121212;
     font-size: 28px;
     padding: 50px;
     flex: 0;
@@ -91,7 +88,7 @@ body {
     visibility: hidden;
 }
 
-#mainBlur{
+#mainBlur {
     z-index: 2;
     width: 100%;
     height: 100%;
@@ -102,6 +99,7 @@ body {
     margin-top: -50px;
     margin-left: -50px;
 }
+
 #todosAll {
     overflow-y: scroll;
     height: calc(100% - 65px);
@@ -134,16 +132,16 @@ body {
 #resizer {
     flex-basis: 4px;
     cursor: col-resize;
-    background: #D8E1E7;
+    background: #444444;
     display: none;
 }
 
 #rightbar {
     display: none;
     color: white;
-    background: #2A231F;
+    background: #272727;
     box-sizing: border-box;
-    border: 4px solid #D8E1E7;
+    border: 4px solid #444444;
     border-left: none;
     padding: 10px 10px 100px;
     flex-basis: 500px;
@@ -160,28 +158,32 @@ body {
     opacity: 0;
 }
 
-#header{
+#header {
     color: white;
     position: relative;
 }
-#mainTitle{
+
+#mainTitle {
     font-size: 40px;
+    text-align: center;
 }
 
 
-
 #subHeader {
-    width: 615px;
     color: white;
     margin-top: 5px;
     margin-bottom: 20px;
     position: relative;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #date {
     font-size: 20px;
     width: max-content;
-    border-bottom: solid 3px #FF5D00;
+    border-bottom: solid 3px #2979FF;
     padding-bottom: 4px;
 }
 
@@ -192,7 +194,7 @@ body {
 
 #todosFinished .task {
     text-decoration: line-through;
-    color: grey;
+    color: #B3B3B3;
 
 }
 
@@ -207,28 +209,48 @@ body {
 #todosAll::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
 .todo {
     margin-right: 5px;
     min-height: 50px;
-    background: #2A231F;
+    background: rgba(255, 255, 255, 0.05);
     font-size: 25px;
     color: white;
-    margin-bottom: 7px;
-    border: 1px solid #D8E1E7;
+    margin-bottom: 12px;
+    border: 1px solid #444444;
     display: flex;
     cursor: default;
     position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    border-radius: 10px;
 }
+
+.todo:hover {
+    background-color: #2A2A2A;
+    border-color: #2979FF;
+    box-shadow: 0px 0px 8px rgba(41, 121, 255, 0.5);
+}
+
+
+.todo:active {
+    background-color: #141414 !important; /* Slightly darker */
+    border-color: #2979FF;
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.5); /* Inner shadow for pressed effect */
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
 
 .todoId {
     display: none;
 }
 
 .todoCheck {
-    border-right: 1px solid #D8E1E7;
+    border-right: 1px solid #444444;
     pointer-events: none;
     position: relative;
-    background: #FF5D00 url("images/goals/Frame 8.svg") no-repeat;
+    background: #FF5D00 url("../images/goals/rank1.svg") no-repeat;
 }
 
 .checkDot {
@@ -242,8 +264,7 @@ body {
     position: absolute;
     z-index: 1;
     border: 2px red solid;
-    background: #1E1E1E no-repeat center;
-
+    background: #121212 no-repeat center;
 }
 
 .check_task {
@@ -259,12 +280,12 @@ body {
 }
 
 #finishedButton {
-    background-color: #FF5D00;
+    background-color: #2979FF;
     color: white;
     width: max-content;
     font-size: 20px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 16px;
+    margin-bottom: 16px;
     display: none;
     pointer-events: all;
     padding: 3px 8px;
@@ -293,12 +314,30 @@ body {
 
 
 #todoEntrySimple {
-    background: #55423B;
+    border: 1px solid #3A3A3A;
+    background: #2A2A2A;
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     display: flex;
 }
 
+#todoEntrySimple:hover, #todoEntrySimple:hover #todoEntryGet {
+    background-color: #1E1E1E !important;
+    border-color: #2979FF;
+}
+
+#todoEntryGet:focus, .stepEntry:focus {
+    background-color: #1A3667;
+    border: none;
+}
+
+.stepEntry:hover {
+    background-color: #1E1E1E !important;
+    border: 1px solid #2979FF;
+}
+
 #todoEntryComplex {
-    background: #55423B;
+    background: #2A2A2A;
     display: flex;
     height: 0;
     transition: 0.5s;
@@ -311,26 +350,38 @@ body {
     color: white;
     width: 100%;
     margin-left: 10px;
-    background: #55423B;
+    background: #2A2A2A;
     font-size: 20px;
     border: none;
     outline: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-#todoRepeat{
+#todoEntryGet::placeholder {
+    color: #B3B3B3;
+    opacity: 1;
+}
+
+#newProjectName::placeholder {
+    color: #B3B3B3;
+    opacity: 1;
+}
+
+#todoRepeat {
     width: 40px;
     height: 50px;
     text-align: center;
     cursor: pointer;
     margin-right: 5px;
 }
-#todoRepeat img{
+
+#todoRepeat img {
     width: 25px;
     height: 25px;
     padding: 11px 0;
 }
 
-#repeatPicker{
+#repeatPicker {
     width: 150px;
     height: 150px;
     position: absolute;
@@ -342,22 +393,23 @@ body {
     display: none;
 }
 
-.repeatOption{
+.repeatOption {
     display: flex;
     height: 50px;
 }
 
-.repeatOption:hover{
-    background-color: #3E3C4B!important;
+.repeatOption:hover {
+    background-color: #3E3C4B !important;
 }
 
-.repeatCount{
+.repeatCount {
     width: 30px;
     text-align: center;
     position: relative;
     top: 10px;
 }
-.repeatLabel{
+
+.repeatLabel {
     text-align: right;
     position: relative;
     top: 10px;
@@ -404,6 +456,7 @@ body {
 }
 
 .stepEntry {
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     background: transparent;
     color: white;
     height: 30px;
@@ -414,6 +467,10 @@ body {
     width: 100%;
 }
 
+.stepEntry::placeholder {
+    color: #B3B3B3;
+    opacity: 1;
+}
 
 #todoSettings {
     width: 200px;
@@ -492,7 +549,7 @@ body {
     bottom: 5px
 }
 
-#todoSettings .todoRange{
+#todoSettings .todoRange {
     width: 200px;
 }
 
@@ -532,10 +589,11 @@ body {
     pointer-events: none;
 }
 
-.repeatLabelShow{
+.repeatLabelShow {
     display: inline-block;
 }
-.repeatLabelShow img{
+
+.repeatLabelShow img {
     position: relative;
     top: 2px;
     width: 20px;
@@ -621,24 +679,24 @@ body {
 
 }
 
-.polaura2{
+.polaura2 {
     transform: scaleX(-1);
 }
 
 #gloryButton {
     width: 50px;
     height: 50px;
-    background-color: #FF5D00;
-    border: 2px solid gold;
+    background-color: #333333;
+    border: 2px solid black;
     position: absolute;
     border-radius: 10px;
 }
 
 #gloryImg {
     position: relative;
-    width: 40px;
-    height: 40px;
-    top: 5px;
+    width: 30px;
+    height: 30px;
+    top: 10px;
 }
 
 
@@ -646,11 +704,11 @@ body {
     font-size: 16px;
     overflow: hidden;
     width: 100%;
-    border-bottom: solid 1px black;
+    border-bottom: solid 1px #444444;
     margin-top: 15px;
     display: flex;
     color: white;
-    background-color: #2A231F;
+    background-color: #272727;
 }
 
 .sidebarTask span {
@@ -663,7 +721,7 @@ body {
     pointer-events: none;
 }
 
-.monthDay .sidebarTask{
+.monthDay .sidebarTask {
     height: 17px;
     font-size: 13px;
     margin-top: 1px;
@@ -678,7 +736,7 @@ body {
     right: 10px;
 }
 
-.monthDay .sidebarTask .historyCheck{
+.monthDay .sidebarTask .historyCheck {
     visibility: hidden;
 }
 
@@ -693,7 +751,7 @@ body {
 }
 
 .historyDate {
-    border-bottom: solid 2px black;
+    border-bottom: solid 2px #2979FF;
     position: relative;
     padding-bottom: 5px;
 }
@@ -792,7 +850,7 @@ body {
     outline: none;
 }
 
-#editButtons{
+#editButtons {
     display: flex;
     position: relative;
     margin-bottom: 10px;
@@ -817,7 +875,7 @@ body {
     background: #323232;
 }
 
-#editBack{
+#editBack {
     margin-left: 10px;
     width: 30px;
 }
@@ -826,7 +884,7 @@ body {
     background: #323232;
 }
 
-#editBack img{
+#editBack img {
     width: 20px;
     height: 20px;
     position: relative;
@@ -870,7 +928,7 @@ body {
     margin-bottom: 15px;
 }
 
-#editProject{
+#editProject {
     font-size: 20px;
     height: 40px;
     background: #55423B;
@@ -880,7 +938,7 @@ body {
     position: relative;
 }
 
-#editConfirmProject{
+#editConfirmProject {
     font-size: 20px;
     height: 150px;
     background: #55423B;
@@ -891,7 +949,7 @@ body {
     border: 5px solid red;
 }
 
-#editConfirmProjectQuestion{
+#editConfirmProjectQuestion {
     width: 100%;
     height: 75px;
     display: block;
@@ -901,12 +959,12 @@ body {
 
 }
 
-#editConfirmProjectButtons{
+#editConfirmProjectButtons {
     display: flex;
     justify-content: center;
 }
 
-#editConfirmProjectYes{
+#editConfirmProjectYes {
     line-height: 40px;
     height: 40px;
     width: 100px;
@@ -916,7 +974,7 @@ body {
     margin-right: 100px;
 }
 
-#editConfirmProjectNo{
+#editConfirmProjectNo {
     line-height: 40px;
     height: 40px;
     width: 100px;
@@ -926,14 +984,14 @@ body {
 }
 
 
-#editProjectTitle{
+#editProjectTitle {
     flex-grow: 1;
     text-align: center;
     font-size: 25px;
     line-height: 40px;
 }
 
-#editSelectProject{
+#editSelectProject {
     line-height: 40px;
     height: 40px;
     width: 250px;
@@ -945,7 +1003,7 @@ body {
     margin-left: 25px;
 }
 
-.editPickProject{
+.editPickProject {
     line-height: 40px;
     height: 40px;
     width: 250px;
@@ -956,12 +1014,12 @@ body {
     position: relative;
 }
 
-#editSelectProject{
+#editSelectProject {
     margin-top: 10px;
 }
 
 
-.editProjectIcon{
+.editProjectIcon {
     width: 30px;
     height: 30px;
     background-color: #D8E1E7;
@@ -971,13 +1029,14 @@ body {
     top: 5px;
     border-radius: 5px;
 }
-.editProjectName{
+
+.editProjectName {
     display: inline-block;
     position: relative;
     left: 10px;
 }
 
-#editProjectPicker{
+#editProjectPicker {
     height: 200px;
     width: 250px;
     max-height: 160px;
@@ -991,12 +1050,12 @@ body {
     overflow-x: hidden;
 }
 
-.editPickProject{
+.editPickProject {
     background-color: #2A231F;
     border: 0;
 }
 
-.editPickProjectIcon{
+.editPickProjectIcon {
     width: 25px;
     height: 25px;
     position: relative;
@@ -1085,7 +1144,7 @@ body {
 }
 
 #editNewStep {
-    color: #FF5D00;
+    color: #2979FF;
     font-size: 20px;
     position: relative;
     bottom: 2px;
@@ -1106,20 +1165,21 @@ body {
     font-size: 30px;
 }
 
-#glorySetup{
+#glorySetup {
     position: absolute;
     display: flex;
     left: 20px;
     font-size: 32px;
 }
-#glorySetup img{
+
+#glorySetup img {
     width: 30px;
     height: 30px;
     position: relative;
     top: 9px;
 }
 
-#gloryFormat{
+#gloryFormat {
     height: 50px;
     width: 120px;
     border: #FFC90E 2px solid;
@@ -1129,19 +1189,21 @@ body {
     margin-right: 10px;
 
 }
-#gloryFormatText{
+
+#gloryFormatText {
     position: relative;
     top: 7px;
 }
 
-#gloryCurrentSetup{
+#gloryCurrentSetup {
     width: 150px;
     position: relative;
     top: 9px;
     margin-right: 20px;
     margin-left: 10px;
 }
-.gloryChangeMonth{
+
+.gloryChangeMonth {
     width: 50px;
     height: 50px;
     border: #FFC90E 2px solid;
@@ -1149,24 +1211,25 @@ body {
     border-radius: 5px;
 }
 
-#gloryContent{
+#gloryContent {
     width: 100%;
     height: calc(100% - 60px);
 }
 
-.gloryHalf{
+.gloryHalf {
     height: 50%;
 
 }
-#gloryHalf1{
+
+#gloryHalf1 {
     position: relative;
 }
 
-#gloryHalf2{
+#gloryHalf2 {
     position: relative;
 }
 
-#gloryTimeline{
+#gloryTimeline {
     position: absolute;
     bottom: -18px;
     width: 92%;
@@ -1175,19 +1238,20 @@ body {
     background-color: white;
     border: none;
 }
-.vl{
+
+.vl {
     width: 5px;
     height: 30px;
     background-color: white;
 }
 
-.dayTimeline{
+.dayTimeline {
     font-size: 20px;
     position: relative;
     top: 5px;
 }
 
-#verticalLinesTop{
+#verticalLinesTop {
     display: flex;
     justify-content: space-between;
     width: calc(92%);
@@ -1197,7 +1261,7 @@ body {
     height: 30px;
 }
 
-#verticalLinesBottom{
+#verticalLinesBottom {
     display: flex;
     justify-content: space-between;
     width: calc(94%);
@@ -1207,14 +1271,14 @@ body {
     height: 30px;
 }
 
-#gloryHalfContentTop{
+#gloryHalfContentTop {
     display: flex;
     margin-left: 0.6%;
     width: 98%;
     height: calc(100% - 35px);
 }
 
-#gloryHalfContentBot{
+#gloryHalfContentBot {
     display: flex;
     position: relative;
     top: 30px;
@@ -1223,25 +1287,28 @@ body {
     height: calc(100% - 35px);
 }
 
-.gloryDay{
+.gloryDay {
     height: 100%;
     width: 100%;
     position: relative;
 
 }
-.gloryGoals{
+
+.gloryGoals {
     max-height: 100%;
     overflow-y: scroll;
 }
+
 .gloryGoals {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
 .gloryGoals::-webkit-scrollbar {
     display: none;
 }
 
-.gloryGoal{
+.gloryGoal {
     height: 50px;
     width: calc(100% - 14px);
     max-width: 65px;
@@ -1250,67 +1317,99 @@ body {
     border: 2px black solid;
 }
 
-#gloryHalfContentTop .gloryGoals{
+#gloryHalfContentTop .gloryGoals {
     width: 100%;
     position: absolute;
     bottom: 0;
 }
 
 
-
 #vignette {
     position: absolute;
     height: 100%;
     width: 100%;
-    top: 0%;
-    left: 0%;
+    top: 0;
+    left: 0;
     background-color: rgba(100, 100, 100, 0.5);
     color: rgba(100, 100, 100, 0.5);
-    z-index: 100;
+    z-index: 10;
     display: none;
 }
 
-.vignetteWindow1{
+#vignette2 {
     position: absolute;
-    color: black;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(100, 100, 100, 0.5);
+    color: rgba(100, 100, 100, 0.5);
+    z-index: 11;
+    display: none;
+}
+
+
+.vignetteWindow1 {
+    position: absolute;
+    color: white;
     width: 40%;
     height: 40%;
     top: 30%;
     left: 30%;
-    background-color: #D8E1E7;
+    background-color: #121212;
     border: #000000 3px solid;
     border-radius: 10px;
-    display: none;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+    font-size: 20px;
 }
 
-.vignetteWindow1Content{
+#iconPicker {
+    position: relative;
+    height: 400px ;
+    width: 300px ;
+    align-items: center;
+    background-color: #121212;
+    border: #000000 3px solid;
+    border-radius: 10px;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+    font-size: 20px;
+    left: 50px;
+    bottom: 200px;
+    z-index: 12;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.vignetteWindow1Content {
     padding: 10px;
     height: 200px;
-    display:flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.vignetteWindow1Title{
-    width:60%;
-    height:8%;
+.vignetteWindow1Title {
+    width: 60%;
+    height: 8%;
     font-size: 25px;
     text-align: center;
     margin-bottom: 7%;
 }
 
 #newCategorySettingsNames,
-#newCategorySettingsColor{
+#newCategorySettingsColor {
     display: flex;
     align-items: left;
     justify-content: left;
-    width:80%;
-    height:10%;
+    width: 80%;
+    height: 10%;
     margin-bottom: 7%;
 }
 
 #newCategoryNameLabel,
-#newCategoryColorLabel{
+#newCategoryColorLabel {
     height: 100%;
     margin-right: 5%;
     font-size: 20px;
@@ -1320,7 +1419,7 @@ body {
 }
 
 #newCategoryName,
-#newProjectName{
+#newProjectName {
     position: relative;
     font-size: 20px;
     background-color: #D8E1E7;
@@ -1331,37 +1430,37 @@ body {
     flex: 1;
 }
 
-.vignetteWindow1ButtonBox{
+.vignetteWindow1ButtonBox {
     position: absolute;
     bottom: 8%;
-    left:10%;
+    left: 10%;
     width: 80%;
     height: 10%;
 }
 
-.vignetteWindow1Button{
+.vignetteWindow1Button {
     position: absolute;
     text-align: center;
     font-size: 100%;
     border: 3px solid black;
-    width:30%;
-    height:100%;
+    width: 30%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.vignetteWindow1BtnDiscard{
-    left:0%;
+.vignetteWindow1BtnDiscard {
+    left: 0%;
     background-color: red;
     color: white;
 }
 
-.vignetteWindow1BtnCreate{
-    right:0%;
+.vignetteWindow1BtnCreate {
+    right: 0%;
 }
 
-.vignetteWindow1Error{
+.vignetteWindow1Error {
     text-align: center;
     background-color: red;
     position: relative;
@@ -1393,7 +1492,7 @@ body {
 
 #removeCategoryPicker {
     width: 200px;
-    height:auto;
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1416,23 +1515,22 @@ body {
     display: block;
 }
 
-.vignetteWindow2{
+.vignetteWindow2 {
     position: absolute;
     width: 70%;
     height: 70%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #2A231F;
+    background-color: #121212;
     border: #000000 3px solid;
     border-radius: 10px;
-    display: none;
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
     color: white;
     font-size: 20px;
 }
 
-#editHead{
+#editHead {
     height: 50px;
     width: 100%;
     line-height: 50px;
@@ -1441,17 +1539,18 @@ body {
 }
 
 
-#editTitle{
+#editTitle {
     text-align: center;
 }
 
 
-#editBody{
+#editBody {
     height: calc(100% - 50px);
     width: 100%;
     display: flex;
 }
-#editLeft{
+
+#editLeft {
     width: calc(100% - 300px);
     height: 100%;
     padding: 20px;
@@ -1459,14 +1558,13 @@ body {
 }
 
 
-
-#editMain2{
+#editMain2 {
     width: 100%;
     display: flex;
     margin-bottom: 5px;
 }
 
-#editMainCheck{
+#editMainCheck {
     position: relative;
     top: 1px;
     display: block;
@@ -1477,10 +1575,10 @@ body {
     accent-color: #343638;
 }
 
-#editMainEntry{
+#editMainEntry {
     color: white;
     width: 100%;
-    background: #2A231F;
+    background: #121212;
     border-radius: 7px;
     font-size: 24px;
     border: transparent;
@@ -1492,7 +1590,7 @@ body {
 
 }
 
-#editNote{
+#editNote {
     width: 100%;
     display: flex;
     margin-left: 40px;
@@ -1505,10 +1603,10 @@ body {
     display: block;
 }
 
-#editNoteEntry{
+#editNoteEntry {
     color: white;
     width: calc(100% - 40px);
-    background: #2A231F;
+    background: #121212;
     border-radius: 7px;
     font-size: 16px;
     border: transparent;
@@ -1517,30 +1615,31 @@ body {
     outline: none;
     font-family: Arial, serif;
 }
-#editSteps2{
+
+#editSteps2 {
     display: block;
     margin-left: 13px;
 }
 
-#editStepsTitle{
+#editStepsTitle {
     margin-left: 42px;
-    border-bottom: 2px solid #FF5D00;
+    border-bottom: 2px solid #2979FF;
     width: max-content;
     margin-bottom: 10px;
 }
 
-.editStep2{
+.editStep2 {
     display: flex;
     margin-bottom: 2px;
     padding-top: 5px;
 }
 
-.editStepDrag{
+.editStepDrag {
     height: 25px;
     width: 25px;
 }
 
-.editStepCheck{
+.editStepCheck {
     margin-bottom: auto;
     display: block;
     min-width: 20px;
@@ -1551,9 +1650,9 @@ body {
     margin-left: 5px;
 }
 
-.editStepEntry{
+.editStepEntry {
     color: white;
-    background: #2A231F;
+    background: #121212;
     border-radius: 7px;
     font-size: 20px;
     border: transparent;
@@ -1564,10 +1663,10 @@ body {
     font-family: Arial, serif;
 }
 
-#editRight{
+#editRight {
     width: 300px;
     height: 100%;
-    background-color: #55423B;
+    background-color: #1E1E1E;
     border-left: 3px solid black;
     overflow: hidden;
     border-radius: 0 0 10px 0;
@@ -1576,13 +1675,13 @@ body {
     position: relative;
 }
 
-#selectCategory22{
+#selectCategory22 {
     display: block;
     width: 250px;
     margin: 10px auto 0;
 }
 
-#categoryPicker22{
+#categoryPicker22 {
     width: 250px;
     text-align: center;
     margin-right: 10px;
@@ -1592,14 +1691,232 @@ body {
     box-sizing: border-box;
 }
 
-#editDiff{
+#editDiff {
     margin-top: 10px;
 }
 
-#editImportance{
+#editImportance {
     margin-top: 10px;
 }
 
-.editLabel{
+.editLabel {
     margin-top: 15px;
+}
+
+.custom-box::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: yellow;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.checkbox input:checked + .custom-box {
+    background: #007ACC;
+    box-shadow: 0 0 10px 2px #007ACC;
+}
+
+.checkbox input:checked + .custom-box::before {
+    transform: translate(-50%, -50%) scale(1.5) rotate(45deg);
+}
+
+#viewOptions {
+    width: 150px;
+    height: 50px;
+    position: absolute;
+    left: 100px;
+    top: 0;
+    display: flex;
+    border: 1px solid #3A3A3A;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
+}
+
+.viewOption {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;
+    width: 50px;
+}
+
+.viewOption img {
+    height: 30px;
+    width: 30px;
+
+}
+
+.viewOption + .viewOption {
+    border-left: 1px solid #3A3A3A;
+}
+
+#dayViewButton {
+    background-color: #2979FF;
+}
+
+#goLeft, #goRight {
+    position: relative;
+    cursor: pointer;
+}
+
+#goLeft {
+    right: 20px;
+}
+
+#goRight {
+    left: 20px;
+}
+
+#goLeft img, #goRight img {
+    height: 30px;
+    width: 30px;
+}
+
+#deleteProjectTitle {
+    font-size: 25px;
+    text-align: center;
+}
+
+#deleteProject {
+    padding: 50px;
+}
+
+#deleteProjectOptions {
+    display: flex;
+    gap: 50px;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;
+    margin-top: 200px;
+}
+
+#deleteProjectOptions div {
+    color: white;
+    height: 50px;
+    width: 200px;
+    text-align: center;
+    line-height: 50px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+#deleteProjectCancel {
+    background-color: red;
+    color: white;
+}
+
+#newProjectButtons {
+    margin-top: 50px;
+}
+
+#iconPickerTitle {
+    width: 100%;
+    text-align: center;
+}
+
+#iconPickerPlus {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 10px;
+}
+
+#iconPickerAdd{
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: #333333;
+    border: 1px solid #6F6F6F;
+    height: 50px;
+    align-items: center;
+    width: 200px;
+    margin-bottom: 30px;
+}
+
+#iconPickerIcons{
+    overflow: hidden;
+    width: 100%;
+    flex-grow: 1;
+}
+
+#iconPickerTitle{
+    font-size: 25px;
+    margin-bottom: 15px;
+}
+
+#projectSettingIconSrc{
+    width: 40px;
+    height: 40px;
+    position: relative;
+    top: 5px;
+    left: 2px;
+    cursor: pointer;
+}
+
+#iconUpload::-webkit-file-upload-button{
+    height: 52px;
+    width: 202px;
+    cursor: pointer;
+}
+
+#iconUpload{
+    position: absolute;
+    top: 59px;
+    color: transparent;
+    right: 64px;
+    opacity: 0;
+    cursor: pointer;
+    width: 200px;
+}
+
+#iconPickerList {
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap; /* Allow items to wrap to the next row */
+    list-style-type: none; /* Remove default list bullets */
+    padding: 0;
+    margin: 0;
+    gap: 15px; /* Space between items */
+    max-height: 280px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#iconPickerList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#iconPickerList::-webkit-scrollbar-track {
+    background: #333;
+}
+
+#iconPickerList::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+#iconPickerList::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.iconPickerListElement {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333; /* Card background */
+    padding: 5px;
+    border-radius: 8px;
+    width: 50px; /* Adjust width */
+    height: 50px; /* Adjust height */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.iconPickerListElement img {
+    max-width: 40px;
+    max-height: 40px;
+    object-fit: contain; /* Ensure the image fits inside the card */
 }

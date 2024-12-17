@@ -1,5 +1,8 @@
-const {ipcMain, ipcRenderer} = require('electron')
+const {ipcMain, ipcRenderer, dialog} = require('electron')
 const electron = require("electron");
+const app = electron.app
+const path = require('path');
+const fsa = require('fs')
 
 module.exports = {todoHandlers, appHandlers}
 
@@ -15,101 +18,201 @@ function todoHandlers(db) {
     let ids_array = []
     let ids_array_previous = []
 
-    ipcMain.on('ask-goals', (event, params) => {
-        db.all(`SELECT G.id,
-                       G.goal,
-                       G.check_state,
-                       G.goal_pos,
-                       G.category,
-                       G.difficulty,
-                       G.importance,
-                       PR.category as pr_category,
-                       PR.id       as pr_id,
-                       PR.icon     as pr_icon,
-                       KN.knot_id
-                FROM goals G
-                         LEFT JOIN knots KN ON KN.goal_id = G.id
-                         LEFT JOIN projects PR ON PR.id = G.project_id
-                WHERE addDate = "${params.date}"
-                ORDER BY goal_pos`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                set_goal_ids(goals)
-                ids_array = goal_ids
-                ids_array_previous = ids_array
-                let ids_string = `( ${goal_ids} )`
-                db.all(`SELECT id, goal_id, step_text, step_check
-                        FROM steps
-                        WHERE goal_id IN ${ids_string}`, (err2, steps) => {
-                    if (err2) console.error(err2)
-                    else {
-                        let safe_goals = get_safe_goals(goals, steps)
-                        set_step_ids(steps)
 
-                        event.reply('get-goals', safe_goals)
+    ipcMain.handle('get-day-view', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               PR.category as pr_category,
+                               PR.id       as pr_id,
+                               PR.icon     as pr_icon,
+                               KN.knot_id
+                        FROM goals G
+                                 LEFT JOIN knots KN ON KN.goal_id = G.id
+                                 LEFT JOIN projects PR ON PR.id = G.project_id
+                        WHERE addDate = "${params.date}"
+                        ORDER BY goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        set_goal_ids(goals)
+                        ids_array = goal_ids
+                        ids_array_previous = ids_array
+                        let ids_string = `( ${goal_ids} )`
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                            if (err2) reject(err);
+                            else {
+                                let safe_goals = get_safe_goals(goals, steps)
+                                set_step_ids(steps)
+                                resolve(safe_goals);
+                            }
+                        })
                     }
                 })
-            }
-        })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+    ipcMain.handle('get-week-view', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.addDate,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               KN.knot_id
+                        FROM goals G
+                                 LEFT JOIN knots KN ON KN.goal_id = G.id
+                        WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
+                          and check_state = 0
+                        ORDER BY addDate, goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        goal_ids = goals.map(item => item.id);
+
+                        let safe_goals = goals.map(goal => {
+                            let {id, ...rest} = goal;
+                            return rest;
+                        })
+                        resolve(safe_goals);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+
+    ipcMain.handle('get-month-view', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id, G.goal, G.addDate, G.category, G.difficulty, KN.knot_id
+                        FROM goals G
+                                 LEFT JOIN knots KN ON KN.goal_id = G.id
+                        WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
+                          and check_state = ${params.goal_check}
+                        ORDER BY addDate, goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        goal_ids = goals.map((goal) => goal.id)
+                        let goals_dict = {}
+                        for (let i = 0; i < goals.length; i++) {
+                            let day = Number(goals[i].addDate.slice(-2))
+
+                            if (day in goals_dict) goals_dict[day].push({
+                                "goal": goals[i].goal,
+                                "category": goals[i].category,
+                                "knot_id": goals[i].knot_id,
+                                "difficulty": goals[i].difficulty
+                            })
+                            else goals_dict[day] = [{
+                                "goal": goals[i].goal,
+                                "category": goals[i].category,
+                                "knot_id": goals[i].knot_id,
+                                "difficulty": goals[i].difficulty
+                            }]
+                        }
+                        resolve(goals_dict)
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+
+
     })
 
 
-    ipcMain.on('ask-project-goals', (event, params) => {
-        db.all(`SELECT G.id,
-                       G.goal,
-                       G.check_state,
-                       G.goal_pos,
-                       G.category,
-                       G.difficulty,
-                       G.importance,
-                       G.addDate
-                FROM goals G
-                WHERE G.project_id = ${project_ids[params.project_pos]}
-                ORDER BY goal_pos`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                set_goal_ids(goals)
-                let ids_string = `( ${goal_ids} )`
-
-                db.all(`SELECT id, goal_id, step_text, step_check
-                        FROM steps
-                        WHERE goal_id IN ${ids_string}`, (err2, steps) => {
-                    if (err2) console.error(err2)
+    ipcMain.handle('get-project-view', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               G.addDate
+                        FROM goals G
+                        WHERE G.project_id = ${project_ids[params.project_pos]}
+                        ORDER BY goal_pos`, (err, goals) => {
+                    if (err) reject(err)
                     else {
-                        set_step_ids(steps)
-                        let safe_goals = get_safe_goals(goals, steps)
+                        set_goal_ids(goals)
+                        let ids_string = `( ${goal_ids} )`
 
-                        event.reply('get-project-goals', safe_goals)
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                            if (err2) reject(err)
+                            else {
+                                set_step_ids(steps)
+                                let safe_goals = get_safe_goals(goals, steps)
+                                resolve(safe_goals)
+                            }
+                        })
                     }
                 })
-            }
-        })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+
     })
 
-    ipcMain.on('ask-project-sidebar', (event, params) => {
+    ipcMain.handle('ask-project-sidebar', async (event, params) => {
         let option_sql = where_option(params.option, params.project_pos)
 
         const current_dates_str = params.current_dates.map(date => `'${date}'`).join(', ');
 
-        db.all(`SELECT G.id,
-                       G.goal,
-                       G.check_state,
-                       G.goal_pos,
-                       G.category,
-                       G.difficulty,
-                       G.importance,
-                       G.addDate,
-                       CASE WHEN G.addDate IN (${current_dates_str}) THEN 1 ELSE 0 END as "already"
-                FROM goals G
-                    ${option_sql}
-                ORDER BY goal_pos`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                project_sidebar_ids = goals.map((goal) => goal.id)
-                let safe_goals = get_safe_goals(goals, [])
-                event.reply('get-project-sidebar', safe_goals)
-            }
-        })
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               G.addDate,
+                               CASE WHEN G.addDate IN (${current_dates_str}) THEN 1 ELSE 0 END as "already"
+                        FROM goals G
+                            ${option_sql}
+                        ORDER BY goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        project_sidebar_ids = goals.map((goal) => goal.id)
+                        let safe_goals = get_safe_goals(goals, [])
+                        resolve(safe_goals)
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+
+
     })
 
     function where_option(option, project_pos) {
@@ -164,68 +267,6 @@ function todoHandlers(db) {
     }
 
 
-    ipcMain.on('ask-week-goals', (event, params) => {
-        db.all(`SELECT G.id,
-                       G.goal,
-                       G.addDate,
-                       G.check_state,
-                       G.goal_pos,
-                       G.category,
-                       G.difficulty,
-                       G.importance,
-                       KN.knot_id
-                FROM goals G
-                         LEFT JOIN knots KN ON KN.goal_id = G.id
-                WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
-                  and check_state = 0
-                ORDER BY addDate, goal_pos`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                goal_ids = goals.map(item => item.id);
-
-                let safe_goals = goals.map(goal => {
-                    let {id, ...rest} = goal;
-                    return rest;
-                })
-                event.reply('get-week-goals', safe_goals)
-            }
-        })
-    })
-
-
-    ipcMain.on('ask-month-goals', (event, params) => {
-        db.all(`SELECT G.id, G.goal, G.addDate, G.category, G.difficulty, KN.knot_id
-                FROM goals G
-                         LEFT JOIN knots KN ON KN.goal_id = G.id
-                WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
-                  and check_state = ${params.goal_check}
-                ORDER BY addDate, goal_pos`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                goal_ids = goals.map((goal) => goal.id)
-                let goals_dict = {}
-                for (let i = 0; i < goals.length; i++) {
-                    let day = Number(goals[i].addDate.slice(-2))
-
-                    if (day in goals_dict) goals_dict[day].push({
-                        "goal": goals[i].goal,
-                        "category": goals[i].category,
-                        "knot_id": goals[i].knot_id,
-                        "difficulty": goals[i].difficulty
-                    })
-                    else goals_dict[day] = [{
-                        "goal": goals[i].goal,
-                        "category": goals[i].category,
-                        "knot_id": goals[i].knot_id,
-                        "difficulty": goals[i].difficulty
-                    }]
-                }
-                if (params.goal_check) event.reply('get-month-goals-done', goals_dict)
-                else event.reply('get-month-goals', goals_dict)
-            }
-        })
-    })
-
     ipcMain.on('ask-projects-info', (event, params) => {
         db.all(`SELECT *
                 FROM projects`, (err, projects) => {
@@ -277,7 +318,7 @@ function todoHandlers(db) {
                 let {id, ...rest} = project;
                 return rest;
             })
-            event.reply('get-projects-info', safe_projects)
+            event.reply('new-project-created', safe_projects)
         })
     })
 
@@ -287,6 +328,7 @@ function todoHandlers(db) {
                 WHERE id = ${project_ids[params.position]}`)
 
         project_ids.splice(params.position, 1)
+
     })
 
     ipcMain.on('goal-remove-date', (event, params) => {
@@ -300,6 +342,7 @@ function todoHandlers(db) {
                 SET addDate="${empty}",
                     check_state=0
                 WHERE id = ${array_ids[params.id]}`)
+
 
         if (params.option === 1) {
             project_sidebar_ids.splice(params.id, 1)
@@ -321,46 +364,54 @@ function todoHandlers(db) {
     })
 
 
-    ipcMain.on('ask-edit-goal', (event, params) => {
+    ipcMain.handle('ask-edit-goal', async (event, params) => {
         ids_array_previous = ids_array
         if (params.option === 0) ids_array = goal_ids
         else if (params.option === 1) ids_array = history_ids
         else if (params.option === 2) ids_array = project_sidebar_ids
 
-        db.all(`SELECT G.goal,
-                       G.check_state,
-                       G.goal_pos,
-                       G.category,
-                       G.difficulty,
-                       G.importance,
-                       G.note,
-                       PR.id as pr_id
-                FROM goals G
-                         LEFT JOIN projects PR ON PR.id = G.project_id
-                WHERE G.id = ${ids_array[params.todo_id]}
-                ORDER BY G.goal_pos`, (err, goal) => {
-            if (err) console.error(err)
-            else {
-                goal[0]["pr_pos"] = project_ids.indexOf(goal[0].pr_id)
-                delete goal[0]["pr_id"]
-
-                db.all(`SELECT id, goal_id, step_text, step_check
-                        FROM steps
-                        WHERE goal_id = ${ids_array[params.todo_id]}`, (err2, steps) => {
-                    if (err2) console.error(err2)
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               G.note,
+                               PR.id as pr_id
+                        FROM goals G
+                                 LEFT JOIN projects PR ON PR.id = G.project_id
+                        WHERE G.id = ${ids_array[params.todo_id]}
+                        ORDER BY G.goal_pos`, (err, goal) => {
+                    if (err) console.error(err)
                     else {
-                        step_ids[ids_array[params.todo_id]] = steps.map((step) => step.id)
+                        goal[0]["pr_pos"] = project_ids.indexOf(goal[0].pr_id)
+                        delete goal[0]["pr_id"]
 
-                        let safe_steps = steps.map(step => {
-                            let {id, goal_id, ...rest} = step;
-                            return rest;
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id = ${ids_array[params.todo_id]}`, (err2, steps) => {
+                            if (err2) reject(err2)
+                            else {
+                                step_ids[ids_array[params.todo_id]] = steps.map((step) => step.id)
+
+                                let safe_steps = steps.map(step => {
+                                    let {id, goal_id, ...rest} = step;
+                                    return rest;
+                                })
+                                resolve([goal[0], safe_steps])
+                            }
                         })
-
-                        event.reply('get-edit-goal', goal[0], safe_steps)
                     }
                 })
-            }
-        })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+
+
     })
 
 
@@ -381,13 +432,13 @@ function todoHandlers(db) {
             }
 
             values += `("${params.goal}", "${date}", ${current_goal_pos}, ${params.category},
-                        ${params.difficulty}, ${params.importance}, ${project_id})`
+                        ${params.difficulty}, ${params.importance}, ${project_id}, "${params.note}")`
             if (i < params.dates.length - 1) values += ","
             current_goal_pos++
         }
         values += ";"
 
-        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id)
+        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
                 VALUES ${values}`)
 
         db.all(`SELECT id
@@ -514,6 +565,7 @@ function todoHandlers(db) {
             array_ids = project_sidebar_ids
         }
 
+        console.log(params.id)
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
                 WHERE id = ${array_ids[params.id]}`)
@@ -537,81 +589,6 @@ function todoHandlers(db) {
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
     })
 
-    ipcMain.on('change-text-goal', (event, params) => {
-        let selected_array = ids_array
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`UPDATE goals
-                SET goal="${params.input}"
-                WHERE id = ${selected_array[params.id]}`)
-    })
-
-    ipcMain.on('add-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`INSERT INTO steps (step_text, goal_id)
-                VALUES ("${params.input}", ${selected_array[params.id]})`)
-
-        db.all(`SELECT id
-                from steps
-                ORDER BY id DESC
-                LIMIT 1`, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                if (!(selected_array[params.id] in step_ids)) step_ids[selected_array[params.id]] = [rows[0].id]
-                step_ids[selected_array[params.id]].push(rows[0].id)
-            }
-        })
-    })
-
-    ipcMain.on('change-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`UPDATE steps
-                SET step_text="${params.input}"
-                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
-    })
-
-    ipcMain.on('remove-step', (event, params) => {
-        let selected_array = ids_array
-
-        if (params.is_previous) {
-            selected_array = ids_array_previous
-        }
-
-        db.run(`DELETE
-                FROM steps
-                WHERE id = ${step_ids[selected_array[params.id]][params.step_id]}`)
-        step_ids[selected_array[params.id]].splice(params.step_id, 1)
-    })
-
-    ipcMain.on('change-category', (event, params) => {
-        db.run(`UPDATE goals
-                SET category="${params.new_category}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
-
-    ipcMain.on('change-difficulty', (event, params) => {
-        db.run(`UPDATE goals
-                SET Difficulty="${params.difficulty}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
-
-    ipcMain.on('change-importance', (event, params) => {
-        db.run(`UPDATE goals
-                SET Importance="${params.importance}"
-                WHERE id = ${ids_array[params.id]}`)
-    })
 
     ipcMain.on('change-project', (event, params) => {
         let new_project_id = 0
@@ -622,19 +599,24 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('edit-goal', (event, params) => {
+        let project_id = params.changes['project_id']
+        if (project_id !== -1) project_id = project_ids[params.changes['project_id']]
+
         db.run(`UPDATE goals
                 SET goal       = '${params.changes['goal']}',
                     category   = ${params.changes['category']},
                     difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${params.changes['project_id']}
+                    project_id = ${project_id}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
 
         let current_steps_length = step_ids[ids_array[params.id]].length
         let new_steps_length = params.changes['steps'].length
+
+        let how_many_deleted = 0
 
         for (let i = 0; i < current_steps_length; i++) {
             if (i < new_steps_length) {
@@ -645,8 +627,9 @@ function todoHandlers(db) {
             } else {
                 db.run(`DELETE
                         FROM steps
-                        WHERE id = ${step_ids[ids_array[params.id]][i]}`)
+                        WHERE id = ${step_ids[ids_array[params.id]][i - how_many_deleted]}`)
                 step_ids[ids_array[params.id]].splice(i, 1)
+                how_many_deleted += 1
             }
         }
 
@@ -654,14 +637,14 @@ function todoHandlers(db) {
             for (let i = 0; i < new_steps_length - current_steps_length; i++) {
                 let array_pos = i + current_steps_length
                 db.run(`INSERT INTO steps (step_text, step_check, goal_id)
-                VALUES ("${new_steps[array_pos]['step_text']}",
-                        ${new_steps[array_pos]['step_check']},
-                        ${ids_array[params.id]})`)
+                        VALUES ("${new_steps[array_pos]['step_text']}",
+                                ${new_steps[array_pos]['step_check']},
+                                ${ids_array[params.id]})`)
 
                 db.all(`SELECT id
-                from steps
-                ORDER BY id DESC
-                LIMIT 1`, (err, rows) => {
+                        from steps
+                        ORDER BY id DESC
+                        LIMIT 1`, (err, rows) => {
                     if (err) console.error(err)
                     else {
                         if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
@@ -674,7 +657,7 @@ function todoHandlers(db) {
 
     })
 
-    ipcMain.on('ask-history', (event, params) => {
+    ipcMain.handle('ask-history', async (event, params) => {
         let query = `SELECT id, goal, addDate
                      FROM goals
                      WHERE addDate IN (SELECT addDate
@@ -686,17 +669,25 @@ function todoHandlers(db) {
                                        LIMIT 10)
                        and check_state = 0
                      ORDER BY addDate DESC;`
-        db.all(query, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                history_ids = rows.map((goal) => goal.id)
-                let safe_rows = rows.map(row => {
-                    let {id, ...rest} = row;
-                    return rest;
+
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(query, (err, rows) => {
+                    if (err) reject(err)
+                    else {
+                        history_ids = rows.map((goal) => goal.id)
+                        let safe_rows = rows.map(row => {
+                            let {id, ...rest} = row;
+                            return rest;
+                        })
+                        resolve(safe_rows)
+                    }
                 })
-                event.reply('get-history', safe_rows)
-            }
-        })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
     })
 
     ipcMain.on('delete-history', (event, params) => {
@@ -916,6 +907,69 @@ function todoHandlers(db) {
         })
     })
 
+    ipcMain.handle('get-categories', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM categories
+                        ORDER BY id`, (err, categories) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(categories);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+    ipcMain.handle('get-projects', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM projects
+                        ORDER BY id`, (err, projects) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        project_ids = projects.map((project) => project.id)
+                        let safe_projects = projects.map(project => {
+                            let {id, ...rest} = project;
+                            return rest;
+                        })
+                        resolve(safe_projects);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching projects.'};
+        }
+    })
+
+    ipcMain.handle('get-galactic-connections', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM galactic_connections
+                        ORDER BY category`, (err, rows) => {
+                    if (err) reject(err);
+                    else {
+                        console.log(rows)
+                        resolve(rows);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching galactic connections.'};
+        }
+
+    })
+
     ipcMain.on('add-category', (event, params) => {
         db.run(`INSERT INTO categories (id, name, r, g, b)
                 VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
@@ -924,10 +978,15 @@ function todoHandlers(db) {
     ipcMain.on('ask-all-projects', (event) => {
         db.all(`SELECT *
                 FROM projects
-                ORDER BY id`, (err, rows) => {
+                ORDER BY id`, (err, projects) => {
             if (err) console.error(err)
             else {
-                event.reply('get-all-projects', rows);
+                project_ids = projects.map((project) => project.id)
+                let safe_projects = projects.map(project => {
+                    let {id, ...rest} = project;
+                    return rest;
+                })
+                event.reply('get-all-projects', safe_projects);
             }
         })
     })
@@ -981,6 +1040,45 @@ function todoHandlers(db) {
                 FROM goals
                 WHERE category = ${params.id}`);
     })
+
+    ipcMain.handle('save-file', async (event, fileName, fileData) => {
+        try {
+            const appDataPath = path.join(app.getPath('userData'), 'icons');
+            if (!fsa.existsSync(appDataPath)) {
+                fsa.mkdirSync(appDataPath, {recursive: true});
+            }
+
+            const filePath = path.join(appDataPath, fileName);
+            const file = fileName.slice(0, fileName.lastIndexOf('.'))
+            fsa.writeFileSync(filePath, fileData, 'base64');
+            return {success: true, name: file, path: filePath};
+        } catch (err) {
+            console.error('Failed to save file:', err);
+            return {success: false, error: err.message};
+        }
+    });
+
+    ipcMain.handle('get-icons', async () => {
+        try {
+            const appDataPath = path.join(app.getPath('userData'), 'icons');
+
+            // Ensure the directory exists
+            if (!fsa.existsSync(appDataPath)) {
+                return {success: false, files: [], message: 'Icons folder does not exist.'};
+            }
+
+            // Read the contents of the directory
+            const files = fsa.readdirSync(appDataPath).map((file) => ({
+                name: file.slice(0, file.lastIndexOf('.')),
+                path: path.join(appDataPath, file),
+            }));
+
+            return {success: true, files};
+        } catch (err) {
+            console.error('Error reading icons folder:', err);
+            return {success: false, files: [], message: err.message};
+        }
+    });
 }
 
 

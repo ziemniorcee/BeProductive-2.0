@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Hello World!</title>
-    <link rel="stylesheet" href="index.css"/>
-    <link rel="stylesheet" href="week.css"/>
-    <link rel="stylesheet" href="project.css"/>
-    <link rel="stylesheet" href="sidebar.css"/>
-    <link rel="stylesheet" href="dashboard.css"/>
-    <link rel="stylesheet" href="galactic.css"/>
+    <link rel="stylesheet" href="css/index.css"/>
+    <link rel="stylesheet" href="css/inbox.css"/>
+    <link rel="stylesheet" href="css/week.css"/>
+    <link rel="stylesheet" href="css/project.css"/>
+    <link rel="stylesheet" href="css/sidebar.css"/>
+    <link rel="stylesheet" href="css/dashboard.css"/>
+    <link rel="stylesheet" href="css/galactic.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -19,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <script type="module" src="date.js"></script>
+    <script type="module" src="main.mjs"></script>
     <script type="module" src="edit2.mjs"></script>
     <script type="module" src="render.mjs"></script>
     <script type="module" src="sidebar.mjs"></script>
@@ -29,28 +31,45 @@
     <script type="module" src="project.mjs"></script>
     <script type="module" src="graph.mjs"></script>
     <script type="module" src="galactic.mjs"></script>
+    <script type="module" src="inbox.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
 </head>
 <body>
 
 
 <div id="container">
-
     <div id="leftbar">
-        <img src="images/laura2.png" alt="laurels" draggable="false" id="laurels" width="100" height="100">
-        <a><img src="images/goal0.png" draggable="false" alt="laurels" id="to-do"><span>TO DO</span></a>
-        <a><img src="images/habit01.png" draggable="false" alt="laurels"><span>Habits</span></a>
-        <a><img src="images/timeline01.png" draggable="false" alt="laurels"><span>Timeline</span></a>
-        <a><img src="images/strategy.png" draggable="false" alt="laurels" id="strategy"><span>Strategy</span></a>
+        <div id="laurels">
+            <img src="images/laurels.png" alt="laurels" draggable="false">
+        </div>
+        <div id="leftbarBody" >
+            <div class="leftbarButton" id="todoButton">
+                <img src="images/goal.png" alt="">
+            </div>
+            <div class="leftbarButton" id="habitButton">
+                <img src="images/habit.png" alt="">
+            </div>
+            <div class="leftbarButton" id="timelineButton">
+                <img src="images/timeline.png" alt="">
+            </div>
+            <div class="leftbarButton" id="strategyButton">
+                <img src="images/strategy.png" alt="">
+            </div>
+        </div>
     </div>
+
     <div id="dashboard">
         <div id="dashClose">
-            <img src="images/goals/left_arrow.png">
+            <img src="images/goals/back.png">
         </div>
         <div id="dashTitle">TO DO</div>
+        <div id="dashInbox">
+            <img src="images/goals/dashboard/inbox.png">
+            Inbox
+        </div>
         <div id="dashMyDayBG">
             <div id="dashMyDayBtn">
-                <img src="images/goals/today0.png">
+                <img src="images/goals/dashboard/today.png">
                 My day
             </div>
             <div class="dash-graph-1BG" id="dashGraph1BG">
@@ -63,30 +82,189 @@
         </div>
         <div id="dashTomorrowBG">
             <div id="dashTomorrowBtn">
-                <img src="images/goals/tomorrow0.png">
+                <img src="images/goals/dashboard/tomorrow.png">
                 <span>Plan tomorrow</span>
             </div>
         </div>
         <div id="dashAnotherBtn">
             <input type="text" id="datePicker">
-            <img src="images/goals/other0.png">
+            <img src="images/goals/dashboard/other.png">
             Show another date
         </div>
 
-        <div id="dashView">
-            <span>View:    </span>
-            <div id="dashViewTable">
-                <div class="dashViewOption" id="dashDay">Day</div>
-                <div class="dashViewOption" id="dashWeek">Week</div>
-                <div class="dashViewOption" id="dashMonth">Month</div>
-            </div>
-        </div>
 
         <div id="dashProjectsTitle">PROJECTS</div>
         <div id="dashProjects">
 
         </div>
     </div>
+
+    <template id="inboxTodoTemplate">
+        <div class="inboxTodo">
+            <div class="inboxTodoId">i</div>
+            <div class="inboxTodoCheck">
+                <div class="inboxCheckDot"></div>
+                <input type="checkbox" class="check_task">
+            </div>
+            <div class="taskText">
+                <span class="task"></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="inboxMainTemplate">
+        <div id="inboxHeader">Inbox</div>
+        <div id="inboxBody">
+            <div id="inboxEntry">
+                <input id="inboxInput" type="text" spellcheck="false" placeholder="Result">
+                <div id="inboxAdd">+</div>
+            </div>
+            <div id="inboxList">
+
+            </div>
+        </div>
+    </template>
+
+    <template id="viewHeaderTemplate">
+        <div id="header">
+            <div id="mainTitle">title</div>
+            <div id="projectShowed">
+                <img src="images/goals/project.png">
+                <div id="projectTypes">
+
+                </div>
+            </div>
+            <div id="sideOptions">
+                <div id="sideHistory">
+                    <img src="images/goals/history.png" alt="">
+                </div>
+                <div class="sidebars">
+                    <div id="sideIdeas">
+                        <img src="images/goals/idea.png" alt="">
+                    </div>
+                </div>
+            </div>
+            <div id="subHeader">
+                <div id="goLeft">
+                    <img src="images/goals/left_arrow.png" alt="">
+                </div>
+                <span id="date">
+                    date
+                </span>
+                <div id="goRight">
+                    <img src="images/goals/right_arrow.png" alt="">
+                </div>
+            </div>
+            <div id="dashOpen">
+                <img src="images/goals/back.png" alt="">
+            </div>
+            <div id="viewOptions">
+                <div class="viewOption" id="dayViewButton">
+                    <img src="images/goals/dayview.png" alt="">
+                </div>
+                <div class="viewOption"  id="weekViewButton">
+                    <img src="images/goals/weekview.png" alt="">
+                </div>
+                <div class="viewOption"  id="monthViewButton">
+                    <img src="images/goals/monthview.png" alt="">
+                </div>
+            </div>
+
+
+        </div>
+    </template>
+
+    <template id="dayViewContentTemplate">
+        <div id="content">
+            <div id="todosAll">
+                <div id="todosArea">
+
+                </div>
+                <div id="finishedButton">
+                    <img id="finishedImg" src="images/goals/down.png" alt="up">
+                    <span>Finished: </span>
+                    <span id="finishedCount">0</span>
+                </div>
+                <div id="todosFinished">
+
+                </div>
+            </div>
+
+        </div>
+    </template>
+
+    <template id="todoInputTemplate">
+        <div id="todoInput">
+            <div id="repeatPicker">
+                <div class="repeatOption">
+                    <div class="repeatCount">1</div>
+                    <div class="repeatLabel">Every day</div>
+                </div>
+                <div class="repeatOption">
+                    <div class="repeatCount">7</div>
+                    <div class="repeatLabel">Every week</div>
+                </div>
+                <div class="repeatOption">
+                    <div class="repeatCount">31</div>
+                    <div class="repeatLabel">Every month</div>
+                </div>
+            </div>
+
+            <div id="todoEntrySimple">
+                <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
+                <div id="todoRepeat"><img id="repeatImg" src="images/goals/repeat.png" alt=""></div>
+                <div id="todoAdd">+</div>
+            </div>
+            <div id="todoEntryComplex">
+                <div id="newSteps">
+                    <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>
+                </div>
+                <div id="todoSettings">
+                    <div class="todoLabel">Category</div>
+                    <div id="selectCategory1" class="selectCategory">General</div>
+                    <div class="todoLabel" id="label1">Difficulty</div>
+                    <input type="range" class="todoRange" id="range1" min="0" max="4">
+                    <div class="todoLabel" id="label2">Importance</div>
+                    <input type="range" class="todoRange" id="range2" min="0" max="4">
+                    <div class="categoryPicker" id="categoryPicker1">
+                        ${categories_html}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="projectViewHeaderTemplate">
+        <div id="projectHeader">
+            <img id="projectHeaderIcon" src="" alt="">
+            <div id="projectName"></div>
+            <div id="projectAskDelete">Are you sure? <div id="projectDeleteConfirm">DELETE</div></div>
+            <img id="projectDelete" src="images/goals/delete.png" alt="">
+        </div>
+    </template>
+
+    <template id="projectViewMainTemplate">
+        <div id="projectContent">
+            <div class="projectSection" id="projectDone">
+                <div class="projectSectionTitle">Done</div>
+                <div class="projectSectionGoals">
+
+                </div>
+            </div>
+            <div class="projectSection" id="projectDoing">
+                <div class="projectSectionTitle">Doing</div>
+                <div class="projectSectionGoals">
+
+                </div>
+            </div>
+            <div class="projectSection" id="projectTodo">
+                <div class="projectSectionTitle">To Do</div>
+                <div class="projectSectionGoals">
+
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="main">
 
     </div>
@@ -99,57 +277,8 @@
 
         </div>
     </div>
-    <div id="vignette">
-        <div id="removeCategory" class="vignetteWindow1">
-            <div id="removeCategoryContent" class="vignetteWindow1Content">
-                <div id="removeCategoryTitle" class="vignetteWindow1Title">Remove category</div>
-                <div id="removeCategoryPicker">
-                    <div id="selectCategory4" class="selectCategory">General</div>
-                    <div class="categoryPicker" id="categoryPicker4"></div>
-                </div>
-            </div>
-            <div id="removeCategoryButtons" class="vignetteWindow1ButtonBox">
-                <div id="removeCategoryDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
-                <div id="removeCategoryCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Remove</div>
-            </div>
-            <div class="vignetteWindow1Error"></div>
-        </div>
-        <div id="newCategory" class="vignetteWindow1">
-            <div id="newCategoryContent" class="vignetteWindow1Content">
-                <div id="newCategoryTitle" class="vignetteWindow1Title">Create new category</div>
-                <div id="newCategorySettingsNames">
-                    <div id="newCategoryNameLabel" for="newCategoryName">Category name</div>
-                    <input type="text" id="newCategoryName" placeholder="Enter name">
-                </div>
-                <div id="newCategorySettingsColor">
-                    <div id="newCategoryColorLabel" for="newCategoryColor">Category color</div>
-                    <input id="newCategoryColor" type="range" min="0" max="180">
-                </div>
-            </div>
-            <div id="newCategoryButtons" class="vignetteWindow1ButtonBox">
-                <div id="newCategoryDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
-                <div id="newCategoryCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
-            </div>
-            <div id="newCategoryError" class="vignetteWindow1Error"></div>
-        </div>
-        <div id="newProject" class="vignetteWindow1">
-            <div id="newProjectContent" class="vignetteWindow1Content">
-                <div id="newProjectTitle" class="vignetteWindow1Title">Create new project</div>
-                <div id="newProjectSettingsNames">
-                    <div id="newProjectNameLabel" for="newProjectName">Project name</div>
-                    <input type="text" id="newProjectName" placeholder="Enter name">
-                </div>
-                <div id="removeCategoryPicker">
-                    <div id="selectCategory4" class="selectCategory">General</div>
-                    <div class="categoryPicker" id="categoryPicker4"></div>
-                </div>
-            </div>
-            <div id="newProjectButtons" class="vignetteWindow1ButtonBox">
-                <div id="newProjectDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
-                <div id="newProjectCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
-            </div>
-            <div id="newCategoryError" class="vignetteWindow1Error"></div>
-        </div>
+
+    <template id="editTemplate">
         <div id="taskEdit" class="vignetteWindow2">
             <div id="editHead">
                 <div id="editTitle">My day</div>
@@ -195,9 +324,110 @@
                     <div class="editLabel">Deadline</div>
                 </div>
             </div>
+        </div>
+    </template>
+
+    <template id="addCategoryTemplate">
+        <div id="newCategory" class="vignetteWindow1">
+            <div id="newCategoryContent" class="vignetteWindow1Content">
+                <div id="newCategoryTitle" class="vignetteWindow1Title">Create new category</div>
+                <div id="newCategorySettingsNames">
+                    <div id="newCategoryNameLabel" for="newCategoryName">Category name</div>
+                    <input type="text" id="newCategoryName" placeholder="Enter name">
+                </div>
+                <div id="newCategorySettingsColor">
+                    <div id="newCategoryColorLabel" for="newCategoryColor">Category color</div>
+                    <input id="newCategoryColor" type="range" min="0" max="180">
+                </div>
+            </div>
+            <div id="newCategoryButtons" class="vignetteWindow1ButtonBox">
+                <div id="newCategoryDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
+                <div id="newCategoryCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
+            </div>
+            <div id="newCategoryError" class="vignetteWindow1Error"></div>
+        </div>
+    </template>
+
+    <template id="removeCategoryTemplate">
+        <div id="removeCategory" class="vignetteWindow1">
+            <div id="removeCategoryContent" class="vignetteWindow1Content">
+                <div id="removeCategoryTitle" class="vignetteWindow1Title">Remove category</div>
+                <div id="removeCategoryPicker">
+                    <div id="selectCategory4" class="selectCategory">General</div>
+                    <div class="categoryPicker" id="categoryPicker4"></div>
+                </div>
+            </div>
+            <div id="removeCategoryButtons" class="vignetteWindow1ButtonBox">
+                <div id="removeCategoryDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
+                <div id="removeCategoryCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Remove</div>
+            </div>
+            <div class="vignetteWindow1Error"></div>
+        </div>
+    </template>
+
+    <template id="newProjectTemplate">
+        <div id="dashNewProject" class="vignetteWindow1">
+            <div id="dashNewProjectContent">
+                <div id="newProjectTitle">Create new Project</div>
+                <div id="newProjectSettings">
+                    <div id="newProjectSettingsNames">
+                        <div>Category</div>
+                        <div>Project name</div>
+                        <div id="newProjectIconText">Icon</div>
+                    </div>
+                    <div id="projectSettings">
+                        <div class="selectCategory" id="selectCategory3">General</div>
+                        <input type="text" id="newProjectName" placeholder="Enter name">
+                        <div id="projectSettingsIcon">
+                            <img id="projectSettingIconSrc" src="images/goals/project.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="categoryPicker" id="categoryPicker3">
+
+                </div>
+                <div id="newProjectIconPicker">
+                </div>
+            </div>
+            <div id="newProjectButtons">
+                <div id="newProjectDiscard">Discard</div>
+                <div id="newProjectCreate">Create</div>
+            </div>
+            <div id="newProjectError"></div>
+        </div>
+    </template>
+    <template id="deleteprojectTemplate">
+        <div id="deleteProject" class="vignetteWindow1">
+            <div id="deleteProjectTitle">Delete this project?</div>
+            <div id="deleteProjectOptions">
+                <div id="deleteProjectCancel">Cancel</div>
+                <div id="deleteProjectConfirm">Delete</div>
+            </div>
 
         </div>
+    </template>
+    <template id="iconPickerTemplate">
+        <div id="iconPicker">
+            <div id="iconPickerTitle">Select icon</div>
+            <div id="iconPickerAdd">
+                <img id="iconPickerPlus" src="images/goals/plus.png">
+                <div id="iconPickerAddText">Add icon</div>
+            </div>
+            <input type="file" id="iconUpload" accept="image/png">
+            <div id="iconPickerIcons">
+                <ul id="iconPickerList">
+
+                </ul>
+            </div>
+        </div>
+    </template>
+    <div id="vignette" class="vignetteLayer">
+
     </div>
+    <div id="vignette2" class="vignetteLayer">
+
+    </div>
+
     <div id="testPanel" style="opacity: 0">
         <div id="testPanelClear"></div>
         <div id="testPanelShowIds"></div>
@@ -208,4 +438,7 @@
 </div>
 
 </body>
+
 </html>
+
+
