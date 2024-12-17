@@ -1,8 +1,5 @@
 import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
-import {dragula_day_view} from "./render.mjs";
-import {change_goal} from "./edit2.mjs";
-import {dragula_week_view} from "./weekView.mjs";
-import {dragula_month_view} from "./monthView.mjs";
+
 
 
 // #main behaviors
@@ -165,22 +162,7 @@ $(document).on('blur', '#inboxInput', function (){
     $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
 })
 
-$(document).on('mousedown', '#vignette', function () {
-    if ($('#taskEdit').length){
-        change_goal()
-        if ($('#todosAll').length){
-            dragula_day_view()
-        }
-        else if ($('.weekDay').length){
-            dragula_week_view()
-        }
-        else if ($('#monthGrid').length){
-            dragula_month_view()
-        }
-    }
-    $('#vignette').css('display', 'none');
-    $('#vignette').html('')
-})
+
 
 $(document).on('mousedown', '#vignette2', function (){
     $('#vignette2').css('display', 'none');

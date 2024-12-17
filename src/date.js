@@ -1,10 +1,6 @@
 import {weekdays, month_names} from "./data.mjs";
-import {reset_project_pos} from "./project.mjs";
-import {dragula_week_view, week_view} from "./weekView.mjs";
-import {dragula_month_view, month_view} from "./monthView.mjs";
-import {day_view} from "./render.mjs";
 
-class CurrentDate {
+export class CurrentDate {
     constructor() {
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
@@ -313,7 +309,6 @@ class CurrentDate {
             let selected_date = new Date(this.day_sql)
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
-            day_view()
         }
         else if ($('.weekDay').length) {
             let selected_date

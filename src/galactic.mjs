@@ -1,5 +1,4 @@
 import { calculateContainment, categories, categories2, projects, project_conn, extractNumbers, calculateChildPosition, divide_to_boxes } from "./data.mjs";
-import {open_add_project} from "./project.mjs";
 
 let clicked_project = '';
 let changes_lines = [];
