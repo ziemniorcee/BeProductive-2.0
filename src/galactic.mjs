@@ -54,49 +54,131 @@ function create_galactic_editor(key) {
     box.empty();
     box.html(_galactic_editor_HTML(key));
 
-    // zoom event
-    $('#galactic-editor').on('wheel', function(event) {
-        event.preventDefault();
-
-        let elementOffset = $('#galacticContainer').offset();
-        let mouseXInElement = event.originalEvent.clientX - elementOffset.left;
-        let mouseYInElement = event.originalEvent.clientY - elementOffset.top;
-        let multiplier = event.originalEvent.deltaY > 0 ? -0.05 : 0.05;
-        scale = Math.min(Math.max(scale + multiplier, 1), 5);
-        const [x, y] = $(this).css('transform-origin').split(' ');
-        const oldX = parseFloat(x);
-        const oldY = parseFloat(y);
-        const formattedX = (mouseXInElement + oldX) / 2;
-        const formattedY = (mouseYInElement + oldY) / 2;
-        $(this).css('transform', 'scale(' + scale + ')');
-        $(this).css('transform-origin', formattedX + 'px ' + formattedY + 'px');
-        console.log('Pozycja myszy względem elementu: ', formattedX, formattedY);
-    });
-
-    $('#galactic-editor').draggable({
+    const container = $('#galacticContainer');
+    const map = $('#galactic-editor');
+    map.draggable({
         start: function(event, ui) {
             $('galacticContainer').css('cursor', 'grab');
+            ui.helper.data("pointer", {
+                y: (event.pageY - $('#galacticContainer').offset().top) / scale - parseInt($(event.target).css('top')),
+                x: (event.pageX - $('#galacticContainer').offset().left) / scale - parseInt($(event.target).css('left'))
+            })
         },
-        drag: function(event, ui) {
-            let pos = $('#galacticContainer').position();
-            let size = {width: $('#galacticContainer').outerWidth(), height: $('#galacticContainer').outerHeight()};
-            let left = pos.left;
-            let top = pos.top;
-            let right = pos.left + size.width;
-            let bottom = pos.top + size.height;
-            let editor_width = $('#galactic-editor').outerWidth() * scale;
-            let editor_height = $('#galactic-editor').outerHeight() * scale;
-            if (ui.position.left > left) ui.position.left = left;
-            if (ui.position.top > top) ui.position.top = top;
-            if (ui.position.left + editor_width < right) ui.position.left = right - editor_width;
-            if (ui.position.top + editor_height < bottom) ui.position.top = bottom - editor_height;
-        },
-        stop: function(event, ui) {
-            $('galacticContainer').css('cursor', 'pointer');
-        }
-    })
-    
+        drag: function (event, ui) {
+            // var pointer = ui.helper.data("pointer");
+            // var canvasTop = $('#galacticContainer').offset().top;
+            // var canvasLeft = $('#galacticContainer').offset().left;
+            // ui.position.top = Math.round((event.pageY - canvasTop) / scale - pointer.y); 
+            // ui.position.left = Math.round((event.pageX - canvasLeft) / scale - pointer.x); 
+            
+            const containerWidth = container.width();
+            const containerHeight = container.height();
 
+            const scaledWidth = map.width() * scale;
+            const scaledHeight = map.height() * scale;
+
+            const leftLimit = containerWidth - scaledWidth;
+            const topLimit = containerHeight - scaledHeight;
+
+            ui.position.left = Math.min(0, Math.max(leftLimit, ui.position.left));
+            ui.position.top = Math.min(0, Math.max(topLimit, ui.position.top));
+        }
+    });
+
+      // Obsługa zoomowania kółkiem myszy
+    container.on('wheel', function (e) {
+        e.preventDefault();
+        const zoomStep = 0.1;
+        const maxScale = 4;
+        const minScale = 1;
+
+        const delta = e.originalEvent.deltaY > 0 ? -zoomStep : zoomStep;
+        const newScale = Math.min(maxScale, Math.max(minScale, scale + delta));
+
+        if (newScale !== scale) {
+          const containerOffset = container.offset();
+          const mouseX = e.pageX - containerOffset.left;
+          const mouseY = e.pageY - containerOffset.top;
+
+          const prevScaledWidth = map.width() * scale;
+          const prevScaledHeight = map.height() * scale;
+
+          scale = newScale;
+          map.css('transform', `scale(${scale})`);
+
+          const newScaledWidth = map.width() * scale;
+          const newScaledHeight = map.height() * scale;
+
+          const dx = (mouseX / prevScaledWidth) * (newScaledWidth - prevScaledWidth);
+          const dy = (mouseY / prevScaledHeight) * (newScaledHeight - prevScaledHeight);
+
+          const newLeft = parseFloat(map.css('left')) - dx;
+          const newTop = parseFloat(map.css('top')) - dy;
+
+          const leftLimit = container.width() - newScaledWidth;
+          const topLimit = container.height() - newScaledHeight;
+
+          map.css({
+            left: Math.min(0, Math.max(leftLimit, newLeft)),
+            top: Math.min(0, Math.max(topLimit, newTop))
+          });
+        }
+      });
+
+
+
+    // $('#galactic-editor').on('wheel', function(event) {
+    //     event.preventDefault();
+    //     let offset = $('#galacticContainer').offset();
+    //     let size = {x: $('#galactic-editor').outerWidth(), y: $('#galactic-editor').outerHeight()}
+    //     const x_old = parseFloat($(this).css('left'));
+    //     const y_old = parseFloat($(this).css('top'));
+    //     let x = event.originalEvent.clientX - size.x / 2;
+    //     let y = event.originalEvent.clientY - size.y / 2;
+    //     let multiplier = event.originalEvent.deltaY > 0 ? -0.05 : 0.05;
+    //     let newScale = Math.min(Math.max(scale + multiplier, 1), 5);
+    //     let dx = x_old - x * (newScale / scale - 1);
+    //     let dy = y_old - y * (newScale / scale - 1);
+    //     $(this).css('transform', 'scale(' + scale + ')');
+    //     $(this).css('left', dx + 'px');
+    //     $(this).css('top', dy + 'px');
+    //     scale = newScale;
+    //     console.log(scale);
+    // });
+
+    // // background panning event
+    // $('#galactic-editor').draggable({
+    //     start: function(event, ui) {
+    //         $('galacticContainer').css('cursor', 'grab');
+    //         ui.helper.data("pointer", {
+    //             y: (event.pageY - $('#galacticContainer').offset().top) / scale - parseInt($(event.target).css('top')),
+    //             x: (event.pageX - $('#galacticContainer').offset().left) / scale - parseInt($(event.target).css('left'))
+    //         })
+    //     },
+    //     drag: function(event, ui) {
+    //         var pointer = ui.helper.data("pointer");
+    //         var canvasTop = $('#galacticContainer').offset().top;
+    //         var canvasLeft = $('#galacticContainer').offset().left;
+    //         var canvasHeight = $('#galacticContainer').height();
+    //         var canvasWidth = $('#galacticContainer').width();
+    //         ui.position.top = Math.round((event.pageY - canvasTop) / scale - pointer.y); 
+    //         ui.position.left = Math.round((event.pageX - canvasLeft) / scale - pointer.x); 
+
+    //         if (ui.position.left > 0) ui.position.left = 0;
+    //         if (ui.position.left + $(this).width() < canvasWidth) ui.position.left = canvasWidth - $(this).width();  
+    //         if (ui.position.top > 0) ui.position.top = 0;
+    //         if (ui.position.top + $(this).height() < canvasHeight) ui.position.top = canvasHeight - $(this).height();  
+
+    //         ui.offset.top = Math.round(ui.position.top + canvasTop);
+    //         ui.offset.left = Math.round(ui.position.left + canvasLeft);
+
+    //         console.log(ui.position)
+    //     },
+    //     stop: function(event, ui) {
+    //         $('galacticContainer').css('cursor', 'pointer');
+    //     }
+    // })
+    
     // adding line connections from database
     for (let conn of project_conn) {
         if (conn['category'] === key) {
@@ -117,7 +199,7 @@ function create_galactic_editor(key) {
             scroll: false,
             start: function(event, ui) {
                 $(element).css('transform', 'translate(-50%, -50%)');
-                ui.helper.data('containment', calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]));
+                ui.helper.data('containment', calculateContainment(element, $('#galactic-editor'), [0, 0, 0, 0]));
             },
             stop: function(event, ui) {
                 const boundingBox = ui.helper.data('containment');
@@ -213,14 +295,6 @@ $(document).on('click', '.galactic-editor-line', function () {
         }
     }
     $(this).remove();
-})
-
-// element's size slider input
-$(document).on('input', '#galactic-editor-slider', function () {
-    const val = $('#galactic-editor-slider').val()
-    $('.galactic-editor-project').css('font-size', `${Number(val) + 15}px`);
-    $('.galactic-editor-project').css('min-width', `${Number(val) * 10}px`);
-    $('.galactic-editor-line').attr('stroke-width', `${3 + Math.ceil(Number(val) / 3)}`);
 })
 
 /**
@@ -416,6 +490,10 @@ function _galactic_editor_HTML(key) {
             background: ${categories2[key]}}`)
         .appendTo('head');
     let editor = `<div id="galactic-editor">
+    <div class='galactic-editor-test' style="top: 0%; left: 0%"></div>
+    <div class='galactic-editor-test' style="top: 50%; left: 0%"></div>
+    <div class='galactic-editor-test' style="top: 0%; left: 50%"></div>
+    <div class='galactic-editor-test' style="top: 50%; left: 50%"></div>
     <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>`;
     let not_placed_projects = [];
     for (const proj of projects) {
@@ -436,11 +514,6 @@ function _galactic_editor_HTML(key) {
     <span id="galactic-editor-text" style='color: ${categories2[key]}'>${categories[key][1]}</span>
     <div id="galactic-editor-cancel">
     <img src="images/goals/arrow0.png"></div>
-    <div id="galactic-editor-slider-box">
-    <span>-</span>
-    <input type="range" id="galactic-editor-slider" min="0" max="30" value="15">
-    <span>+</span>
-    </div>
     <div id='galactic-editor-options-btn'>
     <img src="images/goals/more.png">
     <div id='galactic-editor-options'>
