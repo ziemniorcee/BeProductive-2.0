@@ -83,7 +83,7 @@ function todoHandlers(db) {
                     if (err) reject(err)
                     else {
                         goal_ids = goals.map(item => item.id);
-
+                        ids_array = goal_ids
                         let safe_goals = goals.map(goal => {
                             let {id, ...rest} = goal;
                             return rest;
@@ -158,6 +158,7 @@ function todoHandlers(db) {
                     if (err) reject(err)
                     else {
                         set_goal_ids(goals)
+                        ids_array = goal_ids
                         let ids_string = `( ${goal_ids} )`
 
                         db.all(`SELECT id, goal_id, step_text, step_check
@@ -584,6 +585,10 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
+        console.log(params)
+        console.log(step_ids)
+        console.log(ids_array)
+        console.log(ids_array[params.id])
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)

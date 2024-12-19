@@ -32,6 +32,10 @@
     font-size: 40px;
 }
 
+#projectId{
+    display: none;
+}
+
 #projectDelete{
     position: absolute;
     right: 5px;
@@ -134,11 +138,21 @@
 
 /* header */
 #sideProjectHeader{
+
     background-color: #002244;
     width: 100%;
     height: 70px;
     position: relative;
 }
+
+#sideProjectsubTitle{
+    font-size: 25px;
+    text-align: center;
+
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
 
 #sideProjectIcon{
     position: absolute;
@@ -153,6 +167,7 @@
 }
 
 #sideProjectTitle{
+
     text-align: center;
     font-size: 30px;
 }
@@ -237,4 +252,8 @@
 .alreadyEmblemNLetter{
     position: relative;
     left: 1px;
+}
+
+#sideProjectId{
+    display: none;
 }

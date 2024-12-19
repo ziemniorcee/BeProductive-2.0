@@ -1,4 +1,3 @@
-import {l_date} from "./date.js";
 import { categories } from "./data.mjs";
 
 let flag_graph_1 = true;

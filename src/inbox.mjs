@@ -1,36 +1,51 @@
 import {_hide_sidebar} from "./sidebar.mjs";
 
-$(document).on('click', "#dashInbox", () =>{
-    build_inbox()
-})
+export class Inbox {
+    constructor() {
+        this.initEventListeners()
+    }
 
-function build_inbox(){
-    const main_template = $('#inboxMainTemplate').prop('content');
-    let $main_clone = $(main_template).clone()
-    _hide_sidebar()
-    $('#main').html($main_clone)
+    initEventListeners(){
+        $(document).on('click', "#dashInbox", () =>{
+            this.build_inbox()
+        })
 
-    load_inbox()
-}
 
-function load_inbox(){
-    let data = ["ebe", 'aba']
+        $(document).on('click', '#inboxAdd', ()=> {
+            let name = $('#inboxInput').val()
+            this.add_todo(name)
+        })
+    }
 
-    for (let i = 0; i<data.length; i++){
-        add_todo(data[i])
+    build_inbox(){
+        const main_template = $('#inboxMainTemplate').prop('content');
+        let $main_clone = $(main_template).clone()
+        _hide_sidebar()
+        $('#main').html($main_clone)
+
+        this.load_inbox()
+    }
+
+    load_inbox(){
+        let data = ["ebe", 'aba']
+
+        for (let i = 0; i<data.length; i++){
+            this.add_todo(data[i])
+        }
+    }
+
+    add_todo(name){
+        const template = $('#inboxTodoTemplate').prop('content');
+        let id = $('.inboxTodo').length
+        let $clone = $(template).clone()
+        $clone.find('.inboxTodoId').text(id);
+        $clone.find('.task').text(name);
+        $('#inboxList').prepend($clone)
     }
 }
 
-function add_todo(name){
-    const template = $('#inboxTodoTemplate').prop('content');
-    let id = $('.inboxTodo').length
-    let $clone = $(template).clone()
-    $clone.find('.inboxTodoId').text(id);
-    $clone.find('.task').text(name);
-    $('#inboxList').prepend($clone)
-}
 
-$(document).on('click', '#inboxAdd', ()=> {
-    let name = $('#inboxInput').val()
-    add_todo(name)
-})
+
+
+
+

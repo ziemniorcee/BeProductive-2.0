@@ -107,6 +107,17 @@ export class Data {
         }
         return project_emblem
     }
+
+    /**
+     * creates repeat label
+     * @returns {string} HTML of repeat label
+     */
+    _repeat_label_HTML() {
+        return `
+        <div class="repeatLabelShow">
+            <img class="repeatLabelImg" src="images/goals/repeat.png" alt="">
+        </div>`
+    }
 }
 
 export let categories = {};

@@ -258,6 +258,7 @@ export class Project {
         $header_clone.find('#projectHeader').css('background-color', color)
         $header_clone.find('#projectHeaderIcon').attr('src', icon)
         $header_clone.find('#projectName').text(name)
+        $header_clone.find('#projectId').text(this.project_pos)
 
         const main_template = $('#projectViewMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
@@ -309,7 +310,6 @@ export class Project {
      */
     dragula_project_view() {
         this.block_prev_drag = 0
-
         let dragged_task
 
         dragula(Array.from($('.projectSectionGoals')), {
@@ -488,15 +488,16 @@ export class Project {
                 </div>
                 <div id="sideProjectId">${this.project_pos}</div>
             </div>
-            <div id="sideProjectOptions">
-                <div class="sideProjectOption">Done</div>
-                <div class="sideProjectOption">Doing</div>
-                <div class="sideProjectOption" style="background-color: ${project_color}">To do</div>
-            </div>
+            
+            <div id="sideProjectsubTitle">To do</div>
             <div id="sideProjectGoals">
                 
             </div>`)
-
+        // <div id="sideProjectOptions">
+        //     <div class="sideProjectOption">Done</div>
+        // <div className="sideProjectOption">Doing</div>
+        // <div className="sideProjectOption" style="background-color: ${project_color}">To do</div>
+        // </div>
         let goals = await window.projectsAPI.askProjectSidebar({
             project_pos: this.project_pos,
             option: 2,
