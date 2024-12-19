@@ -1,4 +1,4 @@
-import {Data, weekdays2} from "./data.mjs";
+import {Data, decode_text, weekdays2} from "./data.mjs";
 import {Categories, DayView, Input, Steps} from "./render.mjs";
 import {CurrentDate} from "./date.js";
 import {create_today_graphs} from "./graph.mjs";
@@ -6,7 +6,8 @@ import {WeekView} from "./weekView.mjs";
 import {Edit} from "./edit2.mjs";
 import {MonthView} from "./monthView.mjs";
 import {Project} from "./project.mjs";
-import {HistorySidebar} from "./sidebar.mjs";
+import {HistorySidebar, Idea} from "./sidebar.mjs";
+import {Inbox} from "./inbox.mjs";
 
 
 class MainApp {
@@ -18,8 +19,10 @@ class MainApp {
         this.steps = new Steps(this.data)
 
         this.history = new HistorySidebar(this.data, this.date, this.steps)
+        this.idea = new Idea(this.data, this.date)
         this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
+        this.inbox = new Inbox()
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
 
@@ -81,6 +84,8 @@ class DisplayManagement{
         $(document).on('click', '#goRight', async () => {
             this.app.date.get_next_date(1)
             if($('#todosAll').length) await this.app.dayView.display()
+            else if ($('.weekDay').length) await this.app.weekView.display()
+            else if ($('#monthGrid').length) await this.app.monthView.display()
 
             await this.display_reset()
         })
@@ -102,6 +107,26 @@ class DisplayManagement{
                 await this.display_reset()
             }
         })
+
+        $("#datePicker").datepicker({
+            onSelect: async (dateText, inst) => {
+                const $input = inst.input;
+                const selectedDate = $input.datepicker('getDate');
+                this.app.date.set_attributes(selectedDate)
+
+                if ($('#todosAll').length) {
+                    await this.app.dayView.display()
+                    $('#mainTitle').text(this.app.date.get_day_view_header())
+                } else if ($('.weekDay').length) {
+                    await this.app.weekView.display()
+                    let header_params = this.app.date.get_header_week()
+                    $('#mainTitle').text(header_params[0])
+                    $('#date').text(header_params[1])
+                } else {
+                    await this.app.monthView.display()
+                }
+            }
+        });
 
         $(document).on('click', '#monthViewButton', async () => {
             await this.app.monthView.display()
@@ -146,6 +171,23 @@ class DisplayManagement{
             await this.app.history.show_history_sidebar()
             this.reset_dragula()
         })
+
+        window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))
+
+        $(document).on('click', '.stepsShow', (event) => {
+            event.stopPropagation()
+            this.app.steps.show_steps(event)
+            if ($('#todosAll').length) this.app.dayView.dragula_day_view()
+            else if ($('#projectContent').length) this.app.project.dragula_project_view()
+        });
+
+        $(document).on('click', '.stepCheck', (event) => {
+            event.stopPropagation()
+            this.app.steps.change_step_check(event.currentTarget)
+
+            if ($('#todosAll').length) this.app.dayView.dragula_day_view()
+            else if ($('#projectContent').length) this.app.project.dragula_project_view()
+        });
     }
 
     async display_reset (){
@@ -169,6 +211,32 @@ class DisplayManagement{
         if ($('#todosAll').length) this.app.dayView.dragula_day_view()
         else if ($('.weekDay').length) this.app.weekView.dragula_week_view()
         else this.app.monthView.dragula_month_view()
+    }
+
+    /**
+     * Builds goal with given history goal data
+     * @param goal data of goal
+     * @param steps data of steps
+     */
+    history_to_goal(goal, steps) {
+        let todos
+
+        if ($('#todosAll').length) {
+            goal['steps'] = this.app.steps._steps_HTML(this.app.history._prepare_steps(steps), goal.category)
+            goal['goal'] = decode_text(goal['goal'])
+
+            $("#todosArea").append(this.app.dayView.build_goal(goal))
+            todos = $('#todosArea').children()
+        } else if ($('.weekDay').length) {
+            let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
+            week_day.append(this.app.weekView.build_week_goal(goal, $('.todo').length))
+            todos = week_day.children()
+        } else {
+            let month_day = $('.monthGoals .sidebarTask').closest('.monthGoals')
+            month_day.append(this.app.monthView.build_month_goal(goal, $('.monthTodo').length))
+            todos = month_day.children()
+        }
+        this.app.history._fix_order(todos)
     }
 }
 

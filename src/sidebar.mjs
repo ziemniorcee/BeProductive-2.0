@@ -1,4 +1,3 @@
-import {l_date} from './date.js'
 import {decode_text, encode_text} from "./data.mjs";
 
 export class HistorySidebar {
@@ -11,10 +10,16 @@ export class HistorySidebar {
 
     initEventListeners() {
         $(document).on('click', '.historyAdd', (event) => {
+            event.stopPropagation()
             this.get_history_goal(event.currentTarget)
         })
 
-        window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))
+
+        $(document).on('click', '.historyCheck', (event) => {
+            this.change_history_check(event.currentTarget)
+        });
+
+
     }
 
     /**
@@ -113,32 +118,6 @@ export class HistorySidebar {
     }
 
     /**
-     * Builds goal with given history goal data
-     * @param goal data of goal
-     * @param steps data of steps
-     */
-    history_to_goal(goal, steps) {
-        let todos
-
-        if ($('#todosAll').length) {
-            goal['steps'] = this.steps._steps_HTML(this._prepare_steps(steps), goal.category)
-            goal['goal'] = decode_text(goal['goal'])
-
-            $("#todosArea").append(build_goal(goal))
-            todos = $('#todosArea').children()
-        } else if ($('.weekDay').length) {
-            let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals')
-            week_day.append(build_week_goal(goal, $('.todo').length))
-            todos = week_day.children()
-        } else {
-            let month_day = $('.monthGoals .sidebarTask').closest('.monthGoals')
-            month_day.append(build_month_goal(goal, $('.monthTodo').length))
-            todos = month_day.children()
-        }
-        this._fix_order(todos)
-    }
-
-    /**
      * Generates steps array ready to generate goal
      * @param steps given data of steps
      * @returns {*[]} array of steps
@@ -174,50 +153,58 @@ export class HistorySidebar {
             window.goalsAPI.rowsChange({after: new_tasks})
         }
     }
+
+    /**
+     * Ticks history check and after one second removes it from sidebar
+     * @param that clicked element
+     */
+    change_history_check(that) {
+        setTimeout(function () {
+            let check_state = $(that).prop('checked')
+            if (check_state) {
+                window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(that), state: 1})
+
+                if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
+                else $(that).closest('.day').remove()
+            }
+        }, 1000)
+    }
 }
 
 
+export class Idea {
+    constructor(app_data, app_date) {
+        this.initEventListeners()
+        this.data = app_data
+        this.date = app_date
+    }
+
+    initEventListeners() {
+        $(document).on('click', '#sideIdeas', () => this.show_ideas_sidebar())
+
+        window.sidebarAPI.getIdeas((data) => {
+            this.build_ideas_sidebar(data)
+        })
 
 
+        $(document).on('click', '.ideasAdd', (event) => {
+            this.add_idea(event.currentTarget)
+        })
 
+        $(document).on('click', '#ideasAdd', () => this.new_idea())
 
+        $(document).on('keyup', '#ideasEntry', (event) => {
+            if (event.key === 'Enter' || event.keyCode === 13) this.new_idea()
+        });
 
+    }
 
-$(document).on('click', '.historyCheck', function () {
-    change_history_check(this)
-});
-
-/**
- * Ticks history check and after one second removes it from sidebar
- * @param that clicked element
- */
-function change_history_check(that) {
-    setTimeout(function () {
-        let check_state = $(that).prop('checked')
-        if (check_state) {
-            window.sidebarAPI.sideChangeChecks({id: $('.historyCheck').index(that), state: 1})
-
-            if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
-            else $(that).closest('.day').remove()
-        }
-    }, 1000)
-}
-
-$(document).on('click', '#sideIdeas', () => show_ideas_sidebar())
-
-
-
-
-
-
-
-
-/**
- * builds core of ideas sidebar
- */
-function show_ideas_sidebar() {
-    _show_sidebar()
-    $('#rightbar').html(`
+    /**
+     * builds core of ideas sidebar
+     */
+    show_ideas_sidebar() {
+        _show_sidebar()
+        $('#rightbar').html(`
         <div id="head">
             <div id="gloryButton">
                 <img id="gloryImg" src="images/goals/trophy.png" alt="main">
@@ -235,9 +222,78 @@ function show_ideas_sidebar() {
             </div>
         </div>
     `)
+        window.sidebarAPI.askIdeas()
+    }
 
-    window.sidebarAPI.askIdeas()
+    /**
+     * Builds ideas in sidebar
+     * @param data data of ideas
+     */
+    build_ideas_sidebar(data) {
+        let ideas_formatted = ""
+        for (let i = 0; i < data.length; i++) {
+            let converted_text = data[i].idea.replace(/`@`/g, "'").replace(/`@@`/g, '"')
+            ideas_formatted += `
+            <div class="sidebarTask">
+                <span class="idea">${converted_text}</span><span class="ideasAdd">+</span>
+            </div>`
+        }
+        $('#ideas').html(ideas_formatted)
+    }
+
+    /**
+     * Adds idea to the main
+     * @param that clicked ideas
+     */
+    add_idea(that) {
+        let id = $('.ideasAdd').index(that)
+        let goal_text = $('.idea').eq(id).text()
+
+        window.sidebarAPI.deleteIdea({
+            id: id,
+            goal_text: encode_text(goal_text),
+            date: l_date.day_sql
+        })
+
+        let import_goal = {
+            goal: goal_text,
+            main_check: 0,
+            steps: "",
+            category: 1,
+            importance: 2,
+            difficulty: 2,
+            knot_id: null,
+        }
+
+        $("#todosArea").append(build_goal(import_goal))
+        $('.sidebarTask').eq(id).remove()
+    }
+
+    /**
+     * Adds new idea to ideas sidebar
+     */
+    new_idea() {
+        let entry = $('#ideasEntry')
+        let text = entry.val()
+
+        if (text !== "") {
+            let idea_formatted = `
+            <div class="sidebarTask">
+                <span class="idea">${text}</span><span class="ideasAdd">+</span>
+            </div>`
+
+            let ideas = $('#ideas')
+            ideas.html(idea_formatted + ideas.html())
+            entry.val('')
+
+            let converted_text = text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
+
+            window.sidebarAPI.newIdea({text: converted_text})
+        }
+    }
+
 }
+
 
 export function _show_sidebar() {
     let right_bar = $('#rightbar')
@@ -257,88 +313,6 @@ export function _hide_sidebar() {
         resizer.css('display', 'none')
     }
 }
-
-window.sidebarAPI.getIdeas((data) => {
-    build_ideas_sidebar(data)
-})
-
-/**
- * Builds ideas in sidebar
- * @param data data of ideas
- */
-function build_ideas_sidebar(data) {
-    let ideas_formatted = ""
-    for (let i = 0; i < data.length; i++) {
-        let converted_text = data[i].idea.replace(/`@`/g, "'").replace(/`@@`/g, '"')
-        ideas_formatted += `
-            <div class="sidebarTask">
-                <span class="idea">${converted_text}</span><span class="ideasAdd">+</span>
-            </div>`
-    }
-    $('#ideas').html(ideas_formatted)
-}
-
-$(document).on('click', '.ideasAdd', function () {
-    add_idea(this)
-})
-
-/**
- * Adds idea to the main
- * @param that clicked ideas
- */
-function add_idea(that) {
-    let id = $('.ideasAdd').index(that)
-    let goal_text = $('.idea').eq(id).text()
-
-    window.sidebarAPI.deleteIdea({
-        id: id,
-        goal_text: encode_text(goal_text),
-        date: l_date.day_sql
-    })
-
-    let import_goal = {
-        goal: goal_text,
-        main_check: 0,
-        steps: "",
-        category: 1,
-        importance: 2,
-        difficulty: 2,
-        knot_id: null,
-    }
-
-    $("#todosArea").append(build_goal(import_goal))
-    $('.sidebarTask').eq(id).remove()
-}
-
-$(document).on('click', '#ideasAdd', () => new_idea())
-
-$(document).on('keyup', '#ideasEntry', (event) => {
-    if (event.key === 'Enter' || event.keyCode === 13) new_idea()
-});
-
-/**
- * Adds new idea to ideas sidebar
- */
-function new_idea() {
-    let entry = $('#ideasEntry')
-    let text = entry.val()
-
-    if (text !== "") {
-        let idea_formatted = `
-            <div class="sidebarTask">
-                <span class="idea">${text}</span><span class="ideasAdd">+</span>
-            </div>`
-
-        let ideas = $('#ideas')
-        ideas.html(idea_formatted + ideas.html())
-        entry.val('')
-
-        let converted_text = text.replace(/'/g, "`@`").replace(/"/g, "`@@`")
-
-        window.sidebarAPI.newIdea({text: converted_text})
-    }
-}
-
 
 //force = false
 export function show_hide_sidebar(force = false) {

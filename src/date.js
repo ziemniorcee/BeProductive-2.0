@@ -2,6 +2,7 @@ import {weekdays, month_names} from "./data.mjs";
 
 export class CurrentDate {
     constructor() {
+        this.initEventListeners()
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
         this.tomorrow = new Date(this.today.getTime())
@@ -19,6 +20,26 @@ export class CurrentDate {
 
         this.month_current = this.set_current_month()
         this.glory_month = this.get_sql_month(this.day_sql)
+    }
+
+    initEventListeners(){
+        $("#datePicker").datepicker({
+            onSelect: (event) => {
+                this.set_attributes($(event.currentTarget).datepicker('getDate'))
+
+                if ($('#todosAll').length) {
+                    day_view()
+                    $('#mainTitle').text(this.get_day_view_header())
+                } else if ($('.weekDay').length) {
+                    week_view()
+                    let header_params = this.get_header_week()
+                    $('#mainTitle').text(header_params[0])
+                    $('#date').text(header_params[1])
+                } else {
+                    month_view()
+                }
+            }
+        });
     }
 
     get_day_view_header() {
@@ -66,7 +87,7 @@ export class CurrentDate {
         else if (this.week_next.includes(this.day_sql)) main_title = 'Next Week'
         else main_title = 'Another Week'
 
-        let date_display = l_date.get_week_display_format(l_date.week_now)
+        let date_display = this.get_week_display_format(this.week_now)
 
         return [main_title, date_display]
     }
@@ -170,10 +191,10 @@ export class CurrentDate {
     }
 
     get_repeat_dates(option) {
-        let dates = [l_date.day_sql]
-        if (option === 0) dates = l_date.get_every(1, 30)
-        else if (option === 1) dates = l_date.get_every(7, 12)
-        else if (option === 2) dates = l_date.get_everymonth()
+        let dates = [this.day_sql]
+        if (option === 0) dates = this.get_every(1, 30)
+        else if (option === 1) dates = this.get_every(7, 12)
+        else if (option === 2) dates = this.get_everymonth()
         return dates
     }
 
@@ -320,7 +341,6 @@ export class CurrentDate {
             }
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
-            week_view()
         }
         else if ($('#monthGrid').length){
             let month_array =  this.get_month_array()
@@ -333,47 +353,9 @@ export class CurrentDate {
             }
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
-            month_view()
         }
     }
 }
 
-export let l_date = new CurrentDate()
 
-$("#datePicker").datepicker({
-    onSelect: function () {
-        l_date.set_attributes($(this).datepicker('getDate'))
 
-        if ($('#todosAll').length) {
-            date_change(2)
-            $('#mainTitle').text(l_date.get_day_view_header())
-        } else if ($('.weekDay').length) {
-            week_change(2)
-            let header_params = l_date.get_header_week()
-            $('#mainTitle').text(header_params[0])
-            $('#date').text(header_params[1])
-        } else {
-            month_change(2)
-        }
-    }
-});
-
-function date_change(option) {
-    if (option === 0) this.set_attributes(this.today)
-    else if (option === 1) this.set_attributes(this.tomorrow)
-
-    day_view()
-}
-
-function week_change(option) {
-    if (option === 0) l_date.this_week()
-    else if (option === 1) l_date.next_week()
-
-    week_view()
-}
-
-function month_change(option) {
-    if (option === 0) l_date.this_month()
-    else if (option === 1) l_date.next_month()
-    month_view()
-}
