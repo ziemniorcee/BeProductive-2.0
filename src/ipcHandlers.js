@@ -936,11 +936,7 @@ function todoHandlers(db) {
                         reject(err);
                     } else {
                         project_ids = projects.map((project) => project.id)
-                        let safe_projects = projects.map(project => {
-                            let {id, ...rest} = project;
-                            return rest;
-                        })
-                        resolve(safe_projects);
+                        resolve(projects);
                     }
                 })
             });
