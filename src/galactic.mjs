@@ -9,45 +9,44 @@ export class Strategy {
     constructor (app_data) {
         this.data = app_data;
         this.initEventListeners()
+        console.log(this.data.projects)
     }
 
     initEventListeners() {
-        $(document).on('click', '#strategyButton', function() {
+        $(document).on('click', '#strategyButton', () => {
             $('#galactics').css('display', 'block');
             this.add_galactic_category_boxes();
             $('#galactic-editor').remove();
         })
 
-        $(document).on('click', '.galactic', function(event) {
+        $(document).on('click', '.galactic', (event) => {
             const match = $(event.currentTarget).attr('id').match(/\d+$/);
             const key = match ? parseInt(match[0], 10) : null;
-            create_galactic_editor(key);
+            this.create_galactic_editor(key);
         })
 
         
-        $(document).on('click', '#galactic-editor-confirm', function() {
-            save_galactic_editor_changes();
+        $(document).on('click', '#galactic-editor-confirm', () => {
+            this.save_galactic_editor_changes();
             this.add_galactic_category_boxes();
         })
 
-        $(document).on('click', '#galactic-editor-open-projects', function() {
+        $(document).on('click', '#galactic-editor-open-projects', () => {
             let element = $('#galactic-editor-project-picker')
             if (($(element).children().length > 1) && !$(element).is(":visible")) {
                 $(element).css('display', 'flex');
-                console.log('lol1')
             }
             else if ($(element).is(":visible")) {
                 $(element).css('display', 'none');
-                console.log('lol2')
             }
         })
 
-        $(document).on('click', '#galactic-editor-cancel', function() {
+        $(document).on('click', '#galactic-editor-cancel', () => {
             connections.length = 0;
             this.add_galactic_category_boxes()
         })
 
-        $(document).on('mousemove', '#galactic-editor', function(event) {
+        $(document).on('mousemove', '#galactic-editor', (event) => {
             if (clicked_project !== '') {
                 let line = document.getElementById('galactic-editor-line-moving');
                 if (line) {
@@ -60,13 +59,13 @@ export class Strategy {
         })
 
         // handling releasing the left click over the bg
-        $(document).on('mouseup', '#galactic-editor', function() {
+        $(document).on('mouseup', '#galactic-editor', () => {
             $('#galactic-editor-line-moving').remove();
             clicked_project = '';
         })
 
         // handling line removing
-        $(document).on('click', '.galactic-editor-line', function(event) {
+        $(document).on('click', '.galactic-editor-line', (event) => {
             let index = this.data.extractNumbers($(event.currentTarget).attr('id'));
             let flag = true;
             for (let i = 0; i < changes_lines.length; i++) {
@@ -88,7 +87,7 @@ export class Strategy {
             $(event.currentTarget).remove();
         })
 
-        $(document).on('click', '#galactic-display-new-category', function() {
+        $(document).on('click', '#galactic-display-new-category', () => {
             $("#vignette").css('display', 'block')
             const add_category_template = $('#addCategoryTemplate').prop('content');
             let $add_category_clone = $(add_category_template).clone()
@@ -96,11 +95,7 @@ export class Strategy {
             $("#vignette").html($add_category_clone)
         })
         
-        $(document).on('click', '#galactic-editor-new-category', function() {
-            open_add_project()
-        })
-        
-        $(document).on('click', '.vignetteWindow1',function(event) {
+        $(document).on('click', '.vignetteWindow1', (event) => {
             event.stopPropagation()
         })
          
@@ -112,11 +107,11 @@ export class Strategy {
     add_galactic_category_boxes() {
         let box = $('#galacticContainer');
         box.empty();
-        box.html(_galactic_display_HTML());
+        box.html(this.__galactic_display_HTML());
         for (const key in this.data.categories) {
             for (const conn of this.data.project_conn) {
                 if (conn.category == key) {
-                    $(`#galactic-canv${key}`).append(create_line(
+                    $(`#galactic-canv${key}`).append(this.create_line(
                         `#galactic${key}Project-${conn.project_from}`,
                         `#galactic${key}Project-${conn.project_to}`,
                         `galactic-project-line`,
@@ -139,19 +134,19 @@ export class Strategy {
         current_project = key;
         let box = $('#galacticContainer');
         box.empty();
-        box.html(_galactic_editor_HTML(key));
+        box.html(this.__galactic_editor_HTML(key));
 
         const container = $('#galacticContainer');
         const map = $('#galactic-editor');
         map.draggable({
-            start: function(event, ui) {
+            start: (event, ui) => {
                 $('galacticContainer').css('cursor', 'grab');
                 ui.helper.data("pointer", {
                     y: (event.pageY - $('#galacticContainer').offset().top) / scale - parseInt($(event.target).css('top')),
                     x: (event.pageX - $('#galacticContainer').offset().left) / scale - parseInt($(event.target).css('left'))
                 })
             },
-            drag: function (event, ui) {       
+            drag: (event, ui) => {       
                 const containerWidth = container.width();
                 const containerHeight = container.height();
 
@@ -167,7 +162,7 @@ export class Strategy {
         });
 
         // Obsługa zoomowania kółkiem myszy
-        container.on('wheel', function (e) {
+        container.on('wheel', (e) => {
             e.preventDefault();
             const zoomStep = 0.1;
             const maxScale = 4;
@@ -209,7 +204,7 @@ export class Strategy {
         // adding line connections from database
         for (let conn of this.data.project_conn) {
             if (conn['category'] === key) {
-                $("#galactic-editor-canv").append(create_line(
+                $("#galactic-editor-canv").append(this.create_line(
                     `#galacticEditorProject${conn['project_from']}`,
                     `#galacticEditorProject${conn['project_to']}`,
                     `galactic-editor-line`,
@@ -220,15 +215,15 @@ export class Strategy {
         }
 
         // event for to-place projects in the settings
-        $('.galactic-editor-to-place').each(function(index, element) {
+        $('.galactic-editor-to-place').each((index, element) => {
             $(element).draggable({
                 cursorAt: {left: 0, top: 0},
                 scroll: false,
-                start: function(event, ui) {
+                start: (event, ui) => {
                     $(element).css('transform', 'translate(-50%, -50%)');
                     ui.helper.data('containment', this.data.calculateContainment(element, $('#galactic-editor'), [0, 0, 0, 0]));
                 },
-                stop: function(event, ui) {
+                stop: (event, ui) => {
                     const boundingBox = ui.helper.data('containment');
                     if (event.pageX > boundingBox[0] && event.pageX < boundingBox[2] &&
                         event.pageY > boundingBox[1] && event.pageY < boundingBox[3]) {
@@ -240,8 +235,8 @@ export class Strategy {
                         $(element).attr("id", `galacticEditorProject${$(element).data('project-number')}`)
                         $(element).css("left", `${event.pageX - offset.left}px`);
                         $(element).css("top", `${event.pageY - offset.top}px`);
-                        bind_editor_project(key, element);
-                        change_editor_project_position(element);
+                        this.bind_editor_project(key, element);
+                        this.change_editor_project_position(element);
                         if ($('#galactic-editor-project-picker').children().length === 1) {
                             $('#galactic-editor-project-picker').css('display', 'none');
                         }
@@ -256,8 +251,8 @@ export class Strategy {
                 }
             })
         })
-        $('.galactic-editor-project').each(function(index, element) { 
-            bind_editor_project(key, element);
+        $('.galactic-editor-project').each((index, element) => { 
+            this.bind_editor_project(key, element);
         })
     }
 
@@ -296,13 +291,13 @@ export class Strategy {
             cursorAt: {left: 0, top: 0},
             containment: this.data.calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
-            start: function(event, ui) {
+            start: (event, ui) => {
                 ui.helper.data("pointer", {
                     y: (event.pageY - $('#galactic-editor').offset().top) / scale - parseInt($(event.target).css('top')),
                     x: (event.pageX - $('#galactic-editor').offset().left) / scale - parseInt($(event.target).css('left'))
                 })
             },
-            drag: function(event, ui) {
+            drag: (event, ui) => {
                 var pointer = ui.helper.data("pointer");
                 var canvasTop = $('#galactic-editor').offset().top;
                 var canvasLeft = $('#galactic-editor').offset().left;
@@ -338,13 +333,13 @@ export class Strategy {
                     }
                 }
             },
-            stop: function(event, ui) {
-                change_editor_project_position(element);
+            stop: (event, ui) => {
+                this.change_editor_project_position(element);
             }
         })
 
         // handling click on project and create temporary line
-        $(element).on('mousedown', function (event) {
+        $(element).on('mousedown', (event) => {
             if (event.button === 2) {
                 clicked_project = $(element).attr('id');
                 let pos = {top: parseFloat($(element).css('top')) - $(element).outerHeight() / 2, 
@@ -362,15 +357,18 @@ export class Strategy {
         })
 
         // handling destroying / adding the line
-        $(element).on('mouseup', function (event) {
+        $(element).on('mouseup', (event) => {
             if (event.button === 2) {
                 let released_project = $(element).attr('id');
+                console.log(clicked_project + " " + released_project)
                 if (released_project !== clicked_project) {
+                    
                     let conn = [$(`#${clicked_project}`).data('project-number'), $(element).data('project-number')];
                     conn.sort();
                     if ($(`#galactic-editor-line${conn[0]}-${conn[1]}`).length) ;
                     else {
-                        $("#galactic-editor-canv").append(create_line(
+                        
+                        $("#galactic-editor-canv").append(this.create_line(
                             `#galacticEditorProject${conn[0]}`,
                             `#galacticEditorProject${conn[1]}`,
                             `galactic-editor-line`,
@@ -445,7 +443,7 @@ export class Strategy {
      * @param {number} key - galactic id
      * @returns {string} html of galactic editor for given category
      * */
-    _galactic_editor_HTML(key) {
+    __galactic_editor_HTML(key) {
         $('<style>')
             .prop('type', 'text/css')
             .html(`#galactic-editor-slider::-webkit-slider-thumb {
@@ -459,6 +457,7 @@ export class Strategy {
         <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>`;
         let not_placed_projects = [];
         for (const proj of this.data.projects) {
+            console.log(proj)
             if (proj.category == key) {
                 if (proj.x === null || proj.y === null) {
                     not_placed_projects.push(proj);
@@ -504,7 +503,7 @@ export class Strategy {
      * Returns html of galactics.
      * @returns {string} html of galactics display
      * */
-    _galactic_display_HTML() {
+    __galactic_display_HTML() {
         let galactics = '';
         const len = Object.keys(this.data.categories).length;
         const height = Math.floor(100 / Math.ceil((len - 1) / 5));
