@@ -767,18 +767,7 @@ export class Categories {
     }
 
     initEventListeners() {
-        $(document).on('click', '#newCategoryCreate', () => {
-            this.create_new_category();
-            let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
-
-            $("#newCategory").css('display', 'none');
-            $vignette_layer.css('display', 'none');
-            $vignette_layer.html('')
-
-            let category_element = Object.keys(this.data.categories).at(-1)
-            $('#selectCategory22').css('background', this.data.categories[category_element][0])
-            $('#selectCategory22').text(this.data.categories[category_element][1])
-        })
+        
 
         $(document).on('click', '#newCategoryDiscard', () => {
             $("#newCategory").css('display', 'none');
@@ -795,10 +784,7 @@ export class Categories {
             this.open_remove_category()
         })
 
-        $(document).on('click', '#removeCategoryCreate', () => {
-            this.remove_category()
-        })
-
+        
     }
 
     /**
@@ -832,9 +818,7 @@ export class Categories {
                 $(`#categoryPicker${i}`).css('display', 'none');
             }
         }
-        if ($('#galactics').css('display') !== 'none') {
-            add_galactic_category_boxes();
-        }
+        
     }
 
 
@@ -915,7 +899,7 @@ export class Categories {
             projects.push(e);
         }
         window.goalsAPI.removeCategory({id: category});
-        add_galactic_category_boxes();
+        
         $("#vignette").css('display', 'none');
         $("#vignette").html('')
         $("#categoryPicker1").html(_categories_HTML(true))

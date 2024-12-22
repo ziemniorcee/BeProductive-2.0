@@ -14,7 +14,7 @@ export class Strategy {
     initEventListeners() {
         $(document).on('click', '#strategyButton', function() {
             $('#galactics').css('display', 'block');
-            add_galactic_category_boxes();
+            this.add_galactic_category_boxes();
             $('#galactic-editor').remove();
         })
 
@@ -27,7 +27,7 @@ export class Strategy {
         
         $(document).on('click', '#galactic-editor-confirm', function() {
             save_galactic_editor_changes();
-            add_galactic_category_boxes();
+            this.add_galactic_category_boxes();
         })
 
         $(document).on('click', '#galactic-editor-open-projects', function() {
@@ -44,7 +44,7 @@ export class Strategy {
 
         $(document).on('click', '#galactic-editor-cancel', function() {
             connections.length = 0;
-            add_galactic_category_boxes()
+            this.add_galactic_category_boxes()
         })
 
         $(document).on('mousemove', '#galactic-editor', function(event) {

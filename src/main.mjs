@@ -148,6 +148,28 @@ class DisplayManagement{
             await this.app.history.show_history_sidebar()
             this.reset_dragula()
         })
+
+        $(document).on('click', '#newCategoryCreate', () => {
+            this.app.DayView.create_new_category();
+            if ($('#galactics').css('display') !== 'none') {
+                this.app.strategy.add_galactic_category_boxes();
+            }
+            let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+
+            $("#newCategory").css('display', 'none');
+            $vignette_layer.css('display', 'none');
+            $vignette_layer.html('')
+
+            let category_element = Object.keys(this.data.categories).at(-1)
+            $('#selectCategory22').css('background', this.data.categories[category_element][0])
+            $('#selectCategory22').text(this.data.categories[category_element][1])
+        })
+
+        $(document).on('click', '#removeCategoryCreate', () => {
+            this.app.dayView.remove_category()
+            this.app.strategy.add_galactic_category_boxes()
+        })
+
     }
 
     async display_reset (){
