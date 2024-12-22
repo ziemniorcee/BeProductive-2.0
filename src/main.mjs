@@ -7,6 +7,7 @@ import {Edit} from "./edit2.mjs";
 import {MonthView} from "./monthView.mjs";
 import {Project} from "./project.mjs";
 import {HistorySidebar} from "./sidebar.mjs";
+import { Strategy } from "./galactic.mjs";
 
 
 class MainApp {
@@ -26,6 +27,7 @@ class MainApp {
         this.input = new Input(this.data, this.date, this.steps, this.project, this.dayView)
         this.weekView = new WeekView(this.data, this.date)
         this.monthView = new MonthView(this.data, this.date)
+        this.strategy = new Strategy(this.data)
     }
 
     async init() {

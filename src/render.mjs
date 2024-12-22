@@ -9,7 +9,6 @@ import {
     project_conn
 } from "./data.mjs";
 import {create_today_graphs} from './graph.mjs';
-import {add_galactic_category_boxes} from './galactic.mjs';
 
 
 export class DayView {
