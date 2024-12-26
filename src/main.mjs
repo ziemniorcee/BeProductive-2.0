@@ -27,7 +27,7 @@ class MainApp {
         this.input = new Input(this.data, this.date, this.steps, this.project, this.dayView)
         this.weekView = new WeekView(this.data, this.date)
         this.monthView = new MonthView(this.data, this.date)
-        this.strategy = new Strategy(this.data)
+        this.strategy = new Strategy(this.data, this.categories)
     }
 
     async init() {
@@ -179,11 +179,16 @@ class DisplayManagement{
     }
 
     async delete_project() {
-        window.projectsAPI.deleteProject({position: this.app.project.project_pos})
-
         $('#vignette').html('')
         $('#vignette').css('display', 'none')
-        this.app.data.projects.splice(this.app.project.project_pos, 1)
+
+        if ($('#galacticContainer').has('#galactic-editor')) {
+            window.projectsAPI.removeProject({id: this.strategy.project_to_remove})
+            this.strategy.remove_project()
+        } else {
+            window.projectsAPI.deleteProject({position: this.app.project.project_pos})
+            this.app.data.projects.splice(this.app.project.project_pos, 1)
+        }
 
         this.app.project.set_projects_options()
         await this.app.dayView.display()

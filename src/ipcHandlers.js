@@ -1075,6 +1075,10 @@ function todoHandlers(db) {
             return {success: false, files: [], message: err.message};
         }
     });
+
+    ipcMain.on('remove-project', (event, params) => {
+        db.run(`DELETE FROM projects WHERE id=${params.id}`);
+    })
 }
 
 

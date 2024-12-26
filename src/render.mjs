@@ -780,11 +780,6 @@ export class Categories {
             this.select_category(event.currentTarget)
         });
 
-        $(document).on('click', '#galactic-display-remove-category', () => {
-            this.open_remove_category()
-        })
-
-        
     }
 
     /**
@@ -879,17 +874,6 @@ export class Categories {
         return categories_html
     }
 
-
-    open_remove_category() {
-        $("#vignette").css('display', 'block')
-
-        const remove_category_template = $('#removeCategoryTemplate').prop('content');
-        let $remove_category_clone = $(remove_category_template).clone()
-        $remove_category_clone.find(".categoryPicker").html(_categories_HTML(false))
-        $("#vignette").html($remove_category_clone)
-    }
-
-
     remove_category() {
         let category = getIdByColor(this.data.categories, $('#selectCategory4').css('backgroundColor'))
         delete this.data.categories[category];
@@ -899,7 +883,6 @@ export class Categories {
             projects.push(e);
         }
         window.goalsAPI.removeCategory({id: category});
-        
         $("#vignette").css('display', 'none');
         $("#vignette").html('')
         $("#categoryPicker1").html(_categories_HTML(true))

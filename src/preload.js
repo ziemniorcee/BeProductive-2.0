@@ -71,6 +71,7 @@ contextBridge.exposeInMainWorld('projectsAPI', {
 
 
     deleteProject: (params) => ipcRenderer.send('delete-project', params),
+    removeProject: (params) => ipcRenderer.send('remove-project', params),
 })
 
 contextBridge.exposeInMainWorld('sidebarAPI', {
