@@ -30,6 +30,7 @@ export class Data {
     async init() {
         let categories_data = await window.dataAPI.getCategories();
         this.projects = await window.dataAPI.getProjects()
+        console.log(projects)
         this.project_conn = await window.dataAPI.getGalacticConnections()
 
         this.set_categories(categories_data)

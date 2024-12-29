@@ -42,9 +42,9 @@ export class HistorySidebar {
             </div>`)
 
         let date = ""
-        if ($('#todosAll').length) date = l_date.day_sql
-        else if ($('.weekDay').length) date = l_date.week_now[0]
-        else if ($('#monthGrid').length) date = l_date.get_sql_month(l_date.day_sql)[0]
+        if ($('#todosAll').length) date = this.date.day_sql
+        else if ($('.weekDay').length) date = this.date.week_now[0]
+        else if ($('#monthGrid').length) date = this.date.get_sql_month(this.date.day_sql)[0]
         let goals = await window.sidebarAPI.askHistory({date: date})
 
         this.build_history_sidebar(goals)
@@ -79,7 +79,7 @@ export class HistorySidebar {
      * @returns {string} HTML of history day
      */
     build_history_day(goals, date) {
-        let display = l_date.get_display_format(date)
+        let display = this.date.get_display_format(date)
 
         let goals_HTML = ''
         for (let i = 0; i < goals.length; i++) {
@@ -112,7 +112,7 @@ export class HistorySidebar {
      * Adding goal to main from history by clicking plus on goal
      */
     get_history_goal(that) {
-        window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(that), date: l_date.day_sql})
+        window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(that), date: this.date.day_sql})
         if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
         else $(that).closest('.day').remove()
     }
@@ -252,7 +252,7 @@ export class Idea {
         window.sidebarAPI.deleteIdea({
             id: id,
             goal_text: encode_text(goal_text),
-            date: l_date.day_sql
+            date: this.date.day_sql
         })
 
         let import_goal = {

@@ -18,6 +18,7 @@ function todoHandlers(db) {
     let ids_array = []
     let ids_array_previous = []
 
+    let inbox_ids = []
 
     ipcMain.handle('get-day-view', async (event, params) => {
         try {
@@ -566,7 +567,6 @@ function todoHandlers(db) {
             array_ids = project_sidebar_ids
         }
 
-        console.log(params.id)
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
                 WHERE id = ${array_ids[params.id]}`)
@@ -585,10 +585,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('change-checks-step', (event, params) => {
-        console.log(params)
-        console.log(step_ids)
-        console.log(ids_array)
-        console.log(ids_array[params.id])
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
                 WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
@@ -963,7 +959,6 @@ function todoHandlers(db) {
                         ORDER BY category`, (err, rows) => {
                     if (err) reject(err);
                     else {
-                        console.log(rows)
                         resolve(rows);
                     }
                 })
@@ -1084,6 +1079,48 @@ function todoHandlers(db) {
             return {success: false, files: [], message: err.message};
         }
     });
+
+    ipcMain.handle('get-inbox', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM inbox WHERE check_state = 0
+                        ORDER BY id DESC`, (err, goals) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        inbox_ids = goals.map((goal) => goal.id)
+                        let safe_inbox = goals.map(goal => {
+                            let {id, ...rest} = goal;
+                            return rest;
+                        })
+                        resolve(safe_inbox);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+    ipcMain.on('new-inbox-goal', (event, params) => {
+        db.run(`INSERT INTO inbox (name, add_date)
+                VALUES ("${params.name}", "${params.add_date}")`);
+
+        db.all("SELECT id  FROM inbox WHERE check_state = 0 ORDER BY id DESC LIMIT 1;", (err, rows) => {
+            inbox_ids.push(rows[0]['id'])
+            console.log(inbox_ids)
+        })
+    })
+
+    ipcMain.on('check-inbox-goal', (event, params) => {
+        db.run(`UPDATE inbox
+                SET check_state = 1
+                WHERE id = ${inbox_ids[params.position]}`)
+
+        inbox_ids.splice(params.position, 1)
+    })
 }
 
 
