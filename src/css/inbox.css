@@ -63,6 +63,13 @@
     overflow: hidden;
 }
 
+.inboxListBreak{
+    font-size: 20px;
+    border-bottom: 3px solid #2979FF;
+    width: max-content;
+    margin-bottom: 15px;
+}
+
 .inboxTodo {
     margin-right: 5px;
     min-height: 50px;

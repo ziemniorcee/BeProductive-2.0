@@ -22,7 +22,7 @@ class MainApp {
         this.idea = new Idea(this.data, this.date)
         this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
-        this.inbox = new Inbox()
+        this.inbox = new Inbox(this.date)
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
 
@@ -188,6 +188,7 @@ class DisplayManagement{
             if ($('#todosAll').length) this.app.dayView.dragula_day_view()
             else if ($('#projectContent').length) this.app.project.dragula_project_view()
         });
+
     }
 
     async display_reset (){

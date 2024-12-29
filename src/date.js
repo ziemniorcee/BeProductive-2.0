@@ -22,7 +22,7 @@ export class CurrentDate {
         this.glory_month = this.get_sql_month(this.day_sql)
     }
 
-    initEventListeners(){
+    initEventListeners() {
         $("#datePicker").datepicker({
             onSelect: (event) => {
                 this.set_attributes($(event.currentTarget).datepicker('getDate'))
@@ -141,7 +141,7 @@ export class CurrentDate {
         this.set_attributes(date)
     }
 
-    sql_sql_month_day(day){
+    sql_sql_month_day(day) {
         let date = new Date(this.day_sql)
         date.setDate(date.getDate() - date.getDate() + 1)
 
@@ -325,35 +325,66 @@ export class CurrentDate {
         else return current_sql
     }
 
-    get_next_date(direction){
-        if($('#todosAll').length){
+    get_next_date(direction) {
+        if ($('#todosAll').length) {
             let selected_date = new Date(this.day_sql)
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
-        }
-        else if ($('.weekDay').length) {
+        } else if ($('.weekDay').length) {
             let selected_date
-            if (direction === -1){
+            if (direction === -1) {
                 selected_date = new Date(this.week_now[0])
-            }
-            else if (direction === 1){
+            } else if (direction === 1) {
                 selected_date = new Date(this.week_now[6])
             }
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
-        }
-        else if ($('#monthGrid').length){
-            let month_array =  this.get_month_array()
+        } else if ($('#monthGrid').length) {
+            let month_array = this.get_month_array()
             let selected_date
-            if (direction === -1){
+            if (direction === -1) {
                 selected_date = new Date(month_array[0])
-            }
-            else if (direction === 1){
-                selected_date = new Date(month_array[month_array.length-1])
+            } else if (direction === 1) {
+                selected_date = new Date(month_array[month_array.length - 1])
             }
             selected_date.setDate(selected_date.getDate() + direction)
             this.set_attributes(selected_date)
         }
+    }
+
+    get_inbox_sections(goals) {
+        let today_yesterday = new Date()
+        today_yesterday.setDate(this.today.getDate() - 1)
+
+        let today_week_ago = new Date()
+        today_week_ago.setDate(this.today.getDate() - 7)
+
+        let today_month_ago = new Date()
+        today_month_ago.setDate(this.today.getDate() - 30)
+
+        let break_points = [-1, -1, -1, -1]
+        let state_before = -1
+        for (let i = 0; i < goals.length; i++) {
+            let new_state = state_before
+            let current_date = new Date(goals[i]['add_date'])
+
+            if (current_date > today_yesterday) {
+                new_state = 0
+            } else if (current_date > today_week_ago) {
+                new_state = 1
+            } else if (current_date > today_month_ago) {
+                new_state = 2
+            } else {
+                new_state = 3
+            }
+
+            if (state_before !== new_state) {
+                break_points[new_state] = i
+                state_before = new_state
+            }
+
+        }
+        return break_points
     }
 }
 
