@@ -79,7 +79,7 @@ function todoHandlers(db) {
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                         WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
-                          and check_state = 0
+                          and check_state = 0 
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -381,6 +381,7 @@ function todoHandlers(db) {
                                G.difficulty,
                                G.importance,
                                G.note,
+                               G.addDate,
                                PR.id as pr_id
                         FROM goals G
                                  LEFT JOIN projects PR ON PR.id = G.project_id
@@ -609,7 +610,9 @@ function todoHandlers(db) {
                     difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${project_id}
+                    project_id = ${project_id},
+                    addDate = '${params.changes['addDate']}',
+                    date_type = ${params.changes['date_type']}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
@@ -1084,7 +1087,8 @@ function todoHandlers(db) {
         try {
             return await new Promise((resolve, reject) => {
                 db.all(`SELECT *
-                        FROM inbox WHERE check_state = 0
+                        FROM inbox
+                        WHERE check_state = 0
                         ORDER BY id DESC`, (err, goals) => {
                     if (err) {
                         reject(err);

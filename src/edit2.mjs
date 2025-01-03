@@ -46,6 +46,67 @@ export class Edit{
         $(document).on('click', '.editPickProject', (event) => {
             this.change_project(event.currentTarget)
         })
+
+        $(document).on('click', '#selectDate', () => {
+            let $edit_date_selector = $('#editDateSelector')
+            let is_visible = $edit_date_selector.css('display') === "flex"
+            if (is_visible) $edit_date_selector.css('display', 'none')
+            else $edit_date_selector.css('display', 'flex')
+        })
+
+        $(document).on('click', '#editDateToday', () => {
+            let date_formatted = this.date.get_edit_date_format(this.date.today)
+            $('#selectDate').text(date_formatted)
+        })
+
+        $(document).on('click', '#editDateTomorrow', () => {
+            let date_formatted = this.date.get_edit_date_format(this.date.tomorrow)
+            $('#selectDate').text(date_formatted)
+        })
+
+        $('.vignetteLayer').on('click', function (e) {
+            let $edit_date_selector = $('#editDateSelector')
+            let $select_date = $('#selectDate')
+
+            if (!$edit_date_selector.is(e.target) && !$select_date.is(e.target)) {
+                $edit_date_selector.css('display', 'none'); // Close the picker
+            }
+        });
+
+        $(document).on('click', '#editSwitchDateMode', () => {
+            let $edit_label_date = $('#editLabelDate')
+            let $edit_switch_date_mode = $('#editSwitchDateMode')
+            let $edit_switch_img = $('#editSwitchImg')
+
+            let is_current_date = $edit_label_date.text() === 'Date'
+
+            if (is_current_date) {
+                $edit_label_date.text('Deadline')
+                $edit_switch_date_mode.css('background-color', 'blue')
+                $edit_switch_img.attr('src', 'images/goals/dashboard/other.png')
+            }
+            else {
+                $edit_label_date.text('Date')
+                $edit_switch_date_mode.css('background-color', 'red')
+                $edit_switch_img.attr('src', 'images/goals/deadline.png')
+            }
+        })
+
+        $(document).on('mouseenter', '#editSwitchDateMode', () => {
+            let $edit_switch_date_mode = $('#editSwitchDateMode')
+
+            let is_current_date = $('#editLabelDate').text() === 'Date'
+            if (is_current_date) {
+                $edit_switch_date_mode.css('background-color', 'red')
+            }
+            else {
+                $edit_switch_date_mode.css('background-color', 'blue')
+            }
+        })
+
+        $(document).on('mouseleave', '#editSwitchDateMode', () => {
+            $('#editSwitchDateMode').css('background-color', '')
+        })
     }
 
     /**
@@ -79,7 +140,6 @@ export class Edit{
      * @param steps data of steps of selected goal
      */
     build_edit(goal, steps) {
-
         const edit_template = $('#editTemplate').prop('content');
         let $edit_clone = $(edit_template).clone()
 
@@ -98,13 +158,25 @@ export class Edit{
 
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
-
+        $edit_clone.find('#selectDate').text(this.date.change_to_edit_format(goal['addDate']))
         this.selected_project_id = goal['pr_pos']
         $("#vignette").append($edit_clone)
         $('#categoryPicker22').html(this.categories._categories_HTML())
         $('#editProjectPicker').html(this._project_picker_HTML())
         this.set_project(goal['pr_pos'])
         this.dragula_steps()
+
+        $( function() {
+            $( "#editDatePicker" ).datepicker({
+                dateFormat: "dd.mm.yy",
+                onSelect: function (selectedDate) {
+                    $('#selectDate').text(selectedDate)
+                    $('#editDateSelector').css('display', 'none')
+                }
+            });
+        });
+
+
     }
 
     /**
@@ -262,6 +334,8 @@ export class Edit{
         let difficulty = $('#editDiff').val()
         let importance = $('#editImportance').val()
         let steps_array = this.get_steps()
+        let date_type = $('#editLabelDate').text() === "Deadline"
+        let new_date = this.date.get_edit_sql_format($('#selectDate').text())
 
         let changes = {
             'goal': encode_text(edit_main_entry),
@@ -270,7 +344,9 @@ export class Edit{
             'importance': importance,
             'steps': steps_array,
             'note': encode_text(edit_note_entry),
-            'project_id': this.selected_project_id
+            'project_id': this.selected_project_id,
+            'date_type': date_type,
+            'addDate': new_date
         }
 
         if (this.selected_goal.attr('class') === 'todo') {
