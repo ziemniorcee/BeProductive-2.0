@@ -6,21 +6,17 @@ let current_project = 0;
 let scale = 1.0;
 let editor_interval;
 let remove_flag = false;
-let project_to_remove;
+let project_to_remove = 0;
 
 export class Strategy {
     constructor (app_data, app_categories) {
         this.data = app_data;
         this.categories = app_categories;
         this.initEventListeners()
+        console.log(this.data.categories)
     }
 
     initEventListeners() {
-        $(document).on('click', '#strategyButton', () => {
-            $('#galactics').css('display', 'block');
-            this.add_galactic_category_boxes();
-            $('#galactic-editor').remove();
-        })
 
         $(document).on('click', '.galactic', (event) => {
             const match = $(event.currentTarget).attr('id').match(/\d+$/);
@@ -107,18 +103,7 @@ export class Strategy {
         })
 
         $(document).on('click', '#galactic-editor-remove-project', () => {
-            if (remove_flag) {
-                remove_flag = false;
-                $('#galactic-editor').css('cursor', 'default');
-            } else {
-                remove_flag = true;
-                $('#galactic-editor').css('cursor', 'crosshair');
-            }
-            // $("#vignette").css('display', 'block')
-            // const remove_project_template = $('#deleteprojectTemplate').prop('content');
-            // let $remove_project_clone = $(remove_project_template).clone()
-            // $remove_project_clone.find(".categoryPicker").html(this.categories._categories_HTML(false))
-            // $("#vignette").html($remove_project_clone)
+            this.switch_remove_mode();
         })
 
         $(document).on('click', '#galactic-editor-new-project', () => {
@@ -126,7 +111,16 @@ export class Strategy {
             const add_project_template = $('#newProjectTemplate').prop('content');
             let $add_project_clone = $(add_project_template).clone()
             $add_project_clone.find(".categoryPicker").html(this.categories._categories_HTML(false))
-            $("#vignette").html($add_project_clone)
+            $("#vignette").html($add_project_clone);
+            let key = $('#galactic-editor').data('key');
+            let color = this.data.categories[key][0];
+            console.log(color)
+            $('#categoryPicker3').children().each((index, element) => {
+                if ($(element).find('.categoryButton').first().css('background-color') === color) {
+                    $(element).trigger('click');
+                    
+                }
+            })
         })
         
         $(document).on('click', '.vignetteWindow1', (event) => {
@@ -139,6 +133,7 @@ export class Strategy {
      * Creates category windows in main galactic screen
      */
     add_galactic_category_boxes() {
+        scale = 1.0;
         let box = $('#galacticContainer');
         box.empty();
         box.html(this.__galactic_display_HTML());
@@ -150,7 +145,7 @@ export class Strategy {
                         `#galactic${key}Project-${conn.project_to}`,
                         `galactic-project-line`,
                         `galactic${key}Line${conn.project_from}-${conn.project_to}`, key,
-                        4, `rgb(240, 255, 255)`
+                        2, `rgb(240, 255, 255)`
                     ));
                 }
             }
@@ -170,12 +165,14 @@ export class Strategy {
         let box = $('#galacticContainer');
         box.empty();
         box.html(this.__galactic_editor_HTML(key));
-
+        console.log(this.data.projects);
+        console.log(this.data.project_conn);
         const container = $('#galacticContainer');
         const map = $('#galactic-editor');
         map.draggable({
             start: (event, ui) => {
                 $('galacticContainer').css('cursor', 'grab');
+                $('#galactic-editor').css('transition', 'none');
                 ui.helper.data("pointer", {
                     y: (event.pageY - $('#galacticContainer').offset().top) / scale - parseInt($(event.target).css('top')),
                     x: (event.pageX - $('#galacticContainer').offset().left) / scale - parseInt($(event.target).css('left'))
@@ -193,6 +190,9 @@ export class Strategy {
 
                 ui.position.left = Math.min(0, Math.max(leftLimit, ui.position.left));
                 ui.position.top = Math.min(0, Math.max(topLimit, ui.position.top));
+            },
+            stop: (event, ui) => {
+                $('#galactic-editor').css('transition', 'transform 0.5s ease, top 0.5s ease, left 0.5s ease');
             }
         });
 
@@ -287,12 +287,15 @@ export class Strategy {
         $('.galactic-editor-project').each((index, element) => { 
             this.bind_editor_project(key, element);
         })
-
         // interval for autosave
         editor_interval = setInterval(() => {
             this.save_galactic_editor_changes();
             console.log('changes saved');
         }, 5000);
+    }
+
+    clearEditorInterval() {
+        clearInterval(editor_interval);
     }
 
     /**
@@ -322,6 +325,20 @@ export class Strategy {
         line.setAttribute('stroke-width', w);
         line.setAttribute('pointer-events', 'all');
         return line;
+    }
+
+    switch_remove_mode() {
+        if (remove_flag) {
+            remove_flag = false;
+            $('#galactic-editor').css('cursor', 'default');
+            $(".galactic-editor-project").draggable("option", "cancel", null);
+            $(".galactic-editor-project").css("cursor", "grab");
+        } else {
+            remove_flag = true;
+            $('#galactic-editor').css('cursor', 'crosshair');
+            $(".galactic-editor-project").draggable("option", "cancel", "*");
+            $(".galactic-editor-project").css("cursor", "crosshair");
+        }
     }
 
     /**
@@ -383,7 +400,7 @@ export class Strategy {
 
         // handling click on project and create temporary line
         $(element).on('mousedown', (event) => {
-            if (event.button === 2) {
+            if (event.button === 2 && !remove_flag) {
                 clicked_project = $(element).attr('id');
                 let pos = {top: parseFloat($(element).css('top')) - $(element).outerHeight() / 2, 
                         left: parseFloat($(element).css('left')) - $(element).outerWidth() / 2};
@@ -396,6 +413,14 @@ export class Strategy {
                 line.setAttribute('stroke', this.data.categories2[key]);
                 line.setAttribute('stroke-width', 8);
                 $("#galactic-editor-canv").append(line);
+            } else if (event.button === 0 && remove_flag) {
+                this.switch_remove_mode();
+                project_to_remove = $(element).data('project-number');
+                console.log(project_to_remove);
+                $("#vignette").css('display', 'block')
+                const remove_project_template = $('#deleteprojectTemplate').prop('content');
+                let $remove_project_clone = $(remove_project_template).clone()
+                $("#vignette").html($remove_project_clone)
             }
         })
 
@@ -483,16 +508,35 @@ export class Strategy {
         changes_projects.length = 0;
     }
 
-    remove_project(id) {
-        if (id === undefined) id = this.project_to_remove;
+    remove_project(id = undefined) {
+        if (id === undefined) id = project_to_remove;
+        for (let i = 0; i < connections.length; i++) {
+            if (connections[i][0] === id || connections[i][1] === id) {
+                $(`#galactic-editor-line${connections[i][0]}-${connections[i][1]}`).remove();
+                connections.splice(i, 1);
+            }
+        }
+        let conn_to_remove = [];
         for (let i = 0; i < this.data.project_conn.length; i++) {
-            if (this.data.project_conn[i].project_from === id || this.data.project_conn[i].project_to === id)
+            if (this.data.project_conn[i].project_from === id || this.data.project_conn[i].project_to === id) {
+                conn_to_remove.push({category: this.data.project_conn[i].category,
+                    from: this.data.project_conn[i].project_from,
+                    to: this.data.project_conn[i].project_to,
+                    add: false
+                });
                 this.data.project_conn.splice(i, 1);
+            }
         }
         for (let i = 0; i < this.data.projects.length; i++) {
-            if (this.data.projects[i].id === id)
+            if (this.data.projects[i].id === id) {
                 this.data.projects.splice(i, 1);
+            }
         }
+        console.log(id);
+        $(`#galacticEditorToPlace${id}`).remove();
+        $(`#galacticEditorProject${id}`).remove();
+        window.goalsAPI.changeGalacticConnections({'changes': conn_to_remove});
+        window.projectsAPI.removeProject({'id': id});
     }
 
     /**
@@ -506,7 +550,7 @@ export class Strategy {
             .html(`#galactic-editor-slider::-webkit-slider-thumb {
                 background: ${this.data.categories2[key]}}`)
             .appendTo('head');
-        let editor = `<div id="galactic-editor">
+        let editor = `<div id="galactic-editor" data-key="${key}">
         <div class='galactic-editor-test' style="top: 0%; left: 0%"></div>
         <div class='galactic-editor-test' style="top: 50%; left: 0%"></div>
         <div class='galactic-editor-test' style="top: 0%; left: 50%"></div>
@@ -547,7 +591,7 @@ export class Strategy {
         editor += `<div id="galactic-editor-project-picker" style="border-color: ${this.data.categories[key][0]};">
         <span>Stash</span>`
         for (const proj of not_placed_projects) {
-            editor += `<div class="galactic-editor-to-place" data-project-number="${proj.id}"
+            editor += `<div id="galacticEditorToPlace${proj.id}" class="galactic-editor-to-place" data-project-number="${proj.id}"
                     style="border-color: ${this.data.categories[key][0]}; background-color: ${this.data.categories2[key]};"
                     >${proj.name}</div>`
         }

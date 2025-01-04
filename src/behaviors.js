@@ -108,10 +108,6 @@ $(document).on('click', '#newCategory', function(event) {
     event.stopPropagation();
 })
 
-$(document).on('click', '#todoButton', function () {
-    $('#galactics').css('display', 'none');
-})
-
 $(document).on('click', '#testPanelShowIds', function () {
     $('.todoId').toggle();
 })

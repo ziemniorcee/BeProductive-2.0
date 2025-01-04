@@ -150,7 +150,7 @@ class DisplayManagement{
         })
 
         $(document).on('click', '#newCategoryCreate', () => {
-            this.app.DayView.create_new_category();
+            this.app.categories.create_new_category();
             if ($('#galactics').css('display') !== 'none') {
                 this.app.strategy.add_galactic_category_boxes();
             }
@@ -166,13 +166,28 @@ class DisplayManagement{
         })
 
         $(document).on('click', '#removeCategoryCreate', () => {
-            this.app.dayView.remove_category()
-            this.app.strategy.add_galactic_category_boxes()
+            this.app.categories.remove_category()
+            if ($('#galactics').css('display') !== 'none') {
+                this.app.strategy.add_galactic_category_boxes();
+            }
+        })
+
+        // leftbar buttons input
+
+        $(document).on('click', '#todoButton', () => {
+            $('#galactics').css('display', 'none');
+            this.app.strategy.clearEditorInterval();
+        })
+
+        $(document).on('click', '#strategyButton', () => {
+            $('#galactics').css('display', 'block');
+            this.app.strategy.add_galactic_category_boxes();
+            $('#galactic-editor').remove();
         })
 
     }
 
-    async display_reset (){
+    async display_reset() {
         this.app.project.set_projects_options()
         await this.app.project.fix_project_sidebar()
         this.reset_dragula()
@@ -183,8 +198,7 @@ class DisplayManagement{
         $('#vignette').css('display', 'none')
 
         if ($('#galacticContainer').has('#galactic-editor')) {
-            window.projectsAPI.removeProject({id: this.strategy.project_to_remove})
-            this.strategy.remove_project()
+            this.app.strategy.remove_project()
         } else {
             window.projectsAPI.deleteProject({position: this.app.project.project_pos})
             this.app.data.projects.splice(this.app.project.project_pos, 1)
@@ -194,7 +208,7 @@ class DisplayManagement{
         await this.app.dayView.display()
     }
 
-    reset_dragula(){
+    reset_dragula() {
         if ($('#todosAll').length) this.app.dayView.dragula_day_view()
         else if ($('.weekDay').length) this.app.weekView.dragula_week_view()
         else this.app.monthView.dragula_month_view()

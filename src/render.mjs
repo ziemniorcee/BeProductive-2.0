@@ -823,13 +823,12 @@ export class Categories {
      */
     select_category(that) {
         let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-        let picker = '0';
 
         let picker_id = $(that).closest('.categoryPicker').attr('id')
         const id = picker_id.match(/categoryPicker(\d+)/)[1];
 
-
         if (id === '4') index++
+        if (id === '3') index++
 
         if (index === 1) {
             let $selected_vignette = $("#vignette")
@@ -845,6 +844,7 @@ export class Categories {
             let selected_category = $(`#selectCategory${id}`)
             $(`#categoryPicker${id}`).css('display', 'none')
             let category_element = Object.keys(this.data.categories)[index - 2]
+            console.log(category_element);
             selected_category.css('background', this.data.categories[category_element][0])
             selected_category.text(this.data.categories[category_element][1])
         }
@@ -885,7 +885,7 @@ export class Categories {
         window.goalsAPI.removeCategory({id: category});
         $("#vignette").css('display', 'none');
         $("#vignette").html('')
-        $("#categoryPicker1").html(_categories_HTML(true))
+        $("#categoryPicker1").html(this._categories_HTML(true))
     }
 
 
