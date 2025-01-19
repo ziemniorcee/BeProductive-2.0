@@ -4,8 +4,6 @@ import {
     getIdByColor,
 } from "./data.mjs";
 
-import {_hide_sidebar, _show_sidebar} from "./sidebar.mjs";
-
 export class Project {
     constructor(app_data, app_date, app_categories, app_steps) {
         this.initEventListeners()
@@ -77,7 +75,7 @@ export class Project {
             this.check_sidebar_project_goal(event.currentTarget)
         })
 
-        $(document).on('click', '#sideProjectClose', () => _hide_sidebar())
+        $(document).on('click', '#sideProjectClose', () => this.data.show_hide_sidebar(true, 1))
 
         $(document).on('click', '#dashNewProject', function () {
             $('#iconPicker').remove()
@@ -239,7 +237,7 @@ export class Project {
         let project_icon = $('.dashProjectIcon img').eq(this.project_pos).attr('src')
         let project_name = $('.dashProjectName').eq(this.project_pos).text()
 
-        _hide_sidebar()
+        this.data.show_hide_sidebar(true, 1)
         this.set_project_view(project_color, project_icon, project_name)
 
         let goals = await window.goalsAPI.getProjectView({project_pos: this.project_pos})
@@ -258,6 +256,7 @@ export class Project {
         $header_clone.find('#projectHeader').css('background-color', color)
         $header_clone.find('#projectHeaderIcon').attr('src', icon)
         $header_clone.find('#projectName').text(name)
+        $header_clone.find('#projectId').text(this.project_pos)
 
         const main_template = $('#projectViewMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
@@ -309,7 +308,6 @@ export class Project {
      */
     dragula_project_view() {
         this.block_prev_drag = 0
-
         let dragged_task
 
         dragula(Array.from($('.projectSectionGoals')), {
@@ -473,7 +471,7 @@ export class Project {
         let project_color = $('.dashProjectIcon').eq(this.project_pos).css('background-color')
         let project_icon = $('.dashProjectIcon img').eq(this.project_pos).attr('src')
         let project_name = $('.dashProjectName').eq(this.project_pos).text()
-        _show_sidebar()
+        this.data.show_hide_sidebar(true, 0)
 
         $('#rightbar').html(`
             <div id="sideProjectHeader">
@@ -488,15 +486,16 @@ export class Project {
                 </div>
                 <div id="sideProjectId">${this.project_pos}</div>
             </div>
-            <div id="sideProjectOptions">
-                <div class="sideProjectOption">Done</div>
-                <div class="sideProjectOption">Doing</div>
-                <div class="sideProjectOption" style="background-color: ${project_color}">To do</div>
-            </div>
+            
+            <div id="sideProjectsubTitle">To do</div>
             <div id="sideProjectGoals">
                 
             </div>`)
-
+        // <div id="sideProjectOptions">
+        //     <div class="sideProjectOption">Done</div>
+        // <div className="sideProjectOption">Doing</div>
+        // <div className="sideProjectOption" style="background-color: ${project_color}">To do</div>
+        // </div>
         let goals = await window.projectsAPI.askProjectSidebar({
             project_pos: this.project_pos,
             option: 2,

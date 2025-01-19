@@ -8,6 +8,7 @@ import {
     projects,
     project_conn
 } from "./data.mjs";
+import {add_galactic_category_boxes} from './galactic.mjs';
 import {create_today_graphs} from './graph.mjs';
 
 
@@ -28,10 +29,7 @@ export class DayView {
 
 
     initEventListeners() {
-        $(document).on('click', ".repeatOption", (event) => {
-            event.stopPropagation()
-            this.select_repeat_option(event.currentTarget)
-        })
+
 
         $(document).on('drop', '.todo', () => {
             dragged_task.css('background-color', "#FFFFFF")
@@ -172,7 +170,6 @@ export class DayView {
             this.dragula_day_view()
         }
 
-        this.dragula_resetter()
     }
 
     dragula_resetter(){
@@ -212,6 +209,8 @@ export class DayView {
 
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#dayViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/dayview.png')
+
         let categories_html = this.categories._categories_HTML()
 
         const content_template = $('#dayViewContentTemplate').prop('content');
@@ -256,7 +255,7 @@ export class DayView {
         let check_state = goal.check_state ? "checked" : "";
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
         let url = `images/goals/rank${goal.difficulty}.svg`
-        let repeat = goal.knot_id ? this._repeat_label_HTML() : "";
+        let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
         let project_emblem = this.data.project_emblem_html(goal.pr_pos)
 
         return `
@@ -283,40 +282,6 @@ export class DayView {
         let finished_count = $('#todosFinished .todo').length
         $('#finishedButton').css('display', finished_count ? "block" : "none")
         $("#finishedCount").html(finished_count);
-    }
-
-    /**
-     * creates repeat label
-     * @returns {string} HTML of repeat label
-     */
-    _repeat_label_HTML() {
-        return `
-        <div class="repeatLabelShow">
-            <img class="repeatLabelImg" src="images/goals/repeat.png" alt="">
-        </div>`
-    }
-
-
-    /**
-     * selects repeat option
-     * checks current repeat option, if the same repeat cancels
-     * if different or was no option it gets selected
-     * @param that selected repeat option
-     */
-    select_repeat_option(that) {
-        let new_repeat = $('.repeatOption').index(that)
-        let current_repeat = this.get_repeat_option()
-
-        $("#repeatPicker").toggle()
-
-        if (!isNaN(current_repeat) && current_repeat === new_repeat) {
-            $(".repeatOption").css("background-color", "#282828")
-            $('#repeatImg').attr('src', `./images/goals/repeat.png`)
-        } else {
-            $(".repeatOption").css("background-color", "#282828")
-            $(that).css("background-color", "#3E3C4B")
-            $('#repeatImg').attr('src', `./images/goals/repeat${new_repeat}.png`)
-        }
     }
 
     /**
@@ -401,13 +366,15 @@ export class DayView {
         let sidebar_pos = $('#rightbar .todo').index(dragged_task)
 
         $('.todoId').eq(new_goal_index).text(todos.length - 1)
-        let project_pos = $('#sideProjectId').text() //check if works
+        let project_pos = $('#sideProjectId').text()
         todos.eq(new_goal_index).append(this.data.project_emblem_html(project_pos))
         window.projectsAPI.getFromProject({date: this.date.day_sql, sidebar_pos: sidebar_pos, main_pos: new_goal_index})
 
-        if ($('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)') $(dragged_task).remove()
-        else {
-            dragged_task.append(this.data.already_emblem_HTML())
+        $(dragged_task).remove()
+
+        let $sidebar_todoId = $('#rightbar .todoId')
+        for (let i = 0; i < $sidebar_todoId.length; i++){
+            $sidebar_todoId.eq(i).text(i)
         }
     }
 
@@ -482,7 +449,6 @@ export class DayView {
      */
     change_main_check(position) {
         const check_task = $('.check_task').eq(position)
-        console.log(check_task)
         const dot = $('.checkDot').eq(position)
         let todo = $('.todo').eq(position)
         let goal_id = $('.todoId')
@@ -510,6 +476,7 @@ export class DayView {
         if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
 
         this.build_finished_count()
+        this.dragula_day_view()
     }
 }
 
@@ -538,6 +505,11 @@ export class Input {
         $(document).on('keyup', '#todoEntrySimple', (event) => {
             if (event.key === 'Enter' || event.keyCode === 13) this.new_goal()
         });
+
+        $(document).on('click', ".repeatOption", (event) => {
+            event.stopPropagation()
+            this.select_repeat_option(event.currentTarget)
+        })
     }
 
     new_goal() {
@@ -555,7 +527,7 @@ export class Input {
                 goal['project_pos'] = -1
             } else {
                 $('#projectTodo .projectSectionGoals').append(this.project.build_project_goal(goal))
-                goal['project_pos'] = project_pos
+                goal['project_pos'] = $('#projectId').text()
             }
 
             goal['goal'] = encode_text(goal_text)
@@ -587,6 +559,28 @@ export class Input {
             importance: importance,
             difficulty: difficulty,
             knot_id: !isNaN(repeat)
+        }
+    }
+
+    /**
+     * selects repeat option
+     * checks current repeat option, if the same repeat cancels
+     * if different or was no option it gets selected
+     * @param that selected repeat option
+     */
+    select_repeat_option(that) {
+        let new_repeat = $('.repeatOption').index(that)
+        let current_repeat = this.get_repeat_option()
+
+        $("#repeatPicker").toggle()
+
+        if (!isNaN(current_repeat) && current_repeat === new_repeat) {
+            $(".repeatOption").css("background-color", "#282828")
+            $('#repeatImg').attr('src', `./images/goals/repeat.png`)
+        } else {
+            $(".repeatOption").css("background-color", "#282828")
+            $(that).css("background-color", "#3E3C4B")
+            $('#repeatImg').attr('src', `./images/goals/repeat${new_repeat}.png`)
         }
     }
 
@@ -635,10 +629,6 @@ export class Steps {
     }
 
     initEventListeners() {
-        $(document).on('click', '.stepsShow', (event) => {
-            event.stopPropagation()
-            this.show_steps(event)
-        });
 
         $(document).on('change', '.stepEntry', (event) => {
             this.new_step_entry(event.currentTarget)
@@ -648,10 +638,7 @@ export class Steps {
             this.change_step_entry(event.currentTarget, event)
         });
 
-        $(document).on('click', '.stepCheck', (event) => {
-            event.stopPropagation()
-            this.change_step_check(event.currentTarget)
-        });
+
     }
 
     /**
@@ -767,7 +754,24 @@ export class Categories {
     }
 
     initEventListeners() {
-        
+        $(document).on('click', '#newCategoryCreate', () => {
+            let name = $('#newCategoryName').val();
+            if (name !== ""){
+                this.create_new_category();
+                let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+
+                $("#newCategory").css('display', 'none');
+                $vignette_layer.css('display', 'none');
+                $vignette_layer.html('')
+
+                let category_element = Object.keys(this.data.categories).at(-1)
+                $('#selectCategory22').css('background', this.data.categories[category_element][0])
+                $('#selectCategory22').text(this.data.categories[category_element][1])
+            }
+            else{
+                $('#newCategoryName').css('border', '3px solid red')
+            }
+        })
 
         $(document).on('click', '#newCategoryDiscard', () => {
             $("#newCategory").css('display', 'none');

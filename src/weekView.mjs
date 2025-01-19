@@ -12,6 +12,7 @@ export class WeekView {
 
     initEventListeners() {
         $(document).on('click', '.weekDayGoals .check_task', (event) => {
+            event.stopPropagation()
             this.check_week_goal(event.currentTarget)
         });
 
@@ -72,7 +73,7 @@ export class WeekView {
         let check_state = goal.check_state ? "checked" : ""
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : ""
         let converted_text = decode_text(goal.goal)
-        let repeat = goal.knot_id ? _repeat_label_HTML() : "";
+        let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
         let todo_id = $('#main .todo').length
 
         return `
@@ -143,10 +144,13 @@ export class WeekView {
         let $header_clone = $(header_template).clone()
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#weekViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/weekview.png')
 
         $header_clone.find('#mainTitle').text(header_params[0])
         $header_clone.find('#date').text(header_params[1])
         $('#main').append($header_clone)
+
+
     }
 
 
@@ -191,13 +195,17 @@ export class WeekView {
             drag_sidebar_task = $(event)
             this.is_week_drag = 0
 
-            goals_length_before = $('#main .goals').length
+            goals_length_before = $('#main .todo').length
+            console.log($('#main .todo').length)
         }).on('drop', (event) => {
-            let todos = $('#main .goals')
+            let todos = $('#main .todo')
+            console.log(todos.length)
             let goals_length_after = todos.length
             let new_goal_pos = todos.index($(event))
 
+
             if (event.className.includes("todo")) {
+
                 if (goals_length_before !== goals_length_after) {
                     this._get_from_project(event, new_goal_pos, drag_sidebar_task)
                 } else if (drag_sidebar_task.parent().attr('id') !== "sideProjectGoals") {
@@ -215,23 +223,21 @@ export class WeekView {
      * @param dragged_task drag event of the task
      */
     _get_from_project(event, new_goal_pos, dragged_task) {
-        let sidebar_pos = $('#rightbar .goals').index(dragged_task)
-        let new_goal_index = $('.weekDayGoals .goals').index(event)
+        let sidebar_pos = $('#rightbar .todo').index(dragged_task)
+        let new_goal_index = $('.weekDayGoals .todo').index(event)
 
         let display_week_day = $('.weekDayGoals').index(event.parentNode)
         let real_week_day = this.data.weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
         let add_date = this.date.week_now[real_week_day]
 
-        let is_sidebar_to_delete = $('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)'
-        window.goalsAPI.getFromProject({
+        window.projectsAPI.getFromProject({
             date: add_date,
             sidebar_pos: sidebar_pos,
             main_pos: new_goal_index,
-            to_delete: is_sidebar_to_delete
+            to_delete: true
         })
-        if (is_sidebar_to_delete) $(dragged_task).remove()
-        else $(dragged_task).append(this.data.already_emblem_HTML())
-        $('#main .todoId').eq(new_goal_pos).text($('#main .goals').length - 1)
+        $(dragged_task).remove()
+        $('#main .todoId').eq(new_goal_pos).text($('#main .todo').length - 1)
     }
 
 
@@ -286,7 +292,7 @@ export class WeekView {
         $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
         setTimeout(() => {
-            let todos = $('#main .goals')
+            let todos = $('#main .todo')
             todos.eq(rel_id).remove()
             window.goalsAPI.changeWeekGoalCheck({id: Number(goal_ids.eq(rel_id).html()), state: 1})
             this.dragula_week_view()

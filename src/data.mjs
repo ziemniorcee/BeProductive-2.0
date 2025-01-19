@@ -183,6 +183,56 @@ export class Data {
         }
         return res
     }
+
+    /**
+     * creates repeat label
+     * @returns {string} HTML of repeat label
+     */
+    _repeat_label_HTML() {
+        return `
+        <div class="repeatLabelShow">
+            <img class="repeatLabelImg" src="images/goals/repeat.png" alt="">
+        </div>`
+    }
+
+    fix_view_options() {
+        let is_rightbar_on = $('#rightbar').css('display') === 'block'
+        let is_dashboard_on = $("#dashboard").css('display') === 'block'
+
+        let $view_options = $('#viewOptions')
+        let $view_options2 = $('#viewOptions2')
+
+        if (is_rightbar_on && is_dashboard_on) {
+            $view_options.css('display', 'none')
+            $view_options2.css('display', 'block')
+        } else {
+            $view_options.css('display', 'flex')
+            $view_options2.css('display', 'none')
+        }
+    }
+
+    /**
+     * shows or hides sidebar
+     * @param force if true no matter current state it forces selected state
+     * @param force_option 0 - show, 1 - hide
+     */
+    show_hide_sidebar(force = false, force_option = null) {
+        let $rightbar = $('#rightbar')
+        let $resizer = $('#resizer')
+        let to_hide = false
+
+        if (force) {
+            if (force_option === 1) {
+                to_hide = true
+            }
+        } else {
+            to_hide = $rightbar.css('display') === 'block'
+        }
+
+        $rightbar.css('display', to_hide ? 'none' : 'block')
+        $resizer.css('display', to_hide ? 'none' : 'flex')
+        this.fix_view_options()
+    }
 }
 
 export let categories = {};

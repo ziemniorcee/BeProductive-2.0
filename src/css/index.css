@@ -1048,6 +1048,7 @@ body {
     display: none;
     overflow-y: scroll;
     overflow-x: hidden;
+    z-index: 1;
 }
 
 .editPickProject {
@@ -1365,8 +1366,8 @@ body {
 
 #iconPicker {
     position: relative;
-    height: 400px ;
-    width: 300px ;
+    height: 400px;
+    width: 300px;
     align-items: center;
     background-color: #121212;
     border: #000000 3px solid;
@@ -1668,7 +1669,6 @@ body {
     height: 100%;
     background-color: #1E1E1E;
     border-left: 3px solid black;
-    overflow: hidden;
     border-radius: 0 0 10px 0;
     font-size: 24px;
     text-align: center;
@@ -1701,6 +1701,91 @@ body {
 
 .editLabel {
     margin-top: 15px;
+}
+
+#editSwitchDateMode {
+    position: absolute;
+    left: 250px;
+    top: 360px;
+    width: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    border-radius: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+
+#editSwitchImg {
+    width: 30px;
+    height: 30px;
+}
+
+#selectDate {
+    line-height: 40px;
+    height: 40px;
+    width: 250px;
+    text-align: center;
+    margin-right: 8px;
+    background-color: #333333;
+    border: 1px solid black;
+    position: relative;
+    margin-left: 25px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#editDateSelector {
+    position: absolute;
+    height: 400px;
+    width: 300px;
+    align-items: center;
+    background-color: #121212;
+    border: #000000 3px solid;
+    border-radius: 10px;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+    font-size: 20px;
+    right: 273px;
+    bottom: 40px;
+    z-index: 12;
+    padding: 15px;
+    display: none;
+    flex-direction: column;
+}
+
+#editDatePicker {
+    margin-top: 10px;
+}
+
+#editDatePicker .ui-datepicker {
+    font-size: 18px; /* Adjust the font size */
+    width: 250px; /* Set a custom width */
+}
+
+/* Optional: Style the date cells */
+#editDatePicker .ui-datepicker td {
+    height: 30px; /* Set custom height for date cells */
+    width: 30px; /* Set custom width for date cells */
+}
+
+
+#editDateTitle {
+    font-size: 25px;
+    margin-bottom: 20px;
+}
+
+#editDateToday, #editDateTomorrow {
+    height: 40px;
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+    cursor: pointer;
+}
+
+#editDateToday:hover, #editDateTomorrow:hover {
+    font-weight: bold; /* Optional: Add bold effect */
+    transform: scale(1.05); /* Optional: Slightly enlarge on hover */
 }
 
 .custom-box::before {
@@ -1736,6 +1821,39 @@ body {
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
 }
 
+#viewOptions2 {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 20px;
+    top: 0;
+    z-index: 10;
+    display: none;
+}
+
+.viewOption2 {
+    width: 50px;
+    height: 50px;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;
+    display: none;
+    border: 1px solid black;
+    background-color: #121212;
+}
+
+.viewOption2:first-child {
+    background-color: #2979FF;
+    display: flex;
+
+}
+
+#viewOptions2:hover .viewOption2 {
+    display: flex;
+    cursor: pointer;
+}
+#viewOptions2:hover{
+    height: 150px;
+}
 .viewOption {
     display: flex;
     justify-content: center; /* Centers horizontally */
@@ -1743,10 +1861,9 @@ body {
     width: 50px;
 }
 
-.viewOption img {
+.viewOption img, .viewOption2 img {
     height: 30px;
     width: 30px;
-
 }
 
 .viewOption + .viewOption {
@@ -1823,7 +1940,7 @@ body {
     left: 10px;
 }
 
-#iconPickerAdd{
+#iconPickerAdd {
     cursor: pointer;
     position: relative;
     display: flex;
@@ -1836,18 +1953,18 @@ body {
     margin-bottom: 30px;
 }
 
-#iconPickerIcons{
+#iconPickerIcons {
     overflow: hidden;
     width: 100%;
     flex-grow: 1;
 }
 
-#iconPickerTitle{
+#iconPickerTitle {
     font-size: 25px;
     margin-bottom: 15px;
 }
 
-#projectSettingIconSrc{
+#projectSettingIconSrc {
     width: 40px;
     height: 40px;
     position: relative;
@@ -1856,13 +1973,13 @@ body {
     cursor: pointer;
 }
 
-#iconUpload::-webkit-file-upload-button{
+#iconUpload::-webkit-file-upload-button {
     height: 52px;
     width: 202px;
     cursor: pointer;
 }
 
-#iconUpload{
+#iconUpload {
     position: absolute;
     top: 59px;
     color: transparent;

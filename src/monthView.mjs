@@ -45,12 +45,15 @@ export class MonthView {
      */
     make_month_goals(goals_dict) {
         let day_shift = 0
-        $('.monthDate').each((event) => {
-            if (Number($(event.currentTarget).text()) === 1) {
-                day_shift = $('.monthDate').index(event.currentTarget)
-                return false;
+        let $month_date = $('.monthDate')
+
+        for (let i = 0; i < $month_date.length; i++){
+            if (Number($month_date.eq(i).text()) === 1) {
+                day_shift = i
+                break
             }
-        });
+        }
+
 
         for (const [day, goals] of Object.entries(goals_dict)) {
             let goals_space = $('.monthGoals').eq(day - 1 + day_shift)
@@ -156,10 +159,12 @@ export class MonthView {
         let $header_clone = $(header_template).clone()
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#monthViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2').eq(0).attr('src', 'images/goals/monthview.png')
 
         $header_clone.find('#mainTitle').text(main_title)
         $header_clone.find('#date').text(date)
         $('#main').append($header_clone)
+        $('.viewOption2 img').eq(0).attr('src', 'images/goals/monthview.png')
     }
 
 
@@ -170,7 +175,7 @@ export class MonthView {
      */
     build_month_goal(goals_dict) {
         let converted_text = decode_text(goals_dict['goal'])
-        let repeat = goals_dict.knot_id ? _repeat_label_HTML() : "";
+        let repeat = goals_dict.knot_id ? this.data._repeat_label_HTML() : "";
         let goal_id = $('#main, .monthTodo').length - 1
 
         return `
@@ -276,10 +281,7 @@ export class MonthView {
             }
         }
 
-        let is_sidebar_to_delete = $('.sideProjectOption').eq(2).css('background-color') === 'rgb(0, 34, 68)'
-
-        if (is_sidebar_to_delete) $(dragged_task).remove()
-        else $(dragged_task).append(this.data.already_emblem_HTML())
+        $(dragged_task).remove()
 
         let category_id = getIdByColor(this.data.categories, $(event).find('.todoCheck').css('background-color'))
         let goal_dict = {
@@ -295,11 +297,12 @@ export class MonthView {
         let day = Number($(event).closest('.monthDay').find('.monthDate').text())
         let add_date = this.date.sql_sql_month_day(day)
 
-        window.goalsAPI.getFromProject({
+        console.log(add_date)
+        window.projectsAPI.getFromProject({
             date: add_date,
             sidebar_pos: sidebar_pos,
             main_pos: new_goal_index,
-            to_delete: is_sidebar_to_delete
+            to_delete: true
         })
 
         $(event).remove()

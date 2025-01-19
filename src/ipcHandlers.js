@@ -18,6 +18,7 @@ function todoHandlers(db) {
     let ids_array = []
     let ids_array_previous = []
 
+    let inbox_ids = []
 
     ipcMain.handle('get-day-view', async (event, params) => {
         try {
@@ -78,12 +79,12 @@ function todoHandlers(db) {
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                         WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
-                          and check_state = 0
+                          and check_state = 0 
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
                         goal_ids = goals.map(item => item.id);
-
+                        ids_array = goal_ids
                         let safe_goals = goals.map(goal => {
                             let {id, ...rest} = goal;
                             return rest;
@@ -158,6 +159,7 @@ function todoHandlers(db) {
                     if (err) reject(err)
                     else {
                         set_goal_ids(goals)
+                        ids_array = goal_ids
                         let ids_string = `( ${goal_ids} )`
 
                         db.all(`SELECT id, goal_id, step_text, step_check
@@ -281,6 +283,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('get-from-project', (event, params) => {
+        console.log(project_sidebar_ids)
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
@@ -296,7 +299,7 @@ function todoHandlers(db) {
                     else step_ids[steps[i].goal_id] = [steps[i].id]
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
+                project_sidebar_ids.splice(params.sidebar_pos, 1)
 
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;
@@ -379,6 +382,7 @@ function todoHandlers(db) {
                                G.difficulty,
                                G.importance,
                                G.note,
+                               G.addDate,
                                PR.id as pr_id
                         FROM goals G
                                  LEFT JOIN projects PR ON PR.id = G.project_id
@@ -565,7 +569,6 @@ function todoHandlers(db) {
             array_ids = project_sidebar_ids
         }
 
-        console.log(params.id)
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
                 WHERE id = ${array_ids[params.id]}`)
@@ -608,7 +611,9 @@ function todoHandlers(db) {
                     difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${project_id}
+                    project_id = ${project_id},
+                    addDate = '${params.changes['addDate']}',
+                    date_type = ${params.changes['date_type']}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
@@ -954,7 +959,6 @@ function todoHandlers(db) {
                         ORDER BY category`, (err, rows) => {
                     if (err) reject(err);
                     else {
-                        console.log(rows)
                         resolve(rows);
                     }
                 })
@@ -1075,6 +1079,49 @@ function todoHandlers(db) {
             return {success: false, files: [], message: err.message};
         }
     });
+
+    ipcMain.handle('get-inbox', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM inbox
+                        WHERE check_state = 0
+                        ORDER BY id DESC`, (err, goals) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        inbox_ids = goals.map((goal) => goal.id)
+                        let safe_inbox = goals.map(goal => {
+                            let {id, ...rest} = goal;
+                            return rest;
+                        })
+                        resolve(safe_inbox);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+    ipcMain.on('new-inbox-goal', (event, params) => {
+        db.run(`INSERT INTO inbox (name, add_date)
+                VALUES ("${params.name}", "${params.add_date}")`);
+
+        db.all("SELECT id  FROM inbox WHERE check_state = 0 ORDER BY id DESC LIMIT 1;", (err, rows) => {
+            inbox_ids.push(rows[0]['id'])
+            console.log(inbox_ids)
+        })
+    })
+
+    ipcMain.on('check-inbox-goal', (event, params) => {
+        db.run(`UPDATE inbox
+                SET check_state = 1
+                WHERE id = ${inbox_ids[params.position]}`)
+
+        inbox_ids.splice(params.position, 1)
+    })
 
     ipcMain.on('remove-project', (event, params) => {
         db.run(`DELETE FROM projects WHERE id=${params.id}`);

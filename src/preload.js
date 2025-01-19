@@ -117,3 +117,9 @@ contextBridge.exposeInMainWorld('dataAPI', {
     getGalacticConnections: () => ipcRenderer.invoke('get-galactic-connections'),
 });
 
+contextBridge.exposeInMainWorld('inboxAPI', {
+    getInbox: () => ipcRenderer.invoke('get-inbox'),
+    newInboxGoal: (params) => ipcRenderer.send('new-inbox-goal', params),
+    checkInboxGoal: (params) => ipcRenderer.send('check-inbox-goal', params),
+});
+

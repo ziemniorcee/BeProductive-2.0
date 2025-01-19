@@ -59,10 +59,6 @@ import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
     })
 })();
 
-$(document).on('click', '#dashClose, #dashOpen', () => {
-    $('#dashboard').toggle()
-    $('#dashOpen').toggle();
-})
 
 
 $(document).on('click', '#rightbar', function () {

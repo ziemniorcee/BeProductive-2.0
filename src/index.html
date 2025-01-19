@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="css/galactic.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
@@ -33,6 +32,8 @@
     <script type="module" src="galactic.mjs"></script>
     <script type="module" src="inbox.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+
 </head>
 <body>
 
@@ -169,7 +170,20 @@
                     <img src="images/goals/monthview.png" alt="">
                 </div>
             </div>
-
+            <div id="viewOptions2">
+                <div class="viewOption2">
+                    <img src="images/goals/dayview.png" alt="">
+                </div>
+                <div class="viewOption2" id="dayViewButton2">
+                    <img src="images/goals/dayview.png" alt="">
+                </div>
+                <div class="viewOption2"  id="weekViewButton2">
+                    <img src="images/goals/weekview.png" alt="">
+                </div>
+                <div class="viewOption2"  id="monthViewButton2">
+                    <img src="images/goals/monthview.png" alt="">
+                </div>
+            </div>
 
         </div>
     </template>
@@ -237,7 +251,7 @@
         <div id="projectHeader">
             <img id="projectHeaderIcon" src="" alt="">
             <div id="projectName"></div>
-            <div id="projectAskDelete">Are you sure? <div id="projectDeleteConfirm">DELETE</div></div>
+            <div id="projectId">0</div>
             <img id="projectDelete" src="images/goals/delete.png" alt="">
         </div>
     </template>
@@ -321,7 +335,17 @@
                     </div>
                     <div id="editProjectPicker">
                     </div>
-                    <div class="editLabel">Deadline</div>
+                    <div class="editLabel" id="editLabelDate">Date</div>
+                    <div id="editSwitchDateMode">
+                        <img id="editSwitchImg" src="images/goals/deadline.png" alt="">
+                    </div>
+                    <div id="selectDate">30.12.2024</div>
+                    <div id="editDateSelector">
+                        <div id="editDateTitle">Select Date</div>
+                        <div id="editDateToday">Today</div>
+                        <div id="editDateTomorrow">Tomorrow</div>
+                        <div id="editDatePicker"></div>
+                    </div>
                 </div>
             </div>
         </div>
