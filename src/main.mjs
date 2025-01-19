@@ -6,7 +6,6 @@ import {WeekView} from "./weekView.mjs";
 import {Edit} from "./edit2.mjs";
 import {MonthView} from "./monthView.mjs";
 import {Project} from "./project.mjs";
-import {HistorySidebar} from "./sidebar.mjs";
 import { Strategy } from "./galactic.mjs";
 import {HistorySidebar, Idea} from "./sidebar.mjs";
 import {Inbox} from "./inbox.mjs";
