@@ -6,6 +6,8 @@ import {WeekView} from "./weekView.mjs";
 import {Edit} from "./edit2.mjs";
 import {MonthView} from "./monthView.mjs";
 import {Project} from "./project.mjs";
+import {HistorySidebar} from "./sidebar.mjs";
+import { Strategy } from "./galactic.mjs";
 import {HistorySidebar, Idea} from "./sidebar.mjs";
 import {Inbox} from "./inbox.mjs";
 
@@ -29,6 +31,7 @@ class MainApp {
         this.input = new Input(this.data, this.date, this.steps, this.project, this.dayView)
         this.weekView = new WeekView(this.data, this.date)
         this.monthView = new MonthView(this.data, this.date)
+        this.strategy = new Strategy(this.data, this.categories)
     }
 
     async init() {
@@ -173,6 +176,42 @@ class DisplayManagement{
             this.reset_dragula()
         })
 
+        $(document).on('click', '#newCategoryCreate', () => {
+            this.app.categories.create_new_category();
+            if ($('#galactics').css('display') !== 'none') {
+                this.app.strategy.add_galactic_category_boxes();
+            }
+            let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+
+            $("#newCategory").css('display', 'none');
+            $vignette_layer.css('display', 'none');
+            $vignette_layer.html('')
+
+            let category_element = Object.keys(this.data.categories).at(-1)
+            $('#selectCategory22').css('background', this.data.categories[category_element][0])
+            $('#selectCategory22').text(this.data.categories[category_element][1])
+        })
+
+        $(document).on('click', '#removeCategoryCreate', () => {
+            this.app.categories.remove_category()
+            if ($('#galactics').css('display') !== 'none') {
+                this.app.strategy.add_galactic_category_boxes();
+            }
+        })
+
+        // leftbar buttons input
+
+        $(document).on('click', '#todoButton', () => {
+            $('#galactics').css('display', 'none');
+            this.app.strategy.clearEditorInterval();
+        })
+
+        $(document).on('click', '#strategyButton', () => {
+            $('#galactics').css('display', 'block');
+            this.app.strategy.add_galactic_category_boxes();
+            $('#galactic-editor').remove();
+        })
+
         window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))
 
         $(document).on('click', '.stepsShow', (event) => {
@@ -204,7 +243,7 @@ class DisplayManagement{
         }
     }
 
-    async display_reset (){
+    async display_reset() {
         this.app.project.set_projects_options()
         await this.app.project.fix_project_sidebar()
         this.reset_dragula()
@@ -213,17 +252,21 @@ class DisplayManagement{
     }
 
     async delete_project() {
-        window.projectsAPI.deleteProject({position: this.app.project.project_pos})
-
         $('#vignette').html('')
         $('#vignette').css('display', 'none')
-        this.app.data.projects.splice(this.app.project.project_pos, 1)
+
+        if ($('#galacticContainer').has('#galactic-editor')) {
+            this.app.strategy.remove_project()
+        } else {
+            window.projectsAPI.deleteProject({position: this.app.project.project_pos})
+            this.app.data.projects.splice(this.app.project.project_pos, 1)
+        }
 
         this.app.project.set_projects_options()
         await this.app.dayView.display()
     }
 
-    reset_dragula(){
+    reset_dragula() {
         if ($('#todosAll').length) this.app.dayView.dragula_day_view()
         else if ($('.weekDay').length) this.app.weekView.dragula_week_view()
         else this.app.monthView.dragula_month_view()

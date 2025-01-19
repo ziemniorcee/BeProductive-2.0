@@ -941,11 +941,7 @@ function todoHandlers(db) {
                         reject(err);
                     } else {
                         project_ids = projects.map((project) => project.id)
-                        let safe_projects = projects.map(project => {
-                            let {id, ...rest} = project;
-                            return rest;
-                        })
-                        resolve(safe_projects);
+                        resolve(projects);
                     }
                 })
             });
@@ -1125,6 +1121,10 @@ function todoHandlers(db) {
                 WHERE id = ${inbox_ids[params.position]}`)
 
         inbox_ids.splice(params.position, 1)
+    })
+
+    ipcMain.on('remove-project', (event, params) => {
+        db.run(`DELETE FROM projects WHERE id=${params.id}`);
     })
 }
 

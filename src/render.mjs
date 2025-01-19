@@ -1,5 +1,15 @@
-import {check_border, decode_text, encode_text, getIdByColor, hsvToRgb, projects, weekdays2} from "./data.mjs";
+import {
+    check_border,
+    decode_text,
+    encode_text,
+    getIdByColor,
+    hsvToRgb,
+    weekdays2,
+    projects,
+    project_conn
+} from "./data.mjs";
 import {add_galactic_category_boxes} from './galactic.mjs';
+import {create_today_graphs} from './graph.mjs';
 
 
 export class DayView {
@@ -774,14 +784,6 @@ export class Categories {
             this.select_category(event.currentTarget)
         });
 
-        $(document).on('click', '#galactic-display-remove-category', () => {
-            this.open_remove_category()
-        })
-
-        $(document).on('click', '#removeCategoryCreate', () => {
-            this.remove_category()
-        })
-
     }
 
     /**
@@ -815,9 +817,7 @@ export class Categories {
                 $(`#categoryPicker${i}`).css('display', 'none');
             }
         }
-        if ($('#galactics').css('display') !== 'none') {
-            add_galactic_category_boxes();
-        }
+        
     }
 
 
@@ -827,13 +827,12 @@ export class Categories {
      */
     select_category(that) {
         let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-        let picker = '0';
 
         let picker_id = $(that).closest('.categoryPicker').attr('id')
         const id = picker_id.match(/categoryPicker(\d+)/)[1];
 
-
         if (id === '4') index++
+        if (id === '3') index++
 
         if (index === 1) {
             let $selected_vignette = $("#vignette")
@@ -849,6 +848,7 @@ export class Categories {
             let selected_category = $(`#selectCategory${id}`)
             $(`#categoryPicker${id}`).css('display', 'none')
             let category_element = Object.keys(this.data.categories)[index - 2]
+            console.log(category_element);
             selected_category.css('background', this.data.categories[category_element][0])
             selected_category.text(this.data.categories[category_element][1])
         }
@@ -878,17 +878,6 @@ export class Categories {
         return categories_html
     }
 
-
-    open_remove_category() {
-        $("#vignette").css('display', 'block')
-
-        const remove_category_template = $('#removeCategoryTemplate').prop('content');
-        let $remove_category_clone = $(remove_category_template).clone()
-        $remove_category_clone.find(".categoryPicker").html(_categories_HTML(false))
-        $("#vignette").html($remove_category_clone)
-    }
-
-
     remove_category() {
         let category = getIdByColor(this.data.categories, $('#selectCategory4').css('backgroundColor'))
         delete this.data.categories[category];
@@ -898,10 +887,9 @@ export class Categories {
             projects.push(e);
         }
         window.goalsAPI.removeCategory({id: category});
-        add_galactic_category_boxes();
         $("#vignette").css('display', 'none');
         $("#vignette").html('')
-        $("#categoryPicker1").html(_categories_HTML(true))
+        $("#categoryPicker1").html(this._categories_HTML(true))
     }
 
 

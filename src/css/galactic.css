@@ -38,8 +38,7 @@
     position: relative;
     margin: 0px;
     text-align: center;
-    border-radius: 5px;
-    border-width: 5px;
+    border-width: 6px;
     border-style: solid;
     height: 100%;
 }
@@ -56,12 +55,12 @@
 .galactic-project-icon {
     position: absolute;
     transform: translate(-50%, -50%);
-    height: 16px;
-    width: 16px;
+    height: 8px;
+    width: 8px;
     overflow: hidden;
     border-width: 5px;
     border-style:solid;
-    border-radius: 16px;
+    border-radius: 8px;
     border-color: azure;
     color: azure;
     background-color: rgb(240, 255, 255);
@@ -73,13 +72,15 @@
     height: 200%;
     text-align: center;
     transform-origin: top left;
-    transition: transform 0.1s ease;
+    transition: transform 0.5s ease, top 0.5s ease, left 0.5s ease;
 }
 
 .galactic-editor-test {
     position: absolute;
     width: 50%;
     height: 50%;
+    pointer-events: none;
+    /* border: 2px solid yellow; */
 }
 
 #galactic-editor-hud {
@@ -89,7 +90,7 @@
     width: 100%;
     height: 100%;
     text-align: center;
-    border-width: 10px;
+    border-width: 6px;
     border-style:solid;
     border-radius: 5px;
     pointer-events: none;
@@ -141,8 +142,14 @@
     pointer-events: auto;
 }
 
+.galactic-editor-line {
+    pointer-events: all;
+    z-index:5;
+}
+
 #galactic-editor-canv {
     z-index: 55;
+    pointer-events: all;
 }
 
 #galactic-display-options-btn,
@@ -201,20 +208,23 @@
     margin-bottom: 20px;
     margin-top: 20px;
     height: 60px;
-    line-height: 60px;
-    font-size: 24px;
     text-align: right;
     padding-right: 20px;
-    border-radius: 30px;
-    background-color: aliceblue;
-    cursor: pointer;
     z-index: 60;
+    background-color: #000000;
+    border-radius: 30px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 2px white solid;
+    font-size: 24px;
+    line-height: 60px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
 }
 
 .galacticOption img {
     height: 50px;
     width: 50px;
-    margin-right: 10px;
+    margin-right: 20px;
     margin-left: 10px;
 }
 
@@ -223,6 +233,7 @@
     line-height: 1;
     display: flex;
     align-items: center;
+    color: white;
 }
 
 #galactic-editor-project-picker {
