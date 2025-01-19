@@ -159,10 +159,12 @@ export class MonthView {
         let $header_clone = $(header_template).clone()
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#monthViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2').eq(0).attr('src', 'images/goals/monthview.png')
 
         $header_clone.find('#mainTitle').text(main_title)
         $header_clone.find('#date').text(date)
         $('#main').append($header_clone)
+        $('.viewOption2 img').eq(0).attr('src', 'images/goals/monthview.png')
     }
 
 

@@ -79,7 +79,7 @@ function todoHandlers(db) {
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                         WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
-                          and check_state = 0
+                          and check_state = 0 
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -283,6 +283,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('get-from-project', (event, params) => {
+        console.log(project_sidebar_ids)
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
@@ -298,7 +299,7 @@ function todoHandlers(db) {
                     else step_ids[steps[i].goal_id] = [steps[i].id]
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
+                project_sidebar_ids.splice(params.sidebar_pos, 1)
 
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;
@@ -381,6 +382,7 @@ function todoHandlers(db) {
                                G.difficulty,
                                G.importance,
                                G.note,
+                               G.addDate,
                                PR.id as pr_id
                         FROM goals G
                                  LEFT JOIN projects PR ON PR.id = G.project_id
@@ -609,7 +611,9 @@ function todoHandlers(db) {
                     difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${project_id}
+                    project_id = ${project_id},
+                    addDate = '${params.changes['addDate']}',
+                    date_type = ${params.changes['date_type']}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
@@ -1084,7 +1088,8 @@ function todoHandlers(db) {
         try {
             return await new Promise((resolve, reject) => {
                 db.all(`SELECT *
-                        FROM inbox WHERE check_state = 0
+                        FROM inbox
+                        WHERE check_state = 0
                         ORDER BY id DESC`, (err, goals) => {
                     if (err) {
                         reject(err);

@@ -1,7 +1,6 @@
-import {_hide_sidebar} from "./sidebar.mjs";
-
 export class Inbox {
-    constructor(app_date) {
+    constructor(app_data, app_date) {
+        this.data = app_data
         this.date = app_date
         this.initEventListeners()
     }
@@ -22,29 +21,31 @@ export class Inbox {
         });
     }
 
+    /**
+     * build view of inbox
+     * gets from inbox template
+     * builds goals and then adds titles depends on day
+     */
     async build_view() {
         const main_template = $('#inboxMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
-        _hide_sidebar()
+        this.data.show_hide_sidebar(true, 1)
         $('#main').html($main_clone)
 
         let goals = await window.inboxAPI.getInbox()
-
         let breaks = this.date.get_inbox_sections(goals)
-        console.log(breaks)
         let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
-        let current_break = 0
+
         for (let i = 0; i < goals.length; i++) {
-            if (breaks[current_break] === i) {
-                $('#inboxList').append(`<div class="inboxListBreak">${titles[current_break]}</div>`)
-                for (let j = current_break; j < breaks.length; j++) {
-                    current_break += 1
-                    if (breaks[current_break] !== -1) {
-                        break
-                    }
-                }
-            }
             this.add_todo(goals[i]["name"], 1)
+        }
+
+        let current_break = 0
+        for (let i = 0; i < breaks.length; i++) {
+            if (breaks[i] !== -1) {
+                $('#inboxList').children().eq(breaks[i] + current_break).before(`<div class="inboxListBreak">${titles[i]}</div>`)
+                current_break++
+            }
         }
     }
 
@@ -64,7 +65,7 @@ export class Inbox {
             $('#inboxList').append($clone)
         } else {
             let $first_break = $('.inboxListBreak').eq(0)
-            if ($first_break.text() === "Today"){
+            if ($first_break.text() === "Today") {
                 $first_break.after($clone)
             } else {
                 $('#inboxList').prepend($clone)

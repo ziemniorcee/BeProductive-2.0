@@ -19,14 +19,14 @@ export class HistorySidebar {
             this.change_history_check(event.currentTarget)
         });
 
-
+        $(document).on('click', '#sidebarClose', () => this.data.show_hide_sidebar())
     }
 
     /**
      * Displays history sidebar on #rightbar
      */
     async show_history_sidebar() {
-        _show_sidebar()
+        this.data.show_hide_sidebar(true, 0)
         $('#rightbar').html(`
             <div id="head">
                 <div id="gloryButton">
@@ -203,7 +203,7 @@ export class Idea {
      * builds core of ideas sidebar
      */
     show_ideas_sidebar() {
-        _show_sidebar()
+        this.data.show_hide_sidebar(true, 0)
         $('#rightbar').html(`
         <div id="head">
             <div id="gloryButton">
@@ -295,35 +295,8 @@ export class Idea {
 }
 
 
-export function _show_sidebar() {
-    let right_bar = $('#rightbar')
-    let resizer = $('#resizer')
-    if (right_bar.css('display') === 'none') {
-        right_bar.toggle()
-        resizer.css('display', 'flex')
-    }
-}
 
-export function _hide_sidebar() {
-    let right_bar = $('#rightbar')
-    let resizer = $('#resizer')
-    if (right_bar.css('display') === 'block') {
-        right_bar.toggle()
-        right_bar.html("")
-        resizer.css('display', 'none')
-    }
-}
 
-//force = false
-export function show_hide_sidebar(force = false) {
-    let sidebar = $('#rightbar')
-    let sidebar_state = sidebar.css('display') === 'none'
-    if (force) sidebar_state = false
-    sidebar.toggle(sidebar_state)
-    $('#resizer').css('display', sidebar_state ? 'flex' : 'none')
-}
-
-$(document).on('click', '#sidebarClose', show_hide_sidebar)
 
 document.querySelector("#resizer").addEventListener("mousedown", () => {
     document.addEventListener("mousemove", resize, false);

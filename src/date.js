@@ -40,6 +40,7 @@ export class CurrentDate {
                 }
             }
         });
+
     }
 
     get_day_view_header() {
@@ -385,6 +386,27 @@ export class CurrentDate {
 
         }
         return break_points
+    }
+
+    get_edit_date_format(date){
+        let format_day = date.getDate()
+        let format_month = date.getMonth() + 1
+
+        if (format_month < 10) format_month = "0" + format_month
+        if (format_day < 10) format_day = "0" + format_day
+
+        return `${format_day}.${format_month}.${date.getFullYear()}`;
+    }
+
+    change_to_edit_format(sql_format){
+        let date = new Date(sql_format)
+        return this.get_edit_date_format(date)
+    }
+
+    get_edit_sql_format(edit_format){
+        const [day, month, year] = edit_format.split('.').map(Number); // Split and convert to numbers
+        const date = new Date(year, month - 1, day);
+        return this.sql_format(date)
     }
 }
 
