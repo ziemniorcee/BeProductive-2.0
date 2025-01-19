@@ -6,7 +6,7 @@ import {
 } from "./data.mjs";
 
 
-export class Edit{
+export class Edit {
     constructor(app_data, app_date, app_categories, app_steps) {
         this.initEventListeners()
         this.data = app_data
@@ -17,9 +17,11 @@ export class Edit{
         this.selected_goal = null
         this.selected_goal_id = null
         this.selected_project_id = null
+
+        this.prevent_step_blur = false
     }
 
-    initEventListeners(){
+    initEventListeners() {
         $(document).on('click', '.todo, .weekDay .todo, .monthTodo, .day .sidebarTask', async (event) => {
             $("#vignette").css('display', 'block')
             $("#taskEdit").css('display', 'block')
@@ -32,15 +34,41 @@ export class Edit{
         })
 
         $(document).on('input', '#editNoteEntry', () => {
-            this.is_note_img()
+            let note_content = $('#editNoteEntry').val()
+            this.set_note(note_content)
         })
 
         $(document).on('click', '#editNewStep', () => {
             this.new_step_add()
         })
 
+        $(document).on('keydown', '.editStepEntry', (event) => {
+            if (event.key === 'Tab') {
+                event.preventDefault()
+                this.prevent_step_blur = true
+
+                let is_last = $(event.currentTarget).is('.editStepEntry:last')
+                let is_current_empty = $(event.currentTarget).val() === ""
+
+                if (is_last && !is_current_empty) {
+                    this.new_step_add()
+                } else {
+                    let $edit_step_entry = $('.editStepEntry')
+                    let current_input_id = $edit_step_entry.index(event.currentTarget)
+
+                    setTimeout(() => {
+                        $edit_step_entry.eq(current_input_id + 1).focus();
+                    }, 0);
+                }
+            }
+        })
+
         $(document).on('blur', '.editStepEntry', (event) => {
-            this.change_step(event.currentTarget)
+            if (!this.prevent_step_blur) {
+                this.change_step(event.currentTarget)
+            }
+
+            this.prevent_step_blur = false
         })
 
         $(document).on('click', '.editPickProject', (event) => {
@@ -84,8 +112,7 @@ export class Edit{
                 $edit_label_date.text('Deadline')
                 $edit_switch_date_mode.css('background-color', 'blue')
                 $edit_switch_img.attr('src', 'images/goals/dashboard/other.png')
-            }
-            else {
+            } else {
                 $edit_label_date.text('Date')
                 $edit_switch_date_mode.css('background-color', 'red')
                 $edit_switch_img.attr('src', 'images/goals/deadline.png')
@@ -98,8 +125,7 @@ export class Edit{
             let is_current_date = $('#editLabelDate').text() === 'Date'
             if (is_current_date) {
                 $edit_switch_date_mode.css('background-color', 'red')
-            }
-            else {
+            } else {
                 $edit_switch_date_mode.css('background-color', 'blue')
             }
         })
@@ -126,7 +152,7 @@ export class Edit{
         if (this.selected_goal.attr('class') === 'sidebarTask') {
             this.selected_goal_id = $('.sidebarTask').index(this_todo)
             array_option = 1
-        } else if (this.selected_goal.closest('#rightbar').length){
+        } else if (this.selected_goal.closest('#rightbar').length) {
             array_option = 2
         }
 
@@ -146,7 +172,9 @@ export class Edit{
         $edit_clone.find('#editMainEntry').val(decode_text(goal["goal"]))
         $edit_clone.find('#editNoteEntry').val(decode_text(goal["note"]))
         $edit_clone.find('#editMainCheck').prop("checked", goal['check_state'])
-        this.is_note_img()
+        console.log(goal['note'])
+        if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
+        console.log($edit_clone.find('#editNoteImg'))
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
 
@@ -166,8 +194,8 @@ export class Edit{
         this.set_project(goal['pr_pos'])
         this.dragula_steps()
 
-        $( function() {
-            $( "#editDatePicker" ).datepicker({
+        $(function () {
+            $("#editDatePicker").datepicker({
                 dateFormat: "dd.mm.yy",
                 onSelect: function (selectedDate) {
                     $('#selectDate').text(selectedDate)
@@ -191,9 +219,8 @@ export class Edit{
     /**
      * If there is text in a note it adds icon of note at the beggining of note entry
      */
-    is_note_img() {
-        let note_content = $('#editNoteEntry').val()
-
+    set_note(note_content) {
+        console.log(note_content === "")
         if (note_content === "") {
             $('#editNoteImg').css('display', 'block')
         } else {
@@ -256,8 +283,13 @@ export class Edit{
             <textarea rows="1" class="editStepEntry" spellcheck="false"></textarea>
         </div>`)
 
-        let edit_step_entry = $('.editStepEntry')
-        edit_step_entry.last().focus()
+        setTimeout(() => {
+            let edit_step_entry = $('.editStepEntry');
+            edit_step_entry.last().focus();
+        }, 0);
+        console.log('CHuj224')
+
+
     }
 
 
@@ -357,14 +389,14 @@ export class Edit{
                     this.change_project_emblem(this.selected_project_id)
                 }
             }
-            if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length){
+            if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length) {
                 if (project_pos !== this.selected_project_id) {
                     this.selected_goal.remove()
                 }
             }
         } else if (this.selected_goal.attr('class') === 'monthTodo') {
             this.set_monthTodo_changes(this.selected_goal, changes)
-        } else if (this.selected_goal.attr('class') === 'sidebarTask'){
+        } else if (this.selected_goal.attr('class') === 'sidebarTask') {
             this.selected_goal.find('.historyText').text(changes['goal'])
         }
 
@@ -389,7 +421,7 @@ export class Edit{
         selected_goal.find('.checkDot').css('border-color', check_border[changes['importance']])
     }
 
-    set_monthTodo_changes(selected_goal, changes){
+    set_monthTodo_changes(selected_goal, changes) {
         selected_goal.find('.monthTodoText').text(changes['goal'])
         selected_goal.find('.monthTodoLabel').css('background-color', this.data.categories[changes['category']][0])
         selected_goal.css('background-color', this.data.categories2[changes['category']])
@@ -407,8 +439,8 @@ export class Edit{
 
         let steps_array = []
         for (let i = 0; i < edit_steps.length; i++) {
-            let step_input =  edit_steps.eq(i).val()
-            if (step_input !== ""){
+            let step_input = edit_steps.eq(i).val()
+            if (step_input !== "") {
                 steps_array.push({
                     'step_text': encode_text(step_input),
                     'step_check': Number(edit_checks.eq(i).prop('checked'))

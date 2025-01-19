@@ -283,6 +283,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('get-from-project', (event, params) => {
+        console.log(project_sidebar_ids)
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
@@ -298,7 +299,7 @@ function todoHandlers(db) {
                     else step_ids[steps[i].goal_id] = [steps[i].id]
                 }
                 goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                if (params.to_delete) project_sidebar_ids.splice(params.sidebar_pos, 1)
+                project_sidebar_ids.splice(params.sidebar_pos, 1)
 
                 let safe_steps = steps.map(step => {
                     let {id, goal_id, ...rest} = step;

@@ -12,6 +12,7 @@ export class WeekView {
 
     initEventListeners() {
         $(document).on('click', '.weekDayGoals .check_task', (event) => {
+            event.stopPropagation()
             this.check_week_goal(event.currentTarget)
         });
 
@@ -143,10 +144,13 @@ export class WeekView {
         let $header_clone = $(header_template).clone()
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#weekViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/weekview.png')
 
         $header_clone.find('#mainTitle').text(header_params[0])
         $header_clone.find('#date').text(header_params[1])
         $('#main').append($header_clone)
+
+
     }
 
 

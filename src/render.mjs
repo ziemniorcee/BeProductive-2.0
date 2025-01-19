@@ -199,6 +199,8 @@ export class DayView {
 
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#dayViewButton').css('background-color', '#2979FF')
+        $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/dayview.png')
+
         let categories_html = this.categories._categories_HTML()
 
         const content_template = $('#dayViewContentTemplate').prop('content');
@@ -271,11 +273,6 @@ export class DayView {
         $('#finishedButton').css('display', finished_count ? "block" : "none")
         $("#finishedCount").html(finished_count);
     }
-
-
-
-
-
 
     /**
      * Sets drag and drop for day view
@@ -364,6 +361,11 @@ export class DayView {
         window.projectsAPI.getFromProject({date: this.date.day_sql, sidebar_pos: sidebar_pos, main_pos: new_goal_index})
 
         $(dragged_task).remove()
+
+        let $sidebar_todoId = $('#rightbar .todoId')
+        for (let i = 0; i < $sidebar_todoId.length; i++){
+            $sidebar_todoId.eq(i).text(i)
+        }
     }
 
     /**
@@ -437,7 +439,6 @@ export class DayView {
      */
     change_main_check(position) {
         const check_task = $('.check_task').eq(position)
-        console.log(check_task)
         const dot = $('.checkDot').eq(position)
         let todo = $('.todo').eq(position)
         let goal_id = $('.todoId')
@@ -465,6 +466,7 @@ export class DayView {
         if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
 
         this.build_finished_count()
+        this.dragula_day_view()
     }
 }
 

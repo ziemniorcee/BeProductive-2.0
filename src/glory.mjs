@@ -1,4 +1,3 @@
-import {show_hide_sidebar} from "./sidebar.mjs";
 import {categories, month_names} from "./data.mjs";
 
 $(document).on('click','#gloryButton', function (){

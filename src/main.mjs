@@ -22,7 +22,7 @@ class MainApp {
         this.idea = new Idea(this.data, this.date)
         this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
-        this.inbox = new Inbox(this.date)
+        this.inbox = new Inbox(this.data, this.date)
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
 
@@ -62,12 +62,12 @@ class DisplayManagement{
             await this.display_reset()
         })
 
-        $(document).on('click', '#dayViewButton', async () => {
+        $(document).on('click', '#dayViewButton, #dayViewButton2', async () => {
             await this.app.dayView.display()
             await this.display_reset()
         })
 
-        $(document).on('click', '#weekViewButton', async () => {
+        $(document).on('click', '#weekViewButton, #weekViewButton2', async () => {
             await this.app.weekView.display()
             await this.display_reset()
         })
@@ -128,7 +128,7 @@ class DisplayManagement{
             }
         });
 
-        $(document).on('click', '#monthViewButton', async () => {
+        $(document).on('click', '#monthViewButton, #monthViewButton2', async () => {
             await this.app.monthView.display()
             this.app.project.set_projects_options()
             await this.app.project.fix_project_sidebar()
@@ -148,6 +148,7 @@ class DisplayManagement{
 
         $(document).on('click', '.projectType', async (event) => {
             await this.app.project.show_project_sidebar(event.currentTarget)
+            this.app.data.fix_view_options()
             this.reset_dragula()
         });
 
@@ -189,12 +190,26 @@ class DisplayManagement{
             else if ($('#projectContent').length) this.app.project.dragula_project_view()
         });
 
+        $(document).on('click', '#dashClose, #dashOpen', () => {
+            $('#dashboard').toggle()
+            $('#dashOpen').toggle();
+            this.app.data.fix_view_options()
+            console.log('CHUJ')
+        })
+    }
+
+    fix_dashboard_arrows() {
+        if ($("#dashboard").css('display') === 'none') {
+            $('#dashOpen').toggle();
+        }
     }
 
     async display_reset (){
         this.app.project.set_projects_options()
         await this.app.project.fix_project_sidebar()
         this.reset_dragula()
+        this.app.data.fix_view_options()
+        this.fix_dashboard_arrows()
     }
 
     async delete_project() {
@@ -213,6 +228,8 @@ class DisplayManagement{
         else if ($('.weekDay').length) this.app.weekView.dragula_week_view()
         else this.app.monthView.dragula_month_view()
     }
+
+
 
     /**
      * Builds goal with given history goal data
