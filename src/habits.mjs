@@ -1,5 +1,3 @@
-
-
 export class Habits {
     constructor (app_data, app_categories) {
         this.data = app_data;
