@@ -1126,6 +1126,55 @@ function todoHandlers(db) {
     ipcMain.on('remove-project', (event, params) => {
         db.run(`DELETE FROM projects WHERE id=${params.id}`);
     })
+
+    ipcMain.handle('get-habits', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT * FROM habits`, (err, rows) => {
+                    if (err) reject(err);
+                    else {
+                        resolve(rows);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching habits.'};
+        }
+    })
+
+    ipcMain.handle('get-habits-days', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT * FROM habit_days`, (err, rows) => {
+                    if (err) reject(err);
+                    else {
+                        resolve(rows);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching habits days.'};
+        }
+    })
+
+    ipcMain.handle('get-habits-logs', async () => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT * FROM habit_logs`, (err, rows) => {
+                    if (err) reject(err);
+                    else {
+                        resolve(rows);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching habits logs.'};
+        }
+    })
+
 }
 
 

@@ -9,6 +9,7 @@ import {Project} from "./project.mjs";
 import { Strategy } from "./galactic.mjs";
 import {HistorySidebar, Idea} from "./sidebar.mjs";
 import {Inbox} from "./inbox.mjs";
+import { Habits } from "./habits.mjs";
 
 
 class MainApp {
@@ -31,6 +32,7 @@ class MainApp {
         this.weekView = new WeekView(this.data, this.date)
         this.monthView = new MonthView(this.data, this.date)
         this.strategy = new Strategy(this.data, this.categories)
+        this.habits = new Habits(this.data, this.categories)
     }
 
     async init() {
@@ -202,13 +204,21 @@ class DisplayManagement{
 
         $(document).on('click', '#todoButton', () => {
             $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'none');
             this.app.strategy.clearEditorInterval();
         })
 
         $(document).on('click', '#strategyButton', () => {
+            $('#habit').css('display', 'none');
             $('#galactics').css('display', 'block');
             this.app.strategy.add_galactic_category_boxes();
             $('#galactic-editor').remove();
+        })
+
+        $(document).on('click', '#habitButton', () => {
+            $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'grid');
+            console.log("lol")
         })
 
         window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))

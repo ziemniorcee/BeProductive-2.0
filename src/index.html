@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/sidebar.css"/>
     <link rel="stylesheet" href="css/dashboard.css"/>
     <link rel="stylesheet" href="css/galactic.css"/>
+    <link rel="stylesheet" href="css/habits.css"/>
 
     <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
     <script src="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.js"></script>
@@ -31,6 +32,7 @@
     <script type="module" src="graph.mjs"></script>
     <script type="module" src="galactic.mjs"></script>
     <script type="module" src="inbox.mjs"></script>
+    <script type="module" src="habits.mjs"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
 
@@ -286,6 +288,43 @@
     <div id="rightbar">
 
     </div>
+    <div id="habit">
+        <div id="habit-header" class="habitSector">
+            <div id="habit-title">Habits</div>
+        </div>
+        <div id="habit-info" class="habitSector">
+
+        </div>
+        <div id="habit-today" class="habitSector">
+
+        </div>
+        <div id="habit-menu" class="habitSector">
+            <div class="habitBlocks" id="habit-new-btn">+</div>
+        </div>
+    </div>
+
+    <template id="addHabitTemplate">
+        <div id="newHabit" class="vignetteWindow1">
+            <div id="newHabitContent" class="vignetteWindow1Content">
+                <div id="newHabitTitle" class="vignetteWindow1Title">Create new habit</div>
+                <div id="projectSettings">
+                    <div class="selectCategory" id="selectCategory5">General</div>
+                    
+                    <input type="text" id="newProjectName" placeholder="Enter name">
+                </div>
+                <div class="categoryPicker" id="categoryPicker5">
+
+                </div>
+            </div>
+            
+            <div id="newHabitButtons" class="vignetteWindow1ButtonBox">
+                <div id="newHabitDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
+                <div id="newHabitCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
+            </div>
+            <div id="newHabitError" class="vignetteWindow1Error"></div>
+        </div>
+    </template>
+
     <div id="galactics">
         <div id="galacticContainer">
 

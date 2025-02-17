@@ -35,6 +35,7 @@ import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
         else if ($(this).attr('id') === "selectCategory22") $('#categoryPicker22').toggle()
         else if ($(this).attr('id') === "selectCategory3") $('#categoryPicker3').toggle()
         else if ($(this).attr('id') === "selectCategory4") $('#categoryPicker4').toggle()
+        else if ($(this).attr('id') === "selectCategory5") $('#categoryPicker5').toggle()
     });
 
     $(document).on('click', '#main, #todoInput', function () {

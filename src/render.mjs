@@ -825,15 +825,17 @@ export class Categories {
      * @param that selected category
      */
     select_category(that) {
-        let index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
-
+        let category_index = $(that).closest('.categoryPicker').find('.category').index(that) + 1
         let picker_id = $(that).closest('.categoryPicker').attr('id')
-        const id = picker_id.match(/categoryPicker(\d+)/)[1];
-
-        if (id === '4') index++
-        if (id === '3') index++
-
-        if (index === 1) {
+        const picker_number = picker_id.match(/categoryPicker(\d+)/)[1];
+        const first_color = $('#' + picker_id).children().first().children().first().css('background-color');
+        if (first_color !== 'rgb(93, 93, 93)' && first_color !== this.data.no_category_color) category_index++;
+        if ($(that).children().first().css('background-color') == this.data.no_category_color) {
+            $(`#categoryPicker${picker_number}`).css('display', 'none')
+            let selected_category = $(`#selectCategory${picker_number}`)
+            selected_category.css('background', this.data.no_category_color)
+            selected_category.text('No category')
+        } else if (category_index === 1) {
             let $selected_vignette = $("#vignette")
             if ($selected_vignette.css('display') === 'block') {
                 $selected_vignette = $('#vignette2')
@@ -843,10 +845,10 @@ export class Categories {
             let $add_category_clone = $(add_category_template).clone()
 
             $selected_vignette.html($add_category_clone)
-        } else if (id !== '0') {
-            let selected_category = $(`#selectCategory${id}`)
-            $(`#categoryPicker${id}`).css('display', 'none')
-            let category_element = Object.keys(this.data.categories)[index - 2]
+        } else if (picker_number !== '0') {
+            let selected_category = $(`#selectCategory${picker_number}`)
+            $(`#categoryPicker${picker_number}`).css('display', 'none')
+            let category_element = Object.keys(this.data.categories)[category_index - 2]
             console.log(category_element);
             selected_category.css('background', this.data.categories[category_element][0])
             selected_category.text(this.data.categories[category_element][1])
@@ -858,13 +860,19 @@ export class Categories {
      * creates categories for goals
      * @returns {string} HTML of categories
      */
-    _categories_HTML(with_new_category) {
+    _categories_HTML(with_new_category, with_no_category) {
         let categories_html = ""
         if (with_new_category === undefined) {
             categories_html +=
                 `<div class="category">
                 <span class="categoryButton" style="background: rgb(93, 93, 93)"></span>
                 <span class="categoryName">New Category</span>
+            </div>`
+        } if (with_no_category === true) {
+            categories_html +=
+                `<div class="category">
+                <span class="categoryButton" style="background: ${this.data.no_category_color}"></span>
+                <span class="categoryName">No Category</span>
             </div>`
         }
         for (const id_key in this.data.categories) {
