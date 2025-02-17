@@ -26,7 +26,6 @@ export class DayView {
     }
 
 
-
     initEventListeners() {
 
 
@@ -171,13 +170,13 @@ export class DayView {
 
     }
 
-    dragula_resetter(){
+    dragula_resetter() {
         const targetNode = document.getElementById('todosAll');
         const allowedSelectors = ['div.steps', 'div#todosFinished, div.step'];
 
         const callback = (mutationsList) => {
             for (const mutation of mutationsList) {
-                if (allowedSelectors.some(selector => mutation.target.matches(selector))){
+                if (allowedSelectors.some(selector => mutation.target.matches(selector))) {
                     this.dragula_day_view()
                 }
             }
@@ -372,7 +371,7 @@ export class DayView {
         $(dragged_task).remove()
 
         let $sidebar_todoId = $('#rightbar .todoId')
-        for (let i = 0; i < $sidebar_todoId.length; i++){
+        for (let i = 0; i < $sidebar_todoId.length; i++) {
             $sidebar_todoId.eq(i).text(i)
         }
     }
@@ -748,14 +747,15 @@ export class Steps {
 export class Categories {
     constructor(app_data) {
         this.initEventListeners()
-
         this.data = app_data
+
+        this.decider = new Decider(app_data)
     }
 
     initEventListeners() {
         $(document).on('click', '#newCategoryCreate', () => {
             let name = $('#newCategoryName').val();
-            if (name !== ""){
+            if (name !== "") {
                 this.create_new_category();
                 let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
 
@@ -766,8 +766,7 @@ export class Categories {
                 let category_element = Object.keys(this.data.categories).at(-1)
                 $('#selectCategory22').css('background', this.data.categories[category_element][0])
                 $('#selectCategory22').text(this.data.categories[category_element][1])
-            }
-            else{
+            } else {
                 $('#newCategoryName').css('border', '3px solid red')
             }
         })
@@ -782,6 +781,7 @@ export class Categories {
             event.stopPropagation();
             this.select_category(event.currentTarget)
         });
+
 
     }
 
@@ -816,7 +816,7 @@ export class Categories {
                 $(`#categoryPicker${i}`).css('display', 'none');
             }
         }
-        
+
     }
 
 
@@ -890,10 +890,60 @@ export class Categories {
         $("#vignette").html('')
         $("#categoryPicker1").html(this._categories_HTML(true))
     }
-
-
 }
 
+class Decider {
+    constructor(app_data) {
+        this.data = app_data
+
+        this.initEventListeners()
+    }
+
+    initEventListeners() {
+        $(document).on('click', '#categoryDecider', () => {
+            this.open()
+        })
+
+        $(document).on('click', '.categoryDeciderCategory', (event) => {
+            
+        })
+    }
+
+    open() {
+        console.log(this.data.categories)
+        if ($('#decisionMaker').length) {
+            if (!$("#categoryDeciderSelect").length) {
+                let $decider = $(this.create_decider())
+
+                for (let category in this.data.categories) {
+                    let category_settings = this.data.categories[category]
+                    $decider.find('#categoryDeciderCategories').append(this.create_category(category_settings))
+                }
+                $('#decisionCategory').append($decider)
+            } else {
+                $("#categoryDeciderSelect").remove()
+            }
+        }
+    }
+
+    create_decider() {
+        return `
+            <div id="categoryDeciderSelect">
+                <h2>Select Category</h2>
+                <div id="categoryDeciderCategories">
+    
+                </div>
+            </div>`
+    }
+
+    create_category(category_settings) {
+        return `
+            <div class="categoryDeciderCategory">
+                <div class="categoryDeciderColor" style="background-color: ${category_settings[0]}"></div>
+                <span>${category_settings[1]}</span>
+            </div>`
+    }
+}
 
 
 

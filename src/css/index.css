@@ -593,6 +593,17 @@ body {
     display: inline-block;
 }
 
+.inboxDecision{
+    width: 55px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+.inboxDecision img {
+    height: 40px;
+    width: 40px;
+}
+
 .repeatLabelShow img {
     position: relative;
     top: 2px;

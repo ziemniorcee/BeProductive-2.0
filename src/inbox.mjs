@@ -2,6 +2,7 @@ export class Inbox {
     constructor(app_data, app_date) {
         this.data = app_data
         this.date = app_date
+        this.decision_maker = new DecisionMaker(app_data, app_date)
         this.initEventListeners()
     }
 
@@ -19,6 +20,12 @@ export class Inbox {
             event.stopPropagation()
             this.check_goal(event.currentTarget)
         });
+
+        $(document).on('click', '.inboxDecision', () => {
+
+        })
+
+
     }
 
     /**
@@ -121,8 +128,61 @@ export class Inbox {
     }
 }
 
+class DecisionMaker {
+    constructor(app_data, app_date) {
+        this.data = app_data
+        this.date = app_date
+        this.initEventListeners()
+    }
+
+    initEventListeners() {
+        $(document).on('click', '.inboxDecision', () => {
+            $("#vignette").css('display', 'block')
+            $("#taskEdit").css('display', 'block')
+
+            this.open()
+        })
 
 
+        $(document).on('click', '#decisionActionYes', () => {
+            $('#decisionActionYes').css('border', '1px solid #2979FF')
+            $('#decisionWhen').css('display', 'block')
+        })
+
+        $(document).on('click', '#decisionFutureType', () => {
+            if ($('#decisionFutureTypeDate').css('display') === 'flex'){
+                $('#decisionFutureTypeDate').css('display', 'none')
+                $('#decisionFutureTypeDeadline').css('display', 'flex')
+                $('#decisionFutureType').css('justify-content', 'flex-end')
+            } else {
+                $('#decisionFutureTypeDate').css('display', 'flex')
+                $('#decisionFutureTypeDeadline').css('display', 'none')
+                $('#decisionFutureType').css('justify-content', 'flex-start')
+
+            }
+        })
+
+        $(document).on('click', '#decisionMaker', (event) => {
+            if(!$(event.target).closest('#categoryDecider').length && !$(event.target).closest('#categoryDeciderSelect').length){
+                $("#categoryDeciderSelect").remove()
+            }
+
+            if(!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length){
+                $("#projectDeciderSelect").remove()
+            }
+        })
 
 
+    }
+
+    open(){
+        let $decision_clone = $("<div id='decisionMaker' class='vignetteWindow2'></div>")
+        const edit_main_template = $('#editMainTemplate').prop('content');
+        $decision_clone.append($(edit_main_template).clone())
+
+        const decision_right_template = $('#decisionRightTemplate').prop('content');
+        $decision_clone.find('#editBody').append($(decision_right_template).clone())
+        $("#vignette").append($decision_clone)
+    }
+}
 

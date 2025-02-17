@@ -40,6 +40,7 @@ class MainApp {
         await this.dayView.display()
         this.project.set_projects_options()
 
+        await this.inbox.build_view()
         // create_today_graphs();
         // $('#graphLine1').show();
     }

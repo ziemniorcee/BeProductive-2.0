@@ -166,17 +166,19 @@ export class Edit {
      * @param steps data of steps of selected goal
      */
     build_edit(goal, steps) {
-        const edit_template = $('#editTemplate').prop('content');
-        let $edit_clone = $(edit_template).clone()
+        let $edit_clone = $("<div id='taskEdit' class='vignetteWindow2'></div>")
+        const edit_main_template = $('#editMainTemplate').prop('content');
+        $edit_clone.append($(edit_main_template).clone())
+        const edit_right_template = $('#editRightTemplate').prop('content');
+        $edit_clone.find('#editBody').append($(edit_right_template).clone())
 
         $edit_clone.find('#editMainEntry').val(decode_text(goal["goal"]))
         $edit_clone.find('#editNoteEntry').val(decode_text(goal["note"]))
         $edit_clone.find('#editMainCheck').prop("checked", goal['check_state'])
-        console.log(goal['note'])
+
         if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
         console.log($edit_clone.find('#editNoteImg'))
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
-
 
         $edit_clone.find('#selectCategory22').css('background-color', this.data.categories[goal["category"]][0])
         $edit_clone.find('#selectCategory22').text(this.data.categories[goal["category"]][1])
