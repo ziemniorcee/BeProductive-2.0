@@ -558,3 +558,8 @@
     border: 1px solid black;
     cursor: pointer;
 }
+
+#newHabit .categoryDeciderSelect{
+    right: 714px;
+    top: -150px;
+}
