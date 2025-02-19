@@ -307,16 +307,35 @@
         <div id="newHabit" class="vignetteWindow1">
             <div id="newHabitContent" class="vignetteWindow1Content">
                 <div id="newHabitTitle" class="vignetteWindow1Title">Create new habit</div>
-                <div id="projectSettings">
-                    <div class="selectCategory" id="selectCategory5">General</div>
-                    
-                    <input type="text" id="newProjectName" placeholder="Enter name">
+                <div id="newHabitOptions">
+                    <div id="projectSettings">
+                        <div class="selectCategory" id="selectCategory5">General</div>
+                        <input type="text" id="newProjectName" placeholder="Enter name">
+                    </div>
+                    <div id="newHabitMode">
+                        <input type="radio" id="newHabitBtn1" name="newHabitPicker" value="1">
+                        <label for="1">Everyday (any hour)</label><br>
+                        <input type="radio" id="newHabitBtn2" name="newHabitPicker" value="2">
+                        <label for="2">Everyday (same hours)</label><br>
+                        <input type="radio" id="newHabitBtn3" name="newHabitPicker" value="3">
+                        <label for="3">Chosen days (same hours)</label><br>
+                        <input type="radio" id="newHabitBtn4" name="newHabitPicker" value="4">
+                        <label for="4">Chosen days (chosen hours)</label>
+                    </div>
                 </div>
-                <div class="categoryPicker" id="categoryPicker5">
-
+                <div class="categoryPicker" id="categoryPicker5"></div>
+                <div id="newHabitInfo">
+                    <div id="newHabitOption2" class="newHabitOption">
+                        <input type="time" id="newHabitOption2Time">
+                    </div>
+                    <div id="newHabitOption3" class="newHabitOption">
+                        
+                    </div>
+                    <div id="newHabitOption4" class="newHabitOption">
+                        
+                    </div>
                 </div>
             </div>
-            
             <div id="newHabitButtons" class="vignetteWindow1ButtonBox">
                 <div id="newHabitDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
                 <div id="newHabitCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>

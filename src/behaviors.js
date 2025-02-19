@@ -99,6 +99,11 @@ $(document).on('click', '#newCategoryDiscard', function () {
     $("#vignette").css('display', 'none');
 });
 
+$(document).on('click', '#newHabitDiscard', function () {
+    $("#newHabit").css('display', 'none');
+    $("#vignette").css('display', 'none');
+})
+
 
 
 $(document).on('click', '#newCategory', function(event) {
