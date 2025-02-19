@@ -64,30 +64,23 @@
             <img src="images/goals/back.png">
         </div>
         <div id="dashTitle">TO DO</div>
-        <div id="dashInbox">
+        <div id="dashInbox" class="dashButton">
             <img src="images/goals/dashboard/inbox.png">
             Inbox
         </div>
-        <div id="dashMyDayBG">
-            <div id="dashMyDayBtn">
-                <img src="images/goals/dashboard/today.png">
-                My day
-            </div>
-            <div class="dash-graph-1BG" id="dashGraph1BG">
-                <canvas id="dashGraph1"></canvas>
-            </div>
-            <div class="dash-graph-2BG" id="dashGraph2BG">
-                <canvas id="dashGraph2"></canvas>
-            </div>
-            <div id="graphLine1" style="display: none"></div>
+        <div id="dashASAP" class="dashButton">
+            <img src="images/goals/dashboard/fire.png">
+            ASAP
         </div>
-        <div id="dashTomorrowBG">
-            <div id="dashTomorrowBtn">
-                <img src="images/goals/dashboard/tomorrow.png">
-                <span>Plan tomorrow</span>
-            </div>
+        <div id="dashMyDayBtn" class="dashButton">
+            <img src="images/goals/dashboard/today.png">
+            My day
         </div>
-        <div id="dashAnotherBtn">
+        <div id="dashTomorrowBtn" class="dashButton">
+            <img src="images/goals/dashboard/tomorrow.png">
+            <span>Plan tomorrow</span>
+        </div>
+        <div id="dashAnotherBtn" class="dashButton">
             <input type="text" id="datePicker">
             <img src="images/goals/dashboard/other.png">
             Show another date
@@ -124,6 +117,19 @@
                 <div id="inboxAdd">+</div>
             </div>
             <div id="inboxList">
+
+            </div>
+        </div>
+    </template>
+
+    <template id="ASAPMainTemplate">
+        <div id="ASAPHeader">ASAP</div>
+        <div id="ASAPBody">
+            <div id="ASAPEntry">
+                <input id="ASAPInput" type="text" spellcheck="false" placeholder="Result">
+                <div id="ASAPAdd">+</div>
+            </div>
+            <div id="ASAPList">
 
             </div>
         </div>
@@ -352,12 +358,12 @@
             <div id="editSwitchDateMode">
                 <img id="editSwitchImg" src="images/goals/deadline.png" alt="">
             </div>
-            <div id="selectDate">30.12.2024</div>
-            <div id="editDateSelector">
-                <div id="editDateTitle">Select Date</div>
-                <div id="editDateToday">Today</div>
-                <div id="editDateTomorrow">Tomorrow</div>
-                <div id="editDatePicker"></div>
+            <div id="selectDate" class="dateDecider">30.12.2024</div>
+            <div id="editDateSelector" class="dateDeciderSelect">
+                <div class="dateDeciderTitle">Select Date</div>
+                <div class="dateDeciderToday">Today</div>
+                <div class="dateDeciderTomorrow">Tomorrow</div>
+                <div id="editDatePicker" class="dateDeciderPicker"></div>
             </div>
         </div>
     </template>
@@ -367,19 +373,20 @@
             <div id="decisionTop">
                 <div id="decisionCategory">
                     <div id="decisionCategoryLabel">Category</div>
-                    <div id="categoryDecider">
+                    <div id="categoryDecider"  class="deciderButtonFilled">
+                        <div id="categoryDeciderId">1</div>
                         <div id="categoryDeciderName">General</div>
                     </div>
                 </div>
                 <div id="decisionProject">
                     <div id="decisionProjectLabel">Project</div>
-                    <div id="projectDecider">
+                    <div id="projectDecider" class="deciderButtonFilled">
+                        <div id="projectDeciderId">-1</div>
                         <div id="projectDeciderIcon">
-                            <img src="images/goals/projects/keys.png">
+                            <img src="images/goals/projects/keys.png" alt="">
                         </div>
-                        <div id="projectDeciderName">Calculus</div>
+                        <div id="projectDeciderName">None</div>
                     </div>
-<!--                    tu-->
                 </div>
             </div>
             <div id="decisionAction">
@@ -387,14 +394,13 @@
                     Require action?
                 </div>
                 <div id="decisionActionOptions">
-                    <div id="decisionActionNo">
+                    <div id="decisionActionNo" class="deciderButtonEmpty">
                         No
                     </div>
-                    <div id="decisionActionYes">
+                    <div id='decisionActionYes' class="deciderButtonEmpty">
                         Yes
                     </div>
-                    <div id="decisionActionLineLeft"></div>
-                    <div id="decisionActionLineRight"></div>
+
                 </div>
 
             </div>
@@ -403,14 +409,12 @@
                     When?
                 </div>
                 <div id="decisionWhenOptions">
-                    <div id="decisionWhenFuture">
+                    <div id="decisionWhenFuture" class="deciderButtonEmpty">
                         Future
                     </div>
-                    <div id="decisionWhenASAP">
+                    <div id="decisionWhenASAP" class="deciderButtonEmpty">
                         ASAP
                     </div>
-                    <div id="decisionWhenLineLeft"></div>
-                    <div id="decisionWhenLineRight"></div>
                 </div>
             </div>
             <div id="decisionFuture">
@@ -424,19 +428,22 @@
                         <img src="images/goals/deadline.png" alt="">
                     </div>
                 </div>
-                <div id="decisionFutureDate"> 16.11.2024</div>
+                <div id="decisionFutureDate" class="dateDecider"> 16.11.2024</div>
+                <div class="dateDeciderSelect">
+                    <div class="dateDeciderTitle">Select Date</div>
+                    <div class="dateDeciderToday">Today</div>
+                    <div class="dateDeciderTomorrow">Tomorrow</div>
+                    <div id="decisionDatePicker" class="dateDeciderPicker"></div>
+                </div>
+            </div>
+            <div id="decisionEnd">
+                <div id="decisionCancel">Cancel</div>
+                <div id="decisionSave">Save</div>
             </div>
         </div>
     </template>
 
-    <template id="categoryDeciderSelectTemplate">
-        <div id="categoryDeciderSelect">
-            <h2>Select Category</h2>
-            <div id="categoryDeciderCategories">
 
-            </div>
-        </div>
-    </template>
 
     <template id="addCategoryTemplate">
         <div id="newCategory" class="vignetteWindow1">

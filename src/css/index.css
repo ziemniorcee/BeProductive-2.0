@@ -1749,7 +1749,7 @@ body {
     margin-top: 10px;
 }
 
-#editDateSelector {
+.dateDeciderSelect{
     position: absolute;
     height: 400px;
     width: 300px;
@@ -1767,34 +1767,34 @@ body {
     flex-direction: column;
 }
 
-#editDatePicker {
+.dateDeciderPicker {
     margin-top: 10px;
 }
 
-#editDatePicker .ui-datepicker {
+.dateDeciderPicker .ui-datepicker {
     font-size: 18px; /* Adjust the font size */
     width: 250px; /* Set a custom width */
 }
 
 /* Optional: Style the date cells */
-#editDatePicker .ui-datepicker td {
+.dateDeciderPicker .ui-datepicker td {
     height: 30px; /* Set custom height for date cells */
     width: 30px; /* Set custom width for date cells */
 }
 
 
-#editDateTitle {
+.dateDeciderTitle {
     font-size: 25px;
     margin-bottom: 20px;
 }
 
-#editDateToday, #editDateTomorrow {
+.dateDeciderToday, .dateDeciderTomorrow {
     height: 40px;
     transition: background-color 0.3s, color 0.3s; /* Smooth transition */
     cursor: pointer;
 }
 
-#editDateToday:hover, #editDateTomorrow:hover {
+.dateDeciderToday:hover, .dateDeciderTomorrow:hover {
     font-weight: bold; /* Optional: Add bold effect */
     transform: scale(1.05); /* Optional: Slightly enlarge on hover */
 }

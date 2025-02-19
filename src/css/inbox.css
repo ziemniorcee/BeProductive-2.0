@@ -1,13 +1,13 @@
-#inboxHeader {
+#inboxHeader, #ASAPHeader {
     text-align: center;
     margin-bottom: 30px;
 }
 
-#inboxBody {
+#inboxBody, #ASAPBody {
     height: 100%;
 }
 
-#inboxEntry {
+#inboxEntry, #ASAPEntry {
     border: 1px solid #3A3A3A;
     background: #2A2A2A;
     border-radius: 4px; /* Rounded corners */
@@ -16,7 +16,7 @@
     margin-bottom: 30px;
 }
 
-#inboxInput {
+#inboxInput, #ASAPInput {
     color: white;
     width: 100%;
     margin-left: 10px;
@@ -27,29 +27,26 @@
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-#inboxInput:hover, #inboxEntry:hover, #inboxEntry:hover #inboxInput {
+#inboxInput:hover, #inboxEntry:hover, #inboxEntry:hover #inboxInput, #ASAPInput:hover, #ASAPEntry:hover, #ASAPEntry:hover #ASAPInput {
     background-color: #1E1E1E !important;
 }
 
-#inboxEntry:hover {
+#inboxEntry:hover, #ASAPEntry:hover {
     border: 1px solid #2979FF;
 }
 
-#inboxEntry::placeholder {
+#inboxEntry::placeholder, #ASAPEntry::placeholder {
     color: #B3B3B3;
     opacity: 1;
 }
 
-#inboxInput:focus {
+#inboxInput:focus, #ASAPInput:focus {
     background-color: #1A3667;
     border: none;
 }
 
-#inboxInput:focus #inboxEntry {
-    background-color: red !important;
-}
 
-#inboxAdd {
+#inboxAdd, #ASAPAdd {
     height: 50px;
     width: 50px;
     cursor: pointer;
@@ -58,7 +55,7 @@
     text-align: center;
 }
 
-#inboxList {
+#inboxList, #ASAPList {
     height: calc(100% - 80px);
     overflow: hidden;
 }
@@ -130,78 +127,81 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 15px;
 }
 
 
 #decisionCategory, #decisionProject {
     position: relative;
     width: 50%;
-}
-
-#decisionCategory, #decisionProject {
     height: 100%;
     justify-content: center;
     align-items: center;
     margin-left: 10px;
     margin-right: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 #decisionCategoryLabel, #decisionProjectLabel {
     text-align: center;
+    margin-bottom: 10px;
 }
 
 #categoryDecider {
+
+}
+
+:root {
+    --decide-color: #3B151F;
+}
+
+.deciderButtonFilled {
     height: 50px;
     width: 200px;
-    background-color: #3B151F;
+    background-color: var(--decide-color);
     border-radius: 10px;
-    border: 1px solid black;
     text-align: center;
-    margin-top: 10px;
     line-height: 50px;
     font-size: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     align-items: center;
     justify-content: center;
     display: flex;
+    cursor: pointer;
 }
 
-
-#categoryDeciderName{
+.deciderButtonEmpty {
+    height: 50px;
+    width: 200px;
+    background-color: #4A4A4A;
+    border-radius: 10px;
     text-align: center;
+    line-height: 50px;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    cursor: pointer;
+}
+
+#categoryDeciderName {
     max-width: 180px;
     text-overflow: ellipsis;
-    white-space: nowrap;        /* Prevents text from wrapping */
+    white-space: nowrap;
     overflow: hidden;
 }
 
 #projectDecider {
-    display: flex;
-    height: 50px;
-    width: 200px;
-    margin-top: 10px;
-    line-height: 50px;
-    background-color: #3B151F;
-    border-radius: 10px;
-    border: 1px solid black;
-    font-size: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
 
 }
 
-#projectDeciderMarquee {
-    display: flex;
-}
 
-#projectDeciderName{
+#projectDeciderName {
     max-width: 140px;
     text-overflow: ellipsis;
-    white-space: nowrap;        /* Prevents text from wrapping */
+    white-space: nowrap; /* Prevents text from wrapping */
     overflow: hidden;
 }
 
@@ -213,31 +213,26 @@
     margin-right: 7px;
 }
 
-#projectDeciderIcon img{
+#projectDeciderIcon img {
     height: 35px;
     width: 35px;
+    display: none;
 }
 
-#decisionAction{
+#decisionAction {
     margin-bottom: 20px;
 }
-#decisionActionOptions{
+
+#decisionActionOptions, #decisionWhenOptions {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 100px;
+    gap: 20px;
     position: relative;
 }
 
-#decisionActionNo, #decisionActionYes, #decisionWhenFuture, #decisionWhenASAP{
-    width: 100px;
-    height: 50px;
-    background-color: #333333;
-    line-height: 50px;
-}
-
-#decisionActionHead{
-    margin-bottom: 30px;
+#decisionActionHead, #decisionWhenHead {
+    margin-bottom: 15px;
 }
 
 #decisionActionSvg {
@@ -249,7 +244,7 @@
     pointer-events: none;
 }
 
-#decisionActionLineLeft, #decisionWhenLineLeft{
+#decisionActionLineLeft, #decisionWhenLineLeft {
     width: 50px;
     height: 50px;
     border-left: 2px solid white;
@@ -269,35 +264,25 @@
     right: 132px;
 }
 
-#decisionWhen{
-    /*display: none;*/
+#decisionWhen {
+    display: none;
     margin-bottom: 40px;
 }
 
-#decisionWhenHead {
-    margin-bottom: 30px;
-}
 
-#decisionWhenOptions{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 100px;
-    position: relative;
-}
-
-
-#decisionFuture{
-    display: flex;
+#decisionFuture {
+    display: none;
+    /*display: flex;*/
     height: 50px;
 }
 
-#decisionFutureType{
+#decisionFutureType {
     width: 250px;
     border-radius: 25px;
-    background-color:#333333;
+    background-color: #333333;
     justify-content: flex-start;
     display: flex;
+    cursor: pointer;
 }
 
 #decisionFutureTypeDate {
@@ -312,7 +297,7 @@
     gap: 10px;
 }
 
-#decisionFutureDate{
+#decisionFutureDate {
     width: 150px;
     background-color: #2A231F;
     margin-left: 40px;
@@ -320,6 +305,7 @@
     line-height: 50px;
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
     border: 1px solid black;
+    cursor: pointer;
 }
 
 #decisionFutureType img {
@@ -327,7 +313,7 @@
     width: 35px;
 }
 
-#decisionFutureTypeDeadline{
+#decisionFutureTypeDeadline {
     display: none;
     justify-content: flex-end;
     align-items: center;
@@ -339,7 +325,7 @@
     gap: 10px;
 }
 
-#categoryDeciderSelect{
+#categoryDeciderSelect {
     /*display: none;*/
     width: 300px;
     height: 400px;
@@ -354,13 +340,13 @@
     border: 2px solid black;
 }
 
-#categoryDeciderSelect h2{
+#categoryDeciderSelect h2 {
     font-size: 25px;
     margin-bottom: 15px;
     margin-top: 0;
 }
 
-#categoryDeciderCategories{
+#categoryDeciderCategories {
     height: 350px;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -392,7 +378,7 @@
     font-size: 20px;
 }
 
-.categoryDeciderColor {
+.categoryDeciderCategoryColor {
     width: 25px;
     height: 25px;
     border-radius: 50%;
@@ -434,7 +420,7 @@
 
 }
 
-#projectDeciderSelect h2{
+#projectDeciderSelect h2 {
     font-size: 25px;
     margin-bottom: 15px;
     margin-top: 0;
@@ -466,7 +452,7 @@
     position: relative;
 }
 
-.projectDeciderProject{
+.projectDeciderProject {
     height: 50px;
     display: flex;
     align-items: center;
@@ -484,7 +470,7 @@
     margin-left: 5px;
 }
 
-.projectDeciderProjectIcon{
+.projectDeciderProjectIcon {
     margin-left: 5px;
     width: 40px;
     height: 40px;
@@ -517,7 +503,7 @@
     font-size: 20px;
     text-overflow: ellipsis;
     max-width: 210px;
-    white-space: nowrap;        /* Prevents text from wrapping */
+    white-space: nowrap; /* Prevents text from wrapping */
     overflow: hidden;
 }
 
@@ -528,4 +514,34 @@
 
 .projectDeciderProjectId {
     display: none;
+}
+
+.categoryDeciderCategoryId {
+    display: none;
+}
+
+#categoryDeciderId {
+    display: none;
+}
+
+#projectDeciderId {
+    display: none;
+}
+
+#decisionEnd {
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    margin-top: 30px;
+    display: none;
+}
+
+#decisionCancel, #decisionSave {
+    width: 150px;
+    background-color: #2A231F;
+    height: 50px;
+    line-height: 50px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
+    border: 1px solid black;
+    cursor: pointer;
 }
