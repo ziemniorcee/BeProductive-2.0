@@ -1,5 +1,6 @@
 import {Data, decode_text, weekdays2} from "./data.mjs";
-import {Categories, DayView, Input, Steps} from "./render.mjs";
+import {DayView, Input, Steps} from "./render.mjs";
+import {Categories} from "./category.mjs"
 import {CurrentDate} from "./date.js";
 import {create_today_graphs} from "./graph.mjs";
 import {WeekView} from "./weekView.mjs";
@@ -9,6 +10,7 @@ import {Project} from "./project.mjs";
 import { Strategy } from "./galactic.mjs";
 import {HistorySidebar, Idea} from "./sidebar.mjs";
 import {Inbox} from "./inbox.mjs";
+import {Asap} from "./ASAP.mjs";
 
 
 class MainApp {
@@ -23,7 +25,8 @@ class MainApp {
         this.idea = new Idea(this.data, this.date)
         this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
-        this.inbox = new Inbox(this.data, this.date)
+        this.inbox = new Inbox(this.data, this.date, this.edit)
+        this.asap = new Asap(this.data, this.date)
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
 
@@ -40,6 +43,7 @@ class MainApp {
         await this.dayView.display()
         this.project.set_projects_options()
 
+        // await this.inbox.build_view()
         // create_today_graphs();
         // $('#graphLine1').show();
     }

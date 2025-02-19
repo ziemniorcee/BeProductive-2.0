@@ -119,7 +119,12 @@ contextBridge.exposeInMainWorld('dataAPI', {
 
 contextBridge.exposeInMainWorld('inboxAPI', {
     getInbox: () => ipcRenderer.invoke('get-inbox'),
-    newInboxGoal: (params) => ipcRenderer.send('new-inbox-goal', params),
+    newInboxGoal: (params) => ipcRenderer.invoke('new-inbox-goal', params),
     checkInboxGoal: (params) => ipcRenderer.send('check-inbox-goal', params),
+    newGoalFromInbox: (params) => ipcRenderer.send('new-goal-from-inbox', params),
+    removeInboxGoal: (params) => ipcRenderer.send('remove-inbox-project', params),
 });
 
+contextBridge.exposeInMainWorld('asapAPI', {
+    getASAP: () => ipcRenderer.invoke('get-ASAP'),
+});

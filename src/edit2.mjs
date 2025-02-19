@@ -75,31 +75,12 @@ export class Edit {
             this.change_project(event.currentTarget)
         })
 
-        $(document).on('click', '#selectDate', () => {
-            let $edit_date_selector = $('#editDateSelector')
-            let is_visible = $edit_date_selector.css('display') === "flex"
-            if (is_visible) $edit_date_selector.css('display', 'none')
-            else $edit_date_selector.css('display', 'flex')
-        })
 
-        $(document).on('click', '#editDateToday', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.today)
-            $('#selectDate').text(date_formatted)
-        })
-
-        $(document).on('click', '#editDateTomorrow', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.tomorrow)
-            $('#selectDate').text(date_formatted)
-        })
-
-        $('.vignetteLayer').on('click', function (e) {
-            let $edit_date_selector = $('#editDateSelector')
-            let $select_date = $('#selectDate')
-
-            if (!$edit_date_selector.is(e.target) && !$select_date.is(e.target)) {
-                $edit_date_selector.css('display', 'none'); // Close the picker
+        $(document).on('click', '#taskEdit', (event) => {
+            if(!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length){
+                $(".dateDeciderSelect").css('display', 'none')
             }
-        });
+        })
 
         $(document).on('click', '#editSwitchDateMode', () => {
             let $edit_label_date = $('#editLabelDate')
@@ -166,17 +147,18 @@ export class Edit {
      * @param steps data of steps of selected goal
      */
     build_edit(goal, steps) {
-        const edit_template = $('#editTemplate').prop('content');
-        let $edit_clone = $(edit_template).clone()
+        let $edit_clone = $("<div id='taskEdit' class='vignetteWindow2'></div>")
+        const edit_main_template = $('#editMainTemplate').prop('content');
+        $edit_clone.append($(edit_main_template).clone())
+        const edit_right_template = $('#editRightTemplate').prop('content');
+        $edit_clone.find('#editBody').append($(edit_right_template).clone())
 
         $edit_clone.find('#editMainEntry').val(decode_text(goal["goal"]))
         $edit_clone.find('#editNoteEntry').val(decode_text(goal["note"]))
         $edit_clone.find('#editMainCheck').prop("checked", goal['check_state'])
-        console.log(goal['note'])
-        if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
-        console.log($edit_clone.find('#editNoteImg'))
-        $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
+        if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
+        $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
         $edit_clone.find('#selectCategory22').css('background-color', this.data.categories[goal["category"]][0])
         $edit_clone.find('#selectCategory22').text(this.data.categories[goal["category"]][1])
@@ -203,8 +185,6 @@ export class Edit {
                 }
             });
         });
-
-
     }
 
     /**
@@ -220,7 +200,6 @@ export class Edit {
      * If there is text in a note it adds icon of note at the beggining of note entry
      */
     set_note(note_content) {
-        console.log(note_content === "")
         if (note_content === "") {
             $('#editNoteImg').css('display', 'block')
         } else {
@@ -287,9 +266,6 @@ export class Edit {
             let edit_step_entry = $('.editStepEntry');
             edit_step_entry.last().focus();
         }, 0);
-        console.log('CHuj224')
-
-
     }
 
 
@@ -361,11 +337,13 @@ export class Edit {
     change_goal(project_pos) {
         let edit_main_entry = $('#editMainEntry').val()
         let edit_note_entry = $('#editNoteEntry').val()
+        let steps_array = this.get_steps()
+
         let category_color = $('#selectCategory22').css('background-color')
         let category_id = getIdByColor(this.data.categories, category_color)
         let difficulty = $('#editDiff').val()
         let importance = $('#editImportance').val()
-        let steps_array = this.get_steps()
+
         let date_type = $('#editLabelDate').text() === "Deadline"
         let new_date = this.date.get_edit_sql_format($('#selectDate').text())
 
