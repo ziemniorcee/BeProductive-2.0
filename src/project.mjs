@@ -599,7 +599,7 @@ class Decider {
     constructor (app_data) {
         this.data = app_data
         this.sorted_projects = null
-        this.selected_project_id = null
+
         this.initEventListeners()
     }
 
@@ -609,16 +609,17 @@ class Decider {
         })
 
         $(document).on('click', '.projectDeciderProject', (event) =>{
-            this.selected_project_id = Number($(event.currentTarget).find('.projectDeciderProjectId').text())
-            let project = this.data.projects.find(item => item.id === this.selected_project_id)
+            let selected_project_id = Number($(event.currentTarget).find('.projectDeciderProjectId').text())
+            let project = this.data.projects.find(item => item.id === selected_project_id)
 
-            console.log(project)
             let color = this.data.categories[project['category']][0]
             let icon_path = this.data.findPathByName(project['icon'])
-            console.log(color)
+
             $('#projectDecider').css('background-color', color)
             $('#projectDeciderIcon img').attr('src', icon_path)
             $('#projectDeciderName').text(project['name'])
+            $('#projectDeciderId').text(selected_project_id)
+            $('#projectDeciderIcon img').css('display', 'block')
         })
     }
 
@@ -628,7 +629,16 @@ class Decider {
      */
     get_sorted_projects_by_category() {
         this.sorted_projects = [...this.data.projects]
-        this.sorted_projects.sort((a, b) => a.category - b.category);
+        let selected_category = Number($('#categoryDeciderId').text())
+
+        this.sorted_projects.sort((a, b) => {
+            const pinnedCategory = selected_category;
+
+            if (a.category === pinnedCategory) return -1;
+            if (b.category === pinnedCategory) return 1;
+
+            return a.category - b.category;
+        });
     }
 
     open(){
@@ -655,6 +665,7 @@ class Decider {
                 }
                 $('#decisionProject').append($decider)
             }
+
         }
     }
 

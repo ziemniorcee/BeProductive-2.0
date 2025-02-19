@@ -144,15 +144,7 @@ $(document).on('blur', '#todoEntryGet', function (){
     $('#todoEntrySimple').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
 })
 
-$(document).on('focus', '#inboxInput', function (){
-    $('#inboxEntry').css('background-color', "#1A3667")
-    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
-})
 
-$(document).on('blur', '#inboxInput', function (){
-    $('#inboxEntry').css('background-color', "#2A2A2A")
-    $('#inboxEntry').css('box-shadow', 'rgba(41, 121, 255, 0.5)')
-})
 
 
 

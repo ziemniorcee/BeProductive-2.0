@@ -1,8 +1,9 @@
 export class Inbox {
-    constructor(app_data, app_date) {
+    constructor(app_data, app_date, app_edit) {
         this.data = app_data
         this.date = app_date
-        this.decision_maker = new DecisionMaker(app_data, app_date)
+        this.edit = app_edit
+        this.decision_maker = new DecisionMaker(app_data, app_date, app_edit)
         this.initEventListeners()
     }
 
@@ -12,8 +13,8 @@ export class Inbox {
         })
 
 
-        $(document).on('click', '#inboxAdd', () => {
-            this.new_goal()
+        $(document).on('click', '#inboxAdd', async () => {
+            await this.new_goal()
         })
 
         $(document).on('click', '#inboxList .check_task', (event) => {
@@ -25,7 +26,13 @@ export class Inbox {
 
         })
 
+        $(document).on('focus', '#inboxInput', function (){
+            $('#inboxEntry').css('background-color', "#1A3667")
+        })
 
+        $(document).on('blur', '#inboxInput', function (){
+            $('#inboxEntry').css('background-color', "#2A2A2A")
+        })
     }
 
     /**
@@ -40,11 +47,12 @@ export class Inbox {
         $('#main').html($main_clone)
 
         let goals = await window.inboxAPI.getInbox()
+        console.log(goals)
         let breaks = this.date.get_inbox_sections(goals)
         let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
 
         for (let i = 0; i < goals.length; i++) {
-            this.add_todo(goals[i]["name"], 1)
+            this.add_todo(goals[i], 1)
         }
 
         let current_break = 0
@@ -61,12 +69,13 @@ export class Inbox {
      * @param name inbox task name
      * @param way decides if add at the beginning or at the end of list
      */
-    add_todo(name, way) {
+    add_todo(goal, way) {
+        console.log(goal['name'])
         const template = $('#inboxTodoTemplate').prop('content');
         let id = $('.inboxTodo').length
         let $clone = $(template).clone()
-        $clone.find('.inboxTodoId').text(id);
-        $clone.find('.task').text(name);
+        $clone.find('.inboxTodoId').text(goal['id']);
+        $clone.find('.task').text(goal['name']);
 
         if (way) {
             $('#inboxList').append($clone)
@@ -86,13 +95,13 @@ export class Inbox {
      * add new goal to server side
      * builds new goal
      */
-    new_goal() {
+    async new_goal() {
         let $inbox_input = $('#inboxInput')
         let name = $inbox_input.val()
         $inbox_input.val("")
 
-        window.inboxAPI.newInboxGoal({'name': name, "add_date": this.date.today_sql})
-        this.add_todo(name, 0)
+        let new_goal = await window.inboxAPI.newInboxGoal({name: name, add_date: this.date.today_sql})
+        this.add_todo(new_goal, 0)
     }
 
     /**
@@ -107,7 +116,7 @@ export class Inbox {
         let $selected_todo = $(selected_check).closest('.inboxTodo')
         let selected_todo_id = $selected_todo.find('.inboxTodoId').text()
 
-        window.inboxAPI.checkInboxGoal({'position': selected_todo_id})
+        window.inboxAPI.checkInboxGoal({'id': selected_todo_id})
 
         let $previous_element = $selected_todo.prev()
         let $next_element = $selected_todo.next()
@@ -129,28 +138,49 @@ export class Inbox {
 }
 
 class DecisionMaker {
-    constructor(app_data, app_date) {
+    constructor(app_data, app_date, app_edit) {
         this.data = app_data
         this.date = app_date
+        this.edit = app_edit
+
+        this.selected_goal = null
+        this.goal_id = null
         this.initEventListeners()
     }
 
     initEventListeners() {
-        $(document).on('click', '.inboxDecision', () => {
+        $(document).on('click', '.inboxDecision', (event) => {
             $("#vignette").css('display', 'block')
             $("#taskEdit").css('display', 'block')
+
+            this.selected_goal = $(event.currentTarget).closest('.inboxTodo')
+            this.goal_id = $(event.currentTarget).closest('.inboxTodo').find('.inboxTodoId').text()
 
             this.open()
         })
 
 
         $(document).on('click', '#decisionActionYes', () => {
-            $('#decisionActionYes').css('border', '1px solid #2979FF')
+            $('#decisionActionYes').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
             $('#decisionWhen').css('display', 'block')
         })
 
+        $(document).on('click', '#decisionWhenFuture', () => {
+            $('#decisionWhenFuture').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionWhenASAP').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionFuture').css('display', 'flex')
+            $('#decisionEnd').css('display', 'flex')
+        })
+
+        $(document).on('click', '#decisionWhenASAP', () => {
+            $('#decisionWhenASAP').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionWhenFuture').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionFuture').css('display', 'none')
+            $('#decisionEnd').css('display', 'flex')
+        })
+
         $(document).on('click', '#decisionFutureType', () => {
-            if ($('#decisionFutureTypeDate').css('display') === 'flex'){
+            if ($('#decisionFutureTypeDate').css('display') === 'flex') {
                 $('#decisionFutureTypeDate').css('display', 'none')
                 $('#decisionFutureTypeDeadline').css('display', 'flex')
                 $('#decisionFutureType').css('justify-content', 'flex-end')
@@ -163,26 +193,95 @@ class DecisionMaker {
         })
 
         $(document).on('click', '#decisionMaker', (event) => {
-            if(!$(event.target).closest('#categoryDecider').length && !$(event.target).closest('#categoryDeciderSelect').length){
+            if (!$(event.target).closest('#categoryDecider').length && !$(event.target).closest('#categoryDeciderSelect').length) {
                 $("#categoryDeciderSelect").remove()
             }
 
-            if(!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length){
+            if (!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
                 $("#projectDeciderSelect").remove()
+            }
+
+            if (!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length) {
+                $(".dateDeciderSelect").css('display', 'none')
             }
         })
 
+        $(document).on('click', '#decisionSave', () => {
+            let decision_main_entry = $('#editMainEntry').val()
+            let decision_note_entry = $('#editNoteEntry').val()
+            let steps_array = this.edit.get_steps()
+            let category_id = Number($('#categoryDeciderId').text())
+            let project_id = Number($('#projectDeciderId').text())
 
+            let date_type = 0
+            let date = ""
+
+            if ($('#decisionWhenFuture').attr('class') === 'deciderButtonFilled') {
+                if ($("#decisionFutureTypeDeadline").css('display') === 'flex') {
+                    date_type = 1
+                }
+                date = this.date.get_edit_sql_format($("#decisionFutureDate").text())
+            } else if ($('#decisionWhenASAP').attr('class') === 'deciderButtonFilled') {
+                date_type = 2
+            }
+
+            console.log(steps_array)
+            let inbox_id = this.goal_id
+            let goal = {
+                inbox_id: inbox_id,
+                goal: decision_main_entry,
+                note: decision_note_entry,
+                steps: steps_array,
+                category_id: category_id,
+                project_id: project_id,
+                date: date,
+                date_type: date_type,
+            }
+
+
+            window.inboxAPI.newGoalFromInbox(goal)
+            $('#vignette').css('display', 'none');
+            $('#vignette').html('')
+
+            let $previous_element = this.selected_goal.prev()
+            console.log($previous_element)
+            let $next_element = this.selected_goal.next()
+            if ($previous_element.attr('class') === "inboxListBreak" &&
+                ($next_element.attr('class') === "inboxListBreak" || $next_element.length === 0)) {
+                $previous_element.remove()
+            }
+            this.selected_goal.remove()
+        })
     }
 
-    open(){
+    open() {
+        $("body").get(0).style.setProperty("--decide-color", "#3B151F");
+
         let $decision_clone = $("<div id='decisionMaker' class='vignetteWindow2'></div>")
         const edit_main_template = $('#editMainTemplate').prop('content');
         $decision_clone.append($(edit_main_template).clone())
 
         const decision_right_template = $('#decisionRightTemplate').prop('content');
         $decision_clone.find('#editBody').append($(decision_right_template).clone())
+
+        let date_formatted = this.date.get_edit_date_format(this.date.today)
+        $decision_clone.find('.dateDecider').text(date_formatted)
+        let goal_name = this.selected_goal.find('.taskText').text().trim()
+        $decision_clone.find("#editMainEntry").val(goal_name)
+
         $("#vignette").append($decision_clone)
+
+        $(function () {
+            $("#decisionDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
+                onSelect: function (selectedDate) {
+                    $('#decisionFutureDate').text(selectedDate)
+                    $('.dateDeciderSelect').css('display', 'none')
+                }
+            });
+        });
+
+
     }
 }
 
