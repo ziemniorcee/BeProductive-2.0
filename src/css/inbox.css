@@ -148,12 +148,25 @@
     margin-bottom: 10px;
 }
 
-#categoryDecider {
 
-}
 
 :root {
     --decide-color: #3B151F;
+}
+
+.deciderButtonFill{
+    height: 50px;
+    width: 200px;
+    background-color: #3B151F ;
+    border-radius: 10px;
+    text-align: center;
+    line-height: 50px;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    cursor: pointer;
 }
 
 .deciderButtonFilled {
@@ -325,7 +338,7 @@
     gap: 10px;
 }
 
-#categoryDeciderSelect {
+.categoryDeciderSelect {
     /*display: none;*/
     width: 300px;
     height: 400px;
@@ -338,15 +351,16 @@
     right: 200px;
     top: -100px;
     border: 2px solid black;
+    text-align: center;
 }
 
-#categoryDeciderSelect h2 {
+.categoryDeciderSelect h2 {
     font-size: 25px;
     margin-bottom: 15px;
     margin-top: 0;
 }
 
-#categoryDeciderCategories {
+.categoryDeciderCategories {
     height: 350px;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -365,8 +379,7 @@
     cursor: pointer;
     transition: 0.3s;
     width: 80%;
-
-
+    height: 50px;
 }
 
 .categoryDeciderCategory:hover {
@@ -387,21 +400,21 @@
     background-color: #FF5D00;
 }
 
-#categoryDeciderCategories::-webkit-scrollbar, #projectDeciderMain::-webkit-scrollbar {
+.categoryDeciderCategories::-webkit-scrollbar, #projectDeciderMain::-webkit-scrollbar {
     width: 8px; /* Thin scrollbar */
 }
 
-#categoryDeciderCategories::-webkit-scrollbar-track, #projectDeciderMain::-webkit-scrollbar-track {
+.categoryDeciderCategories::-webkit-scrollbar-track, #projectDeciderMain::-webkit-scrollbar-track {
     background: #333;
     border-radius: 8px;
 }
 
-#categoryDeciderCategories::-webkit-scrollbar-thumb, #projectDeciderMain::-webkit-scrollbar-thumb {
+.categoryDeciderCategories::-webkit-scrollbar-thumb, #projectDeciderMain::-webkit-scrollbar-thumb {
     background: #555;
     border-radius: 8px;
 }
 
-#categoryDeciderCategories::-webkit-scrollbar-thumb:hover, #projectDeciderMain::-webkit-scrollbar-thumb:hover {
+.categoryDeciderCategories::-webkit-scrollbar-thumb:hover, #projectDeciderMain::-webkit-scrollbar-thumb:hover {
     background: #777;
 }
 
@@ -520,7 +533,7 @@
     display: none;
 }
 
-#categoryDeciderId {
+.categoryDeciderId {
     display: none;
 }
 
@@ -544,4 +557,9 @@
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, .25);
     border: 1px solid black;
     cursor: pointer;
+}
+
+#newHabit .categoryDeciderSelect{
+    right: 714px;
+    top: -150px;
 }

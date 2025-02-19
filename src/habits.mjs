@@ -12,7 +12,6 @@ export class Habits {
             let $new_habit_clone = $(new_habit_template).clone()
             $new_habit_clone.find(".categoryPicker").html(this.categories._categories_HTML(false, true))
             $("#vignette").html($new_habit_clone)
-            this.categories.select_category($('#categoryPicker5').children().first());
         })
 
         $(document).on('change', 'input[name="newHabitPicker"]', () => {
@@ -24,6 +23,13 @@ export class Habits {
             } 
         })
 
+
+        $(document).on('click', '#newHabit', (event) => {
+            //category picker closing
+            if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
+                $(".categoryDeciderSelect").remove()
+            }
+        })
 
     }
 }
