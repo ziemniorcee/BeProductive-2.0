@@ -2,6 +2,7 @@ export class Data {
     constructor() {
         this.weekdays2 = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         this.weekdays_grid = [["Monday"], ["Tuesday", "Friday"], ["Wednesday", "Saturday"], ["Thursday", "Sunday"]];
+        this.no_category_color = 'rgb(60, 60, 60)'
         this.icons = [{
             name: "book",
             path: "images/goals/projects/book.png"
@@ -30,8 +31,13 @@ export class Data {
     async init() {
         let categories_data = await window.dataAPI.getCategories();
         this.projects = await window.dataAPI.getProjects()
-        console.log(this.projects)
         this.project_conn = await window.dataAPI.getGalacticConnections()
+        this.habits = await window.dataAPI.getHabits()
+        this.habits_days = await window.dataAPI.getHabitsDays()
+        this.habits_logs = await window.dataAPI.getHabitsLogs()
+        console.log(this.habits)
+        console.log(this.habits_days)
+        console.log(this.habits_logs)
 
         this.set_categories(categories_data)
     }

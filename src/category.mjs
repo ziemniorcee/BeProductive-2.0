@@ -156,7 +156,7 @@ class Decider {
     }
 
     initEventListeners() {
-        $(document).on('click', '#categoryDecider', () => {
+        $(document).on('click', '.categoryDecider', () => {
             this.open()
         })
 
@@ -166,35 +166,34 @@ class Decider {
 
             $("body").get(0).style.setProperty("--decide-color", category[0]);
 
-            $('#categoryDecider').css('background-color', category[0])
-            $('#categoryDeciderName').text(category[1])
-            $('#categoryDeciderId').text(selected_category_id)
+            $('.categoryDecider').css('background-color', category[0])
+            $('.categoryDeciderName').text(category[1])
+            $('.categoryDeciderId').text(selected_category_id)
             // $('.deciderButtonFilled').css('background-color', category[0])
+
+            $(".categoryDeciderSelect").remove()
         })
     }
 
     open() {
         console.log(this.data.categories)
-        if ($('#decisionMaker').length) {
-            if (!$("#categoryDeciderSelect").length) {
-                let $decider = $(this.create_decider())
+        if (!$(".categoryDeciderSelect").length) {
+            let $decider = $(this.create_decider())
 
-                for (let category in this.data.categories) {
-
-                    $decider.find('#categoryDeciderCategories').append(this.create_category(category))
-                }
-                $('#decisionCategory').append($decider)
-            } else {
-                $("#categoryDeciderSelect").remove()
+            for (let category in this.data.categories) {
+                $decider.find('.categoryDeciderCategories').append(this.create_category(category))
             }
+            $('.categoryDecider').after($decider)
+        } else {
+            $(".categoryDeciderSelect").remove()
         }
     }
 
     create_decider() {
         return `
-            <div id="categoryDeciderSelect">
+            <div class="categoryDeciderSelect">
                 <h2>Select Category</h2>
-                <div id="categoryDeciderCategories">
+                <div class="categoryDeciderCategories">
     
                 </div>
             </div>`

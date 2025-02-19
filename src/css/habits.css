@@ -1,0 +1,127 @@
+#habit {
+    background-color: #121212;
+    color: #fff;
+    letter-spacing: 1px;
+
+    position: absolute;
+    top: 0%;
+    left: 100px;
+    width: calc(100vw - 100px);
+    height: 100%;
+    padding: 20px;
+    
+    display: none;
+    grid-template-rows: 10% 1fr;
+    grid-template-columns: 25% 1fr 1fr;
+    grid-template-areas: "habits-header habits-header habits-header"
+    "habits-info habits-today habits-menu";
+    gap: 20px;
+    z-index: 6;
+}
+
+.habitSector {
+    background-color: #1E1E1E;
+    color: white;
+    border-radius: 20px;
+    position: relative;
+}
+
+#habit-header {
+    grid-area: habits-header;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#habit-title {
+    font-size: 40px;
+}
+
+#habit-info {
+    grid-area: habits-info;
+}
+
+#habit-today {
+    grid-area: habits-today;
+}
+
+#habit-menu {
+    grid-area: habits-menu;
+}
+
+.habitBlocks {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #333333;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.1s ease, border-color 0.1s ease, transform 0.1s ease;
+}
+
+.habitBlocks:hover {
+    border-color: #2979FF;
+    box-shadow: 0px 0px 8px rgba(41, 121, 255, 0.5); /* Blue glow */
+}
+
+#habit-new-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: calc(100% - 40px);
+}
+
+#newHabit {
+    height: 50%;
+    width: 50%;
+}
+
+#selectCategory5 {
+    text-align: center;
+}
+
+#newHabitOptions {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10%;
+}
+
+#newHabitMode {
+    position: relative;
+    margin-top: 10px;
+}
+
+#newHabitInfo {
+    width: 100%;
+    display: flex;
+    margin-top: 5%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.newHabitOption {
+    width: 100%;
+    margin: 20px;
+    padding: 10px 0 10px 0;
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #333333;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+}

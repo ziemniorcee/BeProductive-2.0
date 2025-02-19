@@ -193,8 +193,8 @@ class DecisionMaker {
         })
 
         $(document).on('click', '#decisionMaker', (event) => {
-            if (!$(event.target).closest('#categoryDecider').length && !$(event.target).closest('#categoryDeciderSelect').length) {
-                $("#categoryDeciderSelect").remove()
+            if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
+                $(".categoryDeciderSelect").remove()
             }
 
             if (!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {

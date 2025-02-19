@@ -50,11 +50,21 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     addCategory: (params) => ipcRenderer.send('add-category', params),
     removeCategory: (params) => ipcRenderer.send('remove-category', params),
 
-    askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
-    getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
+    // askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
+    // getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
 
     changeProjectCoords: (params) => ipcRenderer.send('change-projects-coords', params),
     changeGalacticConnections: (params) => ipcRenderer.send('change-galactic-connections', params),
+
+    // askHabits: () => ipcRenderer.send('ask-habits'),
+    // getHabits: (func) => ipcRenderer.on('get-habits', (event, habits) => func(habits)),
+
+    // askHabitsDays: () => ipcRenderer.send('ask-habits-days'),
+    // getHabitsDays: (func) => ipcRenderer.on('get-habits-days', (event, days) => func(days)),
+
+    // askHabitsLogs: () => ipcRenderer.send('ask-habits-logs'),
+    // getHabitsLogs: (func) => ipcRenderer.on('get-habits-logs', (event, days) => func(days)),
+
 })
 
 contextBridge.exposeInMainWorld('projectsAPI', {
@@ -115,6 +125,9 @@ contextBridge.exposeInMainWorld('dataAPI', {
     getCategories: () => ipcRenderer.invoke('get-categories'),
     getProjects: () => ipcRenderer.invoke('get-projects'),
     getGalacticConnections: () => ipcRenderer.invoke('get-galactic-connections'),
+    getHabits: () => ipcRenderer.invoke('get-habits'),
+    getHabitsDays: () => ipcRenderer.invoke('get-habits-days'),
+    getHabitsLogs: () => ipcRenderer.invoke('get-habits-logs'),
 });
 
 contextBridge.exposeInMainWorld('inboxAPI', {
