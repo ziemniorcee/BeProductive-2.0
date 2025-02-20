@@ -18,7 +18,6 @@ function todoHandlers(db) {
     let ids_array = []
     let ids_array_previous = []
 
-    let inbox_ids = []
 
     ipcMain.handle('get-day-view', async (event, params) => {
         try {
@@ -79,7 +78,7 @@ function todoHandlers(db) {
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                         WHERE addDate between "${params.dates[0]}" and "${params.dates[6]}"
-                          and check_state = 0 
+                          and check_state = 0
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -612,8 +611,8 @@ function todoHandlers(db) {
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
                     project_id = ${project_id},
-                    addDate = '${params.changes['addDate']}',
-                    date_type = ${params.changes['date_type']}
+                    addDate    = '${params.changes['addDate']}',
+                    date_type  = ${params.changes['date_type']}
                 WHERE id = ${ids_array[params.id]}`)
 
         let new_steps = params.changes['steps']
@@ -1090,12 +1089,7 @@ function todoHandlers(db) {
                     if (err) {
                         reject(err);
                     } else {
-                        inbox_ids = goals.map((goal) => goal.id)
-                        let safe_inbox = goals.map(goal => {
-                            let {id, ...rest} = goal;
-                            return rest;
-                        })
-                        resolve(safe_inbox);
+                        resolve(goals)
                     }
                 });
             });
@@ -1105,27 +1099,75 @@ function todoHandlers(db) {
         }
     });
 
-    ipcMain.on('new-inbox-goal', (event, params) => {
+    ipcMain.handle('new-inbox-goal', async (event, params) => {
+        console.log(params.name)
         db.run(`INSERT INTO inbox (name, add_date)
                 VALUES ("${params.name}", "${params.add_date}")`);
 
-        db.all("SELECT id  FROM inbox WHERE check_state = 0 ORDER BY id DESC LIMIT 1;", (err, rows) => {
-            inbox_ids.push(rows[0]['id'])
-            console.log(inbox_ids)
-        })
-    })
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM inbox
+                        WHERE check_state = 0
+                        ORDER BY id DESC
+                        LIMIT 1;`, (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(rows[0])
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
 
     ipcMain.on('check-inbox-goal', (event, params) => {
         db.run(`UPDATE inbox
                 SET check_state = 1
-                WHERE id = ${inbox_ids[params.position]}`)
+                WHERE id = ${params.id}`)
 
-        inbox_ids.splice(params.position, 1)
     })
 
     ipcMain.on('remove-project', (event, params) => {
-        db.run(`DELETE FROM projects WHERE id=${params.id}`);
+        db.run(`DELETE
+                FROM projects
+                WHERE id = ${params.id}`);
     })
+
+    ipcMain.on('new-goal-from-inbox', (event, params) => {
+        db.run(`INSERT INTO goals (goal, addDate, category, project_id, note, date_type)
+                VALUES ("${params.goal}", "${params.date}", ${params.category_id},
+                        ${params.project_id}, "${params.note}", ${params.date_type})`)
+
+        db.all(`SELECT id
+                FROM goals
+                WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
+
+            let goal_id = rows[0].id
+
+            if (params.steps.length){
+                let steps_values = ""
+                for (let j = 0; j < params.steps.length; j++) {
+                    steps_values += `("${params.steps[j].step_text}", ${goal_id})`
+                    if (j < params.steps.length - 1) steps_values += ","
+                }
+                steps_values += ";"
+
+                console.log(`INSERT INTO steps (step_text, goal_id)
+                    VALUES ${steps_values}`)
+                db.run(`INSERT INTO steps (step_text, goal_id)
+                    VALUES ${steps_values}`)
+            }
+        })
+
+        db.run(`DELETE
+                FROM inbox
+                WHERE id = ${params.inbox_id}`);
+    })
+
 
     ipcMain.handle('get-habits', async () => {
         try {

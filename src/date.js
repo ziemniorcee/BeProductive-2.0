@@ -3,6 +3,8 @@ import {weekdays, month_names} from "./data.mjs";
 export class CurrentDate {
     constructor() {
         this.initEventListeners()
+
+        this.decider = new Decider(this)
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
         this.tomorrow = new Date(this.today.getTime())
@@ -410,5 +412,36 @@ export class CurrentDate {
     }
 }
 
+class Decider {
+    constructor(app_date) {
+        this.initEventListeners()
+        this.date = app_date
 
+    }
+
+    initEventListeners() {
+        $(document).on('click', '.dateDecider', (event) => {
+            let $selector = $(event.currentTarget).parent().find('.dateDeciderSelect')
+
+            let is_visible = $selector.css('display') === "flex"
+            if (is_visible) $selector.css('display', 'none')
+            else $selector.css('display', 'flex')
+
+        })
+
+        $(document).on('click', '.dateDeciderToday', () => {
+            let date_formatted = this.date.get_edit_date_format(this.date.today)
+            $('.dateDecider').text(date_formatted)
+
+            $(".dateDeciderSelect").css('display', 'none')
+        })
+
+        $(document).on('click', '.dateDeciderTomorrow', () => {
+            let date_formatted = this.date.get_edit_date_format(this.date.tomorrow)
+            $('.dateDecider').text(date_formatted)
+
+            $(".dateDeciderSelect").css('display', 'none')
+        })
+    }
+}
 
