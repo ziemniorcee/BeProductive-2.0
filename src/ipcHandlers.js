@@ -36,7 +36,7 @@ function todoHandlers(db) {
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                                  LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE addDate = "${params.date}"
+                        WHERE addDate = "${params.date}" and date_type != 2
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -241,6 +241,31 @@ function todoHandlers(db) {
         }
     }
 
+    function get_safe_goals2(goals, steps) {
+        goals = goals.map(goal => ({...goal, steps: []}))
+        let positions = goals.map((goal) => Number(goal.goal_pos))
+        if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions) + 1
+        else current_goal_pos = 0
+
+        let safe_steps = steps.map(step => {
+            let {goal_id, ...rest} = step;
+            return rest;
+        })
+
+        for (let i = 0; i < steps.length; i++) {
+            let goal_index = steps[i].goal_id
+            let item = goals.find(item => item.id === goal_index);
+            item.steps.push(safe_steps[i])
+        }
+
+        let safe_goals = goals.map(goal => {
+            let {goal_pos, ...rest} = goal;
+            return rest;
+        })
+
+        return safe_goals
+    }
+
     function get_safe_goals(goals, steps) {
         goals = goals.map(goal => ({...goal, steps: []}))
         let positions = goals.map((goal) => Number(goal.goal_pos))
@@ -282,7 +307,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('get-from-project', (event, params) => {
-        console.log(project_sidebar_ids)
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
                 WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
@@ -442,6 +466,8 @@ function todoHandlers(db) {
         values += ";"
 
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
+                VALUES ${values}`)
+        console.log(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
                 VALUES ${values}`)
 
         db.all(`SELECT id
@@ -1100,7 +1126,6 @@ function todoHandlers(db) {
     });
 
     ipcMain.handle('new-inbox-goal', async (event, params) => {
-        console.log(params.name)
         db.run(`INSERT INTO inbox (name, add_date)
                 VALUES ("${params.name}", "${params.add_date}")`);
 
@@ -1128,7 +1153,6 @@ function todoHandlers(db) {
         db.run(`UPDATE inbox
                 SET check_state = 1
                 WHERE id = ${params.id}`)
-
     })
 
     ipcMain.on('remove-project', (event, params) => {
@@ -1156,8 +1180,6 @@ function todoHandlers(db) {
                 }
                 steps_values += ";"
 
-                console.log(`INSERT INTO steps (step_text, goal_id)
-                    VALUES ${steps_values}`)
                 db.run(`INSERT INTO steps (step_text, goal_id)
                     VALUES ${steps_values}`)
             }
@@ -1217,6 +1239,81 @@ function todoHandlers(db) {
         }
     })
 
+    ipcMain.handle('get-ASAP', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.category,
+                               PR.category as pr_category,
+                               PR.id       as pr_id,
+                               PR.icon     as pr_icon
+                        FROM goals G
+                                 LEFT JOIN knots KN ON KN.goal_id = G.id
+                                 LEFT JOIN projects PR ON PR.id = G.project_id
+                        WHERE date_type = 2 AND G.check_state = 0
+                        ORDER BY G.id DESC`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        let ids_array = goals.map((goal) => goal.id)
+                        let ids_string = `( ${ids_array} )`
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                            if (err2) reject(err);
+                            else {
+                                let safe_goals = get_safe_goals2(goals, steps)
+                                resolve(safe_goals);
+                            }
+                        })
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+    ipcMain.on('check-ASAP-goal', (event, params) => {
+        db.run(`UPDATE goals
+                SET check_state = 1
+                WHERE id = ${params.id}`)
+    })
+
+    ipcMain.handle('new-ASAP-goal', async (event, params) => {
+        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note, date_type)
+                VALUES ("${params.name}", "${params.add_date}", 0,1,2,4,0, "", 2)`);
+
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.difficulty,
+                               G.importance,
+                               PR.category as pr_category,
+                               PR.id       as pr_id,
+                               PR.icon     as pr_icon
+                        FROM goals G
+                                 LEFT JOIN projects PR ON PR.id = G.project_id
+                        ORDER BY G.id DESC
+                        LIMIT 1;`, (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(rows[0])
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
 }
 
 

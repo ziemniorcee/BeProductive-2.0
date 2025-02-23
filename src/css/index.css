@@ -247,10 +247,8 @@ body {
 }
 
 .todoCheck {
-    border-right: 1px solid #444444;
     pointer-events: none;
     position: relative;
-    background: #FF5D00 url("../images/goals/rank1.svg") no-repeat;
 }
 
 .checkDot {
@@ -1684,6 +1682,9 @@ body {
     font-size: 24px;
     text-align: center;
     position: relative;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 
 #selectCategory22 {
@@ -1712,12 +1713,13 @@ body {
 
 .editLabel {
     margin-top: 15px;
+    margin-bottom: 10px;
 }
 
 #editSwitchDateMode {
     position: absolute;
     left: 250px;
-    top: 360px;
+    top: 402px;
     width: 35px;
     height: 35px;
     justify-content: center;

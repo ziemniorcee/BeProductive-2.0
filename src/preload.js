@@ -140,4 +140,6 @@ contextBridge.exposeInMainWorld('inboxAPI', {
 
 contextBridge.exposeInMainWorld('asapAPI', {
     getASAP: () => ipcRenderer.invoke('get-ASAP'),
+    checkASAPGoal: (params) => ipcRenderer.send('check-ASAP-goal', params),
+    newASAPGoal: (params) => ipcRenderer.invoke('new-ASAP-goal', params),
 });

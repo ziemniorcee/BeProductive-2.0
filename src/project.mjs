@@ -47,7 +47,7 @@ export class Project {
 
         $(document).on('click', '.iconPickerListElement', (event) => this.select_icon(event.currentTarget))
 
-        $(document).on('click', '.projectEmblem', async (event) => {
+        $(document).on('click', '#todosAll .projectEmblem', async (event) => {
             event.stopPropagation()
             this.project_pos = $(event.currentTarget).find('.projectPos').text()
             await this.project_view()
@@ -113,8 +113,8 @@ export class Project {
      */
     new_project() {
         let project_setting_icon = $('#projectSettingsIcon')
-        let category = getIdByColor(this.data.categories, $('#selectCategory3').css('backgroundColor'))
-
+        let category = Number($('.categoryDeciderId').text())
+        console.log(category)
         let name = $('#newProjectName').val()
 
         let icon_path = $('#projectSettingIconSrc').attr('src')
@@ -124,6 +124,8 @@ export class Project {
             $('#newProjectError').text("NO NAME GIVEN")
         } else if (icon_path === "images/goals/project.png") {
             $('#newProjectError').text("NO ICON SELECTED")
+        } else if (category === 0) {
+            $('#newProjectError').text("NO CATEGORY SELECTED")
         } else {
             window.projectsAPI.newProject({category: category, name: name, icon: icon_name})
             $('#vignette').css('display', 'none')

@@ -27,7 +27,7 @@ class MainApp {
         this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
         this.inbox = new Inbox(this.data, this.date, this.edit)
-        this.asap = new Asap(this.data, this.date)
+        this.asap = new Asap(this.data, this.date, this.steps)
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
 

@@ -103,7 +103,6 @@ export class Categories {
             let selected_category = $(`#selectCategory${id}`)
             $(`#categoryPicker${id}`).css('display', 'none')
             let category_element = Object.keys(this.data.categories)[index - 2]
-            console.log(category_element);
             selected_category.css('background', this.data.categories[category_element][0])
             selected_category.text(this.data.categories[category_element][1])
         }
@@ -162,26 +161,32 @@ class Decider {
 
         $(document).on('click', '.categoryDeciderCategory', (event) => {
             let selected_category_id = Number($(event.currentTarget).find('.categoryDeciderCategoryId').text())
-            let category = this.data.categories[selected_category_id]
+            let category = ['rgb(74, 74, 74)', 'No category']
+
+            if (selected_category_id !== 0) {
+                category = this.data.categories[selected_category_id]
+            }
+
 
             $("body").get(0).style.setProperty("--decide-color", category[0]);
 
             $('.categoryDecider').css('background-color', category[0])
             $('.categoryDeciderName').text(category[1])
             $('.categoryDeciderId').text(selected_category_id)
-            // $('.deciderButtonFilled').css('background-color', category[0])
 
             $(".categoryDeciderSelect").remove()
         })
     }
 
     open() {
-        console.log(this.data.categories)
         if (!$(".categoryDeciderSelect").length) {
             let $decider = $(this.create_decider())
 
+            $decider.find('.categoryDeciderCategories').append(this.create_category(['rgb(74, 74, 74)', 'No category'], 0))
+
             for (let category in this.data.categories) {
-                $decider.find('.categoryDeciderCategories').append(this.create_category(category))
+                let category_settings = this.data.categories[category]
+                $decider.find('.categoryDeciderCategories').append(this.create_category(category_settings, category))
             }
             $('.categoryDecider').after($decider)
         } else {
@@ -199,11 +204,10 @@ class Decider {
             </div>`
     }
 
-    create_category(category) {
-        let category_settings = this.data.categories[category]
+    create_category(category_settings, category_id) {
         return `
             <div class="categoryDeciderCategory">
-                <div class="categoryDeciderCategoryId">${category}</div>
+                <div class="categoryDeciderCategoryId">${category_id}</div>
                 <div class="categoryDeciderCategoryColor" style="background-color: ${category_settings[0]}"></div>
                 <span>${category_settings[1]}</span>
             </div>`

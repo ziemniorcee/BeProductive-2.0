@@ -47,7 +47,6 @@ export class Inbox {
         $('#main').html($main_clone)
 
         let goals = await window.inboxAPI.getInbox()
-        console.log(goals)
         let breaks = this.date.get_inbox_sections(goals)
         let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
 
@@ -70,7 +69,6 @@ export class Inbox {
      * @param way decides if add at the beginning or at the end of list
      */
     add_todo(goal, way) {
-        console.log(goal['name'])
         const template = $('#inboxTodoTemplate').prop('content');
         let id = $('.inboxTodo').length
         let $clone = $(template).clone()
@@ -210,7 +208,7 @@ class DecisionMaker {
             let decision_main_entry = $('#editMainEntry').val()
             let decision_note_entry = $('#editNoteEntry').val()
             let steps_array = this.edit.get_steps()
-            let category_id = Number($('#categoryDeciderId').text())
+            let category_id = Number($('.categoryDeciderId').text())
             let project_id = Number($('#projectDeciderId').text())
 
             let date_type = 0
@@ -225,7 +223,6 @@ class DecisionMaker {
                 date_type = 2
             }
 
-            console.log(steps_array)
             let inbox_id = this.goal_id
             let goal = {
                 inbox_id: inbox_id,
@@ -244,7 +241,6 @@ class DecisionMaker {
             $('#vignette').html('')
 
             let $previous_element = this.selected_goal.prev()
-            console.log($previous_element)
             let $next_element = this.selected_goal.next()
             if ($previous_element.attr('class') === "inboxListBreak" &&
                 ($next_element.attr('class') === "inboxListBreak" || $next_element.length === 0)) {
