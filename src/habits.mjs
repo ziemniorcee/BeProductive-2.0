@@ -20,7 +20,7 @@ export class Habits {
             for (let i=2; i<5; i++) {
                 if ("" + i === val) $(`#newHabitOption${i}`).css('display', 'flex');
                 else $(`#newHabitOption${i}`).css('display', 'none');
-            } 
+            }
         })
 
 

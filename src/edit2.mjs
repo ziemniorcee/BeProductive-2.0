@@ -22,7 +22,7 @@ export class Edit {
     }
 
     initEventListeners() {
-        $(document).on('click', '.todo, .weekDay .todo, .monthTodo, .day .sidebarTask', async (event) => {
+        $(document).on('click', '#todosAll .todo, .weekDay .todo, .monthTodo, .day .sidebarTask', async (event) => {
             $("#vignette").css('display', 'block')
             $("#taskEdit").css('display', 'block')
 
@@ -79,6 +79,10 @@ export class Edit {
         $(document).on('click', '#taskEdit', (event) => {
             if(!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length){
                 $(".dateDeciderSelect").css('display', 'none')
+            }
+
+            if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
+                $(".categoryDeciderSelect").remove()
             }
         })
 
@@ -160,8 +164,14 @@ export class Edit {
         if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
-        $edit_clone.find('#selectCategory22').css('background-color', this.data.categories[goal["category"]][0])
-        $edit_clone.find('#selectCategory22').text(this.data.categories[goal["category"]][1])
+        if (goal["category"] !== 0) {
+            $edit_clone.find('.categoryDecider').css('background-color', this.data.categories[goal["category"]][0])
+            $edit_clone.find('.categoryDeciderName').text(this.data.categories[goal["category"]][1])
+        } else {
+            $edit_clone.find('.categoryDecider').css('background-color', "rgb(74, 74, 74)")
+            $edit_clone.find('.categoryDeciderName').text("No category")
+        }
+        $edit_clone.find('.categoryDeciderId').text(goal["category"])
 
         $edit_clone.find('#editDiff').val(goal["difficulty"])
         $edit_clone.find('#editDiff').css('background-color', range1_backgrounds[goal["difficulty"]])
@@ -339,8 +349,7 @@ export class Edit {
         let edit_note_entry = $('#editNoteEntry').val()
         let steps_array = this.get_steps()
 
-        let category_color = $('#selectCategory22').css('background-color')
-        let category_id = getIdByColor(this.data.categories, category_color)
+        let category_id = Number($('.categoryDeciderId').text())
         let difficulty = $('#editDiff').val()
         let importance = $('#editImportance').val()
 
@@ -393,10 +402,15 @@ export class Edit {
 
     set_todo_changes(selected_goal, changes) {
         selected_goal.find('.task').text(decode_text(changes['goal']))
-        selected_goal.find('.todoCheck').css('background-color', this.data.categories[changes['category']][0])
-        let url = `images/goals/rank${changes['difficulty']}.svg`
-        selected_goal.find('.todoCheck').css('background-image', `url("${url}")`)
+        if (changes['category'] !== 0) {
+            selected_goal.find('.todoCheck').css('background-color', this.data.categories[changes['category']][0])
+            let url = `images/goals/rank${changes['difficulty']}.svg`
+            selected_goal.find('.todoCheck').css('background-image', `url("${url}")`)
+        } else {
+            selected_goal.find('.todoCheck').css('background-color', "")
+        }
         selected_goal.find('.checkDot').css('border-color', check_border[changes['importance']])
+
     }
 
     set_monthTodo_changes(selected_goal, changes) {

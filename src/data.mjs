@@ -101,9 +101,25 @@ export class Data {
     project_emblem_html(project_pos) {
         let project_emblem = ''
         if (project_pos !== -1 && project_pos !== undefined) {
-            console.log()
             let project_color = this.categories[this.projects[project_pos]['category']][0]
             let project_icon = this.findPathByName(this.projects[project_pos]['icon'])
+
+            project_emblem = `
+            <div class="projectEmblem" style="background-color: ${project_color}">
+                <img src="${project_icon}" alt="">
+                <div class="projectPos">${project_pos}</div>
+            </div>
+        `
+        }
+        return project_emblem
+    }
+
+    project_emblem_html2(project_pos) {
+        let project_emblem = ''
+        if (project_pos !== -1 && project_pos !== null) {
+            const selected_project = this.projects.find(project => project.id === project_pos)
+            let project_color = this.categories[selected_project['category']][0]
+            let project_icon = this.findPathByName(selected_project['icon'])
 
             project_emblem = `
             <div class="projectEmblem" style="background-color: ${project_color}">

@@ -318,9 +318,9 @@
                 <div id="newHabitTitle" class="vignetteWindow1Title">Create new habit</div>
                 <div id="newHabitOptions">
                     <div id="projectSettings">
-                        <div class="categoryDecider deciderButtonFill">
-                            <div class="categoryDeciderId">1</div>
-                            <div class="categoryDeciderName">General</div>
+                        <div class="categoryDecider deciderButtonEmpty">
+                            <div class="categoryDeciderId">0</div>
+                            <div class="categoryDeciderName">No category</div>
                         </div>
                         <input type="text" id="newProjectName" placeholder="Enter name">
                     </div>
@@ -364,7 +364,6 @@
 
     <template id="editTemplate">
         <div id="taskEdit" class="vignetteWindow2">
-<!--            tu-->
 
         </div>
     </template>
@@ -397,7 +396,11 @@
     <template id="editRightTemplate">
         <div id="editRight">
             <div class="editLabel">Category</div>
-            <div id="selectCategory22" class="selectCategory">General</div>
+            <div class="categoryDecider deciderButtonFill">
+                <div class="categoryDeciderId">1</div>
+                <div class="categoryDeciderName">General</div>
+            </div>
+
             <div class="categoryPicker" id="categoryPicker22">
             </div>
             <div class="editLabel">Difficulty</div>
@@ -434,14 +437,14 @@
             <div id="decisionTop">
                 <div id="decisionCategory">
                     <div id="decisionCategoryLabel">Category</div>
-                    <div id="categoryDecider" class="categoryDecider deciderButtonFilled">
-                        <div class="categoryDeciderId">1</div>
-                        <div id="categoryDeciderName" class="categoryDeciderName">General</div>
+                    <div id="categoryDecider" class="categoryDecider deciderButtonEmpty">
+                        <div class="categoryDeciderId">0</div>
+                        <div id="categoryDeciderName" class="categoryDeciderName">No category</div>
                     </div>
                 </div>
                 <div id="decisionProject">
                     <div id="decisionProjectLabel">Project</div>
-                    <div id="projectDecider" class="deciderButtonFilled">
+                    <div id="projectDecider" class="deciderButtonEmpty">
                         <div id="projectDeciderId">-1</div>
                         <div id="projectDeciderIcon">
                             <img src="images/goals/projects/keys.png" alt="">
@@ -555,7 +558,10 @@
                         <div id="newProjectIconText">Icon</div>
                     </div>
                     <div id="projectSettings">
-                        <div class="selectCategory" id="selectCategory3">General</div>
+                        <div class="categoryDecider deciderButtonEmpty">
+                            <div class="categoryDeciderId">0</div>
+                            <div class="categoryDeciderName">No category</div>
+                        </div>
                         <input type="text" id="newProjectName" placeholder="Enter name">
                         <div id="projectSettingsIcon">
                             <img id="projectSettingIconSrc" src="images/goals/project.png">

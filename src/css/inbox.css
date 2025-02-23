@@ -563,3 +563,8 @@
     right: 714px;
     top: -150px;
 }
+
+#taskEdit .categoryDeciderSelect{
+    right: 250px;
+    top: -150px;
+}
