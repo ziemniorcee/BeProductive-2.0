@@ -42,7 +42,7 @@ export class DayView {
         /**
          * opens context menu for goals goal and saves selected goal
          */
-        $(document).on('contextmenu', '#main .todo, .monthTodo', (event) => {
+        $(document).on('contextmenu', '#todosAll .todo, .monthTodo', (event) => {
             if ($(event.currentTarget).find('.repeatLabelShow').length) window.appAPI.contextMenuOpen({repeat: 1})
             else window.appAPI.contextMenuOpen({repeat: 0, option: 0})
             this.todo_to_remove = event.target
@@ -249,7 +249,8 @@ export class DayView {
      */
     build_goal(goal) {
         let todo_id = $('#todosAll .todo').length
-        let category_color = this.data.categories[goal.category][0]
+        let category_color = ""
+        if (goal.category !== 0) category_color = this.data.categories[goal.category][0]
         let check_state = goal.check_state ? "checked" : "";
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
         let url = `images/goals/rank${goal.difficulty}.svg`

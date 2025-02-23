@@ -218,7 +218,6 @@
 .projectEmblem{
     float: right;
     width: 55px;
-    background-color: #002244;
     display: flex;
     justify-content: center;
     align-items: center;
