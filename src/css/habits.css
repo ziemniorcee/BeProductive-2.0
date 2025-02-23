@@ -135,3 +135,51 @@
     background-color: #333333;
     color: #fff;
 }
+
+.customTimePicker {
+    background-color: rgb(74, 74, 74);
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 1px black solid;
+    width: auto;
+    height: auto;
+    position: relative;
+    padding: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.customTimePickerHours, .customTimePickerMinutes {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    font-size: 44px;
+    line-height: 60px;
+    position: relative;
+    color: #fff;
+    background-color: #333333;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 3px black solid;
+}
+
+.customTimePickerHours:hover .customTimePickerHoursBox, .customTimePickerMinutes:hover .customTimePickerMinutesBox {
+    display: block;
+}
+
+.customTimePickerHoursBox, .customTimePickerMinutesBox {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    background-color: #333333;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    border: 3px black solid;
+    padding: 15px;
+    transform: translateX(-50%);
+    z-index: 10;
+}
