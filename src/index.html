@@ -312,6 +312,23 @@
         </div>
     </div>
 
+    <template id="customTimePicker">
+        <div class="customTimePicker">
+            <div class="customTimePickerHours">
+                <span class="customTimePickerHoursValue">12</span>
+                <div class="customTimePickerHoursBox">
+                    <input class="customTimePickerHoursPicker" type="range" min="0" max="23" value="12">
+                </div>
+            </div>
+            <div class="customTimePickerMinutes">
+                <span class="customTimePickerMinutesValue">00</span>
+                <div class="customTimePickerMinutesBox">
+                    <input class="customTimePickerMinutesPicker" type="range" min="0" max="59" value="0" step="5">
+                </div>
+            </div>
+        </div>
+    </template>
+
     <template id="addHabitTemplate">
         <div id="newHabit" class="vignetteWindow1">
             <div id="newHabitContent" class="vignetteWindow1Content">
@@ -338,20 +355,7 @@
 
                 <div id="newHabitInfo">
                     <div id="newHabitOption2" class="newHabitOption">
-                        <div class="customTimePicker">
-                            <div class="customTimePickerHours">
-                                <span class="customTimePickerHoursValue">12</span>
-                                <div class="customTimePickerHoursBox">
-                                    <input class="customTimePickerHoursPicker" type="range" min="0" max="23" value="12">
-                                </div>
-                            </div>
-                            <div class="customTimePickerMinutes">
-                                <span class="customTimePickerMinutesValue">00</span>
-                                <div class="customTimePickerMinutesBox">
-                                    <input class="customTimePickerMinutesPicker" type="range" min="0" max="59" value="0">
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                     <div id="newHabitOption3" class="newHabitOption">
                         

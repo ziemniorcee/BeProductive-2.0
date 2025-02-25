@@ -81,7 +81,12 @@
 
 #newHabit {
     height: 50%;
-    width: 50%;
+    width: 60%;
+    left: 20%;
+}
+
+#newHabitTitle {
+    margin-bottom: 30px;
 }
 
 #selectCategory5 {
@@ -103,10 +108,20 @@
     margin-top: 10px;
 }
 
+#newHabitMode label {
+    vertical-align: middle;
+}
+
+#newHabitMode input[type="radio"] {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+}
+
 #newHabitInfo {
     width: 100%;
     display: flex;
-    margin-top: 5%;
+    margin-top: 30px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -114,26 +129,37 @@
 
 .newHabitOption {
     width: 100%;
-    min-height: 100px;
-    margin: 20px;
+    height: auto;
+    margin: 10px 20px 10px 20px;
     padding: 10px 0 10px 0;
     display: none;
     flex-direction: row;
     justify-content: center;
-    align-items: center;
-    background-color: #333333;
+    align-items: flex-start;
+    background-color: #1E1E1E;
     border-radius: 10px;
     box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
     border: 1px black solid;
 }
 
-.newHabitTimeInput {
-    border-radius: 5px;
-    border-width: 0;
-    font-size: 24px;
-    font-family: inherit;
-    background-color: #333333;
+.newHabitOptionDayBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 13.5%;
+}
+
+.newHabitOptionDayBox > span {
     color: #fff;
+    font-size: 20px;
+}
+
+.newHabitOptionDayBox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin: 5px;
 }
 
 .customTimePicker {
@@ -144,20 +170,20 @@
     width: auto;
     height: auto;
     position: relative;
-    padding: 15px;
+    padding: 5px;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .customTimePickerHours, .customTimePickerMinutes {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     text-align: center;
-    font-size: 44px;
-    line-height: 60px;
+    font-size: 28px;
+    line-height: 40px;
     position: relative;
     color: #fff;
     background-color: #333333;
@@ -167,11 +193,13 @@
 }
 
 .customTimePickerHours:hover .customTimePickerHoursBox, .customTimePickerMinutes:hover .customTimePickerMinutesBox {
-    display: block;
+    display: flex;
 }
 
 .customTimePickerHoursBox, .customTimePickerMinutesBox {
     display: none;
+    justify-content: center;
+    align-items: center;
     position: absolute;
     top: 100%;
     left: 50%;
@@ -179,7 +207,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
     border: 3px black solid;
-    padding: 15px;
+    padding: 3px;
     transform: translateX(-50%);
     z-index: 10;
 }
