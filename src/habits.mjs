@@ -23,9 +23,9 @@ export class Habits {
                 <span>${this.data.weekdays2[i]}</span>
                 <input type="checkbox" id="newHabitOption4Day${i}" class="newHabitOption4Checkbox">
                 </div>`);
-                let time_picker_clone = $(time_picker_template).clone();
-                $(time_picker_clone).css('display', 'none');
-                $('#newHabitOption4').children(":last-child").append(time_picker_clone);
+                let last_box = $('#newHabitOption4').children(":last-child")
+                $(last_box).append($(time_picker_template).clone());
+                $(last_box).children(":last-child").css('display', 'none');
             }
         })
 

@@ -113,15 +113,15 @@
 }
 
 #newHabitMode input[type="radio"] {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     vertical-align: middle;
 }
 
 #newHabitInfo {
     width: 100%;
     display: flex;
-    margin-top: 30px;
+    margin-top: 10px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -130,7 +130,8 @@
 .newHabitOption {
     width: 100%;
     height: auto;
-    margin: 10px 20px 10px 20px;
+    min-height: 120px;
+    margin: 10px;
     padding: 10px 0 10px 0;
     display: none;
     flex-direction: row;
@@ -156,8 +157,8 @@
 }
 
 .newHabitOptionDayBox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
     vertical-align: middle;
     margin: 5px;
 }
