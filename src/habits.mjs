@@ -13,17 +13,18 @@ export class Habits {
             $new_habit_clone.find(".categoryPicker").html(this.categories._categories_HTML(false, true))
             $("#vignette").html($new_habit_clone)
             const time_picker_template = $('#customTimePicker').prop('content');
-            $('#newHabitOption2').html($(time_picker_template).clone());
+            $('#newHabitOption2').children(":first-child").html($(time_picker_template).clone());
+            $('#newHabitOption3').append($(time_picker_template).clone());
             for (let i=0; i<7; i++) {
-                $('#newHabitOption3').append(`<div class="newHabitOptionDayBox">
+                $('#newHabitOption3Box').append(`<div class="newHabitOptionDayBox">
                 <span>${this.data.weekdays2[i]}</span>
                 <input type="checkbox" id="newHabitOption3Day${i}">
                 </div>`);
-                $('#newHabitOption4').append(`<div class="newHabitOptionDayBox">
+                $('#newHabitOption4Box').append(`<div class="newHabitOptionDayBox">
                 <span>${this.data.weekdays2[i]}</span>
                 <input type="checkbox" id="newHabitOption4Day${i}" class="newHabitOption4Checkbox">
                 </div>`);
-                let last_box = $('#newHabitOption4').children(":last-child")
+                let last_box = $('#newHabitOption4Box').children(":last-child")
                 $(last_box).append($(time_picker_template).clone());
                 $(last_box).children(":last-child").css('display', 'none');
             }

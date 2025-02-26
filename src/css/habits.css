@@ -80,8 +80,9 @@
 }
 
 #newHabit {
-    height: 50%;
+    height: 60%;
     width: 60%;
+    top: 20%;
     left: 20%;
 }
 
@@ -115,6 +116,7 @@
 #newHabitMode input[type="radio"] {
     width: 32px;
     height: 32px;
+    margin-top: 5px;
     vertical-align: middle;
 }
 
@@ -130,17 +132,31 @@
 .newHabitOption {
     width: 100%;
     height: auto;
-    min-height: 120px;
+    min-height: 200px;
     margin: 10px;
     padding: 10px 0 10px 0;
     display: none;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     background-color: #1E1E1E;
     border-radius: 10px;
     box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
     border: 1px black solid;
+}
+
+.newHabitOption span {
+    font-size: 28px;
+    margin: 10px 0 10px 0;
+}
+
+#newHabitOption3Box, #newHabitOption4Box {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .newHabitOptionDayBox {
