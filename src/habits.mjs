@@ -43,7 +43,6 @@ export class Habits {
             }
         })
 
-
         $(document).on('click', '#newHabit', (event) => {
             //category picker closing
             if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
@@ -51,5 +50,16 @@ export class Habits {
             }
         })
 
+        $(document).on('click', '#newHabitCreate', () => {
+            this.add_new_habit("lol", 3, []);
+            $('#vignette').css('display', 'none');
+        })
+
     }
+
+    async add_new_habit(name, importancy, days) {
+        let new_habit_id = await window.goalsAPI.addHabit({name: name, importancy: importancy, days: days});
+        console.log(new_habit_id[0]);
+    }
+
 }

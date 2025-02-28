@@ -1239,6 +1239,28 @@ function todoHandlers(db) {
         }
     })
 
+    ipcMain.handle('add-habit', async (event, params) => {
+        db.run(`INSERT INTO habits (name, importancy)
+                VALUES ("${params.name}", "${3}")`)
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all("SELECT * FROM habits ORDER BY id DESC", (err, rows) => {
+                    
+                    if (err) reject(err);
+                    else {
+                        console.log(rows);
+                        resolve({id: rows});
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching habits logs.'};
+        }
+    })
+
+    
+
     ipcMain.handle('get-ASAP', async (event, params) => {
         try {
             return await new Promise((resolve, reject) => {
