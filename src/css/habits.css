@@ -150,7 +150,7 @@
     margin: 10px 0 10px 0;
 }
 
-#newHabitOption3Box, #newHabitOption4Box {
+.newHabitOptionHorBox {
     position: relative;
     width: 100%;
     display: flex;
@@ -165,11 +165,13 @@
     justify-content: center;
     align-items: center;
     width: 13.5%;
+    gap: 10px;
 }
 
 .newHabitOptionDayBox > span {
     color: #fff;
     font-size: 20px;
+    margin: 0;
 }
 
 .newHabitOptionDayBox input[type="checkbox"] {
@@ -177,6 +179,10 @@
     height: 32px;
     vertical-align: middle;
     margin: 5px;
+}
+
+#newHabitButtons {
+    bottom: 4%;
 }
 
 .customTimePicker {

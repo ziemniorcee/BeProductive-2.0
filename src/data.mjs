@@ -35,6 +35,7 @@ export class Data {
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()
         this.habits_logs = await window.dataAPI.getHabitsLogs()
+        console.log(categories_data)
         console.log(this.habits)
         console.log(this.habits_days)
         console.log(this.habits_logs)
@@ -78,6 +79,12 @@ export class Data {
         const icon = this.merged_icons.find(icon => icon.name === name);
         return icon ? icon.path : null;
     };
+
+    compare_times(first_time, second_time) {
+        let [hours1, minutes1] = first_time.split(":").map(Number);
+        let [hours2, minutes2] = second_time.split(":").map(Number);
+        return Boolean(hours2 * 60 + minutes2 > hours1 * 60 + minutes1);
+    }
 
     /**
      * build HTML of project being in
