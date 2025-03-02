@@ -34,14 +34,15 @@ export class Habits {
             let mode = $('input[name="newHabitPicker"]:checked').val();
             console.log(mode)
             let days = [];
+            let start_date, end_date;
             for (let i=0; i<7; i++) {
                 switch (mode) {
                     case '1':
                         days.push({day: i}); break;
                     case '2':
-                        let start_date = this.get_custom_time_data(
+                        start_date = this.get_custom_time_data(
                             $('#newHabitOption2Box').children('.customTimePicker').eq(0))
-                        let end_date = this.get_custom_time_data(
+                        end_date = this.get_custom_time_data(
                             $('#newHabitOption2Box').children('.customTimePicker').eq(1))
                         console.log(start_date);
                         console.log(end_date)
@@ -49,8 +50,41 @@ export class Habits {
                             days.push({day: i, 
                                 start_date: start_date,
                                 end_date: end_date
-                            }); break;
+                            }); 
                         }
+                        break;
+                    case '3':
+                        if ($(`#newHabitOption3Day${i}`).prop('checked')) {
+                            start_date = this.get_custom_time_data(
+                                $('#newHabitOption3TimeBox').children('.customTimePicker').eq(0))
+                            end_date = this.get_custom_time_data(
+                                $('#newHabitOption3TimeBox').children('.customTimePicker').eq(1))
+                            console.log(start_date);
+                            console.log(end_date)
+                            if (this.data.compare_times(start_date, end_date)) {
+                                days.push({day: i, 
+                                    start_date: start_date,
+                                    end_date: end_date
+                                }); 
+                            }
+                        }
+                        break;
+                    case '4':
+                        if ($(`#newHabitOption4Day${i}`).prop('checked')) {
+                            start_date = this.get_custom_time_data(
+                                $(`#newHabitOption4Day${i}`).parent().children('.customTimePicker').eq(0))
+                            end_date = this.get_custom_time_data(
+                                $(`#newHabitOption4Day${i}`).parent().children('.customTimePicker').eq(1))
+                            console.log(start_date);
+                            console.log(end_date);
+                            if (this.data.compare_times(start_date, end_date)) {
+                                days.push({day: i, 
+                                    start_date: start_date,
+                                    end_date: end_date
+                                }); 
+                            }
+                        }
+                        break;
                 }
             }
             if (days.length > 0) {
@@ -61,10 +95,9 @@ export class Habits {
 
     }
 
-    add_new_habit(name, importancy, days) {
-        let new_id = Math.max(...this.data.habits.map(h => h.id)) + 1;
-        if (Math.abs(new_id) === Infinity) new_id = 1;
-        window.goalsAPI.addHabit({name: name, importancy: importancy, days: days});
+    async add_new_habit(name, importancy, days) {
+        let new_id = await window.goalsAPI.addHabit({name: name, importancy: importancy, days: days});
+        new_id = new_id[0].id;
         window.goalsAPI.addHabitDays({id: new_id, days: days});
         this.data.habits.push({id: new_id, name: name, importancy: 3});
         days.forEach(day => {

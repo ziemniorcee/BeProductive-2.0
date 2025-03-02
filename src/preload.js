@@ -56,7 +56,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     changeProjectCoords: (params) => ipcRenderer.send('change-projects-coords', params),
     changeGalacticConnections: (params) => ipcRenderer.send('change-galactic-connections', params),
 
-    addHabit: (params) => ipcRenderer.send('add-habit', params),
+    addHabit: (params) => ipcRenderer.invoke('add-habit', params),
     addHabitDays: (params) => ipcRenderer.send('add-habit-days', params),
 
     // askHabits: () => ipcRenderer.send('ask-habits'),
