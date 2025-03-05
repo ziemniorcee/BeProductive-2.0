@@ -46,7 +46,7 @@ export class Habits {
                             $('#newHabitOption2Box').children('.customTimePicker').eq(1))
                         console.log(start_date);
                         console.log(end_date)
-                        if (this.data.compare_times(start_date, end_date)) {
+                        if (this.data.compare_times(start_date, end_date) > 0) {
                             days.push({day: i, 
                                 start_date: start_date,
                                 end_date: end_date
@@ -61,7 +61,7 @@ export class Habits {
                                 $('#newHabitOption3TimeBox').children('.customTimePicker').eq(1))
                             console.log(start_date);
                             console.log(end_date)
-                            if (this.data.compare_times(start_date, end_date)) {
+                            if (this.data.compare_times(start_date, end_date) > 0) {
                                 days.push({day: i, 
                                     start_date: start_date,
                                     end_date: end_date
@@ -77,7 +77,7 @@ export class Habits {
                                 $(`#newHabitOption4Day${i}`).parent().children('.customTimePicker').eq(1))
                             console.log(start_date);
                             console.log(end_date);
-                            if (this.data.compare_times(start_date, end_date)) {
+                            if (this.data.compare_times(start_date, end_date) > 0) {
                                 days.push({day: i, 
                                     start_date: start_date,
                                     end_date: end_date

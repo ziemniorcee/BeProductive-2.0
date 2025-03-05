@@ -35,10 +35,16 @@ export class Data {
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()
         this.habits_logs = await window.dataAPI.getHabitsLogs()
-        console.log(categories_data)
+        this.habits.forEach(habit => {
+            habit.days = [];
+            this.habits_days.forEach(day => {
+                if (habit.id === day.habit_id) {
+                    let {habit_id, ...copy} = day;
+                    habit.days.push({...copy});
+                }
+            })
+        });
         console.log(this.habits)
-        console.log(this.habits_days)
-        console.log(this.habits_logs)
 
         this.set_categories(categories_data)
     }
@@ -83,7 +89,7 @@ export class Data {
     compare_times(first_time, second_time) {
         let [hours1, minutes1] = first_time.split(":").map(Number);
         let [hours2, minutes2] = second_time.split(":").map(Number);
-        return Boolean(hours2 * 60 + minutes2 > hours1 * 60 + minutes1);
+        return hours2 * 60 + minutes2 > hours1 * 60 + minutes1;
     }
 
     /**
