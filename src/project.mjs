@@ -21,7 +21,7 @@ export class Project {
     initEventListeners() {
         window.projectsAPI.projectToGoal((steps, position) => this.get_goal_from_sidebar(steps, position))
 
-        $(document).on('click', '#newProjectCreate', () => this.new_project())
+        $(document).on('click', '#newProjectCreate', async () => this.new_project())
 
         $(document).on('click', '#newProjectDiscard', () => {
             $('#vignette').css('display', 'none')
@@ -96,8 +96,8 @@ export class Project {
             let project_class = "dashProject"
             if (i % 2 === 0) project_class = "dashProject dashProjectRight"
             let icon_color = this.data.categories[this.data.projects[i].category][0]
+            let icon_path = this.data.findProjectPathByName(`project${this.data.projects[i].id}`)
 
-            let icon_path = this.data.findPathByName(this.data.projects[i].icon)
             projects_HTML += this._dash_project_HTML(project_class, icon_color, icon_path, this.data.projects[i].name)
             project_types_HTML += this._type_project_HTML(icon_color, icon_path, this.data.projects[i].name)
         }
@@ -111,10 +111,9 @@ export class Project {
     /**
      * Builds new project based on given settings
      */
-    new_project() {
+    async new_project() {
         let project_setting_icon = $('#projectSettingsIcon')
-        let category = Number($('.categoryDeciderId').text())
-        console.log(category)
+        let category_id = Number($('.categoryDeciderId').text())
         let name = $('#newProjectName').val()
 
         let icon_path = $('#projectSettingIconSrc').attr('src')
@@ -124,13 +123,60 @@ export class Project {
             $('#newProjectError').text("NO NAME GIVEN")
         } else if (icon_path === "images/goals/project.png") {
             $('#newProjectError').text("NO ICON SELECTED")
-        } else if (category === 0) {
+        } else if (category_id === 0) {
             $('#newProjectError').text("NO CATEGORY SELECTED")
         } else {
-            window.projectsAPI.newProject({category: category, name: name, icon: icon_name})
+            let new_project = await window.projectsAPI.newProject({category: category_id, name: name, icon: "ebe"})
             $('#vignette').css('display', 'none')
-            this.data.projects.push({id: 0, name: name, category: category, icon: icon_name, x: null, y: null})
+            this.data.projects.push({id: new_project["id"], name: name, category: category_id, icon: "ebe", x: null, y: null})
+            await this.make_project_icon(new_project["id"], category_id)
+
+        }
+    }
+
+    async make_project_icon(project_id, category_id) {
+        let category = this.data.categories[category_id]
+        let category_rgb = category[0]
+        const [var_r, var_g, var_b] = category_rgb.match(/\d+/g).map(Number);
+
+        let name = $('#newProjectName').val()
+
+        let icon_path = $('#projectSettingIconSrc').attr('src')
+        let icon_name = this.data.findNameByPath(icon_path);
+
+        const img = new Image();
+        img.src = icon_path;
+        img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            const pixels = imageData.data;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i + 3] > 0) {
+                    pixels[i] = var_r;   // Red
+                    pixels[i + 1] = var_g; // Green
+                    pixels[i + 2] = var_b; // Blue
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            const processedImageSrc = canvas.toDataURL();
+
+            const base64Data = processedImageSrc.split(',')[1];
+            const fileName = `project${project_id}.png`;
+
+            let result = await window.electronAPI.saveFile(fileName, base64Data, "project_icons");
+            await this.data.loadProjectIcons()
             this.set_projects_options()
+
         }
     }
 
@@ -207,7 +253,7 @@ export class Project {
                     const base64Data = processedImageSrc.split(',')[1];
                     const fileName = file.name;
 
-                    const result = await window.electronAPI.saveFile(fileName, base64Data);
+                    const result = await window.electronAPI.saveFile(fileName, base64Data, "icons");
                     $('#projectSettingIconSrc').attr('src', result['path']);
                     if (result.success) {
                         await this.data.loadIcons()
@@ -388,7 +434,7 @@ export class Project {
 
         return `
         <div class='todo'>
-            <div class="todoId">${todo_id}</div>
+            <div class="todoId">${goal.id}</div>
             <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[goal.importance]}"></div>
                 <input type='checkbox' class='check_task' ${check_state}>
@@ -413,7 +459,7 @@ export class Project {
     _dash_project_HTML(project_class, icon_color, icon_path, name) {
         return `
         <div class="${project_class}">
-            <div class="dashProjectIcon" style="background-color: ${icon_color}">
+            <div class="dashProjectIcon">
                 <img src="${icon_path}" alt="">
             </div>
             <span class="dashProjectName">${name}</span>
@@ -542,9 +588,10 @@ export class Project {
 
     check_sidebar_project_goal(selected_check) {
         let check_state = !$(selected_check).prop('checked')
-        let goal_index = $('#sideProjectGoals .check_task').index(selected_check)
+        let todo = $(selected_check).closest('.todo')
 
-        let todo = $('#sideProjectGoals .todo').eq(goal_index)
+        let goal_index = todo.find('.todoId').text()
+
         todo.remove()
 
         if (check_state) {
@@ -606,7 +653,8 @@ class Decider {
     }
 
     initEventListeners(){
-        $(document).on('click', '#projectDecider', () => {
+        $(document).on('click', '.projectDecider', () => {
+            console.log('XPP')
             this.open()
         })
 
@@ -615,13 +663,13 @@ class Decider {
             let project = this.data.projects.find(item => item.id === selected_project_id)
 
             let color = this.data.categories[project['category']][0]
-            let icon_path = this.data.findPathByName(project['icon'])
+            let icon_path = this.data.findProjectPathByName(`project${project['id']}`)
 
-            $('#projectDecider').css('background-color', color)
-            $('#projectDeciderIcon img').attr('src', icon_path)
-            $('#projectDeciderName').text(project['name'])
-            $('#projectDeciderId').text(selected_project_id)
-            $('#projectDeciderIcon img').css('display', 'block')
+            $('.projectDecider').css('border', `2px solid ${color}`)
+            $('.projectDeciderIcon img').attr('src', icon_path)
+            $('.projectDeciderName').text(project['name'])
+            $('.projectDeciderId').text(selected_project_id)
+            $('.projectDeciderIcon img').css('display', 'block')
         })
     }
 
@@ -645,29 +693,28 @@ class Decider {
 
     open(){
         this.get_sorted_projects_by_category()
-        if($('#decisionMaker').length){
-            if (!$("#projectDeciderSelect").length){
-                let $decider = $(this.create_decider())
-                let previous_category_id = 0
+        if (!$("#projectDeciderSelect").length){
+            let $decider = $(this.create_decider())
+            let previous_category_id = 0
 
-                const $decider_main = $decider.find('#projectDeciderMain')
+            const $decider_main = $decider.find('#projectDeciderMain')
 
-                for (let i = 0; i < this.sorted_projects.length; i++) {
-                    let current_category_id = this.sorted_projects[i]['category']
-                    let category_settings = this.data.categories[this.sorted_projects[i]['category']]
+            for (let i = 0; i < this.sorted_projects.length; i++) {
+                let current_category_id = this.sorted_projects[i]['category']
+                let category_settings = this.data.categories[this.sorted_projects[i]['category']]
 
-                    if (current_category_id !== previous_category_id){
-                        previous_category_id = current_category_id
+                if (current_category_id !== previous_category_id){
+                    previous_category_id = current_category_id
 
-                        $decider_main.append(this.create_category(category_settings))
-                        $decider.find('.projectDeciderCategory').last().css('--before-color', category_settings[0]);
-                    }
-
-                    $decider.find('.projectDeciderCategory').last().append(this.create_project(this.sorted_projects[i], category_settings))
+                    $decider_main.append(this.create_category(category_settings))
+                    $decider.find('.projectDeciderCategory').last().css('--before-color', category_settings[0]);
                 }
-                $('#decisionProject').append($decider)
-            }
 
+                $decider.find('.projectDeciderCategory').last().append(this.create_project(this.sorted_projects[i], category_settings))
+            }
+            $('.projectDecider').after($decider)
+        }else {
+            $(".projectDeciderSelect").remove()
         }
     }
 
@@ -688,12 +735,12 @@ class Decider {
     }
 
     create_project(sorted_project, category_settings){
-        let icon_path = this.data.findPathByName(sorted_project['icon'])
+        let icon_path = this.data.findProjectPathByName(`project${sorted_project['id']}`)
 
         return `
             <div class="projectDeciderProject">
                 <span class="projectDeciderProjectId">${sorted_project['id']}</span>
-                <span class="projectDeciderProjectIcon" style="background-color: ${category_settings[0]}"> 
+                <span class="projectDeciderProjectIcon" > 
                     <img src="${icon_path}" alt>
                 </span>
                 <span class="projectDeciderProjectName">

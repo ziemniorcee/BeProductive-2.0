@@ -614,7 +614,6 @@ body {
     padding-bottom: 1px;
     margin-top: 10px;
     margin-bottom: 5px;
-    background: #FF5D00;
     display: block;
     width: max-content;
     padding-right: 5px;
@@ -1815,7 +1814,7 @@ body {
 }
 
 .checkbox input:checked + .custom-box {
-    background: #007ACC;
+    background: #FFFFFF;
     box-shadow: 0 0 10px 2px #007ACC;
 }
 
@@ -2049,4 +2048,8 @@ body {
     max-width: 40px;
     max-height: 40px;
     object-fit: contain; /* Ensure the image fits inside the card */
+}
+
+.editStepId {
+    display: none;
 }

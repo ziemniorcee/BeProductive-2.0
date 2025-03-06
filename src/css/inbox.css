@@ -206,19 +206,16 @@
     overflow: hidden;
 }
 
-#projectDecider {
-
-}
 
 
-#projectDeciderName {
+.projectDeciderName {
     max-width: 140px;
     text-overflow: ellipsis;
     white-space: nowrap; /* Prevents text from wrapping */
     overflow: hidden;
 }
 
-#projectDeciderIcon {
+.projectDeciderIcon {
     display: flex;
     line-height: 50px;
     justify-content: center;
@@ -226,7 +223,7 @@
     margin-right: 7px;
 }
 
-#projectDeciderIcon img {
+.projectDeciderIcon img {
     height: 35px;
     width: 35px;
     display: none;
@@ -490,7 +487,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #002244;
     border-radius: 6px;
     margin-right: 10px;
 }
@@ -537,7 +533,7 @@
     display: none;
 }
 
-#projectDeciderId {
+.projectDeciderId {
     display: none;
 }
 
@@ -567,4 +563,18 @@
 #taskEdit .categoryDeciderSelect{
     right: 250px;
     top: -150px;
+}
+
+#dashNewProject .categoryDeciderSelect{
+    right: 340px;
+    top: -170px;
+}
+
+.stepId {
+    display: none;
+}
+
+#taskEdit #projectDeciderSelect{
+    top: -60px;
+    right: 250px;
 }

@@ -26,6 +26,7 @@ export class Data {
         this.project_conn = []
 
         this.merged_icons = []
+        this.project_icons = []
     }
 
     async init() {
@@ -35,9 +36,6 @@ export class Data {
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()
         this.habits_logs = await window.dataAPI.getHabitsLogs()
-        console.log(this.habits)
-        console.log(this.habits_days)
-        console.log(this.habits_logs)
 
         this.set_categories(categories_data)
     }
@@ -68,6 +66,15 @@ export class Data {
         }
     }
 
+    async loadProjectIcons() {
+        this.project_icons = []
+        const result = await window.electronAPI.getProjectIcons();
+        let icons_imported = result['files']
+        for (let i = 0; i < icons_imported.length; i++) {
+            this.project_icons.push(icons_imported[i])
+        }
+    }
+
 
     findNameByPath = (path) => {
         const icon = this.merged_icons.find(icon => icon.path === path);
@@ -76,6 +83,11 @@ export class Data {
 
     findPathByName = (name) => {
         const icon = this.merged_icons.find(icon => icon.name === name);
+        return icon ? icon.path : null;
+    };
+
+    findProjectPathByName = (name) => {
+        const icon = this.project_icons.find(icon => icon.name === name);
         return icon ? icon.path : null;
     };
 
@@ -98,16 +110,16 @@ export class Data {
      * @param project_pos
      * @returns {string} returns HTML
      */
-    project_emblem_html(project_pos) {
+    project_emblem_html(project_id) {
+        const project = this.projects.find(item => item.id === project_id);
         let project_emblem = ''
-        if (project_pos !== -1 && project_pos !== undefined) {
-            let project_color = this.categories[this.projects[project_pos]['category']][0]
-            let project_icon = this.findPathByName(this.projects[project_pos]['icon'])
+        if (project_id !== -1 && project_id !== null) {
+            let project_icon = this.findProjectPathByName(`project${project_id}`)
 
             project_emblem = `
-            <div class="projectEmblem" style="background-color: ${project_color}">
+            <div class="projectEmblem" >
                 <img src="${project_icon}" alt="">
-                <div class="projectPos">${project_pos}</div>
+                <div class="projectPos">${project_id}</div>
             </div>
         `
         }
@@ -280,7 +292,7 @@ let icons = [{
 }]
 export let merged_icons = []
 
-export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 201, 14)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
+export let check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 255, 255)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
 
 export let range1_backgrounds = ["#FFFF00", "#FFFF80", "#FFFFFF", "#404040", "#000000"]
 export let range2_backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]

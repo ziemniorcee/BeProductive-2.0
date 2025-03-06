@@ -40,6 +40,7 @@ class MainApp {
 
     async init() {
         await this.data.loadIcons()
+        await this.data.loadProjectIcons()
         await this.data.init()
 
         await this.dayView.display()
@@ -166,14 +167,14 @@ class DisplayManagement{
         })
 
         $(document).on('click', '#editMainCheck', () => {
-            let position = this.app.edit.change_edit_check()
+            let positions = this.app.edit.change_edit_check()
 
             if (!$('#projectContent').length) {
-                this.app.dayView.change_main_check(position)
+                this.app.dayView.change_main_check(positions[0])
             } else {
                 this.app.project.change_project_check(this.app.edit.selected_goal)
             }
-            this.app.edit.selected_goal = $('#main .todo').eq(position)
+            this.app.edit.selected_goal = $('#main .todo').eq(positions[1])
         })
 
         $(document).on('click', '#sideHistory', async () => {
@@ -235,11 +236,14 @@ class DisplayManagement{
         });
 
         $(document).on('click', '.stepCheck', (event) => {
-            event.stopPropagation()
-            this.app.steps.change_step_check(event.currentTarget)
+            console.log('')
+            if (!$('#ASAPList').length) {
+                event.stopPropagation()
+                this.app.steps.change_step_check(event.currentTarget)
 
-            if ($('#todosAll').length) this.app.dayView.dragula_day_view()
-            else if ($('#projectContent').length) this.app.project.dragula_project_view()
+                if ($('#todosAll').length) this.app.dayView.dragula_day_view()
+                else if ($('#projectContent').length) this.app.project.dragula_project_view()
+            }
         });
 
         $(document).on('click', '#dashClose, #dashOpen', () => {

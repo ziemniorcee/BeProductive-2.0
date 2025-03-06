@@ -71,14 +71,15 @@ export class Edit {
             this.prevent_step_blur = false
         })
 
-        $(document).on('click', '.editPickProject', (event) => {
-            this.change_project(event.currentTarget)
-        })
 
 
         $(document).on('click', '#taskEdit', (event) => {
             if(!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length){
                 $(".dateDeciderSelect").css('display', 'none')
+            }
+
+            if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
+                $("#projectDeciderSelect").remove()
             }
 
             if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
@@ -173,17 +174,13 @@ export class Edit {
         }
         $edit_clone.find('.categoryDeciderId').text(goal["category"])
 
-        $edit_clone.find('#editDiff').val(goal["difficulty"])
-        $edit_clone.find('#editDiff').css('background-color', range1_backgrounds[goal["difficulty"]])
 
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
         $edit_clone.find('#selectDate').text(this.date.change_to_edit_format(goal['addDate']))
-        this.selected_project_id = goal['pr_pos']
+
         $("#vignette").append($edit_clone)
-        $('#categoryPicker22').html(this.categories._categories_HTML())
-        $('#editProjectPicker').html(this._project_picker_HTML())
-        this.set_project(goal['pr_pos'])
+        this.set_project(goal['pr_id'])
         this.dragula_steps()
 
         $(function () {
@@ -222,42 +219,15 @@ export class Edit {
      * @param project_id id of selected option
      */
     set_project(project_id) {
-        if (project_id !== -1) {
-            let icon_path = this.data.findPathByName(this.data.projects[project_id].icon)
-            $('#editSelectProject').css('background-color', this.data.categories[this.data.projects[project_id]['category']][0])
-            $('#editSelectProject .editProjectIcon').css('background-color', this.data.categories[this.data.projects[project_id]['category']][0])
-            $('#editSelectProject .editProjectName').text(this.data.projects[project_id]["name"])
-            $('#editSelectProject .editPickProjectIcon').attr('src', `${icon_path}`)
-        } else {
-            $('#editSelectProject .editProjectName').eq(0).text('None')
-            $('#editSelectProject').css('background-color', "#FF5D00")
-            $('#editSelectProject .editProjectIcon').css("backgroundColor", "#D8E1E7")
+        if (project_id !== -1 && project_id !== null) {
+            const project = this.data.projects.find(item => item.id === project_id);
+            let icon_path = this.data.findProjectPathByName(`project${project_id}`)
+            $('.projectDeciderName').text(project["name"])
+            $('.projectDeciderIcon img').attr('src', `${icon_path}`)
+            $('.projectDeciderIcon img').css('display', 'block')
+            $('.projectDeciderId').text(project_id)
+            $('.projectDecider').css('border', `2px solid ${this.data.categories[project['category']][0]}`)
         }
-    }
-
-    /**
-     * creates picker based on existing projects
-     * @returns {string} HTML of project picker
-     */
-    _project_picker_HTML() {
-        let picks_HTML = `
-        <div class="editPickProject">
-            <div class="editProjectIcon"></div>
-            <div class="editProjectName">None</div>
-        </div>`
-
-        for (let i = 0; i < this.data.projects.length; i++) {
-            let icon_color = this.data.categories[this.data.projects[i]['category']][0]
-            let icon_path = this.data.findPathByName(this.data.projects[i].icon)
-            picks_HTML += `
-            <div class="editPickProject">
-                <div class="editProjectIcon" style="background-color: ${icon_color}">
-                    <img class="editPickProjectIcon" alt="" src="${icon_path}">
-                </div>
-                <div class="editProjectName">${this.data.projects[i]["name"]}</div>
-            </div>`
-        }
-        return picks_HTML
     }
 
     /**
@@ -325,59 +295,51 @@ export class Edit {
                 <img src="images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
                 <input type="checkbox" class="editStepCheck" ${check_state}>
                 <textarea rows="1" class="editStepEntry" spellcheck="false">${decode_text(steps[i]['step_text'])}</textarea>
+                <div class="editStepId">${steps[i]['id']}</div>
             </div>`
         }
         return steps_formatted
     }
 
     /**
-     * changes selected project in picker
-     * @param picked_project id of selected project
-     */
-    change_project(picked_project) {
-        this.selected_project_id = $('.editPickProject').index(picked_project) - 1
-        this.set_project(this.selected_project_id)
-        $('#editProjectPicker').toggle()
-    }
-
-    /**
      * Make changes to the app
      * Saves changes to the database
      */
-    change_goal(project_pos) {
+    async change_goal(project_pos) {
         let edit_main_entry = $('#editMainEntry').val()
         let edit_note_entry = $('#editNoteEntry').val()
         let steps_array = this.get_steps()
+        console.log(steps_array)
 
         let category_id = Number($('.categoryDeciderId').text())
-        let difficulty = $('#editDiff').val()
         let importance = $('#editImportance').val()
 
         let date_type = $('#editLabelDate').text() === "Deadline"
         let new_date = this.date.get_edit_sql_format($('#selectDate').text())
+        let project_id = Number($('.projectDeciderId').text())
 
         let changes = {
             'goal': encode_text(edit_main_entry),
             'category': category_id,
-            'difficulty': difficulty,
             'importance': importance,
             'steps': steps_array,
             'note': encode_text(edit_note_entry),
-            'project_id': this.selected_project_id,
+            'project_id': project_id,
             'date_type': date_type,
             'addDate': new_date
         }
 
+        changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
         if (this.selected_goal.attr('class') === 'todo') {
             this.set_todo_changes(this.selected_goal, changes)
             if (this.selected_goal.closest('#todosAll').length || $('#projectContent').length) {
                 this.set_step_changes(this.selected_goal, changes)
                 if ($('#todosAll').length) {
-                    this.change_project_emblem(this.selected_project_id)
+                    this.change_project_emblem(project_id)
                 }
             }
             if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length) {
-                if (project_pos !== this.selected_project_id) {
+                if (project_pos !== project_id) {
                     this.selected_goal.remove()
                 }
             }
@@ -386,8 +348,6 @@ export class Edit {
         } else if (this.selected_goal.attr('class') === 'sidebarTask') {
             this.selected_goal.find('.historyText').text(changes['goal'])
         }
-
-        window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
     }
 
     /**
@@ -403,11 +363,9 @@ export class Edit {
     set_todo_changes(selected_goal, changes) {
         selected_goal.find('.task').text(decode_text(changes['goal']))
         if (changes['category'] !== 0) {
-            selected_goal.find('.todoCheck').css('background-color', this.data.categories[changes['category']][0])
-            let url = `images/goals/rank${changes['difficulty']}.svg`
-            selected_goal.find('.todoCheck').css('background-image', `url("${url}")`)
+            selected_goal.css('border-right', `4px solid ${this.data.categories[changes['category']][0]}`)
         } else {
-            selected_goal.find('.todoCheck').css('background-color', "")
+            selected_goal.css('border', "1px solid #444444")
         }
         selected_goal.find('.checkDot').css('border-color', check_border[changes['importance']])
 
@@ -448,13 +406,17 @@ export class Edit {
         this.selected_goal.find('.check_task').prop('checked', check_state)
         let position = $('#main .todo').index(this.selected_goal)
 
+        let new_position = 0
         if (!$('#projectContent').length) {
-            if (check_state) position = $('#main .todo').length - 1
+            if (check_state) {
+                console.log($('#main .todo').length)
+                new_position = $('#main .todo').length - 1
+            }
             else {
-                position = $('#todosArea .todo').length
+                new_position = $('#todosArea .todo').length
             }
         }
-        return position
+        return [position, new_position]
     }
 }
 

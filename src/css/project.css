@@ -221,7 +221,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-left: 1px solid #444444;
+}
+
+.projectEmblem canvas{
+    width: 35px;
+    height: 35px;
 }
 
 .projectEmblem img{

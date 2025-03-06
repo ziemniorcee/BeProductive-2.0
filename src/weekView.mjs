@@ -74,11 +74,10 @@ export class WeekView {
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : ""
         let converted_text = decode_text(goal.goal)
         let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
-        let todo_id = $('#main .todo').length
 
         return `
         <div class="todo">
-            <div class="todoId">${todo_id}</div>
+            <div class="todoId">${goal.id}</div>
             <div class="todoCheck" style="background: ${this.data.categories[goal.category][0]} url(${difficulty}) no-repeat">
                 <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.importance]} solid"></div>
                 <input type="checkbox" class="check_task" ${check_state}>
@@ -205,7 +204,6 @@ export class WeekView {
 
 
             if (event.className.includes("todo")) {
-
                 if (goals_length_before !== goals_length_after) {
                     this._get_from_project(event, new_goal_pos, drag_sidebar_task)
                 } else if (drag_sidebar_task.parent().attr('id') !== "sideProjectGoals") {
@@ -287,14 +285,15 @@ export class WeekView {
      * @param that selected check in week view
      */
     check_week_goal(that) {
-        const goal_ids = $(`#main .todoId`)
+        const goal_ids = Number($(that).closest('.todo').find('.todoId').text())
         const rel_id = $('.check_task').index(that)
         $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
         setTimeout(() => {
             let todos = $('#main .todo')
             todos.eq(rel_id).remove()
-            window.goalsAPI.changeWeekGoalCheck({id: Number(goal_ids.eq(rel_id).html()), state: 1})
+            console.log(goal_ids)
+            window.goalsAPI.changeWeekGoalCheck({id: goal_ids, state: 1})
             this.dragula_week_view()
             let new_ids = $(`#main .todoId`)
             for (let i = 0; i < new_ids.length; i++) {

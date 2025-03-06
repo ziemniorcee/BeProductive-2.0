@@ -7,7 +7,6 @@ const fsa = require('fs')
 module.exports = {todoHandlers, appHandlers}
 
 function todoHandlers(db) {
-    let goal_ids = []
     let step_ids = {}
     let history_ids = []
     let idea_ids = []
@@ -27,7 +26,6 @@ function todoHandlers(db) {
                                G.check_state,
                                G.goal_pos,
                                G.category,
-                               G.difficulty,
                                G.importance,
                                PR.category as pr_category,
                                PR.id       as pr_id,
@@ -40,17 +38,14 @@ function todoHandlers(db) {
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
-                        set_goal_ids(goals)
-                        ids_array = goal_ids
-                        ids_array_previous = ids_array
-                        let ids_string = `( ${goal_ids} )`
+                        let rows_ids = goals.map((goal) => goal.id)
+                        let ids_string = `( ${rows_ids} )`
                         db.all(`SELECT id, goal_id, step_text, step_check
                                 FROM steps
                                 WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                             if (err2) reject(err);
                             else {
-                                let safe_goals = get_safe_goals(goals, steps)
-                                set_step_ids(steps)
+                                let safe_goals = get_safe_goals2(goals, steps)
                                 resolve(safe_goals);
                             }
                         })
@@ -82,13 +77,7 @@ function todoHandlers(db) {
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
-                        goal_ids = goals.map(item => item.id);
-                        ids_array = goal_ids
-                        let safe_goals = goals.map(goal => {
-                            let {id, ...rest} = goal;
-                            return rest;
-                        })
-                        resolve(safe_goals);
+                        resolve(goals);
                     }
                 })
             });
@@ -110,7 +99,6 @@ function todoHandlers(db) {
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
-                        goal_ids = goals.map((goal) => goal.id)
                         let goals_dict = {}
                         for (let i = 0; i < goals.length; i++) {
                             let day = Number(goals[i].addDate.slice(-2))
@@ -157,17 +145,15 @@ function todoHandlers(db) {
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
-                        set_goal_ids(goals)
-                        ids_array = goal_ids
-                        let ids_string = `( ${goal_ids} )`
+                        let row_ids = goals.map((goal) => goal.id)
+                        let ids_string = `( ${row_ids} )`
 
                         db.all(`SELECT id, goal_id, step_text, step_check
                                 FROM steps
                                 WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                             if (err2) reject(err)
                             else {
-                                set_step_ids(steps)
-                                let safe_goals = get_safe_goals(goals, steps)
+                                let safe_goals = get_safe_goals2(goals, steps)
                                 resolve(safe_goals)
                             }
                         })
@@ -202,8 +188,7 @@ function todoHandlers(db) {
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
-                        project_sidebar_ids = goals.map((goal) => goal.id)
-                        let safe_goals = get_safe_goals(goals, [])
+                        let safe_goals = get_safe_goals2(goals, [])
                         resolve(safe_goals)
                     }
                 })
@@ -229,17 +214,6 @@ function todoHandlers(db) {
         }
     }
 
-    function set_goal_ids(goals) {
-        goal_ids = goals.map((goal) => goal.id)
-    }
-
-    function set_step_ids(steps) {
-        step_ids = {}
-        for (let i = 0; i < steps.length; i++) {
-            if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
-            else step_ids[steps[i].goal_id] = [steps[i].id]
-        }
-    }
 
     function get_safe_goals2(goals, steps) {
         goals = goals.map(goal => ({...goal, steps: []}))
@@ -266,33 +240,6 @@ function todoHandlers(db) {
         return safe_goals
     }
 
-    function get_safe_goals(goals, steps) {
-        goals = goals.map(goal => ({...goal, steps: []}))
-        let positions = goals.map((goal) => Number(goal.goal_pos))
-        if (positions.length > 0) current_goal_pos = Math.max.apply(Math, positions) + 1
-        else current_goal_pos = 0
-
-        let safe_steps = steps.map(step => {
-            let {id, goal_id, ...rest} = step;
-            return rest;
-        })
-        for (let i = 0; i < steps.length; i++) {
-            let goal_index = goal_ids.indexOf(steps[i].goal_id)
-            goals[goal_index].steps.push(safe_steps[i])
-        }
-
-        let safe_goals = goals.map(goal => {
-            let {id, pr_id, goal_pos, ...rest} = goal;
-            return rest;
-        })
-        for (let i = 0; i < goals.length; i++) {
-            safe_goals[i]["pr_pos"] = project_ids.indexOf(goals[i].pr_id)
-        }
-
-        return safe_goals
-    }
-
-
     ipcMain.on('ask-projects-info', (event, params) => {
         db.all(`SELECT *
                 FROM projects`, (err, projects) => {
@@ -309,43 +256,41 @@ function todoHandlers(db) {
     ipcMain.on('get-from-project', (event, params) => {
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
-                WHERE id = ${project_sidebar_ids[params.sidebar_pos]}`)
+                WHERE id = ${params.sidebar_id}`)
 
 
         db.all(`SELECT id, goal_id, step_text, step_check
                 FROM steps
-                WHERE goal_id = ${project_sidebar_ids[params.sidebar_pos]}`, (err2, steps) => {
+                WHERE goal_id = ${params.sidebar_id}`, (err2, steps) => {
             if (err2) console.error(err2)
             else {
-                for (let i = 0; i < steps.length; i++) {
-                    if (steps[i].goal_id in step_ids) step_ids[steps[i].goal_id].push(steps[i].id)
-                    else step_ids[steps[i].goal_id] = [steps[i].id]
-                }
-                goal_ids.push(project_sidebar_ids[params.sidebar_pos])
-                project_sidebar_ids.splice(params.sidebar_pos, 1)
-
-                let safe_steps = steps.map(step => {
-                    let {id, goal_id, ...rest} = step;
-                    return rest;
-                })
-                event.reply('project-to-goal', safe_steps, params.main_pos)
+                event.reply('project-to-goal', steps, params.main_pos)
             }
         })
     })
 
-    ipcMain.on('new-project', (event, params) => {
+    ipcMain.handle('new-project', async (event, params) => {
         db.run(`INSERT INTO projects (name, category, icon)
                 VALUES ("${params.name}", ${params.category}, "${params.icon}")`)
 
-        db.all(`SELECT *
-                FROM projects`, (err, projects) => {
-            project_ids = projects.map((project) => project.id)
-            let safe_projects = projects.map(project => {
-                let {id, ...rest} = project;
-                return rest;
-            })
-            event.reply('new-project-created', safe_projects)
-        })
+
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT *
+                        FROM projects
+                        ORDER BY id DESC
+                        LIMIT 1;`, (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(rows[0])
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
     })
 
     ipcMain.on('delete-project', (event, params) => {
@@ -359,43 +304,27 @@ function todoHandlers(db) {
 
     ipcMain.on('goal-remove-date', (event, params) => {
         let empty = ""
-        let array_ids = goal_ids
-        if (params.option === 1) {
-            array_ids = project_sidebar_ids
-        }
-
         db.run(`UPDATE goals
                 SET addDate="${empty}",
                     check_state=0
-                WHERE id = ${array_ids[params.id]}`)
-
-
-        if (params.option === 1) {
-            project_sidebar_ids.splice(params.id, 1)
-        }
-
+                WHERE id = ${params.id}`)
     })
 
 
     ipcMain.on('change-date', (event, params) => {
         db.run(`UPDATE goals
                 SET addDate="${params.date}"
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${params.id}`)
 
         for (let i = 0; i < params.order.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
-                    WHERE id = ${goal_ids[params.order[i]]}`)
+                    WHERE id = ${params.order[i]}`)
         }
     })
 
 
     ipcMain.handle('ask-edit-goal', async (event, params) => {
-        ids_array_previous = ids_array
-        if (params.option === 0) ids_array = goal_ids
-        else if (params.option === 1) ids_array = history_ids
-        else if (params.option === 2) ids_array = project_sidebar_ids
-
         try {
             return await new Promise((resolve, reject) => {
                 db.all(`SELECT G.goal,
@@ -409,25 +338,16 @@ function todoHandlers(db) {
                                PR.id as pr_id
                         FROM goals G
                                  LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE G.id = ${ids_array[params.todo_id]}
+                        WHERE G.id = ${params.todo_id}
                         ORDER BY G.goal_pos`, (err, goal) => {
                     if (err) console.error(err)
                     else {
-                        goal[0]["pr_pos"] = project_ids.indexOf(goal[0].pr_id)
-                        delete goal[0]["pr_id"]
-
                         db.all(`SELECT id, goal_id, step_text, step_check
                                 FROM steps
-                                WHERE goal_id = ${ids_array[params.todo_id]}`, (err2, steps) => {
+                                WHERE goal_id = ${params.todo_id}`, (err2, steps) => {
                             if (err2) reject(err2)
                             else {
-                                step_ids[ids_array[params.todo_id]] = steps.map((step) => step.id)
-
-                                let safe_steps = steps.map(step => {
-                                    let {id, goal_id, ...rest} = step;
-                                    return rest;
-                                })
-                                resolve([goal[0], safe_steps])
+                                resolve([goal[0], steps])
                             }
                         })
                     }
@@ -439,12 +359,6 @@ function todoHandlers(db) {
         }
 
 
-    })
-
-
-    ipcMain.on('set-default-edit', (event, params) => {
-        ids_array_previous = ids_array
-        ids_array = goal_ids
     })
 
     ipcMain.on('new-goal', (event, params) => {
@@ -467,14 +381,12 @@ function todoHandlers(db) {
 
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
                 VALUES ${values}`)
-        console.log(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note)
-                VALUES ${values}`)
+
 
         db.all(`SELECT id
                 FROM goals
                 WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
             let first_id = rows[0].id - params.dates.length + 1
-            goal_ids.push(first_id)
 
             if (params.steps.length) {
                 for (let i = 0; i < params.dates.length; i++) {
@@ -523,23 +435,20 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('rows-change', (event, params) => {
-        for (let i = 0; i < goal_ids.length; i++) {
+        for (let i = 0; i < params.after.length; i++) {
             db.run(`UPDATE goals
                     SET goal_pos=${i + 1}
-                    WHERE id = ${goal_ids[(params.after[i])]}`)
+                    WHERE id = ${params.after[i]}`)
         }
     })
 
     ipcMain.on('goal-removed', (event, params) => {
         db.run(`DELETE
                 FROM goals
-                WHERE id = ${goal_ids[params.id]}`)
+                WHERE id = ${params.id}`)
         db.run(`DELETE
                 FROM steps
-                WHERE goal_id = ${goal_ids[params.id]}`)
-
-        delete step_ids[goal_ids[params.id]]
-        goal_ids.splice(params.id, 1)
+                WHERE goal_id = ${params.id}`)
     })
 
     ipcMain.on('following-removed', (event, params) => {
@@ -547,7 +456,7 @@ function todoHandlers(db) {
                 FROM goals
                 WHERE id IN (SELECT goal_id
                              FROM knots
-                             WHERE knot_id = (SELECT knot_id FROM knots WHERE goal_id = ${goal_ids[params.id]}))
+                             WHERE knot_id = (SELECT knot_id FROM knots WHERE goal_id = ${params.id}))
                   AND addDate >= '${params.date}'`, (err, goals) => {
             if (err) console.error(err)
             else {
@@ -571,50 +480,30 @@ function todoHandlers(db) {
                         FROM knots
                         WHERE goal_id IN ${goals_format}`)
 
-                let goals_positions = []
-                for (let i = 0; i < goal_ids.length; i++) {
-                    if (goals_repeat.includes(goal_ids[i])) {
-                        goals_positions.push(i)
-                    }
-                }
-
-                for (let i = goals_positions.length - 1; i >= 0; i--) {
-                    delete step_ids[goal_ids[goals_positions[i]]]
-                    goal_ids.splice(goals_positions[i], 1)
-                }
-
+                console.log("!!!Nieobsługiwany")
                 event.reply('get-following-removed', goals_positions)
             }
         })
     })
 
     ipcMain.on('change-checks-goal', (event, params) => {
-        let array_ids = goal_ids
-        if (params.option === 1) {
-            array_ids = project_sidebar_ids
-        }
-
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
-                WHERE id = ${array_ids[params.id]}`)
-
-        if (params.option === 1) {
-            project_sidebar_ids.splice(params.id, 1)
-        }
+                WHERE id = ${params.id}`)
     })
 
     ipcMain.on('change-week-goal-check', (event, params) => {
         db.run(`UPDATE goals
                 SET check_state="${Number(params.state)}"
-                WHERE id = ${goal_ids[params.id]}`)
-
-        goal_ids.splice(params.id, 1)
+                WHERE id = ${params.id}`)
     })
 
-    ipcMain.on('change-checks-step', (event, params) => {
+
+
+    ipcMain.on('change-checks-step2', (event, params) => {
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
-                WHERE id = ${step_ids[ids_array[params.id]][params.step_id]}`)
+                WHERE id = ${params.id}`)
     })
 
 
@@ -626,63 +515,50 @@ function todoHandlers(db) {
                 WHERE id = ${ids_array[params.id]}`)
     })
 
-    ipcMain.on('edit-goal', (event, params) => {
-        let project_id = params.changes['project_id']
-        if (project_id !== -1) project_id = project_ids[params.changes['project_id']]
-
-        db.run(`UPDATE goals
+    ipcMain.handle('edit-goal', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.run(`UPDATE goals
                 SET goal       = '${params.changes['goal']}',
                     category   = ${params.changes['category']},
-                    difficulty = ${params.changes['difficulty']},
                     importance = ${params.changes['importance']},
                     note       = '${params.changes['note']}',
-                    project_id = ${project_id},
+                    project_id = ${params.changes['project_id']},
                     addDate    = '${params.changes['addDate']}',
                     date_type  = ${params.changes['date_type']}
-                WHERE id = ${ids_array[params.id]}`)
+                WHERE id = ${params.id}`)
 
-        let new_steps = params.changes['steps']
-
-        let current_steps_length = step_ids[ids_array[params.id]].length
-        let new_steps_length = params.changes['steps'].length
-
-        let how_many_deleted = 0
-
-        for (let i = 0; i < current_steps_length; i++) {
-            if (i < new_steps_length) {
-                db.run(`UPDATE steps
-                        SET step_text="${new_steps[i]['step_text']}",
-                            step_check="${new_steps[i]['step_check']}"
-                        WHERE id = ${step_ids[ids_array[params.id]][i]}`)
-            } else {
                 db.run(`DELETE
-                        FROM steps
-                        WHERE id = ${step_ids[ids_array[params.id]][i - how_many_deleted]}`)
-                step_ids[ids_array[params.id]].splice(i, 1)
-                how_many_deleted += 1
-            }
-        }
+                FROM steps
+                WHERE goal_id = ${params.id}`)
 
-        if (new_steps_length > current_steps_length) {
-            for (let i = 0; i < new_steps_length - current_steps_length; i++) {
-                let array_pos = i + current_steps_length
-                db.run(`INSERT INTO steps (step_text, step_check, goal_id)
-                        VALUES ("${new_steps[array_pos]['step_text']}",
-                                ${new_steps[array_pos]['step_check']},
-                                ${ids_array[params.id]})`)
-
-                db.all(`SELECT id
-                        from steps
-                        ORDER BY id DESC
-                        LIMIT 1`, (err, rows) => {
-                    if (err) console.error(err)
-                    else {
-                        if (!(ids_array[params.id] in step_ids)) step_ids[ids_array[params.id]] = [rows[0].id]
-                        step_ids[ids_array[params.id]].push(rows[0].id)
+                if (params.changes['steps'].length){
+                    let steps_values = ""
+                    for (let j = 0; j < params.changes['steps'].length; j++) {
+                        steps_values += `("${params.changes['steps'][j].step_text}", ${params.id}, ${params.changes['steps'][j].step_check})`
+                        if (j < params.changes['steps'].length - 1) steps_values += ","
                     }
-                })
-            }
+                    steps_values += ";"
+
+                    db.run(`INSERT INTO steps (step_text, goal_id, step_check)
+                    VALUES ${steps_values}`)
+                    db.all(`SELECT id, step_check, step_text FROM steps
+                            WHERE goal_id = ${params.id}`, (err, rows) => {
+                        if (err) reject(err)
+                        else {
+                            resolve(rows)
+                        }
+                    })
+                } else {
+                    resolve([])
+                }
+
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while editing goal.'};
         }
+
 
 
     })
@@ -753,14 +629,13 @@ function todoHandlers(db) {
                             else step_ids[steps[i].goal_id] = [steps[i].id]
                         }
                     }
-                    goal_ids.push(history_ids[params.id])
-                    history_ids.splice(params.id, 1)
 
                     let safe_steps = steps.map(step => {
                         let {id, goal_id, ...rest} = step;
                         return rest;
                     })
 
+                    console.log("!!!Nieobsługiwany")
                     event.reply('history-to-goal', safe_steps, goal[0])
                 })
                 current_goal_pos++
@@ -811,16 +686,7 @@ function todoHandlers(db) {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category)
                 VALUES ("${params.goal_text}", "${params.date}", ${current_goal_pos}, 1)`)
 
-        db.all(`SELECT id
-                from goals
-                ORDER BY id DESC
-                LIMIT 1`, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                goal_ids.push(rows[0].id)
-                step_ids[rows[0].id] = []
-            }
-        })
+
     })
 
 
@@ -913,29 +779,8 @@ function todoHandlers(db) {
     })
 
 
-    ipcMain.on('ask-categories-counts', (event) => {
-        db.all(`SELECT COUNT(goal) AS counts,
-                       category
-                FROM goals
-                GROUP BY category
-                ORDER BY category;`, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                event.reply('get-categories-counts', rows);
-            }
-        })
-    })
 
-    ipcMain.on('ask-categories', (event) => {
-        db.all(`SELECT *
-                FROM categories
-                ORDER BY id`, (err, rows) => {
-            if (err) console.error(err)
-            else {
-                event.reply('get-categories', rows);
-            }
-        })
-    })
+
 
     ipcMain.handle('get-categories', async () => {
         try {
@@ -1000,21 +845,7 @@ function todoHandlers(db) {
                 VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
     })
 
-    ipcMain.on('ask-all-projects', (event) => {
-        db.all(`SELECT *
-                FROM projects
-                ORDER BY id`, (err, projects) => {
-            if (err) console.error(err)
-            else {
-                project_ids = projects.map((project) => project.id)
-                let safe_projects = projects.map(project => {
-                    let {id, ...rest} = project;
-                    return rest;
-                })
-                event.reply('get-all-projects', safe_projects);
-            }
-        })
-    })
+
 
     ipcMain.on('ask-galactic-conn', (event) => {
         db.all(`SELECT *
@@ -1066,9 +897,9 @@ function todoHandlers(db) {
                 WHERE category = ${params.id}`);
     })
 
-    ipcMain.handle('save-file', async (event, fileName, fileData) => {
+    ipcMain.handle('save-file', async (event, fileName, fileData, fileSource) => {
         try {
-            const appDataPath = path.join(app.getPath('userData'), 'icons');
+            const appDataPath = path.join(app.getPath('userData'), fileSource);
             if (!fsa.existsSync(appDataPath)) {
                 fsa.mkdirSync(appDataPath, {recursive: true});
             }
@@ -1086,6 +917,28 @@ function todoHandlers(db) {
     ipcMain.handle('get-icons', async () => {
         try {
             const appDataPath = path.join(app.getPath('userData'), 'icons');
+
+            // Ensure the directory exists
+            if (!fsa.existsSync(appDataPath)) {
+                return {success: false, files: [], message: 'Icons folder does not exist.'};
+            }
+
+            // Read the contents of the directory
+            const files = fsa.readdirSync(appDataPath).map((file) => ({
+                name: file.slice(0, file.lastIndexOf('.')),
+                path: path.join(appDataPath, file),
+            }));
+
+            return {success: true, files};
+        } catch (err) {
+            console.error('Error reading icons folder:', err);
+            return {success: false, files: [], message: err.message};
+        }
+    });
+
+    ipcMain.handle('get-project-icons', async () => {
+        try {
+            const appDataPath = path.join(app.getPath('userData'), 'project_icons');
 
             // Ensure the directory exists
             if (!fsa.existsSync(appDataPath)) {
@@ -1265,6 +1118,7 @@ function todoHandlers(db) {
                             else {
                                 let safe_goals = get_safe_goals2(goals, steps)
                                 resolve(safe_goals);
+
                             }
                         })
                     }
@@ -1284,7 +1138,7 @@ function todoHandlers(db) {
 
     ipcMain.handle('new-ASAP-goal', async (event, params) => {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note, date_type)
-                VALUES ("${params.name}", "${params.add_date}", 0,1,2,4,0, "", 2)`);
+                VALUES ("${params.name}", "${params.add_date}", 0,0,2,4,0, "", 2)`);
 
         try {
             return await new Promise((resolve, reject) => {

@@ -191,11 +191,12 @@ class DecisionMaker {
         })
 
         $(document).on('click', '#decisionMaker', (event) => {
+            console.log('caf')
             if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
                 $(".categoryDeciderSelect").remove()
             }
 
-            if (!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
+            if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
                 $("#projectDeciderSelect").remove()
             }
 

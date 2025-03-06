@@ -32,6 +32,10 @@ export class Asap {
         $(document).on('click', '#ASAPAdd', async () => {
             await this.new_goal()
         })
+
+        $(document).on('click', '#ASAPList .stepCheck', (event) => {
+            this.steps.change_step_check(event.currentTarget)
+        })
     }
 
     async build_view() {
@@ -41,6 +45,7 @@ export class Asap {
         $('#main').html($main_clone)
 
         let goals = await window.asapAPI.getASAP()
+
         for (let i = 0; i < goals.length; i++){
             goals[i]['steps'] = this.steps._steps_HTML(goals[i].steps, goals[i].category)
             goals[i]['goal'] = decode_text(goals[i]['goal'])
@@ -76,7 +81,6 @@ export class Asap {
         $asap_input.val("")
 
         let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.date.today_sql})
-        console.log(new_goal)
         new_goal['steps'] = ""
         // this.add_todo(new_goal, 0)
         $('#ASAPList').prepend(this.build_goal(new_goal))
