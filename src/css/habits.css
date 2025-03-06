@@ -25,13 +25,17 @@
     padding: 20px;
     border-radius: 20px;
     position: relative;
+    box-sizing: border-box;
+    border: 1px solid transparent;
 }
 
 .habitSubsector {
     background-color: #292929;
     color: white;
     border-radius: 20px;
+    padding: 20px;
     position: relative;
+    box-sizing: border-box;
     border: 1px solid transparent;
 }
 

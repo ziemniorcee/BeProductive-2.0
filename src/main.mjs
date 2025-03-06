@@ -222,7 +222,7 @@ class DisplayManagement{
         $(document).on('click', '#habitButton', () => {
             $('#galactics').css('display', 'none');
             $('#habit').css('display', 'grid');
-            console.log("lol")
+            this.app.habits.refresh_today_habits();
         })
 
         window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))

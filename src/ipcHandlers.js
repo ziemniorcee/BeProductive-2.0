@@ -1240,7 +1240,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.handle('add-habit', async (event, params) => {
-        console.log(params)
         db.run(`INSERT INTO habits (name, importancy)
                 VALUES ("${params.name}", "${3}")`)
         try {
@@ -1259,7 +1258,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('add-habit-days', (event, params) => {
-        console.log(params)
         params.days.forEach(day => {
             if (day.start_date !== undefined && day.end_date !== undefined) {
                 db.run(`INSERT INTO habit_days (habit_id, day_of_week, start_date, end_date)
