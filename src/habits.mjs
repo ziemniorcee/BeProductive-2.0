@@ -90,6 +90,15 @@ export class Habits {
 
     }
 
+    __HTML_habit_block(name, start_date, end_date, with_checkbox, opt_classes) {
+        if (opt_classes === undefined) opt_classes = "";
+        let habit_block = `<div class="habitBlocks habitHabit ${opt_classes}"><span>${name}</span>`
+        if (start_date && end_date) habit_block += `<span>${start_date} - ${end_date}</span>`
+        if (with_checkbox) habit_block += '<input type="checkbox">'
+        habit_block += '</div>'
+        return habit_block
+    }
+
     async add_new_habit(name, importancy, days) {
         let new_id = await window.goalsAPI.addHabit({name: name, importancy: importancy, days: days});
         new_id = new_id[0].id;
@@ -128,6 +137,8 @@ export class Habits {
         }
     }
 
+    
+
     refresh_today_habits() {
         $('#habit-today-to-do').empty()
         $('#habit-today-done').empty()
@@ -141,23 +152,21 @@ export class Habits {
                     for (const log of this.data.habits_logs) {
                         if (log.habit_id === habit.id && log.date === today_date) {
                             flag = false;
-                            let habit_block = `<div class="habitBlocks habitHabit">
-                                <span>${habit.name}</span>`
-                            if (day.start_date && day.end_date) {
-                                habit_block += `<span>${day.start_date} - ${day.end_date}</span>`
-                            }
-                            habit_block += `<input type="checkbox"></div>`
+                            let habit_block = this.__HTML_habit_block(habit.name, 
+                                day.start_date, day.end_date, false)
                             $('#habit-today-done').append(habit_block)
                         } break;
                     }
                     if (flag) {
-                        let habit_block = `<div class="habitBlocks habitHabit">
-                            <span>${habit.name}</span>`
-                        if (day.start_date && day.end_date) {
-                            habit_block += `<span>${day.start_date} - ${day.end_date}</span>`
+                        let time_now = `${today.getHours()}:${today.getMinutes()}`
+                        console.log(day.start_date, time_now, day.end_date)
+                        if (!day.start_date || !day.end_date || 
+                            (this.data.compare_times(day.start_date, time_now) > 0 && 
+                            this.data.compare_times(time_now, day.end_date) > 0)) {
+                            let habit_block = this.__HTML_habit_block(habit.name,
+                                day.start_date, day.end_date, true, "habitToDo")
+                            $('#habit-today-to-do').append(habit_block)
                         }
-                        habit_block += `<input type="checkbox"></div>`
-                        $('#habit-today-to-do').append(habit_block)
                     }
                 }
             }
