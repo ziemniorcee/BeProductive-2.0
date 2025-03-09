@@ -58,6 +58,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     addHabit: (params) => ipcRenderer.invoke('add-habit', params),
     addHabitDays: (params) => ipcRenderer.send('add-habit-days', params),
+    addHabitLogs: (params) => ipcRenderer.send('add-habit-logs', params),
 
     // askHabits: () => ipcRenderer.send('ask-habits'),
     // getHabits: (func) => ipcRenderer.on('get-habits', (event, habits) => func(habits)),

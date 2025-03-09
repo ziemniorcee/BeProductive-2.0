@@ -30,6 +30,19 @@ export class Habits {
             }
         })
 
+        $(document).on('click', '#habit-today-save', () => {
+            $('#habit-today-to-do').children().each((index, element) => {
+                if ($(element).children(":last-child").is(':checked')) {
+                    this.add_habit_log($(element).data('habit-to-do-id'))
+                    let clone = $(element).clone()
+                    clone.removeClass('habitToDo');
+                    clone.children().last().remove();
+                    $('#habit-today-done').append(clone);
+                    $(element).remove();
+                }
+            });
+        }) 
+
         $(document).on('click', '#newHabitCreate', () => {
             let mode = $('input[name="newHabitPicker"]:checked').val();
             console.log(mode)
@@ -90,9 +103,9 @@ export class Habits {
 
     }
 
-    __HTML_habit_block(name, start_date, end_date, with_checkbox, opt_classes) {
+    __HTML_habit_block(id, name, start_date, end_date, with_checkbox, opt_classes) {
         if (opt_classes === undefined) opt_classes = "";
-        let habit_block = `<div class="habitBlocks habitHabit ${opt_classes}"><span>${name}</span>`
+        let habit_block = `<div class="habitBlocks habitHabit ${opt_classes}" data-habit-to-do-id="${id}"><span>${name}</span>`
         if (start_date && end_date) habit_block += `<span>${start_date} - ${end_date}</span>`
         if (with_checkbox) habit_block += '<input type="checkbox">'
         habit_block += '</div>'
@@ -105,6 +118,13 @@ export class Habits {
         window.goalsAPI.addHabitDays({id: new_id, days: days});
         this.data.habits.push({id: new_id, name: name, importancy: 3, days: days.slice()});
         console.log(this.data.habits);
+    }
+
+    async add_habit_log(id) {
+        let today = new Date();
+        const today_date = today.toISOString().split('T')[0];
+        window.goalsAPI.addHabitLogs({id: id, date: today_date})
+        this.data.habits_logs.push({habit_id: id, date: today_date})
     }
 
     create_new_habit_window() {
@@ -152,18 +172,17 @@ export class Habits {
                     for (const log of this.data.habits_logs) {
                         if (log.habit_id === habit.id && log.date === today_date) {
                             flag = false;
-                            let habit_block = this.__HTML_habit_block(habit.name, 
+                            let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
                                 day.start_date, day.end_date, false)
                             $('#habit-today-done').append(habit_block)
-                        } break;
+                        }
                     }
                     if (flag) {
-                        let time_now = `${today.getHours()}:${today.getMinutes()}`
-                        console.log(day.start_date, time_now, day.end_date)
+                        let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
                         if (!day.start_date || !day.end_date || 
                             (this.data.compare_times(day.start_date, time_now) > 0 && 
                             this.data.compare_times(time_now, day.end_date) > 0)) {
-                            let habit_block = this.__HTML_habit_block(habit.name,
+                            let habit_block = this.__HTML_habit_block(habit.id, habit.name,
                                 day.start_date, day.end_date, true, "habitToDo")
                             $('#habit-today-to-do').append(habit_block)
                         }

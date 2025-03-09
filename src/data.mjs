@@ -45,6 +45,7 @@ export class Data {
             })
         });
         console.log(this.habits)
+        console.log(this.habits_logs)
 
         this.set_categories(categories_data)
     }

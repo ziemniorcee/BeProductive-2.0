@@ -1269,6 +1269,12 @@ function todoHandlers(db) {
         })
     })
 
+    ipcMain.on('add-habit-logs', (event, params) => {
+        db.run(`INSERT INTO habit_logs (habit_id, date)
+                VALUES ("${params.id}", "${params.date}")`)
+    })
+
+
     
 
     ipcMain.handle('get-ASAP', async (event, params) => {
