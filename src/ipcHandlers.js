@@ -27,14 +27,15 @@ function todoHandlers(db) {
                                G.goal_pos,
                                G.category,
                                G.importance,
-                               PR.category as pr_category,
-                               PR.id       as pr_id,
-                               PR.icon     as pr_icon,
+                               PR.category  as pr_category,
+                               G.project_id as pr_id,
+                               PR.icon      as pr_icon,
                                KN.knot_id
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                                  LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE addDate = "${params.date}" and date_type != 2
+                        WHERE addDate = "${params.date}"
+                          and date_type != 2
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -103,18 +104,15 @@ function todoHandlers(db) {
                         for (let i = 0; i < goals.length; i++) {
                             let day = Number(goals[i].addDate.slice(-2))
 
-                            if (day in goals_dict) goals_dict[day].push({
+                            let new_dict = {
                                 "goal": goals[i].goal,
                                 "category": goals[i].category,
                                 "knot_id": goals[i].knot_id,
-                                "difficulty": goals[i].difficulty
-                            })
-                            else goals_dict[day] = [{
-                                "goal": goals[i].goal,
-                                "category": goals[i].category,
-                                "knot_id": goals[i].knot_id,
-                                "difficulty": goals[i].difficulty
-                            }]
+                                "difficulty": goals[i].difficulty,
+                                "id": goals[i].id
+                            }
+                            if (day in goals_dict) goals_dict[day].push(new_dict)
+                            else goals_dict[day] = [new_dict]
                         }
                         resolve(goals_dict)
                     }
@@ -141,7 +139,7 @@ function todoHandlers(db) {
                                G.importance,
                                G.addDate
                         FROM goals G
-                        WHERE G.project_id = ${project_ids[params.project_pos]}
+                        WHERE G.project_id = ${params.project_pos}
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -499,7 +497,6 @@ function todoHandlers(db) {
     })
 
 
-
     ipcMain.on('change-checks-step2', (event, params) => {
         db.run(`UPDATE steps
                 SET step_check="${params.state}"
@@ -519,20 +516,20 @@ function todoHandlers(db) {
         try {
             return await new Promise((resolve, reject) => {
                 db.run(`UPDATE goals
-                SET goal       = '${params.changes['goal']}',
-                    category   = ${params.changes['category']},
-                    importance = ${params.changes['importance']},
-                    note       = '${params.changes['note']}',
-                    project_id = ${params.changes['project_id']},
-                    addDate    = '${params.changes['addDate']}',
-                    date_type  = ${params.changes['date_type']}
-                WHERE id = ${params.id}`)
+                        SET goal       = '${params.changes['goal']}',
+                            category   = ${params.changes['category']},
+                            importance = ${params.changes['importance']},
+                            note       = '${params.changes['note']}',
+                            project_id = ${params.changes['pr_id']},
+                            addDate    = '${params.changes['addDate']}',
+                            date_type  = ${params.changes['date_type']}
+                        WHERE id = ${params.id}`)
 
                 db.run(`DELETE
-                FROM steps
-                WHERE goal_id = ${params.id}`)
+                        FROM steps
+                        WHERE goal_id = ${params.id}`)
 
-                if (params.changes['steps'].length){
+                if (params.changes['steps'].length) {
                     let steps_values = ""
                     for (let j = 0; j < params.changes['steps'].length; j++) {
                         steps_values += `("${params.changes['steps'][j].step_text}", ${params.id}, ${params.changes['steps'][j].step_check})`
@@ -541,8 +538,9 @@ function todoHandlers(db) {
                     steps_values += ";"
 
                     db.run(`INSERT INTO steps (step_text, goal_id, step_check)
-                    VALUES ${steps_values}`)
-                    db.all(`SELECT id, step_check, step_text FROM steps
+                            VALUES ${steps_values}`)
+                    db.all(`SELECT id, step_check, step_text
+                            FROM steps
                             WHERE goal_id = ${params.id}`, (err, rows) => {
                         if (err) reject(err)
                         else {
@@ -558,7 +556,6 @@ function todoHandlers(db) {
             console.error(error);
             return {error: 'An error occurred while editing goal.'};
         }
-
 
 
     })
@@ -779,9 +776,6 @@ function todoHandlers(db) {
     })
 
 
-
-
-
     ipcMain.handle('get-categories', async () => {
         try {
             return await new Promise((resolve, reject) => {
@@ -844,7 +838,6 @@ function todoHandlers(db) {
         db.run(`INSERT INTO categories (id, name, r, g, b)
                 VALUES ("${params.id}", "${params.name}", "${params.r}", "${params.g}", "${params.b}")`);
     })
-
 
 
     ipcMain.on('ask-galactic-conn', (event) => {
@@ -1025,7 +1018,7 @@ function todoHandlers(db) {
 
             let goal_id = rows[0].id
 
-            if (params.steps.length){
+            if (params.steps.length) {
                 let steps_values = ""
                 for (let j = 0; j < params.steps.length; j++) {
                     steps_values += `("${params.steps[j].step_text}", ${goal_id})`
@@ -1034,7 +1027,7 @@ function todoHandlers(db) {
                 steps_values += ";"
 
                 db.run(`INSERT INTO steps (step_text, goal_id)
-                    VALUES ${steps_values}`)
+                        VALUES ${steps_values}`)
             }
         })
 
@@ -1047,7 +1040,8 @@ function todoHandlers(db) {
     ipcMain.handle('get-habits', async () => {
         try {
             return await new Promise((resolve, reject) => {
-                db.all(`SELECT * FROM habits`, (err, rows) => {
+                db.all(`SELECT *
+                        FROM habits`, (err, rows) => {
                     if (err) reject(err);
                     else {
                         resolve(rows);
@@ -1063,7 +1057,8 @@ function todoHandlers(db) {
     ipcMain.handle('get-habits-days', async () => {
         try {
             return await new Promise((resolve, reject) => {
-                db.all(`SELECT * FROM habit_days`, (err, rows) => {
+                db.all(`SELECT *
+                        FROM habit_days`, (err, rows) => {
                     if (err) reject(err);
                     else {
                         resolve(rows);
@@ -1079,7 +1074,8 @@ function todoHandlers(db) {
     ipcMain.handle('get-habits-logs', async () => {
         try {
             return await new Promise((resolve, reject) => {
-                db.all(`SELECT * FROM habit_logs`, (err, rows) => {
+                db.all(`SELECT *
+                        FROM habit_logs`, (err, rows) => {
                     if (err) reject(err);
                     else {
                         resolve(rows);
@@ -1099,13 +1095,14 @@ function todoHandlers(db) {
                                G.goal,
                                G.check_state,
                                G.category,
-                               PR.category as pr_category,
-                               PR.id       as pr_id,
-                               PR.icon     as pr_icon
+                               PR.category  as pr_category,
+                               G.project_id as pr_id,
+                               PR.icon      as pr_icon
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                                  LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE date_type = 2 AND G.check_state = 0
+                        WHERE date_type = 2
+                          AND G.check_state = 0
                         ORDER BY G.id DESC`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -1116,7 +1113,9 @@ function todoHandlers(db) {
                                 WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                             if (err2) reject(err);
                             else {
+                                console.log(goals)
                                 let safe_goals = get_safe_goals2(goals, steps)
+
                                 resolve(safe_goals);
 
                             }
@@ -1137,8 +1136,9 @@ function todoHandlers(db) {
     })
 
     ipcMain.handle('new-ASAP-goal', async (event, params) => {
-        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note, date_type)
-                VALUES ("${params.name}", "${params.add_date}", 0,0,2,4,0, "", 2)`);
+        db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note,
+                                   date_type)
+                VALUES ("${params.name}", "${params.add_date}", 0, 0, 2, 4, -1, "", 2)`);
 
         try {
             return await new Promise((resolve, reject) => {
@@ -1168,68 +1168,116 @@ function todoHandlers(db) {
             return {error: 'An error occurred while fetching categories.'};
         }
     });
+
+    ipcMain.handle('new-goal-2', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, importance, project_id, note, date_type)
+                        VALUES ('${params.changes['goal']}', '${params.changes['addDate']}',
+                                ${params.changes['goal_pos']},
+                                ${params.changes['category']}, ${params.changes['importance']},
+                                ${params.changes['pr_id']}, '${params.changes['note']}',
+                                ${params.changes['date_type']})`)
+
+                let goal_id = -1
+                db.all(`SELECT id
+                        FROM goals
+                        WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
+                    goal_id = rows[0].id
+                    console.log(goal_id)
+
+                    if (params.changes['steps'].length) {
+                        let steps_values = ""
+                        for (let j = 0; j < params.changes['steps'].length; j++) {
+                            steps_values += `("${params.changes['steps'][j].step_text}", ${goal_id}, ${params.changes['steps'][j].step_check})`
+                            if (j < params.changes['steps'].length - 1) steps_values += ","
+                        }
+                        steps_values += ";"
+
+                        db.run(`INSERT INTO steps (step_text, goal_id, step_check)
+                            VALUES ${steps_values}`)
+                        db.all(`SELECT id, step_check, step_text
+                            FROM steps
+                            WHERE goal_id = ${goal_id}`, (err, steps) => {
+                            if (err) reject(err)
+                            else {
+                                resolve([goal_id, steps])
+                            }
+                        })
+                    } else {
+                        resolve([goal_id, []])
+                    }
+                })
+
+
+            })
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
 }
 
 
-function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
-    let mainWindow_state = true
-    let move_flag = false
-    let middle = []
+    function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
+        let mainWindow_state = true
+        let move_flag = false
+        let middle = []
 
-    ipcMain.on('change_window', () => {
-        mainWindow_state = !mainWindow_state
-        if (mainWindow_state) {
-            mainWindow.show()
-            floatMenuWindow.hide()
+        ipcMain.on('change_window', () => {
+            mainWindow_state = !mainWindow_state
+            if (mainWindow_state) {
+                mainWindow.show()
+                floatMenuWindow.hide()
 
-        } else {
-            floatMenuWindow.show()
-            mainWindow.hide()
+            } else {
+                floatMenuWindow.show()
+                mainWindow.hide()
+            }
+        })
+
+        ipcMain.on('start_pos_change', () => {
+            move_flag = true
+            let pos_before = floatMenuWindow.getPosition()
+            let mouse_pos = electron.screen.getCursorScreenPoint()
+            middle = [mouse_pos.x - pos_before[0], mouse_pos.y - pos_before[1]]
+            floatbar_refresh()
+        })
+        ipcMain.on('stop_pos_change', () => {
+            move_flag = false
+        })
+
+        function floatbar_refresh() {
+            let mouse_pos = electron.screen.getCursorScreenPoint()
+            let new_pos = [mouse_pos.x - middle[0], mouse_pos.y - middle[1]]
+            floatMenuWindow.setPosition(new_pos[0], new_pos[1])
+            floatContentWindow.setPosition(new_pos[0] - 400, new_pos[1])
+            if (move_flag) {
+                setTimeout(floatbar_refresh, 7)
+            }
         }
-    })
 
-    ipcMain.on('start_pos_change', () => {
-        move_flag = true
-        let pos_before = floatMenuWindow.getPosition()
-        let mouse_pos = electron.screen.getCursorScreenPoint()
-        middle = [mouse_pos.x - pos_before[0], mouse_pos.y - pos_before[1]]
-        floatbar_refresh()
-    })
-    ipcMain.on('stop_pos_change', () => {
-        move_flag = false
-    })
+        let menu_state = false
+        let menu_sizes = [100, 200]
 
-    function floatbar_refresh() {
-        let mouse_pos = electron.screen.getCursorScreenPoint()
-        let new_pos = [mouse_pos.x - middle[0], mouse_pos.y - middle[1]]
-        floatMenuWindow.setPosition(new_pos[0], new_pos[1])
-        floatContentWindow.setPosition(new_pos[0] - 400, new_pos[1])
-        if (move_flag) {
-            setTimeout(floatbar_refresh, 7)
-        }
+        let goals_state = false
+
+        ipcMain.on('show_floatbar_menu', () => {
+            menu_state = !menu_state
+            floatMenuWindow.setSize(100, menu_sizes[Number(menu_state)])
+            if (menu_state === false) {
+                floatContentWindow.hide()
+                goals_state = false
+            }
+        })
+
+
+        ipcMain.on('show_goals', (event) => {
+            goals_state = !goals_state
+            if (goals_state) floatContentWindow.show()
+            else floatContentWindow.hide()
+            event.reply('return_state', goals_state)
+        })
+
+
     }
-
-    let menu_state = false
-    let menu_sizes = [100, 200]
-
-    let goals_state = false
-
-    ipcMain.on('show_floatbar_menu', () => {
-        menu_state = !menu_state
-        floatMenuWindow.setSize(100, menu_sizes[Number(menu_state)])
-        if (menu_state === false) {
-            floatContentWindow.hide()
-            goals_state = false
-        }
-    })
-
-
-    ipcMain.on('show_goals', (event) => {
-        goals_state = !goals_state
-        if (goals_state) floatContentWindow.show()
-        else floatContentWindow.hide()
-        event.reply('return_state', goals_state)
-    })
-
-
-}

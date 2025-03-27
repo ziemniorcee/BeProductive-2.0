@@ -1,9 +1,9 @@
 export class Inbox {
-    constructor(app_data, app_date, app_edit) {
+    constructor(app_data, app_date, app_vignette) {
         this.data = app_data
         this.date = app_date
-        this.edit = app_edit
-        this.decision_maker = new DecisionMaker(app_data, app_date, app_edit)
+        this.vignette = app_vignette
+        this.decision_maker = new DecisionMaker(app_data, app_date, app_vignette)
         this.initEventListeners()
     }
 
@@ -136,10 +136,10 @@ export class Inbox {
 }
 
 class DecisionMaker {
-    constructor(app_data, app_date, app_edit) {
+    constructor(app_data, app_date, app_vignette) {
         this.data = app_data
         this.date = app_date
-        this.edit = app_edit
+        this.vignette = app_vignette
 
         this.selected_goal = null
         this.goal_id = null
@@ -208,9 +208,10 @@ class DecisionMaker {
         $(document).on('click', '#decisionSave', () => {
             let decision_main_entry = $('#editMainEntry').val()
             let decision_note_entry = $('#editNoteEntry').val()
-            let steps_array = this.edit.get_steps()
+            let steps_array = this.vignette.get_steps()
             let category_id = Number($('.categoryDeciderId').text())
-            let project_id = Number($('#projectDeciderId').text())
+            console.log("pr id", $('.projectDeciderId').text())
+            let project_id = Number($('.projectDeciderId').text())
 
             let date_type = 0
             let date = ""

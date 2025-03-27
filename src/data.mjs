@@ -112,8 +112,9 @@ export class Data {
      */
     project_emblem_html(project_id) {
         const project = this.projects.find(item => item.id === project_id);
+        console.log("ebe ",project_id)
         let project_emblem = ''
-        if (project_id !== -1 && project_id !== null) {
+        if (project_id !== -1 && project_id !== null ) {
             let project_icon = this.findProjectPathByName(`project${project_id}`)
 
             project_emblem = `

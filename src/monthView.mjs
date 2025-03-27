@@ -173,16 +173,21 @@ export class MonthView {
      * @param goals_dict data of goals
      * @returns {string}
      */
-    build_month_goal(goals_dict) {
-        let converted_text = decode_text(goals_dict['goal'])
-        let repeat = goals_dict.knot_id ? this.data._repeat_label_HTML() : "";
-        let goal_id = $('#main, .monthTodo').length - 1
+    build_month_goal(goal) {
+        console.log(goal)
+        let converted_text = decode_text(goal['goal'])
+
+        let category_color = "rgb(74, 74, 74)"
+
+        if (goal.category !== 0) {
+            category_color = this.data.categories[goal.category][0]
+        }
 
         return `
-        <div class="monthTodo" style="background-color: ${this.data.categories2[goals_dict['category']]}">
-            <div class="monthTodoId">${goal_id}</div>
-            <div class="monthTodoLabel" style="background-color: ${this.data.categories[goals_dict['category']][0]}"></div>
-            <div class="monthTodoText" >${converted_text} ${repeat}</div>
+        <div class="monthTodo" style="">
+            <div class="monthTodoId">${goal["id"]}</div>
+            <div class="monthTodoLabel" style="background-color: ${category_color}"></div>
+            <div class="monthTodoText" >${converted_text}</div>
         </div>`
     }
 

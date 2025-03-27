@@ -4,7 +4,7 @@ import {Categories} from "./category.mjs"
 import {CurrentDate} from "./date.js";
 import {create_today_graphs} from "./graph.mjs";
 import {WeekView} from "./weekView.mjs";
-import {Edit} from "./edit2.mjs";
+import { TodoVignette} from "./edit2.mjs";
 import {MonthView} from "./monthView.mjs";
 import {Project} from "./project.mjs";
 import { Strategy } from "./galactic.mjs";
@@ -12,6 +12,7 @@ import {HistorySidebar, Idea} from "./sidebar.mjs";
 import {Inbox} from "./inbox.mjs";
 import {Asap} from "./ASAP.mjs";
 import { Habits } from "./habits.mjs";
+import {Dashboard} from "./dashboard.mjs";
 
 
 class MainApp {
@@ -21,12 +22,12 @@ class MainApp {
         this.date = new CurrentDate()
         this.categories = new Categories(this.data)
         this.steps = new Steps(this.data)
+        this.dashboard = new Dashboard(this.data, this.date)
 
         this.history = new HistorySidebar(this.data, this.date, this.steps)
         this.idea = new Idea(this.data, this.date)
-        this.edit = new Edit(this.data, this.date, this.categories, this.steps)
         this.project = new Project(this.data, this.date, this.categories, this.steps)
-        this.inbox = new Inbox(this.data, this.date, this.edit)
+
         this.asap = new Asap(this.data, this.date, this.steps)
 
         this.dayView = new DayView(this.data, this.date, this.categories, this.steps)
@@ -36,6 +37,11 @@ class MainApp {
         this.monthView = new MonthView(this.data, this.date)
         this.strategy = new Strategy(this.data, this.categories)
         this.habits = new Habits(this.data, this.categories)
+
+        this.todoVignette = new TodoVignette(this.data, this.date, this.steps, this.dayView)
+
+        this.inbox = new Inbox(this.data, this.date, this.todoVignette)
+
     }
 
     async init() {
@@ -43,12 +49,10 @@ class MainApp {
         await this.data.loadProjectIcons()
         await this.data.init()
 
+        this.dashboard.fix_dashboard(false)
         await this.dayView.display()
-        this.project.set_projects_options()
+        // this.project.set_projects_options()
 
-        // await this.inbox.build_view()
-        // create_today_graphs();
-        // $('#graphLine1').show();
     }
 }
 
@@ -144,10 +148,14 @@ class DisplayManagement{
             await this.display_reset()
         })
 
-        $(document).on('mousedown', '#vignette', () => {
+        $(document).on('mousedown', '#vignette', async () => {
             if ($('#taskEdit').length){
                 let project_pos = this.app.project.project_pos
-                this.app.edit.change_goal(project_pos)
+                await this.app.todoVignette.todo_edit.change_goal(project_pos)
+                this.reset_dragula()
+            }
+            else if ($('#newTask').length){
+                await this.app.todoVignette.todo_new.add_goal()
                 this.reset_dragula()
             }
             $('#vignette').css('display', 'none');
@@ -167,14 +175,14 @@ class DisplayManagement{
         })
 
         $(document).on('click', '#editMainCheck', () => {
-            let positions = this.app.edit.change_edit_check()
+            let positions = this.app.todoVignette.todo_edit.change_edit_check()
 
             if (!$('#projectContent').length) {
                 this.app.dayView.change_main_check(positions[0])
             } else {
-                this.app.project.change_project_check(this.app.edit.selected_goal)
+                this.app.project.change_project_check(this.app.todoVignette.todo_edit.selected_goal)
             }
-            this.app.edit.selected_goal = $('#main .todo').eq(positions[1])
+            this.app.todoVignette.todo_edit.selected_goal = $('#main .todo').eq(positions[1])
         })
 
         $(document).on('click', '#sideHistory', async () => {
@@ -235,16 +243,6 @@ class DisplayManagement{
             else if ($('#projectContent').length) this.app.project.dragula_project_view()
         });
 
-        $(document).on('click', '.stepCheck', (event) => {
-            console.log('')
-            if (!$('#ASAPList').length) {
-                event.stopPropagation()
-                this.app.steps.change_step_check(event.currentTarget)
-
-                if ($('#todosAll').length) this.app.dayView.dragula_day_view()
-                else if ($('#projectContent').length) this.app.project.dragula_project_view()
-            }
-        });
 
         $(document).on('click', '#dashClose, #dashOpen', () => {
             $('#dashboard').toggle()

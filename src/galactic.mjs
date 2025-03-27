@@ -13,7 +13,6 @@ export class Strategy {
         this.data = app_data;
         this.categories = app_categories;
         this.initEventListeners()
-        console.log(this.data.categories)
     }
 
     initEventListeners() {

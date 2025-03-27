@@ -54,18 +54,22 @@ export class Asap {
     }
 
     build_goal(goal) {
-        let category_color = ""
+        let category_color = "rgb(74, 74, 74)"
+        let category_border = ""
+
         if (goal.category !== 0) {
             category_color = this.data.categories[goal.category][0]
+            category_border = `border-right: 4px solid ${category_color}`
         }
-        let project_emblem = this.data.project_emblem_html2(goal.pr_id)
 
+        let project_emblem = this.data.project_emblem_html(goal.pr_id)
+
+        let check_color = check_border[4]
         return `
-        <div class='todo'>
+        <div class='todo' style="${category_border}">
             <div class="todoId">${goal.id}</div>
-            <div class='todoCheck' style="background: ${category_color}">
-                <div class="checkDot"></div>
-                <input type='checkbox' class='check_task'>
+            <div class='todoCheck'>
+                <input type='checkbox' class='check_task' style="border-color:${check_color}; color:${check_color}">
             </div>
             <div class='taskText'>
                 <span class='task'> ${goal.goal} </span>

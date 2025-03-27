@@ -14,7 +14,6 @@ import {range1_backgrounds, range2_backgrounds, hsvToRgb} from "./data.mjs";
     $(document).on('click', '#main', () => {
         $("#repeatPicker").css({"display": "none"});
         $("#todoEntryComplex").css({"height": "0", "visibility": "hidden"});
-        $("#todosAll").css({"height": "calc(100% - 65px)"});
         $('.projectSectionGoals').css({"height": "calc(100% - 65px)"})
     })
 

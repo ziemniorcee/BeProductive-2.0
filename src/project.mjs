@@ -16,6 +16,7 @@ export class Project {
         this.project_pos = null
         this.current_goal_id = 0
         this.block_prev_drag = 0
+        this.selected_project = null
     }
 
     initEventListeners() {
@@ -27,16 +28,23 @@ export class Project {
             $('#vignette').css('display', 'none')
         })
 
+        // $(document).on('click', '.dashProject', async(event) => {
+        //     let jq_dash_project = $('.dashProject')
+        //     this.project_pos = jq_dash_project.index(event.currentTarget)
+        //     let how_many_projects = jq_dash_project.length
+        //     if (this.project_pos < how_many_projects - 1) {
+        //         await this.project_view()
+        //     } else {
+        //         this.project_pos = null
+        //         this.open_add_project()
+        //     }
+        // })
+
         $(document).on('click', '.dashProject', async(event) => {
-            let jq_dash_project = $('.dashProject')
-            this.project_pos = jq_dash_project.index(event.currentTarget)
-            let how_many_projects = jq_dash_project.length
-            if (this.project_pos < how_many_projects - 1) {
-                await this.project_view()
-            } else {
-                this.project_pos = null
-                this.open_add_project()
-            }
+            let project_id = Number($(event.currentTarget).find('.dashProjectId').text())
+            this.selected_project = this.data.projects.find(item => item.id === project_id)
+            console.log(this.selected_project)
+            await this.project_view()
         })
 
         $(document).on('click', "#projectSettingIconSrc", async () => await this.open_icon_picker())
@@ -49,6 +57,7 @@ export class Project {
 
         $(document).on('click', '#todosAll .projectEmblem', async (event) => {
             event.stopPropagation()
+
             this.project_pos = $(event.currentTarget).find('.projectPos').text()
             await this.project_view()
         });
@@ -82,6 +91,11 @@ export class Project {
             $('#iconPicker').remove()
         })
 
+        $(document).on('click', '#projectContent .stepCheck', (event) => {
+            event.stopPropagation()
+            this.steps.change_step_check(event.currentTarget)
+            this.dragula_project_view()
+        });
 
     }
 
@@ -284,14 +298,14 @@ export class Project {
      * Displays project view
      */
     async project_view() {
-        let project_color = $('.dashProjectIcon').eq(this.project_pos).css('background-color')
-        let project_icon = $('.dashProjectIcon img').eq(this.project_pos).attr('src')
-        let project_name = $('.dashProjectName').eq(this.project_pos).text()
+        let project_color = this.data.categories[this.selected_project['category']][0]
+        let project_icon = this.data.findProjectPathByName(`project${this.selected_project['id']}`)
+        let project_name = this.selected_project['name']
 
         this.data.show_hide_sidebar(true, 1)
         this.set_project_view(project_color, project_icon, project_name)
 
-        let goals = await window.goalsAPI.getProjectView({project_pos: this.project_pos})
+        let goals = await window.goalsAPI.getProjectView({project_pos: this.selected_project['id']})
         this.build_project_view(goals)
 
         this._set_input_category(project_color)

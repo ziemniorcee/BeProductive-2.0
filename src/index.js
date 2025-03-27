@@ -29,9 +29,11 @@ if (require('electron-squirrel-startup')) {
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
+        titleBarStyle: 'hidden',
+        titleBarOverlay: true,
         autoHideMenuBar: true,
-        // width: 1920,
-        width: 2320,
+        width: 1920,
+        // width: 2320,
         height: 1080,
 
         webPreferences: {

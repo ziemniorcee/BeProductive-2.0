@@ -1,34 +1,19 @@
-import {
-    check_border, decode_text, encode_text,
-    getIdByColor,
-    range1_backgrounds,
-    range2_backgrounds
-} from "./data.mjs";
+import {check_border, decode_text, encode_text, range2_backgrounds} from "./data.mjs";
 
-
-export class Edit {
-    constructor(app_data, app_date, app_categories, app_steps) {
+export class TodoVignette {
+    constructor(app_data, app_date, app_steps, dayView) {
         this.initEventListeners()
         this.data = app_data
         this.date = app_date
-        this.categories = app_categories
         this.steps = app_steps
-
-        this.selected_goal = null
-        this.selected_goal_id = null
-        this.selected_project_id = null
-
+        this.dayView = dayView
         this.prevent_step_blur = false
+
+        this.todo_edit = new TodoEdit(this)
+        this.todo_new = new TodoNew(this)
     }
 
     initEventListeners() {
-        $(document).on('click', '#todosAll .todo, .weekDay .todo, .monthTodo, .day .sidebarTask', async (event) => {
-            $("#vignette").css('display', 'block')
-            $("#taskEdit").css('display', 'block')
-
-            await this.get_goal_data($(event.currentTarget))
-        })
-
         $(document).on('input', '#editMainEntry, #editNoteEntry, .editStepEntry', (event) => {
             this.fix_entry($(event.currentTarget))
         })
@@ -42,25 +27,9 @@ export class Edit {
             this.new_step_add()
         })
 
+
         $(document).on('keydown', '.editStepEntry', (event) => {
-            if (event.key === 'Tab') {
-                event.preventDefault()
-                this.prevent_step_blur = true
-
-                let is_last = $(event.currentTarget).is('.editStepEntry:last')
-                let is_current_empty = $(event.currentTarget).val() === ""
-
-                if (is_last && !is_current_empty) {
-                    this.new_step_add()
-                } else {
-                    let $edit_step_entry = $('.editStepEntry')
-                    let current_input_id = $edit_step_entry.index(event.currentTarget)
-
-                    setTimeout(() => {
-                        $edit_step_entry.eq(current_input_id + 1).focus();
-                    }, 0);
-                }
-            }
+            this.step_tab_event(event)
         })
 
         $(document).on('blur', '.editStepEntry', (event) => {
@@ -71,20 +40,8 @@ export class Edit {
             this.prevent_step_blur = false
         })
 
-
-
-        $(document).on('click', '#taskEdit', (event) => {
-            if(!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length){
-                $(".dateDeciderSelect").css('display', 'none')
-            }
-
-            if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
-                $("#projectDeciderSelect").remove()
-            }
-
-            if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
-                $(".categoryDeciderSelect").remove()
-            }
+        $(document).on('click', '#taskEdit, #newTask', (event) => {
+            this.hide_deciders(event)
         })
 
         $(document).on('click', '#editSwitchDateMode', () => {
@@ -118,6 +75,213 @@ export class Edit {
 
         $(document).on('mouseleave', '#editSwitchDateMode', () => {
             $('#editSwitchDateMode').css('background-color', '')
+        })
+    }
+
+    /**
+     * Fixes height of textarea so all the text is displayed wrapped
+     * @param entry_type one of possible entries in edit main/note/step
+     */
+    fix_entry(entry_type) {
+        entry_type.css('height', 'auto')
+        entry_type.css('height', `${entry_type.prop('scrollHeight') - 4}px`)
+    }
+
+    /**
+     * If there is text in a note it adds icon of note at the beggining of note entry
+     */
+    set_note(note_content) {
+        if (note_content === "") {
+            $('#editNoteImg').css('display', 'block')
+        } else {
+            $('#editNoteImg').css('display', 'none')
+        }
+    }
+
+    /**
+     * builds new step entry to the steps and focuses on the new entyr
+     */
+    new_step_add() {
+        $('#editNewStep').toggle()
+        $('#editSteps2').append(`
+        <div class="editStep2">
+            <img src="images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
+            <input type="checkbox" class="editStepCheck">
+            <textarea rows="1" class="editStepEntry" spellcheck="false"></textarea>
+        </div>`)
+
+        setTimeout(() => {
+            let edit_step_entry = $('.editStepEntry');
+            edit_step_entry.last().focus();
+        }, 0);
+    }
+
+    async get_goal_settings() {
+        let edit_main_entry = $('#editMainEntry').val()
+        let edit_note_entry = $('#editNoteEntry').val()
+        let steps_array = this.get_steps()
+
+        let category_id = Number($('.categoryDeciderId').text())
+        let importance = $('#editImportance').val()
+
+        let date_type = 0
+        if ($('#ASAPList').length > 0) date_type = 2
+        else if ($('#editLabelDate').text() === "Deadline") {
+            date_type = 1
+        }
+
+        let new_date = this.date.get_edit_sql_format($('#selectDate').text())
+        let project_id = Number($('.projectDeciderId').text())
+
+        return {
+            'goal': encode_text(edit_main_entry),
+            'category': category_id,
+            'importance': importance,
+            'steps': steps_array,
+            'note': encode_text(edit_note_entry),
+            'pr_id': project_id,
+            'date_type': date_type,
+            'addDate': new_date
+        }
+    }
+
+    get_steps() {
+        let edit_steps = $('.editStepEntry')
+        let edit_checks = $('.editStepCheck')
+
+        let steps_array = []
+        for (let i = 0; i < edit_steps.length; i++) {
+            let step_input = edit_steps.eq(i).val()
+            if (step_input !== "") {
+                steps_array.push({
+                    'step_text': encode_text(step_input),
+                    'step_check': Number(edit_checks.eq(i).prop('checked'))
+                })
+            }
+        }
+        return steps_array
+    }
+
+    /**
+     * changes step based on entry
+     * if its empty it removes entire step
+     * if it's a new step it displays new step button
+     * @param selected_step picked step entry event
+     */
+    change_step(selected_step) {
+        let edit_step_entry = $('.editStepEntry')
+
+        let is_last_step = selected_step === edit_step_entry.last()[0]
+        let is_new_step_hidden = $('#editNewStep').css('display') === "none"
+
+        if (is_last_step && is_new_step_hidden) $('#editNewStep').toggle()
+
+        if ($(selected_step).val() === "") {
+            $(selected_step).closest('.editStep2').remove()
+        }
+    }
+
+    hide_deciders(event){
+        if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
+            $("#projectDeciderSelect").remove()
+        }
+
+        if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
+            $(".categoryDeciderSelect").remove()
+        }
+
+        if (!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length) {
+            $(".dateDeciderSelect").css('display', 'none')
+        }
+    }
+
+    step_tab_event(){
+        if (event.key === 'Tab') {
+            event.preventDefault()
+            this.prevent_step_blur = true
+
+            let is_last = $(event.currentTarget).is('.editStepEntry:last')
+            let is_current_empty = $(event.currentTarget).val() === ""
+
+            if (is_last && !is_current_empty) {
+                this.new_step_add()
+            } else {
+                let $edit_step_entry = $('.editStepEntry')
+                let current_input_id = $edit_step_entry.index(event.currentTarget)
+
+                setTimeout(() => {
+                    $edit_step_entry.eq(current_input_id + 1).focus();
+                }, 0);
+            }
+        }
+    }
+}
+
+
+
+export class TodoNew {
+    constructor(app_vignette) {
+        this.initEventListeners()
+        this.vignette = app_vignette
+    }
+
+    initEventListeners(){
+        $(document).on('click', '#todosAddNew', (event) => {
+            this.build_adder()
+        })
+    }
+
+    build_adder(){
+        $("#vignette").css('display', 'block')
+        let $edit_clone = $("<div id='newTask' class='vignetteWindow2'></div>")
+        const edit_main_template = $('#editMainTemplate').prop('content');
+        $edit_clone.append($(edit_main_template).clone())
+        const edit_right_template = $('#editRightTemplate').prop('content');
+        $edit_clone.find('#editBody').append($(edit_right_template).clone())
+        $edit_clone.find('#selectDate').text(this.vignette.date.change_to_edit_format(this.vignette.date.day_sql))
+        $("#vignette").append($edit_clone)
+
+        $(function () {
+            $("#editDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
+                onSelect: function (selectedDate) {
+                    $('#selectDate').text(selectedDate)
+                    $('#editDateSelector').css('display', 'none')
+                }
+            });
+        });
+    }
+
+    async add_goal(){
+        let changes = await this.vignette.get_goal_settings()
+        changes['goal_pos'] = ('#todosArea .todo').length + 1
+        let new_goal_settings = await window.goalsAPI.newGoal2({changes: changes})
+        changes['id'] = new_goal_settings[0]
+        changes['check_state'] = 0
+        changes['steps'] = this.vignette.steps._steps_HTML(new_goal_settings[1], changes['category'])
+        console.log(changes['addDate'])
+        if (changes['addDate'] === this.vignette.date.today_sql) {
+            $('#todosArea').append(this.vignette.dayView.build_goal(changes))
+
+        }
+    }
+}
+
+export class TodoEdit {
+    constructor(app_vignette) {
+        this.initEventListeners()
+        this.vignette = app_vignette
+
+        this.selected_goal = null
+        this.selected_goal_id = null
+    }
+
+    initEventListeners() {
+        $(document).on('click', '#todosAll .todo, .weekDay .todo, .monthTodo, .day .sidebarTask, #ASAPList .todo', async (event) => {
+            $("#vignette").css('display', 'block')
+
+            await this.get_goal_data($(event.currentTarget))
+
         })
     }
 
@@ -166,8 +330,8 @@ export class Edit {
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
         if (goal["category"] !== 0) {
-            $edit_clone.find('.categoryDecider').css('background-color', this.data.categories[goal["category"]][0])
-            $edit_clone.find('.categoryDeciderName').text(this.data.categories[goal["category"]][1])
+            $edit_clone.find('.categoryDecider').css('background-color', this.vignette.data.categories[goal["category"]][0])
+            $edit_clone.find('.categoryDeciderName').text(this.vignette.data.categories[goal["category"]][1])
         } else {
             $edit_clone.find('.categoryDecider').css('background-color', "rgb(74, 74, 74)")
             $edit_clone.find('.categoryDeciderName').text("No category")
@@ -177,7 +341,7 @@ export class Edit {
 
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
-        $edit_clone.find('#selectDate').text(this.date.change_to_edit_format(goal['addDate']))
+        $edit_clone.find('#selectDate').text(this.vignette.date.change_to_edit_format(goal['addDate']))
 
         $("#vignette").append($edit_clone)
         this.set_project(goal['pr_id'])
@@ -195,76 +359,18 @@ export class Edit {
     }
 
     /**
-     * Fixes height of textarea so all the text is displayed wrapped
-     * @param entry_type one of possible entries in edit main/note/step
-     */
-    fix_entry(entry_type) {
-        entry_type.css('height', 'auto')
-        entry_type.css('height', `${entry_type.prop('scrollHeight') - 4}px`)
-    }
-
-    /**
-     * If there is text in a note it adds icon of note at the beggining of note entry
-     */
-    set_note(note_content) {
-        if (note_content === "") {
-            $('#editNoteImg').css('display', 'block')
-        } else {
-            $('#editNoteImg').css('display', 'none')
-        }
-    }
-
-    /**
      * sets project setting of selected goal based on selected option
      * @param project_id id of selected option
      */
     set_project(project_id) {
         if (project_id !== -1 && project_id !== null) {
-            const project = this.data.projects.find(item => item.id === project_id);
-            let icon_path = this.data.findProjectPathByName(`project${project_id}`)
+            const project = this.vignette.data.projects.find(item => item.id === project_id);
+            let icon_path = this.vignette.data.findProjectPathByName(`project${project_id}`)
             $('.projectDeciderName').text(project["name"])
             $('.projectDeciderIcon img').attr('src', `${icon_path}`)
             $('.projectDeciderIcon img').css('display', 'block')
             $('.projectDeciderId').text(project_id)
-            $('.projectDecider').css('border', `2px solid ${this.data.categories[project['category']][0]}`)
-        }
-    }
-
-    /**
-     * builds new step entry to the steps and focuses on the new entyr
-     */
-    new_step_add() {
-        $('#editNewStep').toggle()
-        $('#editSteps2').append(`
-        <div class="editStep2">
-            <img src="images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
-            <input type="checkbox" class="editStepCheck">
-            <textarea rows="1" class="editStepEntry" spellcheck="false"></textarea>
-        </div>`)
-
-        setTimeout(() => {
-            let edit_step_entry = $('.editStepEntry');
-            edit_step_entry.last().focus();
-        }, 0);
-    }
-
-
-    /**
-     * changes step based on entry
-     * if its empty it removes entire step
-     * if it's a new step it displays new step button
-     * @param selected_step picked step entry event
-     */
-    change_step(selected_step) {
-        let edit_step_entry = $('.editStepEntry')
-
-        let is_last_step = selected_step === edit_step_entry.last()[0]
-        let is_new_step_hidden = $('#editNewStep').css('display') === "none"
-
-        if (is_last_step && is_new_step_hidden) $('#editNewStep').toggle()
-
-        if ($(selected_step).val() === "") {
-            $(selected_step).closest('.editStep2').remove()
+            $('.projectDecider').css('border', `2px solid ${this.vignette.data.categories[project['category']][0]}`)
         }
     }
 
@@ -306,36 +412,15 @@ export class Edit {
      * Saves changes to the database
      */
     async change_goal(project_pos) {
-        let edit_main_entry = $('#editMainEntry').val()
-        let edit_note_entry = $('#editNoteEntry').val()
-        let steps_array = this.get_steps()
-        console.log(steps_array)
-
-        let category_id = Number($('.categoryDeciderId').text())
-        let importance = $('#editImportance').val()
-
-        let date_type = $('#editLabelDate').text() === "Deadline"
-        let new_date = this.date.get_edit_sql_format($('#selectDate').text())
-        let project_id = Number($('.projectDeciderId').text())
-
-        let changes = {
-            'goal': encode_text(edit_main_entry),
-            'category': category_id,
-            'importance': importance,
-            'steps': steps_array,
-            'note': encode_text(edit_note_entry),
-            'project_id': project_id,
-            'date_type': date_type,
-            'addDate': new_date
-        }
-
+        let changes = await this.vignette.get_goal_settings()
         changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
+
         if (this.selected_goal.attr('class') === 'todo') {
             this.set_todo_changes(this.selected_goal, changes)
             if (this.selected_goal.closest('#todosAll').length || $('#projectContent').length) {
                 this.set_step_changes(this.selected_goal, changes)
                 if ($('#todosAll').length) {
-                    this.change_project_emblem(project_id)
+                    this.change_project_emblem(changes['pr_id'])
                 }
             }
             if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length) {
@@ -357,49 +442,38 @@ export class Edit {
      */
     change_project_emblem(project_id) {
         this.selected_goal.find('.projectEmblem').remove()
-        this.selected_goal.append(this.data.project_emblem_html(project_id))
+        this.selected_goal.append(this.vignette.data.project_emblem_html(project_id))
     }
 
     set_todo_changes(selected_goal, changes) {
         selected_goal.find('.task').text(decode_text(changes['goal']))
         if (changes['category'] !== 0) {
-            selected_goal.css('border-right', `4px solid ${this.data.categories[changes['category']][0]}`)
+            let category_color = this.vignette.data.categories[changes['category']][0]
+            selected_goal.css('border-right', `4px solid ${category_color}`)
+
         } else {
             selected_goal.css('border', "1px solid #444444")
         }
-        selected_goal.find('.checkDot').css('border-color', check_border[changes['importance']])
+        selected_goal.find('.check_task').css('border-color', check_border[changes['importance']])
 
     }
 
     set_monthTodo_changes(selected_goal, changes) {
         selected_goal.find('.monthTodoText').text(changes['goal'])
-        selected_goal.find('.monthTodoLabel').css('background-color', this.data.categories[changes['category']][0])
-        selected_goal.css('background-color', this.data.categories2[changes['category']])
+        let category_color = "rgb(74, 74, 74)"
+
+        console.log(selected_goal.category)
+        if (changes.category !== 0) {
+            category_color = this.vignette.data.categories[changes.category][0]
+        }
+        selected_goal.find('.monthTodoLabel').css('background-color', category_color)
     }
 
     set_step_changes(selected_goal, changes) {
         selected_goal.find('.stepsShow').remove()
         selected_goal.find('.steps').remove()
-        selected_goal.find('.taskText').append(this.steps._steps_HTML(changes['steps'], changes['category']))
+        selected_goal.find('.taskText').append(this.vignette.steps._steps_HTML(changes['steps'], changes['category']))
     }
-
-    get_steps() {
-        let edit_steps = $('.editStepEntry')
-        let edit_checks = $('.editStepCheck')
-
-        let steps_array = []
-        for (let i = 0; i < edit_steps.length; i++) {
-            let step_input = edit_steps.eq(i).val()
-            if (step_input !== "") {
-                steps_array.push({
-                    'step_text': encode_text(step_input),
-                    'step_check': Number(edit_checks.eq(i).prop('checked'))
-                })
-            }
-        }
-        return steps_array
-    }
-
 
     change_edit_check() {
         let check_state = $('#editMainCheck').prop('checked')
@@ -419,8 +493,5 @@ export class Edit {
         return [position, new_position]
     }
 }
-
-
-
 
 

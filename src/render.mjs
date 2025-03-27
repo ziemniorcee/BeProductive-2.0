@@ -39,6 +39,12 @@ export class DayView {
             this.change_main_check(position)
         });
 
+        $(document).on('click', '#todosAll .stepCheck', (event) => {
+            event.stopPropagation()
+            this.steps.change_step_check(event.currentTarget)
+            this.dragula_day_view()
+        });
+
         /**
          * opens context menu for goals goal and saves selected goal
          */
@@ -248,32 +254,30 @@ export class DayView {
      * @returns {string} HTML of built goal
      */
     build_goal(goal) {
-        let category_color = ""
+        let category_color = "rgb(74, 74, 74)"
         let category_border = ""
 
         if (goal.category !== 0) {
             category_color = this.data.categories[goal.category][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
+
         let check_state = goal.check_state ? "checked" : "";
-        let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
-        let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
         let project_emblem = this.data.project_emblem_html(goal["pr_id"])
+        let check_color = check_border[goal.importance]
 
         return `
-        <div class='todo' style="${category_border}">
-            <div class="todoId">${goal["id"]}</div>
-            <div class='todoCheck' ">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[goal.importance]}"></div>
-                <input type='checkbox' class='check_task' ${check_state}>
-            </div>
-            <div class='taskText'>
-                <span class='task'> ${goal.goal} </span>
-                ${repeat}
-                ${goal.steps}
-            </div>
-            ${project_emblem}
-        </div>`
+            <div class='todo' style="${category_border}">
+                <div class="todoId">${goal["id"]}</div>
+                <div class='todoCheck'>
+                    <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
+                </div>
+                <div class='taskText'>
+                    <span class='task'> ${goal.goal} </span>
+                    ${goal.steps}
+                </div>
+                ${project_emblem}
+            </div>`
     }
 
     /**
@@ -451,33 +455,38 @@ export class DayView {
      * @param position selected goal position
      */
     change_main_check(position) {
-        const check_task = $('.check_task').eq(position)
-        const dot = $('.checkDot').eq(position)
-        let todo = $('.todo').eq(position)
-        let goal_id = $('.todoId')
-        console.log(todo)
+        const $check_task = $('.check_task').eq(position)
+        let $todo = $('.todo').eq(position)
+        let $todo_id = $('.todoId')
+        let $steps_checks = $todo.find('.stepCheck')
 
-        if ($('#monthGrid').length) {
-            goal_id = $('.monthTodoId')
-            todo = $('.monthTodo')
+        let steps_checks_states = $steps_checks.map(function () {
+            return $(this).prop('checked');
+        })
+
+        let id = Number($todo_id.eq(position).html())
+        let state = Number($check_task.prop('checked'))
+        let importance_color = $todo.find('.check_task').css("border-color")
+
+        $check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task' style="border-color:${importance_color}">`)
+
+        for (let i = 0; i < $steps_checks.length; i++) {
+            $steps_checks.eq(i).replaceWith(`<input type='checkbox' ${steps_checks_states[i] ? "checked" : ""} class='stepCheck'>`)
         }
 
-        let state = Number(check_task.prop('checked'))
+        let category_color = $todo.css("border-color")
+        $todo.css("box-shadow", "none")
+        $todo.css("border", "1px solid #444444")
+        $todo.css("border-right", `4px solid ${category_color}`)
 
-        let category_color = $(dot).css('borderColor')
-        $(dot).replaceWith(`<div class="checkDot" style="background-image: ${state ? "url('images/goals/check.png')" : ""}; border-color:${category_color}">`)
-        check_task.replaceWith(`<input type='checkbox' ${state ? "checked" : ""} class='check_task'>`)
-        $(state ? "#todosFinished" : "#todosArea").append(todo.prop("outerHTML"))
-        todo.remove()
+        $(state ? "#todosFinished" : "#todosArea").append($todo.prop("outerHTML"))
+        $todo.remove()
 
-
-
-        let new_tasks = goal_id.map(function () {
+        let new_tasks = $todo_id.map(function () {
             return $(this).text();
         }).get()
 
-        let array_id = Number(goal_id.eq(position).html())
-        window.goalsAPI.changeChecksGoal({id: array_id, state: state})
+        window.goalsAPI.changeChecksGoal({id: id, state: state})
         if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
 
         this.build_finished_count()
@@ -720,7 +729,6 @@ export class Steps {
         let steps_HTML = ""
         if (steps.length > 0) {
             let checks_counter = steps.reduce((total, step) => total + step.step_check, 0);
-            console.log(steps)
             let steps_elements = ""
             for (let i = 0; i < steps.length; i++) {
                 let step_check = steps[i].step_check ? "checked" : ""
@@ -737,7 +745,7 @@ export class Steps {
                 category_color = this.data.categories[category_id][0]
             }
             steps_HTML =
-                `<div class='stepsShow' style="border: 1px solid ${category_color}">
+                `<div class='stepsShow'>
                     <img class='showImg' src='images/goals/down.png' alt="">
                     <span class="check_counter">
                         <span class="counter">${checks_counter}</span>/<span class="maxCounter">${steps.length}</span>
@@ -750,8 +758,3 @@ export class Steps {
         return steps_HTML
     }
 }
-
-
-
-
-

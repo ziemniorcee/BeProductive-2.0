@@ -69,22 +69,27 @@ export class WeekView {
      * @returns {string} HTML of created goal
      */
     build_week_goal(goal) {
-        let difficulty = `images/goals/rank${goal.difficulty}.svg`
         let check_state = goal.check_state ? "checked" : ""
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : ""
         let converted_text = decode_text(goal.goal)
-        let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
+
+        let category_color = "rgb(74, 74, 74)"
+        let category_border = ""
+
+        if (goal.category !== 0) {
+            category_color = this.data.categories[goal.category][0]
+            category_border = `border-right: 4px solid ${category_color}`
+        }
+        let check_color = check_border[goal.importance]
 
         return `
-        <div class="todo">
+        <div class="todo"  style="${category_border}">
             <div class="todoId">${goal.id}</div>
-            <div class="todoCheck" style="background: ${this.data.categories[goal.category][0]} url(${difficulty}) no-repeat">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.importance]} solid"></div>
-                <input type="checkbox" class="check_task" ${check_state}>
+            <div class="todoCheck">
+                <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
             </div>
             <div class="taskText">
                 <span class="task">${converted_text}</span>
-                ${repeat}
             </div>
         </div>`;
     }
