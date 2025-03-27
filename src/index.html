@@ -41,58 +41,76 @@
 
 
 <div id="container">
-    <div id="leftbar">
-        <div id="laurels">
-            <img src="images/laurels.png" alt="laurels" draggable="false">
-        </div>
-        <div id="leftbarBody" >
-            <div class="leftbarButton" id="todoButton">
-                <img src="images/goal.png" alt="">
-            </div>
-            <div class="leftbarButton" id="habitButton">
-                <img src="images/habit.png" alt="">
-            </div>
-            <div class="leftbarButton" id="timelineButton">
-                <img src="images/timeline.png" alt="">
-            </div>
-            <div class="leftbarButton" id="strategyButton">
-                <img src="images/strategy.png" alt="">
-            </div>
-        </div>
-    </div>
+<!--    <div id="leftbar">-->
+<!--        <div id="laurels">-->
+<!--            <img src="images/laurels.png" alt="laurels" draggable="false">-->
+<!--        </div>-->
+<!--        <div id="leftbarBody" >-->
+<!--            <div class="leftbarButton" id="todoButton">-->
+<!--                <img src="images/goal.png" alt="">-->
+<!--            </div>-->
+<!--            <div class="leftbarButton" id="habitButton">-->
+<!--                <img src="images/habit.png" alt="">-->
+<!--            </div>-->
+<!--            <div class="leftbarButton" id="timelineButton">-->
+<!--                <img src="images/timeline.png" alt="">-->
+<!--            </div>-->
+<!--            <div class="leftbarButton" id="strategyButton">-->
+<!--                <img src="images/strategy.png" alt="">-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <div id="dashboard">
+        <div id="dashTitleBar"></div>
         <div id="dashClose">
             <img src="images/goals/back.png">
         </div>
-        <div id="dashTitle">TO DO</div>
-        <div id="dashInbox" class="dashButton">
-            <img src="images/goals/dashboard/inbox.png">
-            Inbox
+
+        <div id="dashTodo" class="dashSection">
+            <div class="dashTitle">To do</div>
+            <div id="dashInbox" class="dashButton">
+                <div class="dashButtonIcon"><img src="images/goals/dashboard/inbox.png"></div>
+                <div>Inbox</div>
+            </div>
+            <div id="dashASAP" class="dashButton">
+                <div class="dashButtonIcon"><img src="images/goals/dashboard/fire.png"></div>
+                <div>ASAP</div>
+            </div>
+            <div id="dashMyDayBtn" class="dashButton">
+                <div class="dashButtonIcon"><img src="images/goals/dashboard/today.png"></div>
+                <div>Plan</div>
+            </div>
+            <div id="dashPlanOptions">
+                <div class="dashSubTitle">View options</div>
+                <div class="dashPlanOption" id="dayViewButton">Day view</div>
+                <div class="dashPlanOption" id="weekViewButton">Week view</div>
+                <div class="dashPlanOption" id="monthViewButton">Month view</div>
+            </div>
         </div>
-        <div id="dashASAP" class="dashButton">
-            <img src="images/goals/dashboard/fire.png">
-            ASAP
+
+        <div id="dashStrategy" class="dashSection">
+            <div class="dashTitle">Strategy</div>
+            <div id="strategyButton" class="dashButton">
+                <div class="dashButtonIcon"><img src="images/goals/dashboard/galaxy.png"></div>
+                <div>Galaxy</div>
+            </div>
+            <div class="dashSubTitle">Recent projects</div>
+            <div id="dashStrategyProjects">
+
+            </div>
+            <div class="dashSubTitle" id="dashStrategyMore">More</div>
         </div>
-        <div id="dashMyDayBtn" class="dashButton">
-            <img src="images/goals/dashboard/today.png">
-            My day
-        </div>
-        <div id="dashTomorrowBtn" class="dashButton">
-            <img src="images/goals/dashboard/tomorrow.png">
-            <span>Plan tomorrow</span>
-        </div>
-        <div id="dashAnotherBtn" class="dashButton">
-            <input type="text" id="datePicker">
-            <img src="images/goals/dashboard/other.png">
-            Show another date
+
+        <div id="dashHabits" class="dashSection">
+            <div class="dashTitle">Habits</div>
+            <div id="habitButton" class="dashButton">
+                <div class="dashButtonIcon"><img src="images/habit.png"></div>
+                <div>Today</div>
+            </div>
         </div>
 
 
-        <div id="dashProjectsTitle">PROJECTS</div>
-        <div id="dashProjects">
-
-        </div>
     </div>
 
     <template id="inboxTodoTemplate">
@@ -170,17 +188,7 @@
             <div id="dashOpen">
                 <img src="images/goals/back.png" alt="">
             </div>
-            <div id="viewOptions">
-                <div class="viewOption" id="dayViewButton">
-                    <img src="images/goals/dayview.png" alt="">
-                </div>
-                <div class="viewOption"  id="weekViewButton">
-                    <img src="images/goals/weekview.png" alt="">
-                </div>
-                <div class="viewOption"  id="monthViewButton">
-                    <img src="images/goals/monthview.png" alt="">
-                </div>
-            </div>
+
             <div id="viewOptions2">
                 <div class="viewOption2">
                     <img src="images/goals/dayview.png" alt="">
@@ -205,15 +213,20 @@
                 <div id="todosArea">
 
                 </div>
-                <div id="finishedButton">
-                    <img id="finishedImg" src="images/goals/down.png" alt="up">
-                    <span>Finished: </span>
-                    <span id="finishedCount">0</span>
-                </div>
                 <div id="todosFinished">
 
                 </div>
+                <div id="todosAddNew">
+                    <div id="todosAddNewPlus">
+                        <img src="images/goals/plus.png" alt="">
+                    </div>
+                    <div id="todosAddNewText">
+                        <span>New task</span>
+                    </div>
+                </div>
             </div>
+
+
 
         </div>
     </template>
@@ -235,11 +248,6 @@
                 </div>
             </div>
 
-            <div id="todoEntrySimple">
-                <input id="todoEntryGet" type="text" spellcheck="false" placeholder="Result">
-                <div id="todoRepeat"><img id="repeatImg" src="images/goals/repeat.png" alt=""></div>
-                <div id="todoAdd">+</div>
-            </div>
             <div id="todoEntryComplex">
                 <div id="newSteps">
                     <div class="newStepText"><input type="text" class="stepEntry" placeholder="Action 1"></div>
@@ -289,6 +297,7 @@
             </div>
         </div>
     </template>
+    <div id="mainTitleBar"></div>
 
     <div id="main">
 
@@ -396,9 +405,9 @@
     <template id="editRightTemplate">
         <div id="editRight">
             <div class="editLabel">Category</div>
-            <div class="categoryDecider deciderButtonFill">
-                <div class="categoryDeciderId">1</div>
-                <div class="categoryDeciderName">General</div>
+            <div class="categoryDecider deciderButtonEmpty">
+                <div class="categoryDeciderId">0</div>
+                <div class="categoryDeciderName">No category</div>
             </div>
 
             <div class="editLabel">Project</div>
@@ -614,13 +623,6 @@
 
     </div>
 
-    <div id="testPanel" style="opacity: 0">
-        <div id="testPanelClear"></div>
-        <div id="testPanelShowIds"></div>
-        <div id="testPanelShowSidebars"></div>
-        <div id="testPanelRemoveHistory"></div>
-        <div id="testPanelRemoveIdea"></div>
-    </div>
 </div>
 
 </body>
