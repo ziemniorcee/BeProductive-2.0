@@ -170,7 +170,7 @@ class Decider {
 
             $("body").get(0).style.setProperty("--decide-color", category[0]);
 
-            $('.categoryDecider').css('background-color', category[0])
+            $('.categoryDecider').css('border-color', category[0])
             $('.categoryDeciderName').text(category[1])
             $('.categoryDeciderId').text(selected_category_id)
 

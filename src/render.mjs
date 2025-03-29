@@ -48,7 +48,7 @@ export class DayView {
         /**
          * opens context menu for goals goal and saves selected goal
          */
-        $(document).on('contextmenu', '#todosAll .todo, .monthTodo', (event) => {
+        $(document).on('contextmenu', '.todo, .monthTodo', (event) => {
             if ($(event.currentTarget).find('.repeatLabelShow').length) window.appAPI.contextMenuOpen({repeat: 1})
             else window.appAPI.contextMenuOpen({repeat: 0, option: 0})
             this.todo_to_remove = event.target
@@ -146,7 +146,7 @@ export class DayView {
          * removes project goal
          */
         window.sidebarAPI.removingProjectGoal(() => {
-            window.sidebarAPI.projectGoalRemoved({id: $('#sideProjectGoals .todo').index(this.todo_to_remove)})
+            window.sidebarAPI.projectGoalRemoved({id: $(Number(this.todo_to_remove).find('.todoId').text())})
             this.todo_to_remove.remove()
         })
 
@@ -372,17 +372,11 @@ export class DayView {
         let todos = $('#main .todo')
         let sidebar_pos = dragged_task.find('.todoId').text()
 
-        $('.todoId').eq(new_goal_index).text(todos.length - 1)
         let project_pos = $('#sideProjectId').text()
         todos.eq(new_goal_index).append(this.data.project_emblem_html(project_pos))
         window.projectsAPI.getFromProject({date: this.date.day_sql, sidebar_id: sidebar_pos, main_pos: new_goal_index})
 
         $(dragged_task).remove()
-
-        let $sidebar_todoId = $('#rightbar .todoId')
-        for (let i = 0; i < $sidebar_todoId.length; i++) {
-            $sidebar_todoId.eq(i).text(i)
-        }
     }
 
     /**
@@ -411,11 +405,6 @@ export class DayView {
             }
         }
         this.todo_to_remove.remove()
-
-        let goals = $('.todoId')
-        for (let i = 0; i < goals.length; i++) {
-            if (goals.eq(i).html() > id) goals.eq(i).html(goals.eq(i).html() - 1)
-        }
     }
 
     /**

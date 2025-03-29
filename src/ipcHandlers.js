@@ -166,8 +166,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.handle('ask-project-sidebar', async (event, params) => {
-        let option_sql = where_option(params.option, params.project_pos)
-
         const current_dates_str = params.current_dates.map(date => `'${date}'`).join(', ');
 
         try {
@@ -182,7 +180,7 @@ function todoHandlers(db) {
                                G.addDate,
                                CASE WHEN G.addDate IN (${current_dates_str}) THEN 1 ELSE 0 END as "already"
                         FROM goals G
-                            ${option_sql}
+                        WHERE G.project_id = ${params.id} AND G.check_state = 0 AND G.addDate = ''
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -199,15 +197,15 @@ function todoHandlers(db) {
 
     })
 
-    function where_option(option, project_pos) {
+    function where_option(option, project_id) {
         if (option === 0) {
-            return `WHERE G.project_id = ${project_ids[project_pos]} 
+            return `WHERE G.project_id = ${project_id} 
                         AND G.check_state = 1`
         } else if (option === 1) {
-            return `WHERE G.project_id = ${project_ids[project_pos]} 
+            return `WHERE G.project_id = ${project_id} 
                         AND G.check_state = 0 AND G.addDate <> ""`
         } else {
-            return `WHERE G.project_id = ${project_ids[project_pos]} 
+            return `WHERE G.project_id = ${project_id} 
                         AND G.check_state = 0 AND G.addDate = ""`
         }
     }
@@ -441,6 +439,7 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('goal-removed', (event, params) => {
+        console.log(params.id)
         db.run(`DELETE
                 FROM goals
                 WHERE id = ${params.id}`)
@@ -706,8 +705,7 @@ function todoHandlers(db) {
     ipcMain.on('project-goal-removed', (event, params) => {
         db.run(`DELETE
                 FROM goals
-                WHERE id = ${project_sidebar_ids[params.id]}`)
-        project_sidebar_ids.splice(params.id, 1)
+                WHERE id = ${params.id}`)
     })
 
 
@@ -1195,10 +1193,10 @@ function todoHandlers(db) {
                         steps_values += ";"
 
                         db.run(`INSERT INTO steps (step_text, goal_id, step_check)
-                            VALUES ${steps_values}`)
+                                VALUES ${steps_values}`)
                         db.all(`SELECT id, step_check, step_text
-                            FROM steps
-                            WHERE goal_id = ${goal_id}`, (err, steps) => {
+                                FROM steps
+                                WHERE goal_id = ${goal_id}`, (err, steps) => {
                             if (err) reject(err)
                             else {
                                 resolve([goal_id, steps])
@@ -1219,65 +1217,65 @@ function todoHandlers(db) {
 }
 
 
-    function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
-        let mainWindow_state = true
-        let move_flag = false
-        let middle = []
+function appHandlers(mainWindow, floatMenuWindow, floatContentWindow) { //doesnt work
+    let mainWindow_state = true
+    let move_flag = false
+    let middle = []
 
-        ipcMain.on('change_window', () => {
-            mainWindow_state = !mainWindow_state
-            if (mainWindow_state) {
-                mainWindow.show()
-                floatMenuWindow.hide()
+    ipcMain.on('change_window', () => {
+        mainWindow_state = !mainWindow_state
+        if (mainWindow_state) {
+            mainWindow.show()
+            floatMenuWindow.hide()
 
-            } else {
-                floatMenuWindow.show()
-                mainWindow.hide()
-            }
-        })
-
-        ipcMain.on('start_pos_change', () => {
-            move_flag = true
-            let pos_before = floatMenuWindow.getPosition()
-            let mouse_pos = electron.screen.getCursorScreenPoint()
-            middle = [mouse_pos.x - pos_before[0], mouse_pos.y - pos_before[1]]
-            floatbar_refresh()
-        })
-        ipcMain.on('stop_pos_change', () => {
-            move_flag = false
-        })
-
-        function floatbar_refresh() {
-            let mouse_pos = electron.screen.getCursorScreenPoint()
-            let new_pos = [mouse_pos.x - middle[0], mouse_pos.y - middle[1]]
-            floatMenuWindow.setPosition(new_pos[0], new_pos[1])
-            floatContentWindow.setPosition(new_pos[0] - 400, new_pos[1])
-            if (move_flag) {
-                setTimeout(floatbar_refresh, 7)
-            }
+        } else {
+            floatMenuWindow.show()
+            mainWindow.hide()
         }
+    })
 
-        let menu_state = false
-        let menu_sizes = [100, 200]
+    ipcMain.on('start_pos_change', () => {
+        move_flag = true
+        let pos_before = floatMenuWindow.getPosition()
+        let mouse_pos = electron.screen.getCursorScreenPoint()
+        middle = [mouse_pos.x - pos_before[0], mouse_pos.y - pos_before[1]]
+        floatbar_refresh()
+    })
+    ipcMain.on('stop_pos_change', () => {
+        move_flag = false
+    })
 
-        let goals_state = false
-
-        ipcMain.on('show_floatbar_menu', () => {
-            menu_state = !menu_state
-            floatMenuWindow.setSize(100, menu_sizes[Number(menu_state)])
-            if (menu_state === false) {
-                floatContentWindow.hide()
-                goals_state = false
-            }
-        })
-
-
-        ipcMain.on('show_goals', (event) => {
-            goals_state = !goals_state
-            if (goals_state) floatContentWindow.show()
-            else floatContentWindow.hide()
-            event.reply('return_state', goals_state)
-        })
-
-
+    function floatbar_refresh() {
+        let mouse_pos = electron.screen.getCursorScreenPoint()
+        let new_pos = [mouse_pos.x - middle[0], mouse_pos.y - middle[1]]
+        floatMenuWindow.setPosition(new_pos[0], new_pos[1])
+        floatContentWindow.setPosition(new_pos[0] - 400, new_pos[1])
+        if (move_flag) {
+            setTimeout(floatbar_refresh, 7)
+        }
     }
+
+    let menu_state = false
+    let menu_sizes = [100, 200]
+
+    let goals_state = false
+
+    ipcMain.on('show_floatbar_menu', () => {
+        menu_state = !menu_state
+        floatMenuWindow.setSize(100, menu_sizes[Number(menu_state)])
+        if (menu_state === false) {
+            floatContentWindow.hide()
+            goals_state = false
+        }
+    })
+
+
+    ipcMain.on('show_goals', (event) => {
+        goals_state = !goals_state
+        if (goals_state) floatContentWindow.show()
+        else floatContentWindow.hide()
+        event.reply('return_state', goals_state)
+    })
+
+
+}

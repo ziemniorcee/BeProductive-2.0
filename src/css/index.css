@@ -2145,3 +2145,8 @@ body {
     font-size: 20px;
     margin-left: 10px;
 }
+
+.categoryDecider{
+    border: 2px solid black;
+    background-color: #444444;
+}

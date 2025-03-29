@@ -4,12 +4,32 @@
 }
 
 #inboxBody, #ASAPBody {
-    height: 100%;
+    height: calc(100% - 50px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
+
+#inboxList::-webkit-scrollbar, #ASAPList::-webkit-scrollbar {
+    width: 4px;
+}
+
+#inboxList::-webkit-scrollbar-track, #ASAPList::-webkit-scrollbar-track {
+    background: #121212;
+    margin-left: 10px;
+}
+
+#inboxList::-webkit-scrollbar-thumb, #ASAPList::-webkit-scrollbar-thumb {
+    background: #444444;
+    border-radius: 4px;
+}
+
+#inboxList::-webkit-scrollbar-thumb:hover, #ASAPList::-webkit-scrollbar-thumb:hover {
+    background: #45a049;
+}
+
+
 
 #inboxEntry, #ASAPEntry {
     border: 1px solid #3A3A3A;
@@ -64,6 +84,8 @@
     height: calc(100% - 80px);
     overflow: hidden;
     width: 700px;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
 .inboxListBreak {
@@ -95,7 +117,7 @@
 }
 
 .inboxTodoCheck {
-r    pointer-events: none;
+    pointer-events: none;
     position: relative;
 
 }
@@ -420,7 +442,7 @@ r    pointer-events: none;
     background: #777;
 }
 
-#projectDeciderSelect {
+.projectDeciderSelect {
     width: 320px;
     height: 400px;
     background: #1e1e1e;
@@ -435,7 +457,7 @@ r    pointer-events: none;
 
 }
 
-#projectDeciderSelect h2 {
+.projectDeciderSelect h2 {
     font-size: 25px;
     margin-bottom: 15px;
     margin-top: 0;
@@ -579,7 +601,7 @@ r    pointer-events: none;
     display: none;
 }
 
-#taskEdit #projectDeciderSelect{
+#taskEdit .projectDeciderSelect{
     top: -60px;
     right: 250px;
 }

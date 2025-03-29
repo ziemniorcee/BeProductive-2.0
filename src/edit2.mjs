@@ -1,16 +1,18 @@
 import {check_border, decode_text, encode_text, range2_backgrounds} from "./data.mjs";
 
 export class TodoVignette {
-    constructor(app_data, app_date, app_steps, dayView) {
+    constructor(app_data, app_date, app_steps, dayView, app_project) {
         this.initEventListeners()
         this.data = app_data
         this.date = app_date
         this.steps = app_steps
         this.dayView = dayView
+        this.project = app_project
         this.prevent_step_blur = false
 
         this.todo_edit = new TodoEdit(this)
         this.todo_new = new TodoNew(this)
+        this.todo_project_new = new TodoProjectNew(this)
     }
 
     initEventListeners() {
@@ -130,7 +132,10 @@ export class TodoVignette {
             date_type = 1
         }
 
-        let new_date = this.date.get_edit_sql_format($('#selectDate').text())
+        let new_date = ""
+        if ($('#selectDate').text() !== "None"){
+            new_date = this.date.get_edit_sql_format($('#selectDate').text())
+        }
         let project_id = Number($('.projectDeciderId').text())
 
         return {
@@ -182,8 +187,8 @@ export class TodoVignette {
     }
 
     hide_deciders(event){
-        if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
-            $("#projectDeciderSelect").remove()
+        if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('.projectDeciderSelect').length) {
+            $(".projectDeciderSelect").remove()
         }
 
         if (!$(event.target).closest('.categoryDecider').length && !$(event.target).closest('.categoryDeciderSelect').length) {
@@ -214,6 +219,33 @@ export class TodoVignette {
                 }, 0);
             }
         }
+    }
+
+    /**
+     * sets project setting of selected goal based on selected option
+     * @param project_id id of selected option
+     */
+    set_project(project_id, $edit_clone) {
+        if (project_id !== -1 && project_id !== null) {
+            const project = this.data.projects.find(item => item.id === project_id);
+            let icon_path = this.data.findProjectPathByName(`project${project_id}`)
+            $edit_clone.find('.projectDeciderName').text(project["name"])
+            $edit_clone.find('.projectDeciderIcon img').attr('src', `${icon_path}`)
+            $edit_clone.find('.projectDeciderIcon img').css('display', 'block')
+            $edit_clone.find('.projectDeciderId').text(project_id)
+            $edit_clone.find('.projectDecider').css('border', `2px solid ${this.data.categories[project['category']][0]}`)
+        }
+    }
+
+    set_category(category_id, $edit_clone) {
+        if (category_id !== 0) {
+            $edit_clone.find('.categoryDecider').css('border-color', this.data.categories[category_id][0])
+            $edit_clone.find('.categoryDeciderName').text(this.data.categories[category_id][1])
+        } else {
+            $edit_clone.find('.categoryDecider').css('border-color', "rgb(74, 74, 74)")
+            $edit_clone.find('.categoryDeciderName').text("No category")
+        }
+        $edit_clone.find('.categoryDeciderId').text(category_id)
     }
 }
 
@@ -260,10 +292,62 @@ export class TodoNew {
         changes['check_state'] = 0
         changes['steps'] = this.vignette.steps._steps_HTML(new_goal_settings[1], changes['category'])
         console.log(changes['addDate'])
-        if (changes['addDate'] === this.vignette.date.today_sql) {
+        if (changes['addDate'] === this.vignette.date.day_sql) {
             $('#todosArea').append(this.vignette.dayView.build_goal(changes))
 
         }
+    }
+}
+
+export class TodoProjectNew {
+    constructor(app_vignette) {
+        this.initEventListeners()
+        this.vignette = app_vignette
+    }
+
+    initEventListeners(){
+        $(document).on('click', '#projectNewGoal', () => {
+            this.build_adder()
+        })
+    }
+
+    build_adder(){
+        $("#vignette").css('display', 'block')
+        let $edit_clone = $("<div id='newProjectTask' class='vignetteWindow2'></div>")
+        const edit_main_template = $('#editMainTemplate').prop('content');
+        $edit_clone.append($(edit_main_template).clone())
+        const edit_right_template = $('#editRightTemplate').prop('content');
+        $edit_clone.find('#editBody').append($(edit_right_template).clone())
+        $edit_clone.find('#selectDate').text("None")
+
+        let project_id = Number($('#projectId').text())
+        console.log(this.vignette.data.projects)
+        let category_id = this.vignette.data.projects.find(project => project.id === project_id)['category']
+        this.vignette.set_category(category_id, $edit_clone)
+        this.vignette.set_project(project_id, $edit_clone)
+        $("#vignette").append($edit_clone)
+
+
+        $(function () {
+            $("#editDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
+                onSelect: function (selectedDate) {
+                    $('#selectDate').text(selectedDate)
+                    $('#editDateSelector').css('display', 'none')
+                }
+            });
+        });
+    }
+
+    async add_goal(){
+        let changes = await this.vignette.get_goal_settings()
+        changes['goal_pos'] = ('#todosArea .todo').length + 1
+        let new_goal_settings = await window.goalsAPI.newGoal2({changes: changes})
+        changes['id'] = new_goal_settings[0]
+        changes['check_state'] = 0
+        changes['steps'] = this.vignette.steps._steps_HTML(new_goal_settings[1], changes['category'])
+        console.log($('#projectTodo').find('.projectSectionGoals').length)
+        $('#projectTodo').find('.projectSectionGoals').append(this.vignette.project.build_project_goal(changes))
     }
 }
 
@@ -277,7 +361,7 @@ export class TodoEdit {
     }
 
     initEventListeners() {
-        $(document).on('click', '#todosAll .todo, .weekDay .todo, .monthTodo, .day .sidebarTask, #ASAPList .todo', async (event) => {
+        $(document).on('click', '.todo, .monthTodo, .day .sidebarTask', async (event) => {
             $("#vignette").css('display', 'block')
 
             await this.get_goal_data($(event.currentTarget))
@@ -329,22 +413,18 @@ export class TodoEdit {
         if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
-        if (goal["category"] !== 0) {
-            $edit_clone.find('.categoryDecider').css('background-color', this.vignette.data.categories[goal["category"]][0])
-            $edit_clone.find('.categoryDeciderName').text(this.vignette.data.categories[goal["category"]][1])
-        } else {
-            $edit_clone.find('.categoryDecider').css('background-color', "rgb(74, 74, 74)")
-            $edit_clone.find('.categoryDeciderName').text("No category")
-        }
-        $edit_clone.find('.categoryDeciderId').text(goal["category"])
+
 
 
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', range2_backgrounds[goal["importance"]])
         $edit_clone.find('#selectDate').text(this.vignette.date.change_to_edit_format(goal['addDate']))
 
+        this.vignette.set_category(goal['category'], $edit_clone)
+        this.vignette.set_project(goal['pr_id'], $edit_clone)
+
         $("#vignette").append($edit_clone)
-        this.set_project(goal['pr_id'])
+
         this.dragula_steps()
 
         $(function () {
@@ -358,21 +438,7 @@ export class TodoEdit {
         });
     }
 
-    /**
-     * sets project setting of selected goal based on selected option
-     * @param project_id id of selected option
-     */
-    set_project(project_id) {
-        if (project_id !== -1 && project_id !== null) {
-            const project = this.vignette.data.projects.find(item => item.id === project_id);
-            let icon_path = this.vignette.data.findProjectPathByName(`project${project_id}`)
-            $('.projectDeciderName').text(project["name"])
-            $('.projectDeciderIcon img').attr('src', `${icon_path}`)
-            $('.projectDeciderIcon img').css('display', 'block')
-            $('.projectDeciderId').text(project_id)
-            $('.projectDecider').css('border', `2px solid ${this.vignette.data.categories[project['category']][0]}`)
-        }
-    }
+
 
     /**
      * enables drag and drop between steps
@@ -411,7 +477,7 @@ export class TodoEdit {
      * Make changes to the app
      * Saves changes to the database
      */
-    async change_goal(project_pos) {
+    async change_goal() {
         let changes = await this.vignette.get_goal_settings()
         changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
 
@@ -424,7 +490,9 @@ export class TodoEdit {
                 }
             }
             if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length) {
-                if (project_pos !== project_id) {
+                let current_project_id = Number($('#projectId').text())
+                let new_project_id = Number(changes['pr_id'])
+                if (current_project_id !== new_project_id) {
                     this.selected_goal.remove()
                 }
             }

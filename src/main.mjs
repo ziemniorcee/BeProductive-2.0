@@ -38,7 +38,7 @@ class MainApp {
         this.strategy = new Strategy(this.data, this.categories)
         this.habits = new Habits(this.data, this.categories)
 
-        this.todoVignette = new TodoVignette(this.data, this.date, this.steps, this.dayView)
+        this.todoVignette = new TodoVignette(this.data, this.date, this.steps, this.dayView, this.project)
 
         this.inbox = new Inbox(this.data, this.date, this.todoVignette)
 
@@ -51,7 +51,7 @@ class MainApp {
 
         this.dashboard.fix_dashboard(false)
         await this.dayView.display()
-        // this.project.set_projects_options()
+        this.project.set_projects_options()
 
     }
 }
@@ -150,13 +150,15 @@ class DisplayManagement{
 
         $(document).on('mousedown', '#vignette', async () => {
             if ($('#taskEdit').length){
-                let project_pos = this.app.project.project_pos
-                await this.app.todoVignette.todo_edit.change_goal(project_pos)
+                await this.app.todoVignette.todo_edit.change_goal()
                 this.reset_dragula()
             }
             else if ($('#newTask').length){
                 await this.app.todoVignette.todo_new.add_goal()
                 this.reset_dragula()
+            }
+            else if ($('#newProjectTask').length){
+                await this.app.todoVignette.todo_project_new.add_goal()
             }
             $('#vignette').css('display', 'none');
             $('#vignette').html('')
@@ -168,11 +170,6 @@ class DisplayManagement{
             this.app.data.fix_view_options()
             this.reset_dragula()
         });
-
-        $(document).on('click', '.sideProjectOption', async (event) => {
-            await this.app.project.change_sidebar_option(event.currentTarget)
-            this.reset_dragula()
-        })
 
         $(document).on('click', '#editMainCheck', () => {
             let positions = this.app.todoVignette.todo_edit.change_edit_check()

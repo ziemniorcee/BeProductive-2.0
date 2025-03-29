@@ -32,8 +32,6 @@ export class Dashboard {
      */
     fix_dashboard(length_option) {
         $('#dashStrategyProjects').empty()
-        console.log(this.data.projects)
-        console.log(this.data.project_icons)
         let length = this.data.projects.length;
         if (length_option) length = this.data.projects.length
         else if (length > 3) {

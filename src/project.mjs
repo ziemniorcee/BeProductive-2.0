@@ -14,6 +14,7 @@ export class Project {
 
         this.decider = new Decider(app_data)
         this.project_pos = null
+        this.project_id = null
         this.current_goal_id = 0
         this.block_prev_drag = 0
         this.selected_project = null
@@ -28,21 +29,11 @@ export class Project {
             $('#vignette').css('display', 'none')
         })
 
-        // $(document).on('click', '.dashProject', async(event) => {
-        //     let jq_dash_project = $('.dashProject')
-        //     this.project_pos = jq_dash_project.index(event.currentTarget)
-        //     let how_many_projects = jq_dash_project.length
-        //     if (this.project_pos < how_many_projects - 1) {
-        //         await this.project_view()
-        //     } else {
-        //         this.project_pos = null
-        //         this.open_add_project()
-        //     }
-        // })
-
         $(document).on('click', '.dashProject', async(event) => {
-            let project_id = Number($(event.currentTarget).find('.dashProjectId').text())
-            this.selected_project = this.data.projects.find(item => item.id === project_id)
+            this.project_id = Number($(event.currentTarget).find('.dashProjectId').text())
+            console.log(this.project_id)
+
+            this.selected_project = this.data.projects.find(item => item.id === this.project_id)
             console.log(this.selected_project)
             await this.project_view()
         })
@@ -104,20 +95,15 @@ export class Project {
      * @param projects data of projects ,
      */
     set_projects_options() {
-        let projects_HTML = ""
         let project_types_HTML = ""
         for (let i = 0; i < this.data.projects.length; i++) {
-            let project_class = "dashProject"
-            if (i % 2 === 0) project_class = "dashProject dashProjectRight"
-            let icon_color = this.data.categories[this.data.projects[i].category][0]
-            let icon_path = this.data.findProjectPathByName(`project${this.data.projects[i].id}`)
+            let current_project = this.data.projects[i]
+            let icon_color = this.data.categories[current_project.category][0]
+            let icon_path = this.data.findProjectPathByName(`project${current_project.id}`)
 
-            projects_HTML += this._dash_project_HTML(project_class, icon_color, icon_path, this.data.projects[i].name)
-            project_types_HTML += this._type_project_HTML(icon_color, icon_path, this.data.projects[i].name)
+            project_types_HTML += this._type_project_HTML(icon_color, icon_path, current_project["name"], current_project["id"])
         }
 
-        projects_HTML += this._dash_add_project_HTML()
-        $('#dashProjects').html(projects_HTML)
         $('#projectTypes').html(project_types_HTML)
     }
 
@@ -318,15 +304,15 @@ export class Project {
         const header_template = $('#projectViewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
 
-        $header_clone.find('#projectHeader').css('background-color', color)
+        $header_clone.find('#projectHeader').css('border-color', color)
         $header_clone.find('#projectHeaderIcon').attr('src', icon)
         $header_clone.find('#projectName').text(name)
-        $header_clone.find('#projectId').text(this.project_pos)
+        $header_clone.find('#projectId').text(this.project_id)
 
         const main_template = $('#projectViewMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
 
-        $main_clone.find('.projectSectionTitle').css('background-color', color)
+        $main_clone.find('.projectSectionTitle').css('border-color', color)
 
         let categories_html = this.categories._categories_HTML()
 
@@ -397,11 +383,9 @@ export class Project {
             let drop_parent_id = $(event).closest('.projectSection').attr('id')
 
             if (drag_parent_id !== 'projectDone' && drop_parent_id === 'projectDone') {
-                let new_goal_pos = $('#projectDone .todo').index(event)
-                this.move_to_done(new_goal_pos, dragged_task)
+                this.move_to_done(event, dragged_task)
             } else if (drag_parent_id !== 'projectTodo' && drop_parent_id === 'projectTodo') {
-                let new_goal_pos = $('#projectTodo .todo').index(event)
-                this.move_to_todo(new_goal_pos, dragged_task)
+                this.move_to_todo(event, dragged_task)
             }
         })
     }
@@ -411,13 +395,11 @@ export class Project {
      * @param new_goal_pos new position of moved goal
      * @param dragged_task pressed task
      */
-    move_to_done(new_goal_pos, dragged_task) {
-
+    move_to_done(new_goal, dragged_task) {
         let goal_id = $(dragged_task).find('.todoId').text()
         $(dragged_task).remove()
         window.goalsAPI.changeChecksGoal({id: goal_id, state: 1, option: 0})
-        $('#projectDone .todo .checkDot').eq(new_goal_pos).css('background-image', `url('images/goals/check.png')`)
-        $('.check_task').eq(new_goal_pos).attr('checked', true)
+        $(new_goal).find('.check_task').prop('checked', true)
     }
 
     /**
@@ -425,12 +407,11 @@ export class Project {
      * @param new_goal_pos new position of moved goal
      * @param dragged_task pressed task
      */
-    move_to_todo(new_goal_pos, dragged_task) {
+    move_to_todo(new_goal, dragged_task) {
         let goal_id = $(dragged_task).find('.todoId').text()
         $(dragged_task).remove()
         window.goalsAPI.goalRemoveDate({id: goal_id})
-        $('#projectTodo .checkDot').eq(new_goal_pos).css('background-image', ``)
-        $('.check_task').eq(new_goal_pos).attr('checked', false)
+        $(new_goal).find('.check_task').prop('checked', false)
     }
 
     /**
@@ -439,55 +420,28 @@ export class Project {
      * @returns {string} project goal in HTML format
      */
     build_project_goal(goal) {
-        let todo_id = this.current_goal_id++
-        let category_color = this.data.categories[goal.category][0]
+        let category_color = "rgb(74, 74, 74)"
+        let category_border = ""
+
+        if (goal.category !== 0) {
+            category_color = this.data.categories[goal.category][0]
+            category_border = `border-right: 4px solid ${category_color}`
+        }
+
         let check_state = goal.check_state ? "checked" : "";
-        let check_bg = goal.check_state ? "url('images/goals/check.png')" : "";
-        let url = `images/goals/rank${goal.difficulty}.svg`
-        let already_emblem = goal.already ? this.data.already_emblem_HTML() : ""
+        let check_color = check_border[goal.importance]
 
         return `
-        <div class='todo'>
-            <div class="todoId">${goal.id}</div>
-            <div class='todoCheck' style="background: ${category_color} url(${url}) no-repeat">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px solid ${check_border[goal.importance]}"></div>
-                <input type='checkbox' class='check_task' ${check_state}>
-            </div>
-            <div class='taskText'>
-                <span class='task'> ${decode_text(goal.goal)} </span>
-                ${goal.steps}
-            </div>
-            ${already_emblem}
-        </div>`
-    }
-
-    /**
-     * Making html format of project option on dashboard
-     * @param project_class defines if project is on the right side
-     * @param icon_color color of the project option
-     * @param icon icon name in path
-     * @param name name of project
-     * @returns {string} HTML format
-     * @private
-     */
-    _dash_project_HTML(project_class, icon_color, icon_path, name) {
-        return `
-        <div class="${project_class}">
-            <div class="dashProjectIcon">
-                <img src="${icon_path}" alt="">
-            </div>
-            <span class="dashProjectName">${name}</span>
-        </div>`
-    }
-
-    _dash_add_project_HTML() {
-        return `
-        <div class="dashProject" style=" border: 1px #D8E1E7 dashed">
-            <div class="dashProjectIcon" style="background-color: #2979FF">
-                <img src="images/goals/plus.png" alt="">
-            </div>
-            <span class="dashProjectName">New</span>
-        </div>`
+            <div class='todo' style="${category_border}">
+                <div class="todoId">${goal["id"]}</div>
+                <div class='todoCheck'>
+                    <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
+                </div>
+                <div class='taskText'>
+                    <span class='task'> ${goal.goal} </span>
+                    ${goal.steps}
+                </div>
+            </div>`
     }
 
     /**
@@ -498,11 +452,12 @@ export class Project {
      * @returns {string} HTML format
      * @private
      */
-    _type_project_HTML(icon_color, icon, name) {
+    _type_project_HTML(icon_color, icon, name, id) {
         return `
-        <div class="projectType" style="background-color: ${icon_color}">
+        <div class="projectType" style="border: 1px solid ${icon_color}">
+            <div class="projectTypeId">${id}</div>
             <img class="projectTypeImg" src="${icon}" alt="">
-            <div class="projectName" style="background-color: ${icon_color}">
+            <div class="projectName" style="border: 1px solid ${icon_color}">
                 ${name}
             </div>
         </div>`
@@ -532,37 +487,36 @@ export class Project {
      * opens sidebar and displays project sidebar
      */
     async show_project_sidebar(that) {
-        this.project_pos = $('.projectType').index(that)
-        let project_color = $('.dashProjectIcon').eq(this.project_pos).css('background-color')
-        let project_icon = $('.dashProjectIcon img').eq(this.project_pos).attr('src')
-        let project_name = $('.dashProjectName').eq(this.project_pos).text()
+        console.log("CHUJ")
+        this.project_id = Number($(that).find('.projectTypeId').text())
+        this.selected_project = this.data.projects.find(project => project.id === this.project_id)
+
+        let color = this.data.categories[this.selected_project['category']][0]
+        let icon = this.data.findProjectPathByName(`project${this.selected_project['id']}`)
+        let name = this.selected_project['name']
         this.data.show_hide_sidebar(true, 0)
 
         $('#rightbar').html(`
             <div id="sideProjectHeader">
                 <div id="sideProjectClose">⨉</div>
                 <div id="sideProjectIcon">
-                    <img src="${project_icon}" alt="">               
+                    <img src="${icon}" alt="">               
                 </div>
-                <div id="sideProjectTitle" style="background-color: ${project_color}">
+                <div id="sideProjectTitle" style="border: 1px solid ${color}">
                     <img src="images/goals/polaura.png" alt="">
-                    <span>${project_name}</span>
+                    <span>${name}</span>
                     <img class="polaura2" src="images/goals/polaura.png" alt="">
                 </div>
-                <div id="sideProjectId">${this.project_pos}</div>
+                <div id="sideProjectId">${this.project_id}</div>
             </div>
             
             <div id="sideProjectsubTitle">To do</div>
             <div id="sideProjectGoals">
                 
             </div>`)
-        // <div id="sideProjectOptions">
-        //     <div class="sideProjectOption">Done</div>
-        // <div className="sideProjectOption">Doing</div>
-        // <div className="sideProjectOption" style="background-color: ${project_color}">To do</div>
-        // </div>
+
         let goals = await window.projectsAPI.askProjectSidebar({
-            project_pos: this.project_pos,
+            id: this.project_id,
             option: 2,
             current_dates: this.date.get_current_dates()
         })
@@ -579,25 +533,6 @@ export class Project {
             side_project_goals.append(this.build_project_goal(goals[i]))
         }
 
-    }
-
-    /**
-     * changes type of displayed goals from project
-     * @param that html element of selected sidebar project option
-     */
-    async change_sidebar_option(that) {
-        let side_project_option = $('.sideProjectOption')
-        let option = side_project_option.index(that)
-
-        let color = $('.dashProjectIcon').eq(this.project_pos).css('background-color')
-        side_project_option.css('background-color', '#2A231F')
-        $(that).css('background-color', color)
-        let goals = await window.projectsAPI.askProjectSidebar({
-            project_pos: this.project_pos,
-            option: option,
-            current_dates: this.date.get_current_dates()
-        })
-        this.build_project_sidebar(goals)
     }
 
     check_sidebar_project_goal(selected_check) {
@@ -640,17 +575,11 @@ export class Project {
     }
 
     async fix_project_sidebar(selected_button) {
+        console.log(this.project_id)
         if ($('#sideProjectHeader').length) {
-            let options = $('.sideProjectOption')
-            let project_option
-            let background_color = $('#sideProjectTitle').css("background-color")
-            for (let i = 0; i < options.length; i++) {
-                if (options.eq(i).css('background-color') === background_color) project_option = i
-            }
-
             let goals = await window.projectsAPI.askProjectSidebar({
-                project_pos: this.project_pos,
-                option: project_option,
+                id: this.project_id,
+                option: 2,
                 current_dates: this.date.get_current_dates(selected_button)
             })
             this.build_project_sidebar(goals)
@@ -668,11 +597,11 @@ class Decider {
 
     initEventListeners(){
         $(document).on('click', '.projectDecider', () => {
-            console.log('XPP')
             this.open()
         })
 
         $(document).on('click', '.projectDeciderProject', (event) =>{
+
             let selected_project_id = Number($(event.currentTarget).find('.projectDeciderProjectId').text())
             let project = this.data.projects.find(item => item.id === selected_project_id)
 
@@ -684,6 +613,7 @@ class Decider {
             $('.projectDeciderName').text(project['name'])
             $('.projectDeciderId').text(selected_project_id)
             $('.projectDeciderIcon img').css('display', 'block')
+            $(".projectDeciderSelect").remove()
         })
     }
 
@@ -707,7 +637,7 @@ class Decider {
 
     open(){
         this.get_sorted_projects_by_category()
-        if (!$("#projectDeciderSelect").length){
+        if (!$(".projectDeciderSelect").length){
             let $decider = $(this.create_decider())
             let previous_category_id = 0
 
@@ -734,7 +664,7 @@ class Decider {
 
     create_decider(){
         return `
-            <div id="projectDeciderSelect">
+            <div class="projectDeciderSelect">
                 <h2>Select Project</h2>
                 <div id="projectDeciderMain">
     
