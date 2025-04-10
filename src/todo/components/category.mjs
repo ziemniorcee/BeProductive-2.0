@@ -1,11 +1,8 @@
-import {getIdByColor, hsvToRgb, projects} from "./data.mjs";
 
 export class Categories {
-    constructor(app_data) {
+    constructor(app_settings) {
         this.initEventListeners()
-        this.data = app_data
-
-        this.decider = new Decider(app_data)
+        this.settings = app_settings
     }
 
     initEventListeners() {
@@ -19,9 +16,9 @@ export class Categories {
                 $vignette_layer.css('display', 'none');
                 $vignette_layer.html('')
 
-                let category_element = Object.keys(this.data.categories).at(-1)
-                $('#selectCategory22').css('background', this.data.categories[category_element][0])
-                $('#selectCategory22').text(this.data.categories[category_element][1])
+                let category_element = Object.keys(this.settings.data.categories.categories).at(-1)
+                $('#selectCategory22').css('background', this.settings.data.categories.categories[category_element][0])
+                $('#selectCategory22').text(this.settings.data.categories.categories[category_element][1])
             } else {
                 $('#newCategoryName').css('border', '3px solid red')
             }
@@ -38,25 +35,28 @@ export class Categories {
             this.select_category(event.currentTarget)
         });
 
-
+        $(document).on('input', '#newCategoryColor', function () {
+            let rgb = this.settings.data.hsvToRgb(this.value * 2, 0.7, 0.7);
+            $('#newCategoryColor').css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}`);
+        })
     }
 
     /**
      * Creates new category from newCategory box and resets categories pickers
      */
     create_new_category() {
-        let rgb = hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
-        const len = Object.keys(this.data.categories).length + 1;
+        let rgb = this.settings.data.hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
+        const len = Object.keys(this.settings.data.categories.categories).length + 1;
         let index = len;
         for (let i = 1; i < len; i++) {
-            if (!(i in this.data.categories)) {
+            if (!(i in this.settings.data.categories.categories)) {
                 index = i;
                 break;
             }
         }
         let name = $('#newCategoryName').val();
-        this.data.categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
-        this.data.categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
+        this.settings.data.categories.categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
+        this.settings.data.categories.categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
                             ${Math.min(rgb[1] * 5 / 3, 255)}, 
                             ${Math.min(rgb[2] * 5 / 3, 255)})`;
 
@@ -102,9 +102,9 @@ export class Categories {
         } else if (id !== '0') {
             let selected_category = $(`#selectCategory${id}`)
             $(`#categoryPicker${id}`).css('display', 'none')
-            let category_element = Object.keys(this.data.categories)[index - 2]
-            selected_category.css('background', this.data.categories[category_element][0])
-            selected_category.text(this.data.categories[category_element][1])
+            let category_element = Object.keys(this.settings.data.categories.categories)[index - 2]
+            selected_category.css('background', this.settings.data.categories.categories[category_element][0])
+            selected_category.text(this.settings.data.categories.categories[category_element][1])
         }
     }
 
@@ -122,23 +122,23 @@ export class Categories {
                 <span class="categoryName">New Category</span>
             </div>`
         }
-        for (const id_key in this.data.categories) {
+        for (const id_key in this.settings.data.categories.categories) {
             categories_html +=
                 `<div class="category">
-                <span class="categoryButton" style="background: ${this.data.categories[id_key][0]}"></span>
-                <span class="categoryName">${this.data.categories[id_key][1]}</span>
+                <span class="categoryButton" style="background: ${this.settings.data.categories.categories[id_key][0]}"></span>
+                <span class="categoryName">${this.settings.data.categories.categories[id_key][1]}</span>
             </div>`
         }
         return categories_html
     }
 
     remove_category() {
-        let category = getIdByColor(this.data.categories, $('#selectCategory4').css('backgroundColor'))
-        delete this.data.categories[category];
-        let new_projects = projects.filter(item => item.category !== category);
-        projects.splice(0, projects.length);
+        let category = this.settings.data.getIdByColor(this.settings.data.categories.categories, $('#selectCategory4').css('backgroundColor'))
+        delete this.settings.data.categories.categories[category];
+        let new_projects = this.settings.data.projects.projects.filter(item => item.category !== category);
+        this.settings.data.projects.projects.splice(0, this.settings.data.projects.projects.length);
         for (let e of new_projects) {
-            projects.push(e);
+            this.settings.data.projects.projects.push(e);
         }
         window.goalsAPI.removeCategory({id: category});
         $("#vignette").css('display', 'none');
@@ -147,69 +147,3 @@ export class Categories {
     }
 }
 
-class Decider {
-    constructor(app_data) {
-        this.data = app_data
-
-        this.initEventListeners()
-    }
-
-    initEventListeners() {
-        $(document).on('click', '.categoryDecider', () => {
-            this.open()
-        })
-
-        $(document).on('click', '.categoryDeciderCategory', (event) => {
-            let selected_category_id = Number($(event.currentTarget).find('.categoryDeciderCategoryId').text())
-            let category = ['rgb(74, 74, 74)', 'No category']
-
-            if (selected_category_id !== 0) {
-                category = this.data.categories[selected_category_id]
-            }
-
-
-            $("body").get(0).style.setProperty("--decide-color", category[0]);
-
-            $('.categoryDecider').css('border-color', category[0])
-            $('.categoryDeciderName').text(category[1])
-            $('.categoryDeciderId').text(selected_category_id)
-
-            $(".categoryDeciderSelect").remove()
-        })
-    }
-
-    open() {
-        if (!$(".categoryDeciderSelect").length) {
-            let $decider = $(this.create_decider())
-
-            $decider.find('.categoryDeciderCategories').append(this.create_category(['rgb(74, 74, 74)', 'No category'], 0))
-
-            for (let category in this.data.categories) {
-                let category_settings = this.data.categories[category]
-                $decider.find('.categoryDeciderCategories').append(this.create_category(category_settings, category))
-            }
-            $('.categoryDecider').after($decider)
-        } else {
-            $(".categoryDeciderSelect").remove()
-        }
-    }
-
-    create_decider() {
-        return `
-            <div class="categoryDeciderSelect">
-                <h2>Select Category</h2>
-                <div class="categoryDeciderCategories">
-    
-                </div>
-            </div>`
-    }
-
-    create_category(category_settings, category_id) {
-        return `
-            <div class="categoryDeciderCategory">
-                <div class="categoryDeciderCategoryId">${category_id}</div>
-                <div class="categoryDeciderCategoryColor" style="background-color: ${category_settings[0]}"></div>
-                <span>${category_settings[1]}</span>
-            </div>`
-    }
-}

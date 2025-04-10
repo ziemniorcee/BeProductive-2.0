@@ -1,4 +1,3 @@
-import {decode_text, encode_text} from "./data.mjs";
 
 export class HistorySidebar {
     constructor(app_data, app_date, app_steps) {
@@ -30,12 +29,12 @@ export class HistorySidebar {
         $('#rightbar').html(`
             <div id="head">
                 <div id="gloryButton">
-                    <img id="gloryImg" src="images/goals/trophy.png" alt="main">
+                    <img id="gloryImg" src="../images/goals/trophy.png" alt="main">
                 </div>
                 <div id="sidebarClose">⨉</div>
-                <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
+                <img src="../images/goals/polaura.png" alt="polaura" width="25" height="50">
                 <span id="head_text">History</span>
-                <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
+                <img src="../images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
             </div>
             <div id="days">
     
@@ -207,12 +206,12 @@ export class Idea {
         $('#rightbar').html(`
         <div id="head">
             <div id="gloryButton">
-                <img id="gloryImg" src="images/goals/trophy.png" alt="main">
+                <img id="gloryImg" src="../images/goals/trophy.png" alt="main">
             </div>
             <div id="sidebarClose">⨉</div>
-            <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
+            <img src="../images/goals/polaura.png" alt="polaura" width="25" height="50">
             <span id="head_text">Ideas</span>
-            <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
+            <img src="../images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
         </div>
         <div id="days">
             <div id='ideas'></div>

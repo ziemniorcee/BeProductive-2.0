@@ -456,6 +456,7 @@
     color: #656565;
     margin-left: 10px;
     margin-bottom: 10px;
+    position: relative;
 }
 
 .dashProjectId{
@@ -509,4 +510,19 @@
 }
 #dashboard:hover #dashClose{
     visibility: visible;
+}
+
+#dashboardStrategyAddProject{
+    cursor: pointer;
+    font-size: 30px;
+    color: #2979FF;
+    position: absolute;
+    right: 10px;
+    top: -7px;
+}
+
+#dashboardStrategyAddProject span{
+    position: relative;
+    font-size: 15px;
+    top: -5px;
 }

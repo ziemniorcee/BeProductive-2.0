@@ -1,18 +1,10 @@
-import {check_border, decode_text} from "./data.mjs";
-
-export class Asap {
-    constructor(app_data, app_date, app_steps) {
-        this.data = app_data
-        this.date = app_date
-        this.steps = app_steps
+export class AsapView {
+    constructor(todo) {
+        this.todo = todo
         this.initEventListeners()
     }
 
     initEventListeners() {
-        $(document).on('click', "#dashASAP", async () => {
-            await this.build_view()
-        })
-
         $(document).on('focus', '#ASAPInput', () => {
             $('#ASAPEntry').css('background-color', "#1A3667")
         })
@@ -38,17 +30,17 @@ export class Asap {
         })
     }
 
-    async build_view() {
+    async display() {
         const main_template = $('#ASAPMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
-        this.data.show_hide_sidebar(true, 1)
+        this.todo.appSettings.data.show_hide_sidebar(true, 1)
         $('#main').html($main_clone)
 
         let goals = await window.asapAPI.getASAP()
 
         for (let i = 0; i < goals.length; i++){
-            goals[i]['steps'] = this.steps._steps_HTML(goals[i].steps, goals[i].category)
-            goals[i]['goal'] = decode_text(goals[i]['goal'])
+            goals[i]['steps'] = this.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].category)
+            goals[i]['goal'] = this.todo.appSettings.data.decode_text(goals[i]['goal'])
             $('#ASAPList').append(this.build_goal(goals[i]))
         }
     }
@@ -58,13 +50,13 @@ export class Asap {
         let category_border = ""
 
         if (goal.category !== 0) {
-            category_color = this.data.categories[goal.category][0]
+            category_color = this.todo.appSettings.data.categories[goal.category][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
 
-        let project_emblem = this.data.project_emblem_html(goal.pr_id)
+        let project_emblem = this.todo.appSettings.data.projects.project_emblem_html(goal.pr_id)
 
-        let check_color = check_border[4]
+        let check_color = this.todo.appSettings.data.check_border[4]
         return `
         <div class='todo' style="${category_border}">
             <div class="todoId">${goal.id}</div>
@@ -84,9 +76,8 @@ export class Asap {
         let name = $asap_input.val()
         $asap_input.val("")
 
-        let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.date.today_sql})
+        let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.todo.appSettings.date.today_sql})
         new_goal['steps'] = ""
-        // this.add_todo(new_goal, 0)
         $('#ASAPList').prepend(this.build_goal(new_goal))
     }
 }

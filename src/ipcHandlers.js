@@ -292,9 +292,7 @@ function todoHandlers(db) {
     ipcMain.on('delete-project', (event, params) => {
         db.run(`DELETE
                 FROM projects
-                WHERE id = ${project_ids[params.position]}`)
-
-        project_ids.splice(params.position, 1)
+                WHERE id = ${params.id}`)
 
     })
 
@@ -439,7 +437,6 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('goal-removed', (event, params) => {
-        console.log(params.id)
         db.run(`DELETE
                 FROM goals
                 WHERE id = ${params.id}`)
@@ -941,8 +938,7 @@ function todoHandlers(db) {
                 name: file.slice(0, file.lastIndexOf('.')),
                 path: path.join(appDataPath, file),
             }));
-
-            return {success: true, files};
+            return {success: true, files, appDataPath};
         } catch (err) {
             console.error('Error reading icons folder:', err);
             return {success: false, files: [], message: err.message};
@@ -1111,7 +1107,6 @@ function todoHandlers(db) {
                                 WHERE goal_id IN ${ids_string}`, (err2, steps) => {
                             if (err2) reject(err);
                             else {
-                                console.log(goals)
                                 let safe_goals = get_safe_goals2(goals, steps)
 
                                 resolve(safe_goals);
@@ -1182,7 +1177,6 @@ function todoHandlers(db) {
                         FROM goals
                         WHERE id = (SELECT max(id) FROM goals)`, (err, rows) => {
                     goal_id = rows[0].id
-                    console.log(goal_id)
 
                     if (params.changes['steps'].length) {
                         let steps_values = ""

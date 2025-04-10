@@ -19,20 +19,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.0.0/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
-    <script type="module" src="date.js"></script>
+
     <script type="module" src="main.mjs"></script>
-    <script type="module" src="edit2.mjs"></script>
-    <script type="module" src="render.mjs"></script>
-    <script type="module" src="sidebar.mjs"></script>
-    <script type="module" src="weekView.mjs"></script>
-    <script type="module" src="monthView.mjs"></script>
-    <script type="module" src="glory.mjs"></script>
-    <script type="module" src="behaviors.js"></script>
-    <script type="module" src="project.mjs"></script>
-    <script type="module" src="graph.mjs"></script>
-    <script type="module" src="galactic.mjs"></script>
-    <script type="module" src="inbox.mjs"></script>
-    <script type="module" src="habits.mjs"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bevacqua/dragula@3.7.3/dist/dragula.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
 
@@ -41,26 +30,6 @@
 
 
 <div id="container">
-<!--    <div id="leftbar">-->
-<!--        <div id="laurels">-->
-<!--            <img src="images/laurels.png" alt="laurels" draggable="false">-->
-<!--        </div>-->
-<!--        <div id="leftbarBody" >-->
-<!--            <div class="leftbarButton" id="todoButton">-->
-<!--                <img src="images/goal.png" alt="">-->
-<!--            </div>-->
-<!--            <div class="leftbarButton" id="habitButton">-->
-<!--                <img src="images/habit.png" alt="">-->
-<!--            </div>-->
-<!--            <div class="leftbarButton" id="timelineButton">-->
-<!--                <img src="images/timeline.png" alt="">-->
-<!--            </div>-->
-<!--            <div class="leftbarButton" id="strategyButton">-->
-<!--                <img src="images/strategy.png" alt="">-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
     <div id="dashboard">
         <div id="dashTitleBar"></div>
         <div id="dashClose">
@@ -95,7 +64,10 @@
                 <div class="dashButtonIcon"><img src="images/goals/dashboard/galaxy.png"></div>
                 <div>Galaxy</div>
             </div>
-            <div class="dashSubTitle">Recent projects</div>
+            <div class="dashSubTitle">
+                <div>Recent projects</div>
+                <div id="dashboardStrategyAddProject" class="addProject">+ <span>New</span></div>
+            </div>
             <div id="dashStrategyProjects">
 
             </div>

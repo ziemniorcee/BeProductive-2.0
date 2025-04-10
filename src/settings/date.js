@@ -1,7 +1,7 @@
-import {weekdays, month_names} from "./data.mjs";
 
 export class CurrentDate {
-    constructor() {
+    constructor(app_settings) {
+        this.appSettings = app_settings
         this.initEventListeners()
 
         this.decider = new Decider(this)
@@ -259,7 +259,7 @@ export class CurrentDate {
         let format_day = date.getDate()
         if (format_day < 10) format_day = "0" + format_day
 
-        return `${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
+        return `${this.appSettings.data.weekdays[date.getDay()]}, ${this.appSettings.data.month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
 
     get_week_display_format(week) {
@@ -271,13 +271,13 @@ export class CurrentDate {
         let format_day_ending = ending.getDate()
         if (format_day_ending < 10) format_day_ending = "0" + format_day_ending
 
-        return `${month_names[beginning.getMonth()]} ${format_day_beginning} -
-        ${month_names[ending.getMonth()]} ${format_day_ending}`
+        return `${this.appSettings.data.month_names[beginning.getMonth()]} ${format_day_beginning} -
+        ${this.appSettings.data.month_names[ending.getMonth()]} ${format_day_ending}`
     }
 
     get_month_display_format(date_sql) {
         let date = new Date(date_sql)
-        return `${month_names[date.getMonth()]} ${date.getFullYear()}`
+        return `${this.appSettings.data.month_names[date.getMonth()]} ${date.getFullYear()}`
     }
 
     get_current_dates(selected_button = null) {
@@ -293,7 +293,6 @@ export class CurrentDate {
         let base = dates[0].substring(0, 8)
 
         let month_array = []
-        console.log(range[1] - range[0])
         for (let i = 1; i <= range[1] - range[0]; i++) {
             if (i < 10) month_array.push(base + "0" + i)
             else month_array.push(base + i)
@@ -308,24 +307,6 @@ export class CurrentDate {
 
         if (selected_date < current_date) return this.day_sql
         else return this.today_sql
-    }
-
-    get_history_week() {
-        let selected_date = new Date(this.week_now[0])
-        let current_date = new Date(this.week_current[0])
-        if (selected_date < current_date) return this.week_now[0]
-        else return this.week_current[0]
-    }
-
-    get_history_month() {
-        let selected_sql = this.get_sql_month(this.day_sql)[0]
-        let selected_date = new Date(selected_sql)
-
-        let current_sql = this.get_sql_month(this.today_sql)[0]
-        let current_date = new Date(current_sql)
-
-        if (selected_date < current_date) return selected_sql
-        else return current_sql
     }
 
     get_next_date(direction) {

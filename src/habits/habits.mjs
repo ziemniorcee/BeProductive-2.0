@@ -31,5 +31,9 @@ export class Habits {
             }
         })
 
+        $(document).on('click', '#newHabitDiscard', function () {
+            $("#newHabit").css('display', 'none');
+            $("#vignette").css('display', 'none');
+        })
     }
 }
