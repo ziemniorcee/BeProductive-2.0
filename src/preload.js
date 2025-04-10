@@ -20,19 +20,15 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     rowsChange: (params) => ipcRenderer.send('rows-change', params),
     changeChecksGoal: (params) => ipcRenderer.send('change-checks-goal', params),
 
-    changeChecksStep: (params) => ipcRenderer.send('change-checks-step', params),
+    changeChecksStep2: (params) => ipcRenderer.send('change-checks-step2', params),
 
-    editGoal: (params) => ipcRenderer.send('edit-goal', params),
+    editGoal: (params) => ipcRenderer.invoke('edit-goal', params),
 
-    askWeekGoals: (params) => ipcRenderer.send('ask-week-goals', params),
-    getWeekGoals: (func) => ipcRenderer.on('get-week-goals', (event, goals) => func(goals)),
     changeDate: (params) => ipcRenderer.send('change-date', params),
     askEditGoal: (params) => ipcRenderer.invoke('ask-edit-goal', params),
-    getEditGoal: (func) => ipcRenderer.on('get-edit-goal', (event, goal, steps) => func(goal, steps)),
     changeWeekGoalCheck: (params) => ipcRenderer.send('change-week-goal-check', params),
 
     askMonthGoals: (params) => ipcRenderer.send('ask-month-goals', params),
-    getMonthGoals: (func) => ipcRenderer.on('get-month-goals', (event, goals_dict) => func(goals_dict)),
     getMonthGoalsDone: (func) => ipcRenderer.on('get-month-goals-done', (event, goals_dict) => func(goals_dict)),
 
     goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
@@ -43,8 +39,6 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     askCategoriesCounts: () => ipcRenderer.send('ask-categories-counts'),
     getCategoriesCounts: (func) => ipcRenderer.on('get-categories-counts', (event, counts) => func(counts)),
 
-    askCategories: () => ipcRenderer.send('ask-categories'),
-    // getCategories: (func) => ipcRenderer.on('get-categories', (event, categories) => func(categories)),
 
 
     addCategory: (params) => ipcRenderer.send('add-category', params),
@@ -64,20 +58,14 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     // askHabitsLogs: () => ipcRenderer.send('ask-habits-logs'),
     // getHabitsLogs: (func) => ipcRenderer.on('get-habits-logs', (event, days) => func(days)),
-
+    newGoal2: (params) => ipcRenderer.invoke('new-goal-2', params),
 })
 
 contextBridge.exposeInMainWorld('projectsAPI', {
-    askAllProjects: () => ipcRenderer.send('ask-all-projects'),
-    getAllProjects: (func) => ipcRenderer.on('get-all-projects', (event, projects) => func(projects)),
-
-    askProjectGoals: (params) => ipcRenderer.send('ask-project-goals', params),
-    getProjectGoals: (func) => ipcRenderer.on('get-project-goals', (event, goals, steps) => func(goals, steps)),
     askProjectSidebar: (params) => ipcRenderer.invoke('ask-project-sidebar', params),
-    getProjectSidebar: (func) => ipcRenderer.on('get-project-sidebar', (event, goals, steps) => func(goals, steps)),
     getFromProject: (params) => ipcRenderer.send('get-from-project', params),
     projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
-    newProject: (params) => ipcRenderer.send('new-project', params),
+    newProject: (params) => ipcRenderer.invoke('new-project', params),
 
 
     deleteProject: (params) => ipcRenderer.send('delete-project', params),
@@ -86,7 +74,6 @@ contextBridge.exposeInMainWorld('projectsAPI', {
 
 contextBridge.exposeInMainWorld('sidebarAPI', {
     askHistory: (params) => ipcRenderer.invoke('ask-history', params),
-    getHistory: (func) => ipcRenderer.on('get-history', (event, data) => func(data)),
     deleteHistory: (params) => ipcRenderer.send('delete-history', params),
     historyToGoal: (func) => ipcRenderer.on('history-to-goal', (event, steps, goal) => func(steps, goal)),
     sideChangeChecks: (params) => ipcRenderer.send('side-check-change', params),
@@ -117,8 +104,9 @@ contextBridge.exposeInMainWorld('appAPI', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    saveFile: (fileName, fileData) => ipcRenderer.invoke('save-file', fileName, fileData),
+    saveFile: (fileName, fileData, fileSource) => ipcRenderer.invoke('save-file', fileName, fileData, fileSource),
     getIcons: () => ipcRenderer.invoke('get-icons'),
+    getProjectIcons: () => ipcRenderer.invoke('get-project-icons'),
 });
 
 contextBridge.exposeInMainWorld('dataAPI', {

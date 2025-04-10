@@ -1,8 +1,8 @@
 #galactics {
     position: absolute;
     top: 0%;
-    left: 100px;
-    width: calc(100vw - 100px);
+    left: 300px;
+    width: calc(100vw - 300px);
     height: 100%;
     background: black url("../images/galactic_bg.png");
     z-index: 7;

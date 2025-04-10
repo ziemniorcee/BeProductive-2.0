@@ -100,6 +100,7 @@
 }
 
 .projectType {
+    background-color: #444444;
     border: 1px solid black;
     position: relative;
     height: 50px;
@@ -108,7 +109,7 @@
 
 
 .projectName {
-    background-color: #FF5D00;
+    background-color: #444444;
     width: 170px;
     height: 50px;
     position: absolute;
@@ -142,3 +143,7 @@
     background: #323232;
 }
 
+
+.projectTypeId {
+    display: none;
+}
