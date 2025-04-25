@@ -1,7 +1,8 @@
 export class TodoNew {
-    constructor(app) {
+    constructor(app, todo_vignette) {
         this.initEventListeners()
         this.app = app
+        this.vignette = todo_vignette
     }
 
     initEventListeners(){
@@ -32,12 +33,8 @@ export class TodoNew {
     }
 
     async add_goal(){
-        let changes = await this.app.vignette.todoVignette.get_goal_settings()
-        changes['goal_pos'] = ('#todosArea .todo').length + 1
-        let new_goal_settings = await window.goalsAPI.newGoal2({changes: changes})
-        changes['id'] = new_goal_settings[0]
-        changes['check_state'] = 0
-        changes['steps'] = this.app.todo.todoComponents.steps._steps_HTML(new_goal_settings[1], changes['category'])
+        let changes = await this.vignette.add_goal_core()
+
         if (changes['addDate'] === this.app.settings.date.day_sql) {
             $('#todosArea').append(this.app.todo.todoViews.planViews.dayView.build_goal(changes))
         }

@@ -22,7 +22,16 @@ export class DecisionMaker {
 
         $(document).on('click', '#decisionActionYes', () => {
             $('#decisionActionYes').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionActionNo').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
             $('#decisionWhen').css('display', 'block')
+        })
+
+        $(document).on('click', '#decisionActionNo', () => {
+            $('#decisionActionNo').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionActionYes').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionWhen').css('display', 'None')
+            $('#decisionFuture').css('display', 'None')
+            $('#decisionEnd').css('display', 'flex')
         })
 
         $(document).on('click', '#decisionWhenFuture', () => {

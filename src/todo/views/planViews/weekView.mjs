@@ -289,11 +289,13 @@ export class WeekView {
      * @param that selected check in week view
      */
     check_week_goal(that) {
+        $(that).prop('disabled', true)
         const goal_ids = Number($(that).closest('.todo').find('.todoId').text())
         const rel_id = $('.check_task').index(that)
         $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
         setTimeout(() => {
+            console.log('CHUJ')
             let todos = $('#main .todo')
             todos.eq(rel_id).remove()
             window.goalsAPI.changeWeekGoalCheck({id: goal_ids, state: 1})
@@ -305,6 +307,7 @@ export class WeekView {
 
             if (this.todo.appSettings.date.week_now !== this.todo.appSettings.date.week_current) window.sidebarAPI.askHistory({date: this.todo.appSettings.date.week_current[0]})
         }, 1000);
+
     }
 }
 

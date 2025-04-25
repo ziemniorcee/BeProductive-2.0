@@ -9,9 +9,9 @@ export class TodoVignette {
         this.app = app
         this.prevent_step_blur = false
 
-        this.todo_edit = new TodoEdit(app)
-        this.todo_new = new TodoNew(app)
-        this.todo_project_new = new TodoProjectNew(app)
+        this.todo_edit = new TodoEdit(app, this)
+        this.todo_new = new TodoNew(app, this)
+        this.todo_project_new = new TodoProjectNew(app, this)
     }
 
     initEventListeners() {
@@ -104,12 +104,7 @@ export class TodoVignette {
      */
     new_step_add() {
         $('#editNewStep').toggle()
-        $('#editSteps2').append(`
-        <div class="editStep2">
-            <img src="../../images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
-            <input type="checkbox" class="editStepCheck">
-            <textarea rows="1" class="editStepEntry" spellcheck="false"></textarea>
-        </div>`)
+        $('#editSteps2').append(this.render_step())
 
         setTimeout(() => {
             let edit_step_entry = $('.editStepEntry');
@@ -117,11 +112,29 @@ export class TodoVignette {
         }, 0);
     }
 
+    /**
+     * Renders step for edit
+     * @param check if step is checked
+     * @param text step text
+     * @param id step id
+     * @returns {string} html string
+     */
+    render_step(check="", text="", id=-1) {
+        return `<div class="editStep2">
+            <img src="../src/images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
+            <input type="checkbox" class="editStepCheck" ${check}>
+            <textarea rows="1" class="editStepEntry" spellcheck="false">${text}</textarea>
+            <div class="editStepId">${id}</div>
+        </div>`
+    }
+
+
     async get_goal_settings() {
         let edit_main_entry = $('#editMainEntry').val()
         let edit_note_entry = $('#editNoteEntry').val()
         let steps_array = this.get_steps()
 
+        let check_state = $('#editMainCheck').prop('checked')
         let category_id = Number($('.categoryDeciderId').text())
         let importance = $('#editImportance').val()
 
@@ -139,6 +152,7 @@ export class TodoVignette {
 
         return {
             'goal': this.app.settings.data.encode_text(edit_main_entry),
+            'check_state': check_state,
             'category': category_id,
             'importance': importance,
             'steps': steps_array,
@@ -245,6 +259,15 @@ export class TodoVignette {
             $edit_clone.find('.categoryDeciderName').text("No category")
         }
         $edit_clone.find('.categoryDeciderId').text(category_id)
+    }
+
+    async add_goal_core(){
+        let changes = await this.get_goal_settings()
+        let new_goal_settings = await window.goalsAPI.newGoal2({changes: changes})
+        changes['id'] = new_goal_settings[0]
+        changes['check_state'] = 0
+        changes['steps'] = this.app.todo.todoComponents.steps._steps_HTML(new_goal_settings[1], changes['category'])
+        return changes
     }
 }
 

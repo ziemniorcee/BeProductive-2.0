@@ -9,6 +9,12 @@ export class InboxView {
             await this.new_goal()
         })
 
+        $(document).on('keydown','#inboxInput', async (event) => {
+            if (event.key === 'Enter') {
+                await this.new_goal();
+            }
+        });
+
         $(document).on('click', '#inboxList .check_task', (event) => {
             event.stopPropagation()
             this.check_goal(event.currentTarget)

@@ -512,7 +512,8 @@ function todoHandlers(db) {
         try {
             return await new Promise((resolve, reject) => {
                 db.run(`UPDATE goals
-                        SET goal       = '${params.changes['goal']}',
+                        SET check_state = ${params.changes['check_state']},
+                            goal       = '${params.changes['goal']}',
                             category   = ${params.changes['category']},
                             importance = ${params.changes['importance']},
                             note       = '${params.changes['note']}',
@@ -1163,11 +1164,11 @@ function todoHandlers(db) {
     });
 
     ipcMain.handle('new-goal-2', async (event, params) => {
+        console.log(params.changes)
         try {
             return await new Promise((resolve, reject) => {
-                db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, importance, project_id, note, date_type)
+                db.run(`INSERT INTO goals (goal, addDate, category, importance, project_id, note, date_type)
                         VALUES ('${params.changes['goal']}', '${params.changes['addDate']}',
-                                ${params.changes['goal_pos']},
                                 ${params.changes['category']}, ${params.changes['importance']},
                                 ${params.changes['pr_id']}, '${params.changes['note']}',
                                 ${params.changes['date_type']})`)
