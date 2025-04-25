@@ -14,6 +14,7 @@ export class AsapView {
         })
 
         $(document).on('click', '#ASAPList .check_task', (event) => {
+            event.stopPropagation()
             let $todo = $(event.currentTarget).closest('.todo')
             let todo_id = $todo.find('.todoId').text()
 
@@ -25,8 +26,15 @@ export class AsapView {
             await this.new_goal()
         })
 
+        $(document).on('keydown', '#ASAPInput', async (event) => {
+            if (event.key === 'Enter') {
+                await this.new_goal();
+            }
+        });
+
         $(document).on('click', '#ASAPList .stepCheck', (event) => {
-            this.steps.change_step_check(event.currentTarget)
+            event.stopPropagation()
+            this.todo.todoComponents.steps.change_step_check(event.currentTarget)
         })
     }
 
@@ -48,9 +56,8 @@ export class AsapView {
     build_goal(goal) {
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
-
         if (goal.category !== 0) {
-            category_color = this.todo.appSettings.data.categories[goal.category][0]
+            category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
 

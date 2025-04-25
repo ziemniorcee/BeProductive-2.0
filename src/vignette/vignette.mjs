@@ -17,7 +17,6 @@ export class Vignette {
         $(document).on('mousedown', '#vignette', async () => {
             if ($('#taskEdit').length) {
                 await this.todoVignette.todo_edit.change_goal()
-                this.app.todo.todoViews.planViews.dayView.dragula_day_view()
             } else if ($('#newTask').length) {
                 await this.todoVignette.todo_new.add_goal()
             } else if ($('#newProjectTask').length) {

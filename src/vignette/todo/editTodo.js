@@ -1,8 +1,8 @@
-
 export class TodoEdit {
-    constructor(app) {
+    constructor(app, todo_vignette) {
         this.initEventListeners()
         this.app = app
+        this.vignette = todo_vignette
 
         this.selected_goal = null
         this.selected_goal_id = null
@@ -16,14 +16,11 @@ export class TodoEdit {
         })
 
         $(document).on('click', '#editMainCheck', () => {
-            let positions = this.change_edit_check()
-
-            if (!$('#projectContent').length) {
+            if ($('#todosAll').length) {
+                let positions = this.change_edit_check()
                 this.app.todo.todoViews.planViews.dayView.change_main_check(positions[0])
-            } else {
-                this.app.todo.todoViews.projectView.change_project_check(this.selected_goal)
+                this.selected_goal = $('#main .todo').eq(positions[1])
             }
-            this.selected_goal = $('#main .todo').eq(positions[1])
         })
     }
 
@@ -71,15 +68,15 @@ export class TodoEdit {
         if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
         $edit_clone.find('#editSteps2').html(this.set_steps(steps))
 
-
-
-
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', this.app.settings.data.range2_backgrounds[goal["importance"]])
-        $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
-
-        this.app.vignette.todoVignette.set_category(goal['category'], $edit_clone)
-        this.app.vignette.todoVignette.set_project(goal['pr_id'], $edit_clone)
+        if (goal['addDate'] === "") {
+            $edit_clone.find('#selectDate').text("None")
+        } else {
+            $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
+        }
+        this.vignette.set_category(goal['category'], $edit_clone)
+        this.vignette.set_project(goal['pr_id'], $edit_clone)
 
         $("#vignette").append($edit_clone)
 
@@ -95,7 +92,6 @@ export class TodoEdit {
             });
         });
     }
-
 
 
     /**
@@ -116,17 +112,11 @@ export class TodoEdit {
     set_steps(steps) {
         let steps_formatted = ""
         for (let i = 0; i < steps.length; i++) {
-            let check_state = ""
+            let check = ""
+            let text = this.app.settings.data.decode_text(steps[i]['step_text'])
+            if (steps[i]['step_check']) check = "checked"
 
-            if (steps[i]['step_check']) check_state = "checked"
-            $('#editSteps2').append()
-            steps_formatted += `
-            <div class="editStep2">
-                <img src="../src/images/goals/drag.png" class="editStepDrag" draggable="false" alt="">
-                <input type="checkbox" class="editStepCheck" ${check_state}>
-                <textarea rows="1" class="editStepEntry" spellcheck="false">${this.app.settings.data.decode_text(steps[i]['step_text'])}</textarea>
-                <div class="editStepId">${steps[i]['id']}</div>
-            </div>`
+            steps_formatted += this.vignette.render_step(check, text, steps[i]['id'])
         }
         return steps_formatted
     }
@@ -136,29 +126,118 @@ export class TodoEdit {
      * Saves changes to the database
      */
     async change_goal() {
-        let changes = await this.app.vignette.todoVignette.get_goal_settings()
+        let changes = await this.vignette.get_goal_settings()
         changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
 
-        if (this.selected_goal.attr('class') === 'todo') {
-            this.set_todo_changes(this.selected_goal, changes)
-            if (this.selected_goal.closest('#todosAll').length || $('#projectContent').length) {
-                this.set_step_changes(this.selected_goal, changes)
-                if ($('#todosAll').length) {
-                    this.change_project_emblem(changes['pr_id'])
-                }
+        if ($('#todosAll').length) {
+            this.day_todo_change(changes)
+
+        } else if ($('#ASAPList').length) {
+            this.asap_todo_change(changes)
+        } else if ($('.weekDay').length) {
+            this.week_todo_change(changes)
+        } else if ($('.monthTodo').length) {
+            this.month_todo_change(changes)
+        } else if ($('#projectContent').length) {
+            let is_todo_checked = changes['check_state']
+
+            let is_from_todo = this.selected_goal.closest('#projectTodo').length
+            let is_from_doing = this.selected_goal.closest('#projectDoing').length
+            let is_from_done = this.selected_goal.closest('#projectDone').length
+            if (is_todo_checked && (is_from_todo || is_from_doing)) {
+                this.selected_goal.remove()
+                $('#projectDone').find('.projectSectionGoals').append(this.selected_goal)
+            } else if (!is_todo_checked && is_from_done) {
+                this.selected_goal.remove()
+                $('#projectTodo').find('.projectSectionGoals').append(this.selected_goal)
             }
-            if ($('#projectContent').length || this.selected_goal.closest('#rightbar').length) {
-                let current_project_id = Number($('#projectId').text())
-                let new_project_id = Number(changes['pr_id'])
-                if (current_project_id !== new_project_id) {
-                    this.selected_goal.remove()
-                }
-            }
-        } else if (this.selected_goal.attr('class') === 'monthTodo') {
-            this.set_monthTodo_changes(this.selected_goal, changes)
-        } else if (this.selected_goal.attr('class') === 'sidebarTask') {
-            this.selected_goal.find('.historyText').text(changes['goal'])
+
+            let importance_color = this.selected_goal.find('.check_task').css("border-color")
+            this.selected_goal.find('.check_task').replaceWith(`<input type='checkbox' ${is_todo_checked ? "checked" : ""} class='check_task' style="border-color:${importance_color}">`)
+            this._set_todo_changes(this.selected_goal, changes)
+            this._set_step_changes(this.selected_goal, changes)
+            console.log(changes)
         }
+    }
+
+
+    /**
+     * changes standard goal in day view and asap view
+     * @param changes changes of goal
+     */
+    day_todo_change(changes) {
+        if (changes['addDate'] === this.app.settings.date.day_sql) {
+            this._set_todo_changes(this.selected_goal, changes)
+            this._change_project_emblem(changes['pr_id'])
+            this._set_step_changes(this.selected_goal, changes)
+        } else {
+            this.selected_goal.remove()
+        }
+        this.app.todo.todoViews.planViews.dayView.dragula_day_view()
+    }
+
+    asap_todo_change(changes) {
+        if (changes['check_state'] === true) {
+            this.selected_goal.remove()
+        } else {
+            this._set_todo_changes(this.selected_goal, changes)
+            this._change_project_emblem(changes['pr_id'])
+            this._set_step_changes(this.selected_goal, changes)
+        }
+    }
+
+    /**
+     * changes week day goal
+     * @param changes changes of goal
+     */
+    week_todo_change(changes) {
+        if (changes['check_state'] === true) {
+            this.selected_goal.remove()
+        } else {
+            let previous_day = this.selected_goal.closest('.weekDay').find('.weekDayText').text()
+            let previous_date_id = this.app.settings.data.weekdays2.indexOf(previous_day)
+            let previous_date = this.app.settings.date.week_current[previous_date_id]
+
+            if (this.app.settings.date.week_current.includes(changes['addDate'])) {
+                if (changes['addDate'] !== previous_date) {
+                    this.selected_goal.remove()
+                    let new_date_id = this.app.settings.date.week_current.indexOf(changes['addDate'])
+                    let new_date_day = this.app.settings.data.weekdays2[new_date_id]
+                    let new_date = this.app.settings.data.weekdays_grid.flat().indexOf(new_date_day)
+
+                    $('.weekDayGoals').eq(new_date).prepend(this.selected_goal)
+                }
+                this._set_todo_changes(this.selected_goal, changes)
+            } else {
+                this.selected_goal.remove()
+            }
+        }
+        this.app.todo.todoViews.planViews.weekView.dragula_week_view()
+    }
+
+    month_todo_change(changes) {
+        if (changes['check_state'] === true) {
+            this.selected_goal.remove()
+        } else {
+            let previous_day = Number(this.selected_goal.closest('.monthDay').find('.monthDate').text())
+            let month_array = this.app.settings.date.get_month_array()
+            let previous_date = month_array[previous_day - 1]
+
+            if (month_array.includes(changes['addDate'])) {
+                if (changes['addDate'] !== previous_date) {
+                    this.selected_goal.remove()
+                    let new_date_day = month_array.indexOf(changes['addDate']) + 1
+                    let new_date = $('.monthDate').filter(function () {
+                        return Number($(this).text()) === new_date_day;
+                    }).toArray()[0]
+                    $(new_date).closest('.monthDay').find('.monthGoals').prepend(this.selected_goal)
+                }
+                this._set_monthTodo_changes(this.selected_goal, changes)
+            } else {
+                this.selected_goal.remove()
+            }
+        }
+        this.app.todo.todoViews.planViews.monthView.dragula_month_view()
     }
 
     /**
@@ -166,12 +245,14 @@ export class TodoEdit {
      * @param goal_pos
      * @param project_id id of new selected category
      */
-    change_project_emblem(project_id) {
+    _change_project_emblem(project_id) {
         this.selected_goal.find('.projectEmblem').remove()
         this.selected_goal.append(this.app.settings.data.projects.project_emblem_html(project_id))
     }
 
-    set_todo_changes(selected_goal, changes) {
+    _set_todo_changes(selected_goal, changes) {
+        console.log(changes['goal'])
+        console.log(this.app.settings.data.decode_text(changes['goal']))
         selected_goal.find('.task').text(this.app.settings.data.decode_text(changes['goal']))
         if (changes['category'] !== 0) {
             let category_color = this.app.settings.data.categories.categories[changes['category']][0]
@@ -181,21 +262,19 @@ export class TodoEdit {
             selected_goal.css('border', "1px solid #444444")
         }
         selected_goal.find('.check_task').css('border-color', this.app.settings.data.check_border[changes['importance']])
-
     }
 
-    set_monthTodo_changes(selected_goal, changes) {
+    _set_monthTodo_changes(selected_goal, changes) {
         selected_goal.find('.monthTodoText').text(changes['goal'])
         let category_color = "rgb(74, 74, 74)"
 
-        console.log(selected_goal.category)
         if (changes.category !== 0) {
             category_color = this.app.settings.data.categories.categories[changes.category][0]
         }
         selected_goal.find('.monthTodoLabel').css('background-color', category_color)
     }
 
-    set_step_changes(selected_goal, changes) {
+    _set_step_changes(selected_goal, changes) {
         selected_goal.find('.stepsShow').remove()
         selected_goal.find('.steps').remove()
         selected_goal.find('.taskText').append(this.app.todo.todoComponents.steps._steps_HTML(changes['steps'], changes['category']))
@@ -211,8 +290,7 @@ export class TodoEdit {
             if (check_state) {
                 console.log($('#main .todo').length)
                 new_position = $('#main .todo').length - 1
-            }
-            else {
+            } else {
                 new_position = $('#todosArea .todo').length
             }
         }

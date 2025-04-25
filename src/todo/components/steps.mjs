@@ -101,14 +101,7 @@ export class Steps {
                         <div class="stepId">${steps[i].id}</div>
                     </div>`
             }
-            let category_color = ""
-            if (category_id !== 0) {
-                console.log(category_id)
-                console.log(this.appSettings.data)
-                console.log(this.appSettings.data.categories.categories)
 
-                category_color = this.appSettings.data.categories.categories[category_id][0]
-            }
             steps_HTML =
                 `<div class='stepsShow'>
                     <img class='showImg' src='images/goals/down.png' alt="">
