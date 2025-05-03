@@ -8,7 +8,7 @@ import {Strategy} from "./strategy/galactic.mjs";
 
 class MainApp {
     constructor() {
-        this.settings = new AppSettings()
+        this.settings = new AppSettings(this)
         this.controller = new AppController(this)
         this.vignette = new Vignette(this)
 

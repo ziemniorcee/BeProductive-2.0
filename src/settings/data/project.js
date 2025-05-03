@@ -39,6 +39,7 @@ export class ProjectsSettings {
         this.project_icons = []
         const result = await window.electronAPI.getProjectIcons();
         let icons_imported = result['files']
+
         this.appDataPath = result['appDataPath']
         for (let i = 0; i < icons_imported.length; i++) {
             this.project_icons.push(icons_imported[i])

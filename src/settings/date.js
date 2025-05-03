@@ -1,10 +1,9 @@
-
 export class CurrentDate {
-    constructor(app_settings) {
-        this.appSettings = app_settings
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
 
-        this.decider = new Decider(this)
+        this.decider = new Decider(app)
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
         this.tomorrow = new Date(this.today.getTime())
@@ -259,7 +258,7 @@ export class CurrentDate {
         let format_day = date.getDate()
         if (format_day < 10) format_day = "0" + format_day
 
-        return `${this.appSettings.data.weekdays[date.getDay()]}, ${this.appSettings.data.month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
+        return `${this.app.settings.data.weekdays[date.getDay()]}, ${this.app.settings.data.month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
 
     get_week_display_format(week) {
@@ -271,13 +270,13 @@ export class CurrentDate {
         let format_day_ending = ending.getDate()
         if (format_day_ending < 10) format_day_ending = "0" + format_day_ending
 
-        return `${this.appSettings.data.month_names[beginning.getMonth()]} ${format_day_beginning} -
-        ${this.appSettings.data.month_names[ending.getMonth()]} ${format_day_ending}`
+        return `${this.app.settings.data.month_names[beginning.getMonth()]} ${format_day_beginning} -
+        ${this.app.settings.data.month_names[ending.getMonth()]} ${format_day_ending}`
     }
 
     get_month_display_format(date_sql) {
         let date = new Date(date_sql)
-        return `${this.appSettings.data.month_names[date.getMonth()]} ${date.getFullYear()}`
+        return `${this.app.settings.data.month_names[date.getMonth()]} ${date.getFullYear()}`
     }
 
     get_current_dates(selected_button = null) {
@@ -394,9 +393,9 @@ export class CurrentDate {
 }
 
 class Decider {
-    constructor(app_date) {
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
-        this.date = app_date
 
     }
 
@@ -410,18 +409,51 @@ class Decider {
 
         })
 
-        $(document).on('click', '.dateDeciderToday', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.today)
+        $(document).on('click', '#editDateSelector .dateDeciderToday, #decisionFutureDate .dateDeciderToday', () => {
+
+            let date_formatted = this.app.settings.date.get_edit_date_format(this.app.settings.date.today)
             $('.dateDecider').text(date_formatted)
 
             $(".dateDeciderSelect").css('display', 'none')
         })
 
-        $(document).on('click', '.dateDeciderTomorrow', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.tomorrow)
+        $(document).on('click', '#editDateSelector .dateDeciderTomorrow, #decisionFutureDate .dateDeciderTomorrow', () => {
+            let date_formatted = this.app.settings.date.get_edit_date_format(this.app.settings.date.tomorrow)
             $('.dateDecider').text(date_formatted)
 
             $(".dateDeciderSelect").css('display', 'none')
+        })
+
+        $(document).on('click','#planDateSelector .dateDeciderToday', async () => {
+            if($('#todosAll').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.dayView.display()
+            }
+            else if ($('.weekDay').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.weekView.display()
+            }
+            else if ($('#monthGrid').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.monthView.display()
+            }
+        })
+
+        $(document).on('click','#planDateSelector .dateDeciderTomorrow', async () => {
+            if($('#todosAll').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.tomorrow)
+                await this.app.todo.todoViews.planViews.dayView.display()
+            } else if ($('.weekDay').length) {
+                this.app.settings.date.next_week()
+                await this.app.todo.todoViews.planViews.weekView.display()
+            } else if ($('#monthGrid').length) {
+                this.app.settings.date.next_month()
+                await this.app.todo.todoViews.planViews.monthView.display()
+            }
+        })
+
+        $(document).on('click', '#container', async () => {
+            $('#planDateSelector').css('display', 'none')
         })
     }
 }

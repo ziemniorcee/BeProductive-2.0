@@ -46,7 +46,7 @@ export class NewProject {
      */
     async new_project() {
         let project_setting_icon = $('#projectSettingsIcon')
-        let category_id = Number($('.categoryDeciderId').text())
+        let category_id = Number($('#dashNewProject').find('.categoryDeciderId').text())
         let name = $('#newProjectName').val()
 
         let icon_path = $('#projectSettingIconSrc').attr('src')
@@ -60,10 +60,28 @@ export class NewProject {
             $('#newProjectError').text("NO CATEGORY SELECTED")
         } else {
             let new_project = await window.projectsAPI.newProject({category: category_id, name: name, icon: "ebe"})
-            $('#vignette').css('display', 'none')
+
             this.app.settings.data.projects.projects.push({id: new_project["id"], name: name, category: category_id, icon: "ebe", x: null, y: null})
             await this.make_project_icon(new_project["id"], category_id)
 
+            let $selected_vignette = $("#vignette2")
+            if ($selected_vignette.css('display') !== 'block') {
+                $selected_vignette = $('#vignette')
+            } else {
+                setTimeout(() => {
+                    let color = this.app.settings.data.categories.categories[category_id][0]
+                    let new_icon_path = this.app.settings.data.projects.get_project_icon_path(new_project["id"])
+
+                    console.log(new_icon_path)
+                    $('.projectDecider').css('border', `2px solid ${color}`)
+                    $('.projectDeciderIcon img').attr('src', new_icon_path)
+                    $('.projectDeciderName').text(name)
+                    $('.projectDeciderId').text(new_project["id"])
+                    $('.projectDeciderIcon img').css('display', 'block')
+                    $('.projectDeciderSelect').remove()
+                }, 0)
+            }
+            $selected_vignette.css('display', 'none')
         }
     }
 
@@ -109,7 +127,6 @@ export class NewProject {
             let result = await window.electronAPI.saveFile(fileName, base64Data, "project_icons");
             await this.app.settings.data.projects.loadProjectIcons()
             this.app.settings.data.projects.set_projects_options()
-
         }
     }
 

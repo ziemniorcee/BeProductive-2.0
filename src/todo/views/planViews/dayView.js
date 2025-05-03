@@ -199,6 +199,23 @@ export class DayView {
         const input_template = $('#todoInputTemplate').prop('content');
         let $input_clone = $(input_template).clone()
 
+        $( () => {
+            $("#planDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
+
+                onSelect: async (dateText, inst) => {
+                    const $input = inst.input;
+                    const selectedDate = $input.datepicker('getDate');
+                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    await this.display()
+                    $('#mainTitle').text(this.todo.appSettings.date.get_day_view_header())
+
+                    $('#selectDate').text(selectedDate)
+                    $('#planDateSelector').css('display', 'none')
+                }
+            });
+        });
+
         $('#main').html($header_clone)
         $('#main').append($content_clone)
         $('#content').append($input_clone)
