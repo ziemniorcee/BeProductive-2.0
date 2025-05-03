@@ -9,7 +9,7 @@ export class Vignette {
         this.todoVignette = new TodoVignette(app)
         this.projectVignette = new ProjectVignette(app)
         this.decision_maker = new DecisionMaker(app)
-        this.deciders = new Deciders(app.settings)
+        this.deciders = new Deciders(app)
         this.initEventListeners()
     }
 

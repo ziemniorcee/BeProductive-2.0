@@ -106,21 +106,9 @@ export class Strategy {
         })
 
         $(document).on('click', '#galactic-editor-new-project', () => {
-            $("#vignette").css('display', 'block')
-            const add_project_template = $('#newProjectTemplate').prop('content');
-            let $add_project_clone = $(add_project_template).clone()
-            $add_project_clone.find(".categoryPicker").html(this.categories._categories_HTML(false))
-            $("#vignette").html($add_project_clone);
-            let key = $('#galactic-editor').data('key');
-            let color = this.data.categories[key][0];
-
-            $('#categoryPicker3').children().each((index, element) => {
-                if ($(element).find('.categoryButton').first().css('background-color') === color) {
-                    $(element).trigger('click');
-                    
-                }
-            })
+            this.open_new_project()
         })
+
 
         $(document).on('click', '#galactic-display-new-category', function () {
             $("#vignette").css('display', 'block')
@@ -145,21 +133,21 @@ export class Strategy {
             event.stopPropagation();
         })
 
-        $(document).on('click', '#newCategoryCreate', () => {
-            this.app.categories.create_new_category();
-            if ($('#galactics').css('display') !== 'none') {
-                this.app.strategy.add_galactic_category_boxes();
-            }
-            let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
-
-            $("#newCategory").css('display', 'none');
-            $vignette_layer.css('display', 'none');
-            $vignette_layer.html('')
-
-            let category_element = Object.keys(this.data.categories).at(-1)
-            $('#selectCategory22').css('background', this.data.categories[category_element][0])
-            $('#selectCategory22').text(this.data.categories[category_element][1])
-        })
+        // $(document).on('click', '#newCategoryCreate', () => {
+        //     this.app.categories.create_new_category();
+        //     if ($('#galactics').css('display') !== 'none') {
+        //         this.app.strategy.add_galactic_category_boxes();
+        //     }
+        //     let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+        //
+        //     $("#newCategory").css('display', 'none');
+        //     $vignette_layer.css('display', 'none');
+        //     $vignette_layer.html('')
+        //
+        //     let category_element = Object.keys(this.data.categories).at(-1)
+        //     $('#selectCategory22').css('background', this.data.categories[category_element][0])
+        //     $('#selectCategory22').text(this.data.categories[category_element][1])
+        // })
 
         $(document).on('click', '#removeCategoryCreate', () => {
             this.app.categories.remove_category()
@@ -168,6 +156,19 @@ export class Strategy {
             }
         })
 
+
+    }
+
+    open_new_project() {
+        let $selected_vignette = $("#vignette")
+        if ($selected_vignette.css('display') === 'block') {
+            $selected_vignette = $('#vignette2')
+        }
+        $selected_vignette.css('display', 'block')
+        const add_project_template = $('#newProjectTemplate').prop('content');
+        let $add_project_clone = $(add_project_template).clone()
+        $selected_vignette.html($add_project_clone);
+        let key = $('#galactic-editor').data('key');
 
     }
 

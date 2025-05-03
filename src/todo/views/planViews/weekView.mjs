@@ -37,6 +37,8 @@ export class WeekView {
         $('#main').append(this._week_content_HTML())
         this.get_week_goals(goals)
 
+
+
         let rightbar = $('#rightbar')
         rightbar.html(rightbar.html())
 
@@ -147,6 +149,8 @@ export class WeekView {
 
         const header_template = $('#viewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
+        $header_clone.find('#planDateSelector .dateDeciderToday').text("This week")
+        $header_clone.find('#planDateSelector .dateDeciderTomorrow').text("Next week")
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#weekViewButton').css('background-color', '#2979FF')
         $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/weekview.png')
@@ -155,7 +159,24 @@ export class WeekView {
         $header_clone.find('#date').text(header_params[1])
         $('#main').append($header_clone)
 
+        $( () => {
+            $("#planDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
 
+                onSelect: async (dateText, inst) => {
+                    const $input = inst.input;
+                    const selectedDate = $input.datepicker('getDate');
+                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    await this.display()
+                    let header_params = this.todo.appSettings.date.get_header_week()
+                    $('#mainTitle').text(header_params[0])
+                    $('#date').text(header_params[1])
+
+                    $('#selectDate').text(selectedDate)
+                    $('#planDateSelector').css('display', 'none')
+                }
+            });
+        });
     }
 
 

@@ -135,7 +135,7 @@ export class TodoVignette {
         let steps_array = this.get_steps()
 
         let check_state = $('#editMainCheck').prop('checked')
-        let category_id = Number($('.categoryDeciderId').text())
+        let category_id = Number($('.categoryDeciderId').eq(0).text())
         let importance = $('#editImportance').val()
 
         let date_type = 0

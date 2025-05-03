@@ -139,24 +139,7 @@ export class TodoEdit {
         } else if ($('.monthTodo').length) {
             this.month_todo_change(changes)
         } else if ($('#projectContent').length) {
-            let is_todo_checked = changes['check_state']
-
-            let is_from_todo = this.selected_goal.closest('#projectTodo').length
-            let is_from_doing = this.selected_goal.closest('#projectDoing').length
-            let is_from_done = this.selected_goal.closest('#projectDone').length
-            if (is_todo_checked && (is_from_todo || is_from_doing)) {
-                this.selected_goal.remove()
-                $('#projectDone').find('.projectSectionGoals').append(this.selected_goal)
-            } else if (!is_todo_checked && is_from_done) {
-                this.selected_goal.remove()
-                $('#projectTodo').find('.projectSectionGoals').append(this.selected_goal)
-            }
-
-            let importance_color = this.selected_goal.find('.check_task').css("border-color")
-            this.selected_goal.find('.check_task').replaceWith(`<input type='checkbox' ${is_todo_checked ? "checked" : ""} class='check_task' style="border-color:${importance_color}">`)
-            this._set_todo_changes(this.selected_goal, changes)
-            this._set_step_changes(this.selected_goal, changes)
-            console.log(changes)
+            this.project_todo_change(changes)
         }
     }
 
@@ -240,6 +223,30 @@ export class TodoEdit {
         this.app.todo.todoViews.planViews.monthView.dragula_month_view()
     }
 
+    project_todo_change(changes){
+        if (changes['project_id'] !== this.selected_goal.find('.projectDeciderId').text()) {
+            this.selected_goal.remove()
+        } else {
+            let is_todo_checked = changes['check_state']
+
+            let is_from_todo = this.selected_goal.closest('#projectTodo').length
+            let is_from_doing = this.selected_goal.closest('#projectDoing').length
+            let is_from_done = this.selected_goal.closest('#projectDone').length
+            if (is_todo_checked && (is_from_todo || is_from_doing)) {
+                this.selected_goal.remove()
+                $('#projectDone').find('.projectSectionGoals').append(this.selected_goal)
+            } else if (!is_todo_checked && is_from_done) {
+                this.selected_goal.remove()
+                $('#projectTodo').find('.projectSectionGoals').append(this.selected_goal)
+            }
+
+            let importance_color = this.selected_goal.find('.check_task').css("border-color")
+            this.selected_goal.find('.check_task').replaceWith(`<input type='checkbox' ${is_todo_checked ? "checked" : ""} class='check_task' style="border-color:${importance_color}">`)
+            this._set_todo_changes(this.selected_goal, changes)
+            this._set_step_changes(this.selected_goal, changes)
+        }
+    }
+
     /**
      * Changes visual project emblem in to do
      * @param goal_pos
@@ -251,8 +258,6 @@ export class TodoEdit {
     }
 
     _set_todo_changes(selected_goal, changes) {
-        console.log(changes['goal'])
-        console.log(this.app.settings.data.decode_text(changes['goal']))
         selected_goal.find('.task').text(this.app.settings.data.decode_text(changes['goal']))
         if (changes['category'] !== 0) {
             let category_color = this.app.settings.data.categories.categories[changes['category']][0]
@@ -288,7 +293,6 @@ export class TodoEdit {
         let new_position = 0
         if (!$('#projectContent').length) {
             if (check_state) {
-                console.log($('#main .todo').length)
                 new_position = $('#main .todo').length - 1
             } else {
                 new_position = $('#todosArea .todo').length

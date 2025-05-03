@@ -19,6 +19,8 @@ export class MonthView {
                 await this.todo.todoViews.planViews.dayView.display()
             }
         })
+
+
     }
 
     /**
@@ -163,6 +165,8 @@ export class MonthView {
 
         const header_template = $('#viewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
+        $header_clone.find('#planDateSelector .dateDeciderToday').text("This month")
+        $header_clone.find('#planDateSelector .dateDeciderTomorrow').text("Next month")
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#monthViewButton').css('background-color', '#2979FF')
         $header_clone.find('.viewOption2').eq(0).attr('src', 'images/goals/monthview.png')
@@ -171,6 +175,22 @@ export class MonthView {
         $header_clone.find('#date').text(date)
         $('#main').append($header_clone)
         $('.viewOption2 img').eq(0).attr('src', 'images/goals/monthview.png')
+
+        $( () => {
+            $("#planDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
+
+                onSelect: async (dateText, inst) => {
+                    const $input = inst.input;
+                    const selectedDate = $input.datepicker('getDate');
+                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    await this.display()
+
+                    $('#selectDate').text(selectedDate)
+                    $('#planDateSelector').css('display', 'none')
+                }
+            });
+        });
     }
 
 

@@ -1,8 +1,9 @@
 export class Deciders {
-    constructor(app_settings) {
-        this.settings = app_settings
-        this.project = new ProjectDecider(app_settings)
-        this.category = new CategoryDecider(app_settings)
+    constructor(app) {
+        this.app = app
+
+        this.project = new ProjectDecider(app)
+        this.category = new CategoryDecider(app)
         this.initEventListeners()
     }
 
@@ -12,15 +13,15 @@ export class Deciders {
 }
 
 class CategoryDecider {
-    constructor(app_settings) {
-        this.settings = app_settings
-
+    constructor(app) {
+        this.app = app
+        this.settings = app.settings
         this.initEventListeners()
     }
 
     initEventListeners() {
-        $(document).on('click', '.categoryDecider', () => {
-            this.open()
+        $(document).on('click', '.categoryDecider', (event) => {
+            this.open(event)
         })
 
         $(document).on('click', '.categoryDeciderCategory', (event) => {
@@ -34,15 +35,20 @@ class CategoryDecider {
 
             $("body").get(0).style.setProperty("--decide-color", category[0]);
 
-            $('.categoryDecider').css('border-color', category[0])
-            $('.categoryDeciderName').text(category[1])
-            $('.categoryDeciderId').text(selected_category_id)
+            let $target_decider = $(event.currentTarget).parent().parent().parent()
+            $target_decider.find('.categoryDecider').css('border-color', category[0])
+            $target_decider.find('.categoryDeciderName').text(category[1])
+            $target_decider.find('.categoryDeciderId').text(selected_category_id)
 
             $(".categoryDeciderSelect").remove()
         })
+
+        $(document).on('click', '#categoryDeciderAdd', () => {
+            this.app.todo.todoComponents.categories.open_new_category()
+        })
     }
 
-    open() {
+    open(event) {
         if (!$(".categoryDeciderSelect").length) {
             let $decider = $(this.create_decider())
 
@@ -52,7 +58,7 @@ class CategoryDecider {
                 let category_settings = this.settings.data.categories.categories[category]
                 $decider.find('.categoryDeciderCategories').append(this.create_category(category_settings, category))
             }
-            $('.categoryDecider').after($decider)
+            $(event.currentTarget).after($decider)
         } else {
             $(".categoryDeciderSelect").remove()
         }
@@ -62,6 +68,9 @@ class CategoryDecider {
         return `
             <div class="categoryDeciderSelect">
                 <h2>Select Category</h2>
+                <div class="deciderAdd" id="categoryDeciderAdd">
+                    <img src="../src/images/goals/plus.png" alt="">
+                </div>
                 <div class="categoryDeciderCategories">
     
                 </div>
@@ -80,8 +89,9 @@ class CategoryDecider {
 
 
 class ProjectDecider {
-    constructor (app_settings) {
-        this.app_settings = app_settings
+    constructor (app) {
+        this.app = app
+        this.settings = app.settings
         this.sorted_projects = null
 
         this.initEventListeners()
@@ -89,24 +99,34 @@ class ProjectDecider {
 
     initEventListeners(){
         $(document).on('click', '.projectDecider', () => {
-            console.log("CHUJ")
             this.open()
         })
 
         $(document).on('click', '.projectDeciderProject', (event) =>{
-
             let selected_project_id = Number($(event.currentTarget).find('.projectDeciderProjectId').text())
-            let project = this.app_settings.data.projects.projects.find(item => item.id === selected_project_id)
+            if (selected_project_id === -1){
+                $('.projectDecider').css('border', 'none')
+                $('.projectDeciderIcon img').css('display', 'none')
+                $('.projectDeciderName').text('No project')
+                $('.projectDeciderId').text('-1')
+            } else{
+                let project = this.settings.data.projects.projects.find(item => item.id === selected_project_id)
 
-            let color = this.app_settings.data.categories.categories[project['category']][0]
-            let icon_path = this.app_settings.data.projects.findProjectPathByName(`project${project['id']}`)
+                let color = this.settings.data.categories.categories[project['category']][0]
+                let icon_path = this.settings.data.projects.findProjectPathByName(`project${project['id']}`)
 
-            $('.projectDecider').css('border', `2px solid ${color}`)
-            $('.projectDeciderIcon img').attr('src', icon_path)
-            $('.projectDeciderName').text(project['name'])
-            $('.projectDeciderId').text(selected_project_id)
-            $('.projectDeciderIcon img').css('display', 'block')
+                $('.projectDecider').css('border', `2px solid ${color}`)
+                $('.projectDeciderIcon img').attr('src', icon_path)
+                $('.projectDeciderName').text(project['name'])
+                $('.projectDeciderId').text(selected_project_id)
+                $('.projectDeciderIcon img').css('display', 'block')
+
+            }
             $(".projectDeciderSelect").remove()
+        })
+
+        $(document).on('click', '#projectDeciderAdd', () => {
+            this.app.strategy.open_new_project()
         })
     }
 
@@ -115,7 +135,7 @@ class ProjectDecider {
      * @returns sorted projects array
      */
     get_sorted_projects_by_category() {
-        this.sorted_projects = [...this.app_settings.data.projects.projects]
+        this.sorted_projects = [...this.settings.data.projects.projects]
         let selected_category = Number($('#categoryDeciderId').text())
 
         this.sorted_projects.sort((a, b) => {
@@ -135,10 +155,11 @@ class ProjectDecider {
             let previous_category_id = 0
 
             const $decider_main = $decider.find('#projectDeciderMain')
-
+            console.log(this.sorted_projects[0])
+            $decider_main.append(this.create_project({id:-1, name:'No project', category:0}))
             for (let i = 0; i < this.sorted_projects.length; i++) {
                 let current_category_id = this.sorted_projects[i]['category']
-                let category_settings = this.app_settings.data.categories.categories[this.sorted_projects[i]['category']]
+                let category_settings = this.settings.data.categories.categories[this.sorted_projects[i]['category']]
 
                 if (current_category_id !== previous_category_id){
                     previous_category_id = current_category_id
@@ -147,7 +168,7 @@ class ProjectDecider {
                     $decider.find('.projectDeciderCategory').last().css('--before-color', category_settings[0]);
                 }
 
-                $decider.find('.projectDeciderCategory').last().append(this.create_project(this.sorted_projects[i], category_settings))
+                $decider.find('.projectDeciderCategory').last().append(this.create_project(this.sorted_projects[i]))
             }
             $('.projectDecider').after($decider)
         }else {
@@ -159,6 +180,9 @@ class ProjectDecider {
         return `
             <div class="projectDeciderSelect">
                 <h2>Select Project</h2>
+                <div class="deciderAdd" id="projectDeciderAdd">
+                    <img src="../src/images/goals/plus.png" alt="">
+                </div>
                 <div id="projectDeciderMain">
     
                 </div>
@@ -171,18 +195,24 @@ class ProjectDecider {
             </div>`
     }
 
-    create_project(sorted_project, category_settings){
-        let icon_path = this.app_settings.data.projects.findProjectPathByName(`project${sorted_project['id']}`)
+    create_project(sorted_project){
+        let icon = ''
+        if (sorted_project["id"] !== -1){
+            let icon_path = this.settings.data.projects.findProjectPathByName(`project${sorted_project['id']}`)
+            icon = `<img src="${icon_path}" alt>`
+        }
 
         return `
             <div class="projectDeciderProject">
                 <span class="projectDeciderProjectId">${sorted_project['id']}</span>
                 <span class="projectDeciderProjectIcon" > 
-                    <img src="${icon_path}" alt>
+                    ${icon}
                 </span>
                 <span class="projectDeciderProjectName">
                     ${sorted_project['name']}
                 </span>
             </div>`
     }
+
+
 }

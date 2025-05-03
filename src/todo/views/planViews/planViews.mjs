@@ -28,17 +28,14 @@ export class PlanViews {
                 const selectedDate = $input.datepicker('getDate');
                 this.app.date.set_attributes(selectedDate)
 
-                if ($('#todosAll').length) {
-                    await this.app.dayView.display()
-                    $('#mainTitle').text(this.app.date.get_day_view_header())
-                } else if ($('.weekDay').length) {
-                    await this.app.weekView.display()
-                    let header_params = this.app.date.get_header_week()
-                    $('#mainTitle').text(header_params[0])
-                    $('#date').text(header_params[1])
-                } else {
-                    await this.app.monthView.display()
-                }
+
+                // } else if ($('.weekDay').length) {
+                //     let header_params = this.app.date.get_header_week()
+                //     $('#mainTitle').text(header_params[0])
+                //     $('#date').text(header_params[1])
+                // } else {
+                //     await this.app.monthView.display()
+                // }
             }
         });
 
@@ -46,6 +43,14 @@ export class PlanViews {
             await this.todo.project.show_project_sidebar(event.currentTarget)
         });
 
+        $(document).on('click', '#date', (event) => {
+            event.stopPropagation()
+            if ($('#planDateSelector').css('display') === 'none') {
+                $('#planDateSelector').css('display', 'flex')
+            } else {
+                $('#planDateSelector').css('display', 'none')
+            }
+        })
 
     }
 
