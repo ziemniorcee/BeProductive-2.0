@@ -1261,10 +1261,10 @@ function todoHandlers(db) {
         params.days.forEach(day => {
             if (day.start_date !== undefined && day.end_date !== undefined) {
                 db.run(`INSERT INTO habit_days (habit_id, day_of_week, start_date, end_date)
-                VALUES ("${params.id}", "${day.day}", "${day.start_date}", "${day.end_date}")`)
+                VALUES ("${params.id}", "${day.day_of_week}", "${day.start_date}", "${day.end_date}")`)
             } else {
                 db.run(`INSERT INTO habit_days (habit_id, day_of_week)
-                    VALUES ("${params.id}", "${day.day}")`)
+                    VALUES ("${params.id}", "${day.day_of_week}")`)
             }
         })
     })
@@ -1272,6 +1272,12 @@ function todoHandlers(db) {
     ipcMain.on('add-habit-logs', (event, params) => {
         db.run(`INSERT INTO habit_logs (habit_id, date)
                 VALUES ("${params.id}", "${params.date}")`)
+    })
+
+    ipcMain.on('remove-habit', (event, params) => {
+        db.run(`DELETE FROM habits WHERE id=${params.id}`);
+        db.run(`DELETE FROM habit_days WHERE habit_id=${params.id}`);
+        db.run(`DELETE FROM habit_logs WHERE habit_id=${params.id}`);
     })
 
 

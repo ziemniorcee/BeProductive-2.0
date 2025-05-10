@@ -19,14 +19,24 @@
     z-index: 6;
 }
 
+#habit h2 {
+    font-family: Arial, serif;
+    margin: 0 10px;
+}
+
 .habitSector {
     background-color: #1E1E1E;
     color: white;
-    padding: 20px;
+    padding: 20px 20px 40px;
     border-radius: 20px;
     position: relative;
     box-sizing: border-box;
     border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
 
 .habitSubsector {
@@ -108,21 +118,32 @@
 
 #habit-today {
     grid-area: habits-today;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
 }
 
 #habit-menu {
     grid-area: habits-menu;
 }
 
-#habit-today-to-do, #habit-today-done {
+.habitAllButton {
+    border-radius: 5px;
+    background-color: rgb(162, 4, 4);
+    box-shadow: 0 4px 4px 0 rgba(0,0,0,.25);
+    padding: 5px;
+    position: absolute;
+    right: 10px;
+    transition: all 0.1s ease;
+}
+
+.habitAllButton {
+    background-color: rgb(202, 9, 9);
+}
+
+#habit-today-to-do, #habit-today-done, #habit-menu-all {
+    position: relative;
     width: 100%;
     flex: 1;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 #habit-today-save {
@@ -159,11 +180,15 @@
 }
 
 #habit-new-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
+    margin-top: auto;
     width: calc(100% - 40px);
 }
+
+
+
+
+
+
 
 #newHabit {
     height: 60%;
