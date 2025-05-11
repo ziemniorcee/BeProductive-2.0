@@ -223,6 +223,7 @@ class DisplayManagement{
             $('#galactics').css('display', 'none');
             $('#habit').css('display', 'grid');
             this.app.habits.refresh_today_habits();
+            this.app.habits.update_chart();
         })
 
         window.sidebarAPI.historyToGoal((steps, goal) => this.history_to_goal(goal, steps))

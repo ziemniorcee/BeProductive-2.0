@@ -3,6 +3,9 @@ export class Habits {
         this.data = app_data;
         this.categories = app_categories;
         this.initEventListeners();
+        this.chart = undefined;
+        this.create_chart();
+
     }
 
     initEventListeners() {
@@ -224,6 +227,136 @@ export class Habits {
         let hours = $(element).find('.customTimePickerHoursValue').first().text();
         let minutes = $(element).find('.customTimePickerMinutesValue').first().text();
         return hours + ":" + minutes;
+    }
+
+    create_chart() {
+        const ctx = document.getElementById('habit-info-canv').getContext('2d');
+        const dni = ['2025-05-01', '2025-05-02', '2025-05-03', '2025-05-04', '2025-05-05', '2025-05-06', '2025-05-07'];
+        const procenty = [0.2, 0.5, 0.8, 0.6, 1.0, 0.7, 0.3];
+        const data = {
+            labels: dni,
+            datasets: [{
+            label: 'Percentage of completed habits',
+            data: procenty,
+            borderColor: 'green',
+            backgroundColor: 'green',
+            tension: 0.1,
+            fill: false,
+            pointRadius: 5
+            }]
+        };
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                animation: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            color: 'white',
+                            font: {
+                            family: 'Courier New',
+                            size: 12,
+                            weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: '#ccc'
+                        }
+                        },
+                    y: {
+                        ticks: {
+                            color: 'white',
+                            font: {
+                            family: 'Courier New',
+                            size: 12,
+                            weight: 'bold'
+                            },
+                            callback: value => `${Math.round(value * 100)}%`
+                        },
+                        grid: {
+                            color: '#eee'
+                        },
+                        max: 1,
+                        beginAtZero: true
+                        }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white',
+                            font: {
+                            family: 'Arial',
+                            size: 14,
+                            weight: 'bold'
+                            }
+                        },
+                        onClick: null
+                    }
+                },
+            }
+        };
+        this.chart = new Chart(ctx, config);
+    }
+
+    update_chart() {
+        const result = [];
+        const today = new Date();
+
+        for (let i = 1; i <= 7; i++) {
+            const pastDate = new Date();
+            pastDate.setDate(today.getDate() - i);
+
+            const yyyy = pastDate.getFullYear();
+            const mm = String(pastDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(pastDate.getDate()).padStart(2, '0');
+            const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+            const weekdayNumber = (pastDate.getDay() + 6) % 7;
+
+            result.push([formattedDate, weekdayNumber]);
+        }
+
+        let quantities = [];
+        let works = [];
+        for (const [date, weekday] of result) {
+            let quantity = 0;
+            let work = 0;
+            for (const habit of this.data.habits) {
+                let flag = false;
+                for (const day of habit.days) {
+                    if (weekday === day.day_of_week) {
+                        quantity += 1
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag) {
+                    for (const log of this.data.habits_logs) {
+                        if (log.habit_id === habit.id && log.date === date) {
+                            work += 1;
+                        }
+                    }
+                }
+            }
+            quantities.push(quantity);
+            works.push(work);
+        }
+        let days = [];
+        for (const day of result) {
+            days.push(day[0]);
+        }
+        quantities.reverse();
+        works.reverse();
+        let percentages = [];
+        for (let i = 0; i < 7; i++) {
+            percentages.push((quantities[i] == 0) ? 1.0 : works[i] / quantities[i]);
+        }
+        this.chart.data.labels = days;
+        this.chart.data.datasets[0].data = percentages;
+        this.chart.update();
+
     }
 
 }

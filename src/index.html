@@ -302,19 +302,22 @@
             <div id="habit-title">Habits</div>
         </div>
         <div id="habit-info" class="habitSector">
-            
+            <h2>Habits done in last 7 days</h2>
+            <canvas id="habit-info-canv"></canvas>
+            <h2>Habits to do tomorrow</h2>
+            <div id="habit-info-tomorrow" class="habitSubsector"></div>
         </div>
         <div id="habit-today" class="habitSector">
             <h2>Habits to do today</h2>
             <div id="habit-today-to-do" class="habitSubsector"></div>
-            <div id="habit-today-save" class="habitSubsector">Save done habits</div>
+            <div id="habit-today-save" class="habitBlocks habitSubsector">Save done habits</div>
             <h2>Habits done today</h2>
             <div id="habit-today-done" class="habitSubsector"></div>
         </div>
         <div id="habit-menu" class="habitSector">
             <h2>All habits list</h2>
             <div id="habit-menu-all" class="habitSubsector"></div>
-            <div class="habitBlocks" id="habit-new-btn">+</div>
+            <div class="habitBlocks habitSubsector" id="habit-new-btn">+</div>
         </div>
     </div>
 
@@ -340,7 +343,7 @@
             <div id="newHabitContent" class="vignetteWindow1Content">
                 <div id="newHabitTitle" class="vignetteWindow1Title">Create new habit</div>
                 <div id="newHabitOptions">
-                    <div id="projectSettings">
+                    <div id="newHabitSettings">
                         <div class="categoryDecider deciderButtonEmpty">
                             <div class="categoryDeciderId">0</div>
                             <div class="categoryDeciderName">No category</div>

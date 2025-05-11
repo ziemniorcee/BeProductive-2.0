@@ -12,7 +12,7 @@
     
     display: none;
     grid-template-rows: 10% 1fr;
-    grid-template-columns: 25% 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas: "habits-header habits-header habits-header"
     "habits-info habits-today habits-menu";
     gap: 20px;
@@ -22,6 +22,11 @@
 #habit h2 {
     font-family: Arial, serif;
     margin: 0 10px;
+}
+
+#habit canvas {
+    width: 90%;
+    aspect-ratio: 1/1;
 }
 
 .habitSector {
@@ -34,7 +39,7 @@
     border: 1px solid transparent;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 20px;
 }
@@ -50,10 +55,11 @@
 }
 
 .habitBlocks {
-    height: 50px;
+    height: auto;
+    min-height: 50px;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     background-color: #4b4b4b;
     border-radius: 10px;
@@ -61,43 +67,35 @@
     border: 1px black solid;
     text-align: center;
     font-size: 24px;
-    cursor: pointer;
     position: relative;
+    padding: 5px;
+    margin-bottom: 10px;
     transition: box-shadow 0.1s ease, border-color 0.1s ease, transform 0.1s ease;
 }
 
 .habitBlocks:hover {
-    border-color: #2979FF;
-    box-shadow: 0px 0px 8px rgba(41, 121, 255, 0.5);
+    /* border-color: #2979FF; */
+    box-shadow: 0px 0px 3px rgba(41, 121, 255, 0.5);
 }
 
-.habitHabit {
-    margin-bottom: 10px;
-    justify-content: flex-start;
-    transition: all 0.1s ease;
-}
-
-.habitHabit:hover {
-    border-color: transparent;
-    box-shadow: 0px 0px 4px rgba(41, 121, 255, 0.5);
-}
-
-.habitHabit span {
+.habitBlocks span {
     width: 40%;
-    font-size: 28px;
+    font-size: 24px;
     text-align: left;
     padding-left: 10px;
-    text-wrap: nowrap;
+    overflow-x: hidden;
     letter-spacing: 0;
 }
 
-.habitHabit input[type="checkbox"] {
+.habitBlocks input[type="checkbox"] {
     width: 32px;
     height: 32px;
     border: 2px solid #1E1E1E;
     border-radius: 5px;
     position: absolute;
     right: 7px;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 #habit-header {
@@ -138,7 +136,7 @@
     background-color: rgb(202, 9, 9);
 }
 
-#habit-today-to-do, #habit-today-done, #habit-menu-all {
+#habit-today-to-do, #habit-today-done, #habit-menu-all, #habit-info-tomorrow {
     position: relative;
     width: 100%;
     flex: 1;
@@ -148,13 +146,9 @@
 
 #habit-today-save {
     width: 100%;
-    height: 64px;
-    line-height: 64px;
     font-size: 28px;
     text-align: center;
-    padding: 0;
-    border-radius: 10px;
-    border: 1px solid black;
+    justify-content: center !important;
 }
 
 #habit-today-save:hover {
@@ -181,7 +175,9 @@
 
 #habit-new-btn {
     margin-top: auto;
+    font-size: 28px;
     width: calc(100% - 40px);
+    justify-content: center !important;
 }
 
 
@@ -213,6 +209,15 @@
     justify-content: center;
     align-items: center;
     gap: 10%;
+}
+
+#newHabitOptions input[type="text"] {
+    width: 100%;
+    margin-top: 15px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    text-align: center;
 }
 
 #newHabitMode {
