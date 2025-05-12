@@ -193,6 +193,9 @@ export class Habits {
         let today = new Date();
         const weekday = (today.getDay() + 6) % 7;
         const today_date = today.toISOString().split('T')[0];
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const weekdayTomorrow = (tomorrow.getDay() + 6) % 7;
         for (const habit of this.data.habits) {
             let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
                 undefined, undefined, '<div class="habitAllButton">Delete</div>')
@@ -218,6 +221,10 @@ export class Habits {
                             $('#habit-today-to-do').append(habit_block)
                         }
                     }
+                } else if (day.day_of_week === weekdayTomorrow) {
+                    let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
+                        day.start_date, day.end_date, false)
+                    $('#habit-info-tomorrow').append(habit_block)
                 }
             }
         }
@@ -347,6 +354,7 @@ export class Habits {
         for (const day of result) {
             days.push(day[0]);
         }
+        days.reverse();
         quantities.reverse();
         works.reverse();
         let percentages = [];
