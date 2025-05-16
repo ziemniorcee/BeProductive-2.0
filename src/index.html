@@ -296,27 +296,53 @@
             <div id="habit-title">Habits</div>
         </div>
         <div id="habit-info" class="habitSector">
-
+            <h2>Habits done in last 7 days</h2>
+            <canvas id="habit-info-canv"></canvas>
+            <h2>Habits to do tomorrow</h2>
+            <div id="habit-info-tomorrow" class="habitSubsector"></div>
         </div>
         <div id="habit-today" class="habitSector">
-
+            <h2>Habits to do today</h2>
+            <div id="habit-today-to-do" class="habitSubsector"></div>
+            <div id="habit-today-save" class="habitBlocks habitSubsector">Save done habits</div>
+            <h2>Habits done today</h2>
+            <div id="habit-today-done" class="habitSubsector"></div>
         </div>
         <div id="habit-menu" class="habitSector">
-            <div class="habitBlocks" id="habit-new-btn">+</div>
+            <h2>All habits list</h2>
+            <div id="habit-menu-all" class="habitSubsector"></div>
+            <div class="habitBlocks habitSubsector" id="habit-new-btn">+</div>
         </div>
     </div>
+
+    <template id="customTimePicker">
+        <div class="customTimePicker">
+            <div class="customTimePickerHours">
+                <span class="customTimePickerHoursValue">12</span>
+                <div class="customTimePickerHoursBox">
+                    <input class="customTimePickerHoursPicker" type="range" min="0" max="23" value="12">
+                </div>
+            </div>
+            <div class="customTimePickerMinutes">
+                <span class="customTimePickerMinutesValue">00</span>
+                <div class="customTimePickerMinutesBox">
+                    <input class="customTimePickerMinutesPicker" type="range" min="0" max="59" value="0" step="5">
+                </div>
+            </div>
+        </div>
+    </template>
 
     <template id="addHabitTemplate">
         <div id="newHabit" class="vignetteWindow1">
             <div id="newHabitContent" class="vignetteWindow1Content">
                 <div id="newHabitTitle" class="vignetteWindow1Title">Create new habit</div>
                 <div id="newHabitOptions">
-                    <div id="projectSettings">
+                    <div id="newHabitSettings">
                         <div class="categoryDecider deciderButtonEmpty">
                             <div class="categoryDeciderId">0</div>
                             <div class="categoryDeciderName">No category</div>
                         </div>
-                        <input type="text" id="newProjectName" placeholder="Enter name">
+                        <input type="text" id="newHabitName" placeholder="Enter name">
                     </div>
                     <div id="newHabitMode">
                         <input type="radio" id="newHabitBtn1" name="newHabitPicker" value="1">
@@ -332,13 +358,26 @@
 
                 <div id="newHabitInfo">
                     <div id="newHabitOption2" class="newHabitOption">
-                        <input type="time" id="newHabitOption2Time" class="newHabitTimeInput">
+                        <span>Everyday's habit hour</span>
+                        <div class="newHabitOptionHorBox" id="newHabitOption2Box">
+                            
+                        </div>
                     </div>
                     <div id="newHabitOption3" class="newHabitOption">
-                        
+                        <span>Choose days for a habit</span>
+                        <div class="newHabitOptionHorBox" id="newHabitOption3Box">
+
+                        </div>
+                        <span>All chosen days hour</span>
+                        <div class="newHabitOptionHorBox" id="newHabitOption3TimeBox">
+
+                        </div>
                     </div>
                     <div id="newHabitOption4" class="newHabitOption">
-                        
+                        <span>Choose days for a habit</span>
+                        <div class="newHabitOptionHorBox" id="newHabitOption4Box">
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -347,6 +386,19 @@
                 <div id="newHabitCreate" class="vignetteWindow1Button vignetteWindow1BtnCreate">Create</div>
             </div>
             <div id="newHabitError" class="vignetteWindow1Error"></div>
+        </div>
+    </template>
+
+    <template id="removeHabitTemplate">
+        <div id="removeHabit" class="vignetteWindow1">
+            <div id="removeHabitContent" class="vignetteWindow1Content">
+                <div id="removeHabitTitle" class="vignetteWindow1Title">Remove that habit?</div>
+            </div>
+            <div id="removeHabitButtons" class="vignetteWindow1ButtonBox">
+                <div id="removeHabitDiscard" class="vignetteWindow1Button vignetteWindow1BtnDiscard">Discard</div>
+                <div id="removeHabitAccept" class="vignetteWindow1Button vignetteWindow1BtnCreate">Remove</div>
+            </div>
+            <div class="vignetteWindow1Error"></div>
         </div>
     </template>
 

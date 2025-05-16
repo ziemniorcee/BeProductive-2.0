@@ -1087,6 +1087,50 @@ function todoHandlers(db) {
         }
     })
 
+    ipcMain.handle('add-habit', async (event, params) => {
+        db.run(`INSERT INTO habits (name, importancy)
+                VALUES ("${params.name}", "${3}")`)
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT * FROM habits ORDER BY id DESC LIMIT 1`, (err, rows) => {
+                    if (err) reject(err);
+                    else {
+                        resolve(rows);
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching habits.'};
+        }
+    })
+
+    ipcMain.on('add-habit-days', (event, params) => {
+        params.days.forEach(day => {
+            if (day.start_date !== undefined && day.end_date !== undefined) {
+                db.run(`INSERT INTO habit_days (habit_id, day_of_week, start_date, end_date)
+                VALUES ("${params.id}", "${day.day_of_week}", "${day.start_date}", "${day.end_date}")`)
+            } else {
+                db.run(`INSERT INTO habit_days (habit_id, day_of_week)
+                    VALUES ("${params.id}", "${day.day_of_week}")`)
+            }
+        })
+    })
+
+    ipcMain.on('add-habit-logs', (event, params) => {
+        db.run(`INSERT INTO habit_logs (habit_id, date)
+                VALUES ("${params.id}", "${params.date}")`)
+    })
+
+    ipcMain.on('remove-habit', (event, params) => {
+        db.run(`DELETE FROM habits WHERE id=${params.id}`);
+        db.run(`DELETE FROM habit_days WHERE habit_id=${params.id}`);
+        db.run(`DELETE FROM habit_logs WHERE habit_id=${params.id}`);
+    })
+
+
+    
+
     ipcMain.handle('get-ASAP', async (event, params) => {
         try {
             return await new Promise((resolve, reject) => {
