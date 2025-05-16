@@ -1,13 +1,9 @@
-import {check_border, decode_text} from "./data.mjs";
-
 export class WeekView {
-    constructor(app_data, app_date) {
+    constructor(todo) {
+        this.todo = todo
+        this.is_week_drag = 0
         this.initEventListeners()
 
-        this.data = app_data
-        this.date = app_date
-
-        this.is_week_drag = 0
     }
 
     initEventListeners() {
@@ -19,6 +15,14 @@ export class WeekView {
         $(document).on('click', '.sidebarTask', () => {
             this.is_week_drag = 0
         })
+
+        $(document).on('mouseup', '.weekDay', async (event) => {
+            if (event.which === 1 && event.target.className.includes("weekDayGoals")) {
+                let day_index = this.todo.appSettings.data.weekdays2.indexOf($(event.currentTarget).find('.weekDayText').text())
+                this.todo.appSettings.date.get_week_day(day_index)
+                await this.todo.todoViews.planViews.dayView.display()
+            }
+        })
     }
 
     /**
@@ -26,14 +30,14 @@ export class WeekView {
      * builds view, gets goals, allows drag&drop and closes edit
      */
     async display() {
-        let goals = await window.goalsAPI.getWeekView({dates: this.date.week_now})
+        let goals = await window.goalsAPI.getWeekView({dates: this.todo.appSettings.date.week_now})
 
         $('#main').html('')
         this._week_header_HTML()
         $('#main').append(this._week_content_HTML())
         this.get_week_goals(goals)
 
-        // window.sidebarAPI.askHistory({date: this.date.get_history_week()})
+
 
         let rightbar = $('#rightbar')
         rightbar.html(rightbar.html())
@@ -52,8 +56,8 @@ export class WeekView {
         for (let i = 0; i < 7; i++) {
             let is_current_day = true
             while (is_current_day && goals.length) {
-                if (goals[0].addDate === this.date.week_now[i]) {
-                    let week_day = $(`#${this.data.weekdays2[i]}`)
+                if (goals[0].addDate === this.todo.appSettings.date.week_now[i]) {
+                    let week_day = $(`#${this.todo.appSettings.data.weekdays2[i]}`)
                     week_day.append(this.build_week_goal(goals[0]))
                     goals.shift()
                 } else {
@@ -69,23 +73,36 @@ export class WeekView {
      * @returns {string} HTML of created goal
      */
     build_week_goal(goal) {
-        let difficulty = `images/goals/rank${goal.difficulty}.svg`
         let check_state = goal.check_state ? "checked" : ""
         let check_bg = goal.check_state ? "url('images/goals/check.png')" : ""
-        let converted_text = decode_text(goal.goal)
-        let repeat = goal.knot_id ? this.data._repeat_label_HTML() : "";
-        let todo_id = $('#main .todo').length
+        let converted_text = this.todo.appSettings.data.decode_text(goal.goal)
+
+        let category_color = "rgb(74, 74, 74)"
+        let category_border = ""
+        let deadline_label = ""
+
+        if (goal.category !== 0) {
+            category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
+            category_border = `border-right: 4px solid ${category_color}`
+        }
+        console.log(goal.date_type)
+        if(goal.date_type === 1){
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        }
+
+        let check_color = this.todo.appSettings.data.check_border[goal.importance]
 
         return `
-        <div class="todo">
-            <div class="todoId">${todo_id}</div>
-            <div class="todoCheck" style="background: ${this.data.categories[goal.category][0]} url(${difficulty}) no-repeat">
-                <div class="checkDot" style="background-image: ${check_bg}; border: 2px  ${check_border[goal.importance]} solid"></div>
-                <input type="checkbox" class="check_task" ${check_state}>
+        <div class="todo"  style="${category_border}">
+            <div class="todoId">${goal.id}</div>
+            <div class="todoCheck">
+                <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
             </div>
             <div class="taskText">
-                <span class="task">${converted_text}</span>
-                ${repeat}
+                <span class="task">
+                    ${converted_text}
+                    ${deadline_label}
+                 </span>
             </div>
         </div>`;
     }
@@ -97,14 +114,13 @@ export class WeekView {
      * @returns {string} HTML of content
      */
     _week_content_HTML() {
-
-        let today_sql = this.date.sql_format(this.date.today)
+        let today_sql = this.todo.appSettings.date.sql_format(this.todo.appSettings.date.today)
 
         let week_columns = ""
         for (let i = 0; i < 4; i++) {
             let days = ""
-            for (let j = 0; j < this.data.weekdays_grid[i].length; j++) {
-                let sql_date = this.date.week_now[i + j * 3]
+            for (let j = 0; j < this.todo.appSettings.data.weekdays_grid[i].length; j++) {
+                let sql_date = this.todo.appSettings.date.week_now[i + j * 3]
 
                 let classes = "weekDayGoals"
                 let today_label = ""
@@ -115,8 +131,8 @@ export class WeekView {
                 days += `
                 <div class="weekDay">
                     ${today_label}
-                    <div class="weekDayText">${this.data.weekdays_grid[i][j]}</div>
-                    <div class="${classes}" id="${this.data.weekdays_grid[i][j]}"></div>
+                    <div class="weekDayText">${this.todo.appSettings.data.weekdays_grid[i][j]}</div>
+                    <div class="${classes}" id="${this.todo.appSettings.data.weekdays_grid[i][j]}"></div>
                 </div>`
             }
 
@@ -138,10 +154,12 @@ export class WeekView {
      * @returns {string} HTML of header
      */
     _week_header_HTML() {
-        let header_params = this.date.get_header_week()
+        let header_params = this.todo.appSettings.date.get_header_week()
 
         const header_template = $('#viewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
+        $header_clone.find('#planDateSelector .dateDeciderToday').text("This week")
+        $header_clone.find('#planDateSelector .dateDeciderTomorrow').text("Next week")
         $header_clone.find('.viewOption').css('background-color', '#121212')
         $header_clone.find('#weekViewButton').css('background-color', '#2979FF')
         $header_clone.find('.viewOption2 img').eq(0).attr('src', 'images/goals/weekview.png')
@@ -150,7 +168,24 @@ export class WeekView {
         $header_clone.find('#date').text(header_params[1])
         $('#main').append($header_clone)
 
+        $( () => {
+            $("#planDatePicker").datepicker({
+                dateFormat: "dd.mm.yy",
 
+                onSelect: async (dateText, inst) => {
+                    const $input = inst.input;
+                    const selectedDate = $input.datepicker('getDate');
+                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    await this.display()
+                    let header_params = this.todo.appSettings.date.get_header_week()
+                    $('#mainTitle').text(header_params[0])
+                    $('#date').text(header_params[1])
+
+                    $('#selectDate').text(selectedDate)
+                    $('#planDateSelector').css('display', 'none')
+                }
+            });
+        });
     }
 
 
@@ -196,16 +231,13 @@ export class WeekView {
             this.is_week_drag = 0
 
             goals_length_before = $('#main .todo').length
-            console.log($('#main .todo').length)
         }).on('drop', (event) => {
             let todos = $('#main .todo')
-            console.log(todos.length)
             let goals_length_after = todos.length
             let new_goal_pos = todos.index($(event))
 
 
             if (event.className.includes("todo")) {
-
                 if (goals_length_before !== goals_length_after) {
                     this._get_from_project(event, new_goal_pos, drag_sidebar_task)
                 } else if (drag_sidebar_task.parent().attr('id') !== "sideProjectGoals") {
@@ -227,8 +259,8 @@ export class WeekView {
         let new_goal_index = $('.weekDayGoals .todo').index(event)
 
         let display_week_day = $('.weekDayGoals').index(event.parentNode)
-        let real_week_day = this.data.weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
-        let add_date = this.date.week_now[real_week_day]
+        let real_week_day = this.todo.appSettings.data.weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
+        let add_date = this.todo.appSettings.date.week_now[real_week_day]
 
         window.projectsAPI.getFromProject({
             date: add_date,
@@ -246,8 +278,8 @@ export class WeekView {
      * @param event drop state of goals
      */
     _change_order(event) {
-        let day_id = this.data.weekdays2.indexOf($(event.parentNode).attr('id'))
-        let date = this.date.week_now[day_id]
+        let day_id = this.todo.appSettings.data.weekdays2.indexOf($(event.parentNode).attr('id'))
+        let date = this.todo.appSettings.date.week_now[day_id]
         let goal_id = $(event).find('.todoId').text()
 
         let order = []
@@ -273,7 +305,7 @@ export class WeekView {
         }
 
         let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals').attr("id")
-        let date = this.date.week_current[this.data.weekdays2.indexOf(week_day)]
+        let date = this.todo.appSettings.date.week_current[this.todo.appSettings.data.weekdays2.indexOf(week_day)]
 
         window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
 
@@ -287,22 +319,25 @@ export class WeekView {
      * @param that selected check in week view
      */
     check_week_goal(that) {
-        const goal_ids = $(`#main .todoId`)
+        $(that).prop('disabled', true)
+        const goal_ids = Number($(that).closest('.todo').find('.todoId').text())
         const rel_id = $('.check_task').index(that)
         $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
         setTimeout(() => {
+            console.log('CHUJ')
             let todos = $('#main .todo')
             todos.eq(rel_id).remove()
-            window.goalsAPI.changeWeekGoalCheck({id: Number(goal_ids.eq(rel_id).html()), state: 1})
+            window.goalsAPI.changeWeekGoalCheck({id: goal_ids, state: 1})
             this.dragula_week_view()
             let new_ids = $(`#main .todoId`)
             for (let i = 0; i < new_ids.length; i++) {
                 new_ids.eq(i).text(i)
             }
 
-            if (this.date.week_now !== this.date.week_current) window.sidebarAPI.askHistory({date: this.date.week_current[0]})
+            if (this.todo.appSettings.date.week_now !== this.todo.appSettings.date.week_current) window.sidebarAPI.askHistory({date: this.todo.appSettings.date.week_current[0]})
         }, 1000);
+
     }
 }
 

@@ -40,15 +40,15 @@ function build_glory(goals_dict){
     let glory_html=
         `<div id="gloryHead">
             <div id="glorySetup">
-                <div id="prevMonth" class="gloryChangeMonth"><img src="images/goals/arrow0.png" alt=""></div>
+                <div id="prevMonth" class="gloryChangeMonth"><img src="../images/goals/arrow0.png" alt=""></div>
                 <div id="gloryFormat"><div id="gloryFormatText">Month</div></div>
                 <div id="gloryCurrentSetup"></div>
-                <div id="nextMonth" class="gloryChangeMonth"><img src="images/goals/arrow1.png" alt=""></div>
+                <div id="nextMonth" class="gloryChangeMonth"><img src="../images/goals/arrow1.png" alt=""></div>
             </div>
             <div>
-                <img src="images/goals/polaura.png" alt="polaura" width="25" height="50">
+                <img src="../images/goals/polaura.png" alt="polaura" width="25" height="50">
                 <span>Hall of glory</span>
-                <img src="images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
+                <img src="../images/goals/polaura.png" class="polaura2" alt="polaura" width="25" height="50">
             </div>
         </div>
         <div id="gloryContent">

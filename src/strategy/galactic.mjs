@@ -13,7 +13,6 @@ export class Strategy {
         this.data = app_data;
         this.categories = app_categories;
         this.initEventListeners()
-        console.log(this.data.categories)
     }
 
     initEventListeners() {
@@ -107,26 +106,70 @@ export class Strategy {
         })
 
         $(document).on('click', '#galactic-editor-new-project', () => {
-            $("#vignette").css('display', 'block')
-            const add_project_template = $('#newProjectTemplate').prop('content');
-            let $add_project_clone = $(add_project_template).clone()
-            $add_project_clone.find(".categoryPicker").html(this.categories._categories_HTML(false))
-            $("#vignette").html($add_project_clone);
-            let key = $('#galactic-editor').data('key');
-            let color = this.data.categories[key][0];
-            console.log(color)
-            $('#categoryPicker3').children().each((index, element) => {
-                if ($(element).find('.categoryButton').first().css('background-color') === color) {
-                    $(element).trigger('click');
-                    
-                }
-            })
+            this.open_new_project()
         })
-        
+
+
+        $(document).on('click', '#galactic-display-new-category', function () {
+            $("#vignette").css('display', 'block')
+            $("#newCategory").css('display', 'block')
+        })
+
+
         $(document).on('click', '.vignetteWindow1', (event) => {
             event.stopPropagation()
         })
-         
+
+        $(document).on('click', '#removeCategory', function(event) {
+            event.stopPropagation();
+        })
+
+        $(document).on('click', '#removeCategoryDiscard', function () {
+            $("#removeCategory").css('display', 'none');
+            $("#vignette").css('display', 'none');
+        });
+
+        $(document).on('click', '#newCategory', function(event) {
+            event.stopPropagation();
+        })
+
+        // $(document).on('click', '#newCategoryCreate', () => {
+        //     this.app.categories.create_new_category();
+        //     if ($('#galactics').css('display') !== 'none') {
+        //         this.app.strategy.add_galactic_category_boxes();
+        //     }
+        //     let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
+        //
+        //     $("#newCategory").css('display', 'none');
+        //     $vignette_layer.css('display', 'none');
+        //     $vignette_layer.html('')
+        //
+        //     let category_element = Object.keys(this.data.categories).at(-1)
+        //     $('#selectCategory22').css('background', this.data.categories[category_element][0])
+        //     $('#selectCategory22').text(this.data.categories[category_element][1])
+        // })
+
+        $(document).on('click', '#removeCategoryCreate', () => {
+            this.app.categories.remove_category()
+            if ($('#galactics').css('display') !== 'none') {
+                this.app.strategy.add_galactic_category_boxes();
+            }
+        })
+
+
+    }
+
+    open_new_project() {
+        let $selected_vignette = $("#vignette")
+        if ($selected_vignette.css('display') === 'block') {
+            $selected_vignette = $('#vignette2')
+        }
+        $selected_vignette.css('display', 'block')
+        const add_project_template = $('#newProjectTemplate').prop('content');
+        let $add_project_clone = $(add_project_template).clone()
+        $selected_vignette.html($add_project_clone);
+        let key = $('#galactic-editor').data('key');
+
     }
 
     /**
@@ -574,18 +617,18 @@ export class Strategy {
         <div id="galactic-editor-hud" style="border-color: ${this.data.categories[key][0]};">
         <span id="galactic-editor-text" style='color: ${this.data.categories2[key]}'>${this.data.categories[key][1]}</span>
         <div id="galactic-editor-cancel">
-        <img src="images/goals/arrow0.png"></div>
+        <img src="../images/goals/arrow0.png"></div>
         <div id='galactic-editor-options-btn'>
-        <img src="images/goals/more.png">
+        <img src="../images/goals/more.png">
         <div id='galactic-editor-options'>
         <div id='galactic-editor-new-project' class='galacticOption'>
-        <img src="images/goals/plus.png">
+        <img src="../images/goals/plus.png">
         <span>New project</span></div>
         <div id='galactic-editor-remove-project' class='galacticOption'>
-        <img src="images/goals/minus.png">
+        <img src="../images/goals/minus.png">
         <span>Remove project</span></div>
         <div id='galactic-editor-open-projects' class='galacticOption'>
-        <img src="images/goals/plus.png">
+        <img src="../images/goals/plus.png">
         <span>Open not placed projects</span></div>
         </div></div>`;
         editor += `<div id="galactic-editor-project-picker" style="border-color: ${this.data.categories[key][0]};">

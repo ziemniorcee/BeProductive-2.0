@@ -128,6 +128,10 @@ export class Habits {
             }
         })
 
+        $(document).on('click', '#newHabitDiscard', function () {
+            $("#newHabit").css('display', 'none');
+            $("#vignette").css('display', 'none');
+        })
     }
 
     __HTML_habit_block(id, name, start_date, end_date, opt_button, opt_classes) {

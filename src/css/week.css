@@ -161,9 +161,9 @@
 }
 
 .monthTodo {
-    height: 15px;
-    background-color: #3B78B6;
-    font-size: 13px;
+    height: 30px;
+    background-color: #444444;
+    font-size: 15px;
     margin-left: 5px;
     margin-right: 5px;
     overflow: hidden;
@@ -204,3 +204,4 @@
     width: 13px;
     height: 13px;
 }
+

@@ -1,145 +1,7 @@
-export class Inbox {
-    constructor(app_data, app_date, app_edit) {
-        this.data = app_data
-        this.date = app_date
-        this.edit = app_edit
-        this.decision_maker = new DecisionMaker(app_data, app_date, app_edit)
-        this.initEventListeners()
-    }
-
-    initEventListeners() {
-        $(document).on('click', "#dashInbox", async () => {
-            await this.build_view()
-        })
-
-
-        $(document).on('click', '#inboxAdd', async () => {
-            await this.new_goal()
-        })
-
-        $(document).on('click', '#inboxList .check_task', (event) => {
-            event.stopPropagation()
-            this.check_goal(event.currentTarget)
-        });
-
-        $(document).on('click', '.inboxDecision', () => {
-
-        })
-
-        $(document).on('focus', '#inboxInput', function (){
-            $('#inboxEntry').css('background-color', "#1A3667")
-        })
-
-        $(document).on('blur', '#inboxInput', function (){
-            $('#inboxEntry').css('background-color', "#2A2A2A")
-        })
-    }
-
-    /**
-     * build view of inbox
-     * gets from inbox template
-     * builds goals and then adds titles depends on day
-     */
-    async build_view() {
-        const main_template = $('#inboxMainTemplate').prop('content');
-        let $main_clone = $(main_template).clone()
-        this.data.show_hide_sidebar(true, 1)
-        $('#main').html($main_clone)
-
-        let goals = await window.inboxAPI.getInbox()
-        let breaks = this.date.get_inbox_sections(goals)
-        let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
-
-        for (let i = 0; i < goals.length; i++) {
-            this.add_todo(goals[i], 1)
-        }
-
-        let current_break = 0
-        for (let i = 0; i < breaks.length; i++) {
-            if (breaks[i] !== -1) {
-                $('#inboxList').children().eq(breaks[i] + current_break).before(`<div class="inboxListBreak">${titles[i]}</div>`)
-                current_break++
-            }
-        }
-    }
-
-    /**
-     * Builds from template inbox task
-     * @param name inbox task name
-     * @param way decides if add at the beginning or at the end of list
-     */
-    add_todo(goal, way) {
-        const template = $('#inboxTodoTemplate').prop('content');
-        let id = $('.inboxTodo').length
-        let $clone = $(template).clone()
-        $clone.find('.inboxTodoId').text(goal['id']);
-        $clone.find('.task').text(goal['name']);
-
-        if (way) {
-            $('#inboxList').append($clone)
-        } else {
-            let $first_break = $('.inboxListBreak').eq(0)
-            if ($first_break.text() === "Today") {
-                $first_break.after($clone)
-            } else {
-                $('#inboxList').prepend($clone)
-                $('#inboxList').prepend(`<div class="inboxListBreak">Today</div>`)
-            }
-        }
-    }
-
-    /**
-     * gets input value and clears it
-     * add new goal to server side
-     * builds new goal
-     */
-    async new_goal() {
-        let $inbox_input = $('#inboxInput')
-        let name = $inbox_input.val()
-        $inbox_input.val("")
-
-        let new_goal = await window.inboxAPI.newInboxGoal({name: name, add_date: this.date.today_sql})
-        this.add_todo(new_goal, 0)
-    }
-
-    /**
-     * gets postion id of task
-     * check send to server side
-     * removes selected goal and goal ids
-     * fixes positions, if id of task id is greater than remove one
-     *      it changes id to its id - 1
-     * @param selected_check event current target
-     */
-    check_goal(selected_check) {
-        let $selected_todo = $(selected_check).closest('.inboxTodo')
-        let selected_todo_id = $selected_todo.find('.inboxTodoId').text()
-
-        window.inboxAPI.checkInboxGoal({'id': selected_todo_id})
-
-        let $previous_element = $selected_todo.prev()
-        let $next_element = $selected_todo.next()
-        if ($previous_element.attr('class') === "inboxListBreak" &&
-            ($next_element.attr('class') === "inboxListBreak" || $next_element.length === 0)) {
-            $previous_element.remove()
-        }
-        $selected_todo.remove()
-
-        let $inbox_todo_ids = $(".inboxTodoId")
-        for (let i = 0; i < $inbox_todo_ids.length; i++) {
-            let todo_id = $inbox_todo_ids.eq(i).text()
-            if (selected_todo_id < todo_id) {
-                $inbox_todo_ids.eq(i).text(todo_id - 1)
-            }
-
-        }
-    }
-}
-
-class DecisionMaker {
-    constructor(app_data, app_date, app_edit) {
-        this.data = app_data
-        this.date = app_date
-        this.edit = app_edit
+export class DecisionMaker {
+    constructor(app) {
+        this.app = app
+        // this.vignette = app_vignette
 
         this.selected_goal = null
         this.goal_id = null
@@ -160,7 +22,16 @@ class DecisionMaker {
 
         $(document).on('click', '#decisionActionYes', () => {
             $('#decisionActionYes').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionActionNo').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
             $('#decisionWhen').css('display', 'block')
+        })
+
+        $(document).on('click', '#decisionActionNo', () => {
+            $('#decisionActionNo').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionActionYes').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionWhen').css('display', 'None')
+            $('#decisionFuture').css('display', 'None')
+            $('#decisionEnd').css('display', 'flex')
         })
 
         $(document).on('click', '#decisionWhenFuture', () => {
@@ -195,8 +66,8 @@ class DecisionMaker {
                 $(".categoryDeciderSelect").remove()
             }
 
-            if (!$(event.target).closest('#projectDecider').length && !$(event.target).closest('#projectDeciderSelect').length) {
-                $("#projectDeciderSelect").remove()
+            if (!$(event.target).closest('.projectDecider').length && !$(event.target).closest('.projectDeciderSelect').length) {
+                $(".projectDeciderSelect").remove()
             }
 
             if (!$(event.target).closest('.dateDecider').length && !$(event.target).closest('.dateDeciderSelect').length) {
@@ -207,9 +78,10 @@ class DecisionMaker {
         $(document).on('click', '#decisionSave', () => {
             let decision_main_entry = $('#editMainEntry').val()
             let decision_note_entry = $('#editNoteEntry').val()
-            let steps_array = this.edit.get_steps()
+            let steps_array = this.app.vignette.todoVignette.get_steps()
             let category_id = Number($('.categoryDeciderId').text())
-            let project_id = Number($('#projectDeciderId').text())
+            console.log("pr id", $('.projectDeciderId').text())
+            let project_id = Number($('.projectDeciderId').text())
 
             let date_type = 0
             let date = ""
@@ -218,7 +90,7 @@ class DecisionMaker {
                 if ($("#decisionFutureTypeDeadline").css('display') === 'flex') {
                     date_type = 1
                 }
-                date = this.date.get_edit_sql_format($("#decisionFutureDate").text())
+                date = this.app.settings.date.get_edit_sql_format($("#decisionFutureDate").text())
             } else if ($('#decisionWhenASAP').attr('class') === 'deciderButtonFilled') {
                 date_type = 2
             }
@@ -260,7 +132,7 @@ class DecisionMaker {
         const decision_right_template = $('#decisionRightTemplate').prop('content');
         $decision_clone.find('#editBody').append($(decision_right_template).clone())
 
-        let date_formatted = this.date.get_edit_date_format(this.date.today)
+        let date_formatted = this.app.settings.date.get_edit_date_format(this.app.settings.date.today)
         $decision_clone.find('.dateDecider').text(date_formatted)
         let goal_name = this.selected_goal.find('.taskText').text().trim()
         $decision_clone.find("#editMainEntry").val(goal_name)

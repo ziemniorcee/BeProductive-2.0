@@ -1,10 +1,9 @@
-import {weekdays, month_names} from "./data.mjs";
-
 export class CurrentDate {
-    constructor() {
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
 
-        this.decider = new Decider(this)
+        this.decider = new Decider(app)
         this.today = new Date()
         this.today_sql = this.sql_format(this.today)
         this.tomorrow = new Date(this.today.getTime())
@@ -259,7 +258,7 @@ export class CurrentDate {
         let format_day = date.getDate()
         if (format_day < 10) format_day = "0" + format_day
 
-        return `${weekdays[date.getDay()]}, ${month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
+        return `${this.app.settings.data.weekdays[date.getDay()]}, ${this.app.settings.data.month_names[date.getMonth()]} ${format_day}, ${date.getFullYear()}`
     }
 
     get_week_display_format(week) {
@@ -271,13 +270,13 @@ export class CurrentDate {
         let format_day_ending = ending.getDate()
         if (format_day_ending < 10) format_day_ending = "0" + format_day_ending
 
-        return `${month_names[beginning.getMonth()]} ${format_day_beginning} -
-        ${month_names[ending.getMonth()]} ${format_day_ending}`
+        return `${this.app.settings.data.month_names[beginning.getMonth()]} ${format_day_beginning} -
+        ${this.app.settings.data.month_names[ending.getMonth()]} ${format_day_ending}`
     }
 
     get_month_display_format(date_sql) {
         let date = new Date(date_sql)
-        return `${month_names[date.getMonth()]} ${date.getFullYear()}`
+        return `${this.app.settings.data.month_names[date.getMonth()]} ${date.getFullYear()}`
     }
 
     get_current_dates(selected_button = null) {
@@ -293,7 +292,6 @@ export class CurrentDate {
         let base = dates[0].substring(0, 8)
 
         let month_array = []
-        console.log(range[1] - range[0])
         for (let i = 1; i <= range[1] - range[0]; i++) {
             if (i < 10) month_array.push(base + "0" + i)
             else month_array.push(base + i)
@@ -308,24 +306,6 @@ export class CurrentDate {
 
         if (selected_date < current_date) return this.day_sql
         else return this.today_sql
-    }
-
-    get_history_week() {
-        let selected_date = new Date(this.week_now[0])
-        let current_date = new Date(this.week_current[0])
-        if (selected_date < current_date) return this.week_now[0]
-        else return this.week_current[0]
-    }
-
-    get_history_month() {
-        let selected_sql = this.get_sql_month(this.day_sql)[0]
-        let selected_date = new Date(selected_sql)
-
-        let current_sql = this.get_sql_month(this.today_sql)[0]
-        let current_date = new Date(current_sql)
-
-        if (selected_date < current_date) return selected_sql
-        else return current_sql
     }
 
     get_next_date(direction) {
@@ -413,9 +393,9 @@ export class CurrentDate {
 }
 
 class Decider {
-    constructor(app_date) {
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
-        this.date = app_date
 
     }
 
@@ -429,18 +409,51 @@ class Decider {
 
         })
 
-        $(document).on('click', '.dateDeciderToday', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.today)
+        $(document).on('click', '#editDateSelector .dateDeciderToday, #decisionFutureDate .dateDeciderToday', () => {
+
+            let date_formatted = this.app.settings.date.get_edit_date_format(this.app.settings.date.today)
             $('.dateDecider').text(date_formatted)
 
             $(".dateDeciderSelect").css('display', 'none')
         })
 
-        $(document).on('click', '.dateDeciderTomorrow', () => {
-            let date_formatted = this.date.get_edit_date_format(this.date.tomorrow)
+        $(document).on('click', '#editDateSelector .dateDeciderTomorrow, #decisionFutureDate .dateDeciderTomorrow', () => {
+            let date_formatted = this.app.settings.date.get_edit_date_format(this.app.settings.date.tomorrow)
             $('.dateDecider').text(date_formatted)
 
             $(".dateDeciderSelect").css('display', 'none')
+        })
+
+        $(document).on('click','#planDateSelector .dateDeciderToday', async () => {
+            if($('#todosAll').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.dayView.display()
+            }
+            else if ($('.weekDay').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.weekView.display()
+            }
+            else if ($('#monthGrid').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.today)
+                await this.app.todo.todoViews.planViews.monthView.display()
+            }
+        })
+
+        $(document).on('click','#planDateSelector .dateDeciderTomorrow', async () => {
+            if($('#todosAll').length) {
+                this.app.settings.date.set_attributes(this.app.settings.date.tomorrow)
+                await this.app.todo.todoViews.planViews.dayView.display()
+            } else if ($('.weekDay').length) {
+                this.app.settings.date.next_week()
+                await this.app.todo.todoViews.planViews.weekView.display()
+            } else if ($('#monthGrid').length) {
+                this.app.settings.date.next_month()
+                await this.app.todo.todoViews.planViews.monthView.display()
+            }
+        })
+
+        $(document).on('click', '#container', async () => {
+            $('#planDateSelector').css('display', 'none')
         })
     }
 }
