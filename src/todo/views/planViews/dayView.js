@@ -154,31 +154,6 @@ export class DayView {
         this.todo.appSettings.data.projects.set_projects_options()
     }
 
-    dragula_resetter() {
-        const targetNode = document.getElementById('todosAll');
-        const allowedSelectors = ['div.steps', 'div#todosFinished, div.step'];
-
-        const callback = (mutationsList) => {
-            for (const mutation of mutationsList) {
-                if (allowedSelectors.some(selector => mutation.target.matches(selector))) {
-                    this.dragula_day_view()
-                }
-            }
-
-        };
-
-        const observerConfig = {
-            attributes: true,
-            childList: true,
-            subtree: true,
-            characterData: true
-        };
-
-        const observer = new MutationObserver(callback);
-
-        observer.observe(targetNode, observerConfig);
-    }
-
     set_day_html() {
         let main_title = this.todo.appSettings.date.get_day_view_header()
         let date = this.todo.appSettings.date.get_display_format(this.todo.appSettings.date.day_sql)
@@ -245,12 +220,18 @@ export class DayView {
      * @returns {string} HTML of built goal
      */
     build_goal(goal) {
+        console.log(goal)
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
+        let deadline_label = ""
 
         if (goal.category !== 0) {
             category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
             category_border = `border-right: 4px solid ${category_color}`
+        }
+
+        if(goal.date_type === 1){
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         }
 
         let check_state = goal.check_state ? "checked" : "";
@@ -265,7 +246,10 @@ export class DayView {
                     <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
                 </div>
                 <div class='taskText'>
-                    <span class='task'> ${goal_text} </span>
+                    <span class='task'> 
+                        ${goal_text} 
+                        ${deadline_label}
+                     </span>
                     ${goal.steps}
                 </div>
                 ${project_emblem}

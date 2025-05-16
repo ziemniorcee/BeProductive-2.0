@@ -216,7 +216,7 @@ body {
 }
 
 .task {
-    ;
+    position: relative;
 }
 #todosAll::-webkit-scrollbar {
     width: 0.2em;
@@ -2195,4 +2195,21 @@ body {
 #planDatePicker .ui-datepicker {
     font-size: 18px;
     width: 250px;
+}
+
+.todoDeadline{
+    width: 25px;
+    height: 25px;
+    position: absolute;
+
+}
+
+.weekDay .todoDeadline{
+    width: 15px;
+    height: 15px;
+}
+
+.monthDay .todoDeadline{
+    width: 15px;
+    height: 15px;
 }

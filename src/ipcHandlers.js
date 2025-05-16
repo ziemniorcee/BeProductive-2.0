@@ -27,6 +27,7 @@ function todoHandlers(db) {
                                G.goal_pos,
                                G.category,
                                G.importance,
+                               G.date_type,
                                PR.category  as pr_category,
                                G.project_id as pr_id,
                                PR.icon      as pr_icon,
@@ -70,6 +71,7 @@ function todoHandlers(db) {
                                G.category,
                                G.difficulty,
                                G.importance,
+                               G.date_type,
                                KN.knot_id
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
@@ -92,7 +94,7 @@ function todoHandlers(db) {
     ipcMain.handle('get-month-view', async (event, params) => {
         try {
             return await new Promise((resolve, reject) => {
-                db.all(`SELECT G.id, G.goal, G.addDate, G.category, G.difficulty, KN.knot_id
+                db.all(`SELECT G.id, G.goal, G.addDate, G.category, G.difficulty, G.date_type, KN.knot_id
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                         WHERE addDate between "${params.dates[0]}" and "${params.dates[1]}"
@@ -109,7 +111,8 @@ function todoHandlers(db) {
                                 "category": goals[i].category,
                                 "knot_id": goals[i].knot_id,
                                 "difficulty": goals[i].difficulty,
-                                "id": goals[i].id
+                                "id": goals[i].id,
+                                "date_type": goals[i].date_type
                             }
                             if (day in goals_dict) goals_dict[day].push(new_dict)
                             else goals_dict[day] = [new_dict]
@@ -329,6 +332,7 @@ function todoHandlers(db) {
                                G.importance,
                                G.note,
                                G.addDate,
+                               G.date_type,
                                PR.id as pr_id
                         FROM goals G
                                  LEFT JOIN projects PR ON PR.id = G.project_id
