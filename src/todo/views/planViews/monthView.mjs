@@ -201,18 +201,26 @@ export class MonthView {
      */
     build_month_goal(goal) {
         let converted_text = this.todo.appSettings.data.decode_text(goal['goal'])
-
         let category_color = "rgb(74, 74, 74)"
+        let deadline_label = ""
 
         if (goal.category !== 0) {
             category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
+        }
+
+        console.log(goal.date_type)
+        if(goal.date_type === 1){
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         }
 
         return `
         <div class="monthTodo" style="">
             <div class="monthTodoId">${goal["id"]}</div>
             <div class="monthTodoLabel" style="background-color: ${category_color}"></div>
-            <div class="monthTodoText" >${converted_text}</div>
+            <div class="monthTodoText" >
+                ${converted_text}
+                ${deadline_label}
+            </div>
         </div>`
     }
 

@@ -55,6 +55,7 @@ export class TodoEdit {
      * @param steps data of steps of selected goal
      */
     build_edit(goal, steps) {
+        console.log(goal)
         let $edit_clone = $("<div id='taskEdit' class='vignetteWindow2'></div>")
         const edit_main_template = $('#editMainTemplate').prop('content');
         $edit_clone.append($(edit_main_template).clone())
@@ -75,6 +76,12 @@ export class TodoEdit {
         } else {
             $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
         }
+
+        if(goal['date_type'] === 1){
+            $edit_clone.find('#editLabelDate').text('Deadline')
+            $edit_clone.find('#editSwitchImg').prop('src', 'images/goals/dashboard/other.png')
+        }
+
         this.vignette.set_category(goal['category'], $edit_clone)
         this.vignette.set_project(goal['pr_id'], $edit_clone)
 
@@ -258,7 +265,16 @@ export class TodoEdit {
     }
 
     _set_todo_changes(selected_goal, changes) {
-        selected_goal.find('.task').text(this.app.settings.data.decode_text(changes['goal']))
+        let deadline_label = ""
+        if (changes['date_type'] === 1) {
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        }
+
+        selected_goal.find('.task').html(`
+            ${this.app.settings.data.decode_text(changes['goal'])}
+            ${deadline_label} 
+        `)
+
         if (changes['category'] !== 0) {
             let category_color = this.app.settings.data.categories.categories[changes['category']][0]
             selected_goal.css('border-right', `4px solid ${category_color}`)
@@ -266,11 +282,19 @@ export class TodoEdit {
         } else {
             selected_goal.css('border', "1px solid #444444")
         }
+        console.log(changes['date_type'])
         selected_goal.find('.check_task').css('border-color', this.app.settings.data.check_border[changes['importance']])
     }
 
     _set_monthTodo_changes(selected_goal, changes) {
-        selected_goal.find('.monthTodoText').text(changes['goal'])
+        let deadline_label = ""
+        if (changes['date_type'] === 1) {
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        }
+
+        selected_goal.find('.monthTodoText').html(
+            `${changes['goal']} ${deadline_label}`
+        )
         let category_color = "rgb(74, 74, 74)"
 
         if (changes.category !== 0) {

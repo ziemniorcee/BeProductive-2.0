@@ -79,11 +79,17 @@ export class WeekView {
 
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
+        let deadline_label = ""
 
         if (goal.category !== 0) {
             category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
+        console.log(goal.date_type)
+        if(goal.date_type === 1){
+            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        }
+
         let check_color = this.todo.appSettings.data.check_border[goal.importance]
 
         return `
@@ -93,7 +99,10 @@ export class WeekView {
                 <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
             </div>
             <div class="taskText">
-                <span class="task">${converted_text}</span>
+                <span class="task">
+                    ${converted_text}
+                    ${deadline_label}
+                 </span>
             </div>
         </div>`;
     }
