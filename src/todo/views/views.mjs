@@ -2,6 +2,7 @@ import {PlanViews} from "./planViews/planViews.mjs";
 import {ProjectView} from "./projectView.js";
 import {InboxView} from "./inboxView.mjs";
 import {AsapView} from "./asapView.mjs";
+import {MyDayView} from "./myDay.js";
 
 export class TodoViews {
     constructor(todo) {
@@ -10,6 +11,7 @@ export class TodoViews {
         this.projectView = new ProjectView(todo)
         this.inboxView = new InboxView(todo)
         this.asapView = new AsapView(todo)
+        this.myDayView = new MyDayView(todo)
 
         this.initEventListeners()
     }
@@ -24,6 +26,6 @@ export class TodoViews {
     }
 
     async init() {
-        await this.planViews.dayView.display()
+        await this.myDayView.display()
     }
 }

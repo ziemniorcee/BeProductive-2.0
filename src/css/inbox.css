@@ -1,9 +1,9 @@
-#inboxHeader, #ASAPHeader {
+#inboxHeader, #ASAPHeader, #MyDayHeader {
     text-align: center;
     margin-bottom: 30px;
 }
 
-#inboxBody, #ASAPBody {
+#inboxBody, #ASAPBody, #MyDayBody {
     height: calc(100% - 50px);
     display: flex;
     flex-direction: column;
@@ -71,7 +71,7 @@
 }
 
 
-#inboxAdd, #ASAPAdd {
+#inboxAdd {
     height: 50px;
     width: 50px;
     cursor: pointer;
@@ -80,7 +80,7 @@
     text-align: center;
 }
 
-#inboxList, #ASAPList {
+#inboxList, #ASAPList, #MyDayList {
     height: calc(100% - 80px);
     overflow: hidden;
     width: 700px;
@@ -604,4 +604,156 @@
 #taskEdit .projectDeciderSelect{
     top: -60px;
     right: 250px;
+}
+
+#ASAPFire{
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#ASAPFire img{
+    width: 30px;
+    height: 30px;
+    position: relative;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+#ASAPFireASAP{
+    display: none;
+    margin-left: 5px;
+    color: red;
+}
+
+#ASAPAdd {
+    height: 50px;
+
+    cursor: pointer;
+    font-size: 50px;
+    line-height: 50px;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.ASAPLabel {
+    margin-left: 5px;
+    width: 25px;
+    height: 25px;
+    position: absolute;
+
+}
+
+#MyDayFooter {
+    justify-content: right;
+    display: flex;
+    position: relative;
+    width: 700px;
+}
+
+#MyDaySetup {
+    height: 50px;
+    width: max-content;
+    border: 1px solid white;
+    line-height: 50px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+#daySetup {
+    font-size: 20px;
+    padding: 30px
+}
+
+#daySetupHeader {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 25px;
+}
+
+.daySetupSectionTitle {
+    font-size: 25px;
+    cursor: pointer;
+    width: max-content;
+}
+
+.daySetupSectionTitle img {
+    width: 20px;
+    height: 20px;
+
+}
+
+.daySetupSectionBody {
+    margin-left: 30px;
+}
+
+.daySetupCategory {
+    font-size: 25px;
+    border-left: 3px solid red;
+
+}
+
+.daySetupCategoryTitle {
+    width: max-content;
+    position: relative;
+    cursor: pointer;
+}
+
+.daySetupCategory img {
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+.daySetupCategoryCheck {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background-color: #121212;
+    border: 2px solid #fff;
+    position: relative;
+    cursor: pointer;
+    top: 6px;
+}
+
+.daySetupCategoryCheck{
+    --before-content: '✖';
+}
+
+.daySetupCategoryCheck:checked::before {
+    content: var(--before-content);;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
+}
+
+.daySetupProjectCheck {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background-color: #121212;
+    border: 2px solid #fff;
+    position: relative;
+    cursor: pointer;
+    top: 6px;
+    margin-left: 80px;
+}
+
+.daySetupProjectCheck:checked::before {
+    content: "✖";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
 }
