@@ -223,6 +223,7 @@ export class DayView {
         console.log(goal)
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
+        let date_label = ""
         let deadline_label = ""
 
         if (goal.category !== 0) {
@@ -230,7 +231,10 @@ export class DayView {
             category_border = `border-right: 4px solid ${category_color}`
         }
 
-        if(goal.date_type === 1){
+        if(goal.date_type === 0){
+            date_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
+        }
+        else if(goal.date_type === 1){
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         }
 
@@ -249,6 +253,7 @@ export class DayView {
                     <span class='task'> 
                         ${goal_text} 
                         ${deadline_label}
+                        ${date_label}
                      </span>
                     ${goal.steps}
                 </div>

@@ -217,6 +217,7 @@ body {
 
 .task {
     position: relative;
+    margin-right: 15px;
 }
 #todosAll::-webkit-scrollbar {
     width: 0.2em;
@@ -2201,7 +2202,7 @@ body {
     width: 25px;
     height: 25px;
     position: absolute;
-
+    margin-left: 10px;
 }
 
 .weekDay .todoDeadline{

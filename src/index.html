@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Hello World!</title>
+    <title>BeProductive</title>
     <link rel="stylesheet" href="css/index.css"/>
     <link rel="stylesheet" href="css/inbox.css"/>
     <link rel="stylesheet" href="css/week.css"/>
@@ -39,8 +39,8 @@
         <div id="dashTodo" class="dashSection">
             <div class="dashTitle">To do</div>
             <div id="dashMyDay" class="dashButton">
-                <div class="dashButtonIcon"><img src="images/goals/dashboard/today.png"></div>
-                <div>Plan</div>
+                <div class="dashButtonIcon"><img src="images/goals/dashboard/sun.png"></div>
+                <div>My day</div>
             </div>
             <div id="dashInbox" class="dashButton">
                 <div class="dashButtonIcon"><img src="images/goals/dashboard/inbox.png"></div>
@@ -48,7 +48,7 @@
             </div>
             <div id="dashASAP" class="dashButton">
                 <div class="dashButtonIcon"><img src="images/goals/dashboard/fire.png"></div>
-                <div>ASAP</div>
+                <div>Now</div>
             </div>
             <div id="dashMyDayBtn" class="dashButton">
                 <div class="dashButtonIcon"><img src="images/goals/dashboard/today.png"></div>
@@ -119,10 +119,14 @@
     </template>
 
     <template id="ASAPMainTemplate">
-        <div id="ASAPHeader">ASAP</div>
+        <div id="ASAPHeader">Now</div>
         <div id="ASAPBody">
             <div id="ASAPEntry">
                 <input id="ASAPInput" type="text" spellcheck="false" placeholder="Result">
+                <div id="ASAPFire">
+                    <div id="ASAPFireASAP">ASAP </div>
+                    <img src="images/goals/fire0.png" alt="">
+                </div>
                 <div id="ASAPAdd">+</div>
             </div>
             <div id="ASAPList">

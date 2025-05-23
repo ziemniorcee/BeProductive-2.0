@@ -80,6 +80,12 @@ export class TodoEdit {
         if(goal['date_type'] === 1){
             $edit_clone.find('#editLabelDate').text('Deadline')
             $edit_clone.find('#editSwitchImg').prop('src', 'images/goals/dashboard/other.png')
+        } else if (goal['date_type'] === 2) {
+            $edit_clone.find('#editLabelDate').text('Now')
+            $edit_clone.find('#selectDate').text("ASAP")
+        } else if (goal['date_type'] === 3) {
+            $edit_clone.find('#editLabelDate').text('Now')
+            $edit_clone.find('#selectDate').text("None")
         }
 
         this.vignette.set_category(goal['category'], $edit_clone)
@@ -134,11 +140,19 @@ export class TodoEdit {
      */
     async change_goal() {
         let changes = await this.vignette.get_goal_settings()
+        console.log(changes)
+        if (!this.selected_goal.find('.ASAPLabel').length && $("#ASAPList").length) {
+            console.log("CHUUJJ")
+            changes['date_type'] = 3
+        }
+
         changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
 
-        if ($('#todosAll').length) {
+        if ($('#MyDayList').length) {
+            this.asap_todo_change(changes)
+        }
+        else if ($('#todosAll').length) {
             this.day_todo_change(changes)
-
         } else if ($('#ASAPList').length) {
             this.asap_todo_change(changes)
         } else if ($('.weekDay').length) {
@@ -266,13 +280,18 @@ export class TodoEdit {
 
     _set_todo_changes(selected_goal, changes) {
         let deadline_label = ""
+        let asap_label = ""
+        let border_color = this.app.settings.data.check_border[changes['importance']]
         if (changes['date_type'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 2) {
+            asap_label = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
         }
 
         selected_goal.find('.task').html(`
             ${this.app.settings.data.decode_text(changes['goal'])}
             ${deadline_label} 
+            ${asap_label}
         `)
 
         if (changes['category'] !== 0) {
@@ -282,8 +301,12 @@ export class TodoEdit {
         } else {
             selected_goal.css('border', "1px solid #444444")
         }
-        console.log(changes['date_type'])
-        selected_goal.find('.check_task').css('border-color', this.app.settings.data.check_border[changes['importance']])
+        if (changes['date_type'] === 2) {
+            border_color = "red"
+        }
+
+        console.log(border_color)
+        selected_goal.find('.check_task').css('border-color', border_color)
     }
 
     _set_monthTodo_changes(selected_goal, changes) {

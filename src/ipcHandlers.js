@@ -18,6 +18,43 @@ function todoHandlers(db) {
     let ids_array_previous = []
 
 
+    ipcMain.handle('get-my-day', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.importance,
+                               G.project_id as pr_id,
+                               G.date_type
+                        FROM goals G
+                        WHERE (addDate = "${params.date}" and check_state = 0 and (date_type = 0 or date_type = 1))
+                        or (check_state = 0 and (date_type = 2 or date_type = 3))
+                        ORDER BY date_type DESC, goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        let rows_ids = goals.map((goal) => goal.id)
+                        let ids_string = `( ${rows_ids} )`
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                            if (err2) reject(err);
+                            else {
+                                let safe_goals = get_safe_goals2(goals, steps)
+                                resolve(safe_goals);
+                            }
+                        })
+                    }
+                })
+            });
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
     ipcMain.handle('get-day-view', async (event, params) => {
         try {
             return await new Promise((resolve, reject) => {
@@ -36,7 +73,7 @@ function todoHandlers(db) {
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                                  LEFT JOIN projects PR ON PR.id = G.project_id
                         WHERE addDate = "${params.date}"
-                          and date_type != 2
+                          and (date_type = 0 or date_type = 1)
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -1094,15 +1131,16 @@ function todoHandlers(db) {
                                G.goal,
                                G.check_state,
                                G.category,
+                               G.date_type,
                                PR.category  as pr_category,
                                G.project_id as pr_id,
                                PR.icon      as pr_icon
                         FROM goals G
                                  LEFT JOIN knots KN ON KN.goal_id = G.id
                                  LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE date_type = 2
+                        WHERE (date_type = 2 or date_type = 3)
                           AND G.check_state = 0
-                        ORDER BY G.id DESC`, (err, goals) => {
+                        ORDER BY date_type ASC, G.id DESC`, (err, goals) => {
                     if (err) reject(err)
                     else {
                         let ids_array = goals.map((goal) => goal.id)
@@ -1136,7 +1174,7 @@ function todoHandlers(db) {
     ipcMain.handle('new-ASAP-goal', async (event, params) => {
         db.run(`INSERT INTO goals (goal, addDate, goal_pos, category, difficulty, importance, project_id, note,
                                    date_type)
-                VALUES ("${params.name}", "${params.add_date}", 0, 0, 2, 4, -1, "", 2)`);
+                VALUES ("${params.name}", "${params.add_date}", 0, 0, 2, 2, -1, "", "${params.date_type}")`);
 
         try {
             return await new Promise((resolve, reject) => {
@@ -1147,6 +1185,7 @@ function todoHandlers(db) {
                                G.category,
                                G.difficulty,
                                G.importance,
+                               G.date_type,
                                PR.category as pr_category,
                                PR.id       as pr_id,
                                PR.icon     as pr_icon
@@ -1208,6 +1247,44 @@ function todoHandlers(db) {
 
 
             })
+        } catch (error) {
+            console.error(error);
+            return {error: 'An error occurred while fetching categories.'};
+        }
+    });
+
+
+    ipcMain.handle('get-deadlines', async (event, params) => {
+        try {
+            return await new Promise((resolve, reject) => {
+                db.all(`SELECT G.id,
+                               G.goal,
+                               G.check_state,
+                               G.goal_pos,
+                               G.category,
+                               G.importance,
+                               G.project_id as pr_id,
+                               G.date_type,
+                               G.addDate
+                        FROM goals G
+                        WHERE G.addDate > "${params.date}"
+                        ORDER BY addDate, goal_pos`, (err, goals) => {
+                    if (err) reject(err)
+                    else {
+                        let rows_ids = goals.map((goal) => goal.id)
+                        let ids_string = `( ${rows_ids} )`
+                        db.all(`SELECT id, goal_id, step_text, step_check
+                                FROM steps
+                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
+                            if (err2) reject(err);
+                            else {
+                                let safe_goals = get_safe_goals2(goals, steps)
+                                resolve(safe_goals);
+                            }
+                        })
+                    }
+                })
+            });
         } catch (error) {
             console.error(error);
             return {error: 'An error occurred while fetching categories.'};

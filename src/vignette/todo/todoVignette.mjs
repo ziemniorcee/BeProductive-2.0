@@ -1,6 +1,7 @@
 import {TodoNew} from "./newTodo.js";
 import {TodoEdit} from "./editTodo.js";
 import {TodoProjectNew} from "./newProjectTodo.js";
+import {DaySetup} from "./daySetup.js";
 
 export class TodoVignette {
     constructor(app) {
@@ -12,6 +13,7 @@ export class TodoVignette {
         this.todo_edit = new TodoEdit(app, this)
         this.todo_new = new TodoNew(app, this)
         this.todo_project_new = new TodoProjectNew(app, this)
+        this.day_setup = new DaySetup(app)
     }
 
     initEventListeners() {
@@ -142,7 +144,12 @@ export class TodoVignette {
         if ($('#ASAPList').length > 0) date_type = 2
         else if ($('#editLabelDate').text() === "Deadline") {
             date_type = 1
+        } else if ($('#selectDate').text() === "ASAP") {
+            date_type = 2
+        } else if ($('#selectDate').text() === "None" && $('#editLabelDate').text() === "Now") {
+            date_type = 3
         }
+
 
         let new_date = ""
         if ($('#selectDate').text() !== "None"){
