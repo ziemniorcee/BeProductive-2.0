@@ -14,6 +14,8 @@ export class Data {
         this.check_border = ["rgb(0, 117, 255)", "rgb(36, 255, 0)", "rgb(255, 255, 255)", "rgb(255, 92, 0)", "rgb(255, 0, 0)"]
         this.range2_backgrounds = ["#00A2E8", "#24FF00", "#FFFFFF", "#FF5C00", "#FF0000"]
 
+        this.localStorage = "myDaySetupState"
+        // this.localStorage = "myDaySetupStateREAL"
     }
 
     async init() {

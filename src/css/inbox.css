@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
 #inboxHeader, #ASAPHeader, #MyDayHeader {
     text-align: center;
     margin-bottom: 30px;
@@ -663,8 +665,15 @@
 }
 
 #daySetup {
+    display: flex;
+    flex-direction: column;
     font-size: 20px;
     padding: 30px
+}
+
+#daySetupMainBody{
+    display: flex;
+    height: 90%;
 }
 
 #daySetupHeader {
@@ -672,7 +681,48 @@
     margin-bottom: 30px;
     font-size: 25px;
 }
+#daySetupPicker, #daySetupPriorities{
+    width: 50%;
+}
 
+#daySetupPriorities{
+    font-size: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
+#daySetupQueue, #daySetupShare{
+    width: 100%;
+}
+
+.daySetupQueueProjectRank{
+    font-family: 'Trajan Pro', serif;
+    font-size: 25px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 5px;
+    padding-left: 10px;
+}
+
+#daySetupQueueTitle{
+    text-align: center;
+}
+
+.daySetupQueueProject {
+    display: flex;
+    color: white;
+    font-size: 25px;
+    background-color: #121212;
+}
+
+.daySetupQueueProjectDrag {
+    cursor: pointer;
+}
+.daySetupQueueProjectDrag img {
+    width: 25px;
+    height: 25px;
+    -webkit-user-drag: none;
+}
 .daySetupSectionTitle {
     font-size: 25px;
     cursor: pointer;
@@ -756,4 +806,170 @@
     font-size: 18px;
     line-height: 1;
     user-select: none;
+}
+
+:root {
+    --slider-height: 1.5rem;
+    --slider-radius: 0.75rem;
+    --primary-color: #e33;
+    --track-color: #1f1510;
+}
+
+#daySetupShareBodyPct,
+#daySetupShareBodyRemaining {
+    margin-bottom: 2rem;
+}
+
+.daySetupShareSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.daySetupShareSectionTitle {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+.daySetupShareSectionTitle img {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+}
+
+.daySetupShareSectionBody {
+    display: flex;
+    align-items: center;
+}
+
+/* the styled range input */
+.daySetupShareSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: var(--slider-height);
+    border-radius: var(--slider-radius);
+    background: var(--track-color);
+    outline: none;
+    transition: background 0.2s ease;
+}
+.daySetupShareSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--slider-height);
+    height: var(--slider-height);
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    margin-top: calc((var(--slider-height) - var(--slider-height)) / -2);
+}
+.daySetupShareSlider::-moz-range-thumb {
+    width: var(--slider-height);
+    height: var(--slider-height);
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+}
+
+.daySetupShareValue {
+    margin-left: 1rem;
+    font-weight: bold;
+    min-width: 3rem;
+    text-align: right;
+}
+
+.daySetupQueueProjectName {
+    color: white;
+    font-size: 25px;
+}
+
+#daySetupShare {
+    margin-top: 10px;
+}
+
+#daySetupQueue{
+    height: 50%;
+}
+
+#daySetupShareTitle{
+    text-align: center;
+}
+
+#daySetupPicker {
+    overflow-y: scroll;
+    height: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) rgba(0,0,0,0);
+    margin-right: 10px;
+}
+
+#daySetupPicker::-webkit-scrollbar {
+    width: 8px;           /* adjust thickness */
+}
+
+/* the “rail” or background behind the thumb */
+#daySetupPicker::-webkit-scrollbar-track {
+    background: #1c1c1c;  /* deep charcoal to blend with dark BG */
+    border-radius: 4px;   /* rounded corners on the track */
+}
+
+/* the draggable thumb */
+#daySetupPicker::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.15); /* semi‐opaque light */
+    border-radius: 4px;   /* match track curvature */
+    border: 2px solid #1c1c1c; /* keep a bit of padding so it doesn’t “bleed” */
+}
+
+/* thumb on hover/focus */
+#daySetupPicker::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255,255,255,0.30); /* lighten when hovered */
+}
+
+/* optional: if you want a custom corner when both scrollbars meet */
+#daySetupPicker::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+
+
+#daySetupSave {
+    width: 100px;
+    display: inline-block;
+    text-align: center;
+    margin-top: 1.5rem;               /* give some space below the sliders */
+    padding: 0.6rem 1.6rem;           /* adjust for a nice “clickable” area */
+    font-size: 1rem;                  /* same size as your slider labels */
+    font-weight: 500;
+    color: #FFFFFF;                   /* white text */
+    background-color: rgba(255, 255, 255, 0.08);
+    /* very subtle light overlay on black */
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    /* semi-transparent white border */
+    border-radius: 4px;               /* slightly rounded corners */
+    cursor: pointer;
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease;
+}
+
+/* 2) Hover state */
+#daySetupSave:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    /* lighten the background a bit */
+    border-color: rgba(255, 255, 255, 0.4);
+    /* more opaque white border */
+}
+
+/* 3) Active / pressed state */
+#daySetupSave:active {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #FFFFFF;
+}
+
+/* 4) Focus state (keyboard‐accessible outline) */
+#daySetupSave:focus {
+    outline: 2px solid #FFFFFF;      /* pure white outline */
+    outline-offset: 2px;             /* space between button and outline */
 }
