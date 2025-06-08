@@ -21,6 +21,10 @@ export class AppDashboard {
             await this.app.todo.todoViews.planViews.dayView.display()
         })
 
+        $(document).on('click', '#dashMyDay', async () => {
+            await this.app.todo.todoViews.myDayView.display()
+        })
+
         $(document).on('click', '#dayViewButton, #dayViewButton2', async () => {
             await this.app.todo.todoViews.planViews.dayView.display()
         })

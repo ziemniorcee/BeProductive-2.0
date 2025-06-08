@@ -22,6 +22,18 @@ export class AsapView {
             window.asapAPI.checkASAPGoal({'id': todo_id})
         })
 
+        $(document).on('click', '#ASAPFire', async () => {
+            if ($('#ASAPFire img').attr('src') === 'images/goals/fire0.png') {
+                $('#ASAPFire img').attr('src', 'images/goals/fire1.png')
+                $('#ASAPFireASAP').css('display', 'block')
+                $("#ASAPFire").css('border', '1px solid red')
+            } else {
+                $('#ASAPFire img').attr('src', 'images/goals/fire0.png')
+                $('#ASAPFireASAP').css('display', 'none')
+                $("#ASAPFire").css('border', 'none')
+            }
+        })
+
         $(document).on('click', '#ASAPAdd', async () => {
             await this.new_goal()
         })
@@ -46,7 +58,7 @@ export class AsapView {
 
         let goals = await window.asapAPI.getASAP()
 
-        for (let i = 0; i < goals.length; i++){
+        for (let i = 0; i < goals.length; i++) {
             goals[i]['steps'] = this.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].category)
             goals[i]['goal'] = this.todo.appSettings.data.decode_text(goals[i]['goal'])
             $('#ASAPList').append(this.build_goal(goals[i]))
@@ -63,7 +75,14 @@ export class AsapView {
 
         let project_emblem = this.todo.appSettings.data.projects.project_emblem_html(goal.pr_id)
 
-        let check_color = this.todo.appSettings.data.check_border[4]
+        console.log(goal.importance)
+        let check_color = this.todo.appSettings.data.check_border[goal.importance]
+        let fire_emblem = ""
+        if (goal.date_type === 2) {
+            check_color = this.todo.appSettings.data.check_border[4]
+            fire_emblem = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
+        }
+
         return `
         <div class='todo' style="${category_border}">
             <div class="todoId">${goal.id}</div>
@@ -71,7 +90,10 @@ export class AsapView {
                 <input type='checkbox' class='check_task' style="border-color:${check_color}; color:${check_color}">
             </div>
             <div class='taskText'>
-                <span class='task'> ${goal.goal} </span>
+                <span class='task'> 
+                    ${goal.goal} 
+                    ${fire_emblem}
+                 </span>
                 ${goal.steps}
             </div>
             ${project_emblem}
@@ -82,9 +104,20 @@ export class AsapView {
         let $asap_input = $('#ASAPInput')
         let name = $asap_input.val()
         $asap_input.val("")
+        let date_type = 3
 
-        let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.todo.appSettings.date.today_sql})
+        if ($('#ASAPFire img').attr('src') === 'images/goals/fire1.png') date_type = 2
+
+        let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.todo.appSettings.date.today_sql, date_type: date_type})
         new_goal['steps'] = ""
-        $('#ASAPList').prepend(this.build_goal(new_goal))
+
+        if (date_type === 2) {
+            $('#ASAPList').prepend(this.build_goal(new_goal))
+        } else if (date_type === 3) {
+            let where_to_insert = $('.ASAPLabel').length
+
+            $('#ASAPList').children().eq(where_to_insert-1).after(this.build_goal(new_goal))
+
+        }
     }
 }

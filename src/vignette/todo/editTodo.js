@@ -77,9 +77,15 @@ export class TodoEdit {
             $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
         }
 
-        if(goal['date_type'] === 1){
+        if (goal['date_type'] === 1) {
             $edit_clone.find('#editLabelDate').text('Deadline')
             $edit_clone.find('#editSwitchImg').prop('src', 'images/goals/dashboard/other.png')
+        } else if (goal['date_type'] === 2) {
+            $edit_clone.find('#editLabelDate').text('Now')
+            $edit_clone.find('#selectDate').text("ASAP")
+        } else if (goal['date_type'] === 3) {
+            $edit_clone.find('#editLabelDate').text('Now')
+            $edit_clone.find('#selectDate').text("None")
         }
 
         this.vignette.set_category(goal['category'], $edit_clone)
@@ -134,11 +140,18 @@ export class TodoEdit {
      */
     async change_goal() {
         let changes = await this.vignette.get_goal_settings()
+        console.log(changes)
+        if (!this.selected_goal.find('.ASAPLabel').length && $("#ASAPList").length) {
+            console.log("CHUUJJ")
+            changes['date_type'] = 3
+        }
+
         changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
 
-        if ($('#todosAll').length) {
+        if ($('#MyDayList').length) {
+            this.asap_todo_change(changes)
+        } else if ($('#todosAll').length) {
             this.day_todo_change(changes)
-
         } else if ($('#ASAPList').length) {
             this.asap_todo_change(changes)
         } else if ($('.weekDay').length) {
@@ -220,6 +233,7 @@ export class TodoEdit {
                     let new_date = $('.monthDate').filter(function () {
                         return Number($(this).text()) === new_date_day;
                     }).toArray()[0]
+                    console.log(this.selected_goal)
                     $(new_date).closest('.monthDay').find('.monthGoals').prepend(this.selected_goal)
                 }
                 this._set_monthTodo_changes(this.selected_goal, changes)
@@ -230,8 +244,11 @@ export class TodoEdit {
         this.app.todo.todoViews.planViews.monthView.dragula_month_view()
     }
 
-    project_todo_change(changes){
-        if (changes['project_id'] !== this.selected_goal.find('.projectDeciderId').text()) {
+    project_todo_change(changes) {
+        let current_pr_id = Number($('#projectId').text())
+        let new_pr_id = Number($('#taskEdit').find('.projectDeciderId').text())
+        if (current_pr_id !== new_pr_id) {
+            console.log("hcuj1")
             this.selected_goal.remove()
         } else {
             let is_todo_checked = changes['check_state']
@@ -266,13 +283,20 @@ export class TodoEdit {
 
     _set_todo_changes(selected_goal, changes) {
         let deadline_label = ""
-        if (changes['date_type'] === 1) {
+        let asap_label = ""
+        let border_color = this.app.settings.data.check_border[changes['importance']]
+        if (changes['date_type'] === 0) {
+            deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 2) {
+            asap_label = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
         }
 
         selected_goal.find('.task').html(`
             ${this.app.settings.data.decode_text(changes['goal'])}
             ${deadline_label} 
+            ${asap_label}
         `)
 
         if (changes['category'] !== 0) {
@@ -282,19 +306,29 @@ export class TodoEdit {
         } else {
             selected_goal.css('border', "1px solid #444444")
         }
-        console.log(changes['date_type'])
-        selected_goal.find('.check_task').css('border-color', this.app.settings.data.check_border[changes['importance']])
+        if (changes['date_type'] === 2) {
+            border_color = "red"
+        }
+
+        console.log(border_color)
+        selected_goal.find('.check_task').css('border-color', border_color)
     }
 
     _set_monthTodo_changes(selected_goal, changes) {
         let deadline_label = ""
         if (changes['date_type'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 0) {
+            deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
 
-        selected_goal.find('.monthTodoText').html(
-            `${changes['goal']} ${deadline_label}`
+        selected_goal.find('.monthTodoTextLimit').html(
+            `${changes['goal']}`
         )
+        selected_goal.find('.monthTodoDateLabel').html(
+            `${deadline_label}`
+        )
+
         let category_color = "rgb(74, 74, 74)"
 
         if (changes.category !== 0) {

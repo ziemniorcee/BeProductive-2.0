@@ -167,6 +167,7 @@ export class ProjectView {
 
         let check_state = goal.check_state ? "checked" : "";
         let check_color = this.todo.appSettings.data.check_border[goal.importance]
+        let goal_text = this.todo.appSettings.data.decode_text(goal["goal"])
 
         return `
             <div class='todo' style="${category_border}">
@@ -175,7 +176,7 @@ export class ProjectView {
                     <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
                 </div>
                 <div class='taskText'>
-                    <span class='task'> ${goal.goal} </span>
+                    <span class='task'> ${goal_text} </span>
                     ${goal.steps}
                 </div>
             </div>`

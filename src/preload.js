@@ -5,11 +5,13 @@ const {contextBridge, ipcRenderer} = require('electron')
 
 
 contextBridge.exposeInMainWorld('goalsAPI', {
+    getMyDay: (params) => ipcRenderer.invoke('get-my-day', params),
     getDayView: (params) => ipcRenderer.invoke('get-day-view', params),
     getWeekView: (params) => ipcRenderer.invoke('get-week-view', params),
     getMonthView: (params) => ipcRenderer.invoke('get-month-view', params),
     getProjectView: (params) => ipcRenderer.invoke('get-project-view', params),
 
+    getDaySetupGoals: (params) => ipcRenderer.invoke('get-day-setup-goals', params),
     test: (params) => ipcRenderer.send('test', params),
     newGoal: (params) => ipcRenderer.send('new-goal', params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
@@ -65,6 +67,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     // askHabitsLogs: () => ipcRenderer.send('ask-habits-logs'),
     // getHabitsLogs: (func) => ipcRenderer.on('get-habits-logs', (event, days) => func(days)),
     newGoal2: (params) => ipcRenderer.invoke('new-goal-2', params),
+    getDeadlines: (params) => ipcRenderer.invoke('get-deadlines', params),
 })
 
 contextBridge.exposeInMainWorld('projectsAPI', {
