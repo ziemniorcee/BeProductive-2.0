@@ -68,6 +68,7 @@ export class AppDashboard {
 
         $(document).on('click', '#habitButton', () => {
             $('#galactics').css('display', 'none');
+            this.app.habits.refresh_today_habits();
             $('#habit').css('display', 'grid');
         })
 

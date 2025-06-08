@@ -5,8 +5,8 @@
 
     position: absolute;
     top: 0%;
-    left: 100px;
-    width: calc(100vw - 100px);
+    left: var(--dashboard-size);
+    width: calc(100vw - var(--dashboard-size));
     height: 100%;
     padding: 20px;
     

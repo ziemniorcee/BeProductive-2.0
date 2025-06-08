@@ -1,5 +1,9 @@
+:root {
+    --dashboard-size: 300px;
+}
+
 #dashboard{
-    width: 300px;
+    width: var(--dashboard-size);
     background-color: #1E1E1E;
     padding: 30px;
     color: white;

@@ -163,10 +163,3 @@ $(document).on('mousedown', '.vignetteWindow2, .vignetteWindow1', function (even
     event.stopPropagation()
 })
 
-$(document).on('input', '.customTimePickerHoursPicker', function () {
-    $(this).closest(".customTimePickerHours").children().first().text($(this).val());
-})
-
-$(document).on('input', '.customTimePickerMinutesPicker', function () {
-    $(this).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
-})

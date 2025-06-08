@@ -1,7 +1,6 @@
 export class Habits {
-    constructor (app_data, app_categories) {
-        this.data = app_data;
-        this.categories = app_categories;
+    constructor (app_settings) {
+        this.settings = app_settings;
         this.initEventListeners();
         this.chart = undefined;
         this.create_chart();
@@ -9,6 +8,17 @@ export class Habits {
     }
 
     initEventListeners() {
+
+        $(document).on('input', '.customTimePickerHoursPicker', function () {
+            console.log('hours')
+            $(this).closest(".customTimePickerHours").children().first().text($(this).val());
+        })
+
+        $(document).on('input', '.customTimePickerMinutesPicker', function () {
+            console.log('minutes')
+            $(this).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
+        })
+
         $(document).on('click', '#habit-new-btn', () => {
             this.create_new_habit_window();
         })
@@ -60,7 +70,7 @@ export class Habits {
                             $('#newHabitOption2Box').children('.customTimePicker').eq(0))
                         end_date = this.get_custom_time_data(
                             $('#newHabitOption2Box').children('.customTimePicker').eq(1))
-                        if (this.data.compare_times(start_date, end_date) > 0) {
+                        if (this.settings.data.compare_times(start_date, end_date) > 0) {
                             days.push({day_of_week: i, 
                                 start_date: start_date,
                                 end_date: end_date
@@ -73,7 +83,7 @@ export class Habits {
                                 $('#newHabitOption3TimeBox').children('.customTimePicker').eq(0))
                             end_date = this.get_custom_time_data(
                                 $('#newHabitOption3TimeBox').children('.customTimePicker').eq(1))
-                            if (this.data.compare_times(start_date, end_date) > 0) {
+                            if (this.settings.data.compare_times(start_date, end_date) > 0) {
                                 days.push({day_of_week: i, 
                                     start_date: start_date,
                                     end_date: end_date
@@ -87,7 +97,7 @@ export class Habits {
                                 $(`#newHabitOption4Day${i}`).parent().children('.customTimePicker').eq(0))
                             end_date = this.get_custom_time_data(
                                 $(`#newHabitOption4Day${i}`).parent().children('.customTimePicker').eq(1))
-                            if (this.data.compare_times(start_date, end_date) > 0) {
+                            if (this.settings.data.compare_times(start_date, end_date) > 0) {
                                 days.push({day_of_week: i, 
                                     start_date: start_date,
                                     end_date: end_date
@@ -121,8 +131,8 @@ export class Habits {
             if (id) {
                 id = parseInt(id);
                 await window.goalsAPI.removeHabit({id: id});
-                this.data.habits = this.data.habits.filter(obj => obj.id !== id);
-                this.data.habits_logs = this.data.habits_logs.filter(obj => obj.habit_id !== id);
+                this.settings.data.habits = this.settings.data.habits.filter(obj => obj.id !== id);
+                this.settings.data.habits_logs = this.settings.data.habits_logs.filter(obj => obj.habit_id !== id);
                 this.refresh_today_habits();
                 $('#vignette').css('display', 'none');
             }
@@ -147,22 +157,21 @@ export class Habits {
         let new_id = await window.goalsAPI.addHabit({name: name, importancy: importancy, days: days});
         new_id = new_id[0].id;
         await window.goalsAPI.addHabitDays({id: new_id, days: days});
-        this.data.habits.push({id: new_id, name: name, importancy: importancy, days: days.slice()});
-        console.log(this.data.habits);
+        this.settings.data.habits.push({id: new_id, name: name, importancy: importancy, days: days.slice()});
+        console.log(this.settings.data.habits);
     }
 
     async add_habit_log(id) {
         let today = new Date();
         const today_date = today.toISOString().split('T')[0];
         window.goalsAPI.addHabitLogs({id: id, date: today_date})
-        this.data.habits_logs.push({habit_id: id, date: today_date})
+        this.settings.data.habits_logs.push({habit_id: id, date: today_date})
     }
 
     create_new_habit_window() {
         $("#vignette").css('display', 'block')
         const new_habit_template = $('#addHabitTemplate').prop('content');
         let $new_habit_clone = $(new_habit_template).clone()
-        $new_habit_clone.find(".categoryPicker").html(this.categories._categories_HTML(false, true))
         $("#vignette").html($new_habit_clone)
         const time_picker_template = $('#customTimePicker').prop('content');
         $('#newHabitOption2').children("#newHabitOption2Box").append($(time_picker_template).clone());
@@ -173,11 +182,11 @@ export class Habits {
         $('#newHabitOption3').children("#newHabitOption3TimeBox").append($(time_picker_template).clone());
         for (let i=0; i<7; i++) {
             $('#newHabitOption3Box').append(`<div class="newHabitOptionDayBox">
-            <span>${this.data.weekdays2[i]}</span>
+            <span>${this.settings.data.weekdays2[i]}</span>
             <input type="checkbox" id="newHabitOption3Day${i}">
             </div>`);
             $('#newHabitOption4Box').append(`<div class="newHabitOptionDayBox">
-            <span>${this.data.weekdays2[i]}</span>
+            <span>${this.settings.data.weekdays2[i]}</span>
             <input type="checkbox" id="newHabitOption4Day${i}" class="newHabitOption4Checkbox">
             </div>`);
             let last_box = $('#newHabitOption4Box').children(":last-child")
@@ -194,20 +203,21 @@ export class Habits {
         $('#habit-today-to-do').empty();
         $('#habit-today-done').empty();
         $('#habit-menu-all').empty();
+        $('#habit-info-tomorrow').empty();
         let today = new Date();
         const weekday = (today.getDay() + 6) % 7;
         const today_date = today.toISOString().split('T')[0];
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const weekdayTomorrow = (tomorrow.getDay() + 6) % 7;
-        for (const habit of this.data.habits) {
+        for (const habit of this.settings.data.habits) {
             let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
                 undefined, undefined, '<div class="habitAllButton">Delete</div>')
             $('#habit-menu-all').append(habit_block)
             for (const day of habit.days) {
                 if (day.day_of_week === weekday) {
                     let flag = true;
-                    for (const log of this.data.habits_logs) {
+                    for (const log of this.settings.data.habits_logs) {
                         if (log.habit_id === habit.id && log.date === today_date) {
                             flag = false;
                             let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
@@ -218,8 +228,8 @@ export class Habits {
                     if (flag) {
                         let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
                         if (!day.start_date || !day.end_date || 
-                            (this.data.compare_times(day.start_date, time_now) > 0 && 
-                            this.data.compare_times(time_now, day.end_date) > 0)) {
+                            (this.settings.data.compare_times(day.start_date, time_now) > 0 && 
+                            this.settings.data.compare_times(time_now, day.end_date) > 0)) {
                             let habit_block = this.__HTML_habit_block(habit.id, habit.name,
                                 day.start_date, day.end_date, '<input type="checkbox">', "habitToDo")
                             $('#habit-today-to-do').append(habit_block)
@@ -232,6 +242,7 @@ export class Habits {
                 }
             }
         }
+        this.update_chart();
     }
 
     get_custom_time_data(element) {
@@ -334,7 +345,7 @@ export class Habits {
         for (const [date, weekday] of result) {
             let quantity = 0;
             let work = 0;
-            for (const habit of this.data.habits) {
+            for (const habit of this.settings.data.habits) {
                 let flag = false;
                 for (const day of habit.days) {
                     if (weekday === day.day_of_week) {
@@ -344,7 +355,7 @@ export class Habits {
                     }
                 }
                 if (flag) {
-                    for (const log of this.data.habits_logs) {
+                    for (const log of this.settings.data.habits_logs) {
                         if (log.habit_id === habit.id && log.date === date) {
                             work += 1;
                         }

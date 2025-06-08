@@ -13,8 +13,8 @@ class MainApp {
         this.vignette = new Vignette(this)
 
         this.todo = new Todo(this.settings)
-        this.strategy = new Strategy(this.data, this.categories)
-        this.habits = new Habits(this.data, this.categories)
+        this.strategy = new Strategy(this.settings)
+        this.habits = new Habits(this.settings)
     }
 
     async init() {
