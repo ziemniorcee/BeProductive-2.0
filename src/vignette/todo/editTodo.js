@@ -77,7 +77,7 @@ export class TodoEdit {
             $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
         }
 
-        if(goal['date_type'] === 1){
+        if (goal['date_type'] === 1) {
             $edit_clone.find('#editLabelDate').text('Deadline')
             $edit_clone.find('#editSwitchImg').prop('src', 'images/goals/dashboard/other.png')
         } else if (goal['date_type'] === 2) {
@@ -150,8 +150,7 @@ export class TodoEdit {
 
         if ($('#MyDayList').length) {
             this.asap_todo_change(changes)
-        }
-        else if ($('#todosAll').length) {
+        } else if ($('#todosAll').length) {
             this.day_todo_change(changes)
         } else if ($('#ASAPList').length) {
             this.asap_todo_change(changes)
@@ -234,6 +233,7 @@ export class TodoEdit {
                     let new_date = $('.monthDate').filter(function () {
                         return Number($(this).text()) === new_date_day;
                     }).toArray()[0]
+                    console.log(this.selected_goal)
                     $(new_date).closest('.monthDay').find('.monthGoals').prepend(this.selected_goal)
                 }
                 this._set_monthTodo_changes(this.selected_goal, changes)
@@ -244,8 +244,11 @@ export class TodoEdit {
         this.app.todo.todoViews.planViews.monthView.dragula_month_view()
     }
 
-    project_todo_change(changes){
-        if (changes['project_id'] !== this.selected_goal.find('.projectDeciderId').text()) {
+    project_todo_change(changes) {
+        let current_pr_id = Number($('#projectId').text())
+        let new_pr_id = Number($('#taskEdit').find('.projectDeciderId').text())
+        if (current_pr_id !== new_pr_id) {
+            console.log("hcuj1")
             this.selected_goal.remove()
         } else {
             let is_todo_checked = changes['check_state']
@@ -282,7 +285,9 @@ export class TodoEdit {
         let deadline_label = ""
         let asap_label = ""
         let border_color = this.app.settings.data.check_border[changes['importance']]
-        if (changes['date_type'] === 1) {
+        if (changes['date_type'] === 0) {
+            deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         } else if (changes['date_type'] === 2) {
             asap_label = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
@@ -313,11 +318,17 @@ export class TodoEdit {
         let deadline_label = ""
         if (changes['date_type'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+        } else if (changes['date_type'] === 0) {
+            deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
 
-        selected_goal.find('.monthTodoText').html(
-            `${changes['goal']} ${deadline_label}`
+        selected_goal.find('.monthTodoTextLimit').html(
+            `${changes['goal']}`
         )
+        selected_goal.find('.monthTodoDateLabel').html(
+            `${deadline_label}`
+        )
+
         let category_color = "rgb(74, 74, 74)"
 
         if (changes.category !== 0) {

@@ -75,6 +75,7 @@ export class AsapView {
 
         let project_emblem = this.todo.appSettings.data.projects.project_emblem_html(goal.pr_id)
 
+        console.log(goal.importance)
         let check_color = this.todo.appSettings.data.check_border[goal.importance]
         let fire_emblem = ""
         if (goal.date_type === 2) {

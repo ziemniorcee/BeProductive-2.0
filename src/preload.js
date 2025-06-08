@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('goalsAPI', {
     getMonthView: (params) => ipcRenderer.invoke('get-month-view', params),
     getProjectView: (params) => ipcRenderer.invoke('get-project-view', params),
 
+    getDaySetupGoals: (params) => ipcRenderer.invoke('get-day-setup-goals', params),
     test: (params) => ipcRenderer.send('test', params),
     newGoal: (params) => ipcRenderer.send('new-goal', params),
     removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),

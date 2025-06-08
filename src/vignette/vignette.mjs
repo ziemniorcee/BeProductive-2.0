@@ -21,6 +21,9 @@ export class Vignette {
                 await this.todoVignette.todo_new.add_goal()
             } else if ($('#newProjectTask').length) {
                 await this.todoVignette.todo_project_new.add_goal()
+            } else if ($('#daySetup').length) {
+                this.todoVignette.day_setup.save_setup()
+                await this.app.todo.todoViews.myDayView.display()
             }
             $('#vignette').css('display', 'none');
             $('#vignette').html('')

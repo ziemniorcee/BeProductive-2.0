@@ -209,7 +209,6 @@ export class MonthView {
             category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
         }
 
-        console.log(goal.date_type)
         if(goal.date_type === 0){
             date_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
@@ -222,7 +221,11 @@ export class MonthView {
             <div class="monthTodoId">${goal["id"]}</div>
             <div class="monthTodoLabel" style="background-color: ${category_color}"></div>
             <div class="monthTodoText" >
-                ${converted_text}
+                <div class="monthTodoTextLimit">
+                    ${converted_text}
+                </div>
+            </div>
+            <div class="monthTodoDateLabel">
                 ${deadline_label}
                 ${date_label}
             </div>
