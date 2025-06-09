@@ -23,6 +23,10 @@ export class DeleteProject {
         this.app.settings.data.projects.projects = this.app.settings.data.projects.projects.filter(item => item.id !== project_id);
 
         this.app.settings.data.projects.set_projects_options()
+
         await this.app.todo.todoViews.planViews.dayView.display()
+
+        let is_less = $('#dashStrategyMore').text() === 'Less'
+        this.app.controller.appDashboard.projects.build(is_less)
     }
 }
