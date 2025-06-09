@@ -163,8 +163,6 @@ function todoHandlers(db) {
             console.error(error);
             return {error: 'An error occurred while fetching categories.'};
         }
-
-
     })
 
 

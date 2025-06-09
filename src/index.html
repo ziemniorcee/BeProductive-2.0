@@ -31,7 +31,7 @@
 
 <div id="container">
     <div id="dashboard">
-        <div id="dashTitleBar"></div>
+        <div id="dashLogin">login</div>
         <div id="dashClose">
             <img src="images/goals/back.png">
         </div>
@@ -106,7 +106,12 @@
     </template>
 
     <template id="inboxMainTemplate">
-        <div id="inboxHeader">Inbox</div>
+        <div id="inboxHeader">
+            <div id="dashOpen">
+                <img src="images/goals/back.png" alt="">
+            </div>
+            Inbox
+        </div>
         <div id="inboxBody">
             <div id="inboxEntry">
                 <input id="inboxInput" type="text" spellcheck="false" placeholder="Result">
@@ -119,7 +124,12 @@
     </template>
 
     <template id="ASAPMainTemplate">
-        <div id="ASAPHeader">Now</div>
+        <div id="ASAPHeader">
+            <div id="dashOpen">
+                <img src="images/goals/back.png" alt="">
+            </div>
+            Now
+        </div>
         <div id="ASAPBody">
             <div id="ASAPEntry">
                 <input id="ASAPInput" type="text" spellcheck="false" placeholder="Result">
@@ -254,6 +264,9 @@
     </template>
     <template id="projectViewHeaderTemplate">
         <div id="projectHeader">
+            <div id="dashOpen">
+                <img src="images/goals/back.png" alt="">
+            </div>
             <img id="projectHeaderIcon" src="" alt="">
             <div id="projectName"></div>
             <div id="projectId">0</div>
@@ -526,6 +539,9 @@
                 <div id="decisionWhenOptions">
                     <div id="decisionWhenFuture" class="deciderButtonEmpty">
                         Future
+                    </div>
+                    <div id="decisionWhenNow" class="deciderButtonEmpty">
+                        Now
                     </div>
                     <div id="decisionWhenASAP" class="deciderButtonEmpty">
                         ASAP

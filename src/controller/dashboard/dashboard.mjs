@@ -8,6 +8,10 @@ export class AppDashboard {
     }
 
     initEventListeners() {
+        $(document).on('click', '#dashLogin', () => {
+            this.app.vignette.loginVignette.display()
+        })
+
         $('#dashStrategyMore').on('click', () => {
             this.show_more_projects()
         })

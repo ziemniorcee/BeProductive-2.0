@@ -1602,6 +1602,26 @@ body {
     font-size: 20px;
 }
 
+.vignetteWindow3 {
+    position: absolute;
+    width: 30%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #121212;
+    border: #000000 3px solid;
+    border-radius: 10px;
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 20px;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50%;
+    padding: 1rem;
+}
+
 #editHead {
     height: 50px;
     width: 100%;
@@ -2213,4 +2233,93 @@ body {
 .monthDay .todoDeadline{
     width: 15px;
     height: 15px;
+}
+
+.login-form {
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 360px;
+}
+
+/* =========================
+   Logo / Heading
+   ========================= */
+.logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.logo h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #00adee;
+}
+
+/* =========================
+   Form Elements
+   ========================= */
+.login-form h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-align: center;
+}
+.input-group {
+    margin-bottom: 1rem;
+}
+.input-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: #bbb;
+}
+.input-group input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #e4e4e4;
+    font-size: 1rem;
+}
+.input-group input:focus {
+    outline: none;
+    border-color: #00adee;
+}
+
+/* =========================
+   Button
+   ========================= */
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    background: #00adee;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #121212;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.btn-primary:hover {
+    background: #008ecb;
+}
+
+/* =========================
+   Helper Links
+   ========================= */
+.helper-text {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #777;
+}
+.helper-text a {
+    color: #00adee;
+    text-decoration: none;
+}
+.helper-text a:hover {
+    text-decoration: underline;
 }

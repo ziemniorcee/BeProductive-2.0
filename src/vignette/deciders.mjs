@@ -136,7 +136,7 @@ class ProjectDecider {
      */
     get_sorted_projects_by_category() {
         this.sorted_projects = [...this.settings.data.projects.projects]
-        let selected_category = Number($('#categoryDeciderId').text())
+        let selected_category = Number($('.categoryDeciderId').text())
 
         this.sorted_projects.sort((a, b) => {
             const pinnedCategory = selected_category;

@@ -973,3 +973,13 @@
     outline: 2px solid #FFFFFF;      /* pure white outline */
     outline-offset: 2px;             /* space between button and outline */
 }
+
+#MyDayHeader #dashOpen, #inboxHeader #dashOpen, #ASAPHeader #dashOpen{
+    left: 10px;
+    top: 20px;
+}
+
+#projectHeader #dashOpen{
+    left: -50px;
+    top: -30px;
+}
