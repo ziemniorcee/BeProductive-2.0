@@ -25,6 +25,15 @@ export class Data {
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()
         this.habits_logs = await window.dataAPI.getHabitsLogs()
+        this.habits.forEach(habit => {
+            habit.days = [];
+            this.habits_days.forEach(day => {
+                if (habit.id === day.habit_id) {
+                    let {habit_id, ...copy} = day;
+                    habit.days.push({...copy});
+                }
+            })
+        });
     }
 
     decode_text(text) {
@@ -144,5 +153,11 @@ export class Data {
 
         $rightbar.css('display', to_hide ? 'none' : 'block')
         $resizer.css('display', to_hide ? 'none' : 'flex')
+    }
+
+    compare_times(first_time, second_time) {
+        let [hours1, minutes1] = first_time.split(":").map(Number);
+        let [hours2, minutes2] = second_time.split(":").map(Number);
+        return hours2 * 60 + minutes2 > hours1 * 60 + minutes1;
     }
 }

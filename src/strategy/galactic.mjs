@@ -9,9 +9,8 @@ let remove_flag = false;
 let project_to_remove = 0;
 
 export class Strategy {
-    constructor (app_data, app_categories) {
-        this.data = app_data;
-        this.categories = app_categories;
+    constructor (app_settings) {
+        this.settings = app_settings;
         this.initEventListeners()
     }
 
@@ -65,7 +64,7 @@ export class Strategy {
 
         // handling line removing
         $(document).on('click', '.galactic-editor-line', (event) => {
-            let index = this.data.extractNumbers($(event.currentTarget).attr('id'));
+            let index = this.settings.data.extractNumbers($(event.currentTarget).attr('id'));
             let flag = true;
             for (let i = 0; i < changes_lines.length; i++) {
                 if (changes_lines[i].from === index[0] && changes_lines[i].to === index[1]) {
@@ -97,7 +96,6 @@ export class Strategy {
             $("#vignette").css('display', 'block')
             const remove_category_template = $('#removeCategoryTemplate').prop('content');
             let $remove_category_clone = $(remove_category_template).clone()
-            $remove_category_clone.find(".categoryPicker").html(this.categories._categories_HTML(false))
             $("#vignette").html($remove_category_clone)
         })
 
@@ -144,9 +142,9 @@ export class Strategy {
         //     $vignette_layer.css('display', 'none');
         //     $vignette_layer.html('')
         //
-        //     let category_element = Object.keys(this.data.categories).at(-1)
-        //     $('#selectCategory22').css('background', this.data.categories[category_element][0])
-        //     $('#selectCategory22').text(this.data.categories[category_element][1])
+        //     let category_element = Object.keys(this.settings.data.categories.categories).at(-1)
+        //     $('#selectCategory22').css('background', this.settings.data.categories.categories[category_element][0])
+        //     $('#selectCategory22').text(this.settings.data.categories.categories[category_element][1])
         // })
 
         $(document).on('click', '#removeCategoryCreate', () => {
@@ -180,8 +178,8 @@ export class Strategy {
         let box = $('#galacticContainer');
         box.empty();
         box.html(this.__galactic_display_HTML());
-        for (const key in this.data.categories) {
-            for (const conn of this.data.project_conn) {
+        for (const key in this.settings.data.categories.categories) {
+            for (const conn of this.settings.data.projects.project_conn) {
                 if (conn.category == key) {
                     $(`#galactic-canv${key}`).append(this.create_line(
                         `#galactic${key}Project-${conn.project_from}`,
@@ -208,8 +206,8 @@ export class Strategy {
         let box = $('#galacticContainer');
         box.empty();
         box.html(this.__galactic_editor_HTML(key));
-        console.log(this.data.projects);
-        console.log(this.data.project_conn);
+        console.log(this.settings.data.projects.projects);
+        console.log(this.settings.data.projects.project_conn);
         const container = $('#galacticContainer');
         const map = $('#galactic-editor');
         map.draggable({
@@ -280,7 +278,7 @@ export class Strategy {
         });
         
         // adding line connections from database
-        for (let conn of this.data.project_conn) {
+        for (let conn of this.settings.data.projects.project_conn) {
             if (conn['category'] === key) {
                 $("#galactic-editor-canv").append(this.create_line(
                     `#galacticEditorProject${conn['project_from']}`,
@@ -299,7 +297,7 @@ export class Strategy {
                 scroll: false,
                 start: (event, ui) => {
                     $(element).css('transform', 'translate(-50%, -50%)');
-                    ui.helper.data('containment', this.data.calculateContainment(element, $('#galactic-editor'), [0, 0, 0, 0]));
+                    ui.helper.data('containment', this.settings.data.calculateContainment(element, $('#galactic-editor'), [0, 0, 0, 0]));
                 },
                 stop: (event, ui) => {
                     const boundingBox = ui.helper.data('containment');
@@ -333,7 +331,6 @@ export class Strategy {
         // interval for autosave
         editor_interval = setInterval(() => {
             this.save_galactic_editor_changes();
-            console.log('changes saved');
         }, 5000);
     }
 
@@ -353,6 +350,7 @@ export class Strategy {
      * @returns {SVGLineElement} svg line element
      * */
     create_line(div_from, div_to, line_class, line_id, key, w = 8, color = undefined) {
+        console.log(div_from, div_to)
         let pos1 = $(div_from).position();
         let pos2 = $(div_to).position();
         let canvasTop = $('#galacticContainer').offset().top;
@@ -364,7 +362,7 @@ export class Strategy {
         line.setAttribute('y1', Math.round(pos1.top + $(div_from).outerHeight() / 2) / scale + canvasTop * (scale - 1) / 2);
         line.setAttribute('x2', Math.round(pos2.left + $(div_to).outerWidth() / 2) / scale + canvasLeft * (scale - 1) / 2);
         line.setAttribute('y2', Math.round(pos2.top + $(div_to).outerHeight() / 2) / scale + canvasTop * (scale - 1) / 2);
-        line.setAttribute('stroke', (color === undefined) ? this.data.categories2[key] : color);
+        line.setAttribute('stroke', (color === undefined) ? this.settings.data.categories.categories2[key] : color);
         line.setAttribute('stroke-width', w);
         line.setAttribute('pointer-events', 'all');
         return line;
@@ -391,7 +389,7 @@ export class Strategy {
     bind_editor_project(key, element) {
         $(element).draggable({
             cursorAt: {left: 0, top: 0},
-            containment: this.data.calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
+            containment: this.settings.data.calculateContainment(element, $('#galactic-editor'), [0.1, 0.2, 0.1, 0.1]),
             scroll: false,
             cancel: () => {return !remove_flag},
             start: (event, ui) => {
@@ -453,7 +451,7 @@ export class Strategy {
                 line.setAttribute('y1', pos.top + $(element).outerHeight() / 2);
                 line.setAttribute('x2', pos.left + $(element).outerWidth() / 2);
                 line.setAttribute('y2', pos.top + $(element).outerHeight() / 2);
-                line.setAttribute('stroke', this.data.categories2[key]);
+                line.setAttribute('stroke', this.settings.data.categories.categories2[key]);
                 line.setAttribute('stroke-width', 8);
                 $("#galactic-editor-canv").append(line);
             } else if (event.button === 0 && remove_flag) {
@@ -506,7 +504,7 @@ export class Strategy {
 
     change_editor_project_position(element) {
         let n = $(element).data('project-number');
-        let position = this.data.calculateChildPosition(element, $('#galactic-editor'));
+        let position = this.settings.data.calculateChildPosition(element, $('#galactic-editor'));
         let flag = true;
         for (let i = 0; i < changes_projects.length; i++) {
             if (changes_projects[i].id === n) {
@@ -519,31 +517,31 @@ export class Strategy {
     }
 
     save_galactic_editor_changes() {
-        console.log(changes_lines);
-        console.log(changes_projects);
+        // console.log(changes_lines);
+        // console.log(changes_projects);
         window.goalsAPI.changeProjectCoords({'changes': changes_projects});
         window.goalsAPI.changeGalacticConnections({'changes': changes_lines});
         for (let change of changes_projects) {
-            for (let i = 0; i < this.data.projects.length; i++) {
-                if (this.data.projects[i].id === change.id) {
-                    this.data.projects[i].x = change.x;
-                    this.data.projects[i].y = change.y;
+            for (let i = 0; i < this.settings.data.projects.projects.length; i++) {
+                if (this.settings.data.projects.projects[i].id === change.id) {
+                    this.settings.data.projects.projects[i].x = change.x;
+                    this.settings.data.projects.projects[i].y = change.y;
                 }
             }
         }
         for (let change of changes_lines) {
             if (change.add) {
-                this.data.project_conn.push({
+                this.settings.data.projects.project_conn.push({
                     'category': change.category,
                     'project_from': change.from,
                     'project_to': change.to
                 })
             } else {
-                for (let i = 0; i < this.data.project_conn.length; i++) {
-                    if (this.data.project_conn[i].category === change.category &&
-                        this.data.project_conn[i].project_from === change.from &&
-                        this.data.project_conn[i].project_to === change.to)
-                        this.data.project_conn.splice(i, 1);
+                for (let i = 0; i < this.settings.data.projects.project_conn.length; i++) {
+                    if (this.settings.data.projects.project_conn[i].category === change.category &&
+                        this.settings.data.projects.project_conn[i].project_from === change.from &&
+                        this.settings.data.projects.project_conn[i].project_to === change.to)
+                        this.settings.data.projects.project_conn.splice(i, 1);
                 }
             }
         }
@@ -560,19 +558,19 @@ export class Strategy {
             }
         }
         let conn_to_remove = [];
-        for (let i = 0; i < this.data.project_conn.length; i++) {
-            if (this.data.project_conn[i].project_from === id || this.data.project_conn[i].project_to === id) {
-                conn_to_remove.push({category: this.data.project_conn[i].category,
-                    from: this.data.project_conn[i].project_from,
-                    to: this.data.project_conn[i].project_to,
+        for (let i = 0; i < this.settings.data.projects.project_conn.length; i++) {
+            if (this.settings.data.projects.project_conn[i].project_from === id || this.settings.data.projects.project_conn[i].project_to === id) {
+                conn_to_remove.push({category: this.settings.data.projects.project_conn[i].category,
+                    from: this.settings.data.projects.project_conn[i].project_from,
+                    to: this.settings.data.projects.project_conn[i].project_to,
                     add: false
                 });
-                this.data.project_conn.splice(i, 1);
+                this.settings.data.projects.project_conn.splice(i, 1);
             }
         }
-        for (let i = 0; i < this.data.projects.length; i++) {
-            if (this.data.projects[i].id === id) {
-                this.data.projects.splice(i, 1);
+        for (let i = 0; i < this.settings.data.projects.projects.length; i++) {
+            if (this.settings.data.projects.projects[i].id === id) {
+                this.settings.data.projects.projects.splice(i, 1);
             }
         }
         console.log(id);
@@ -591,7 +589,7 @@ export class Strategy {
         $('<style>')
             .prop('type', 'text/css')
             .html(`#galactic-editor-slider::-webkit-slider-thumb {
-                background: ${this.data.categories2[key]}}`)
+                background: ${this.settings.data.categories.categories2[key]}}`)
             .appendTo('head');
         let editor = `<div id="galactic-editor" data-key="${key}">
         <div class='galactic-editor-test' style="top: 0%; left: 0%"></div>
@@ -600,42 +598,42 @@ export class Strategy {
         <div class='galactic-editor-test' style="top: 50%; left: 50%"></div>
         <svg id="galactic-editor-canv" width="100%" height="100%" preserveAspectRatio="none"></svg>`;
         let not_placed_projects = [];
-        for (const proj of this.data.projects) {
+        for (const proj of this.settings.data.projects.projects) {
             if (proj.category == key) {
                 if (proj.x === null || proj.y === null) {
                     not_placed_projects.push(proj);
                 }
                 else {
                     editor += `<div class="galactic-editor-project galactic-editor-items" id="galacticEditorProject${proj.id}" data-project-number="${proj.id}"
-                    style="top: ${proj.y}%; left: ${proj.x}%; border-color: ${this.data.categories[key][0]}; background-color: ${this.data.categories2[key]};"
+                    style="top: ${proj.y}%; left: ${proj.x}%; border-color: ${this.settings.data.categories.categories[key][0]}; background-color: ${this.settings.data.categories.categories2[key]};"
                     >${proj.name}</div>`
                 }
             }
         }
         editor += '</div>'
         editor += `</div>
-        <div id="galactic-editor-hud" style="border-color: ${this.data.categories[key][0]};">
-        <span id="galactic-editor-text" style='color: ${this.data.categories2[key]}'>${this.data.categories[key][1]}</span>
+        <div id="galactic-editor-hud" style="border-color: ${this.settings.data.categories.categories[key][0]};">
+        <span id="galactic-editor-text" style='color: ${this.settings.data.categories.categories2[key]}'>${this.settings.data.categories.categories[key][1]}</span>
         <div id="galactic-editor-cancel">
-        <img src="../images/goals/arrow0.png"></div>
+        <img src="images/goals/arrow0.png"></div>
         <div id='galactic-editor-options-btn'>
-        <img src="../images/goals/more.png">
+        <img src="images/goals/more.png">
         <div id='galactic-editor-options'>
         <div id='galactic-editor-new-project' class='galacticOption'>
-        <img src="../images/goals/plus.png">
+        <img src="images/goals/plus.png">
         <span>New project</span></div>
         <div id='galactic-editor-remove-project' class='galacticOption'>
-        <img src="../images/goals/minus.png">
+        <img src="images/goals/minus.png">
         <span>Remove project</span></div>
         <div id='galactic-editor-open-projects' class='galacticOption'>
-        <img src="../images/goals/plus.png">
+        <img src="images/goals/plus.png">
         <span>Open not placed projects</span></div>
         </div></div>`;
-        editor += `<div id="galactic-editor-project-picker" style="border-color: ${this.data.categories[key][0]};">
+        editor += `<div id="galactic-editor-project-picker" style="border-color: ${this.settings.data.categories.categories[key][0]};">
         <span>Stash</span>`
         for (const proj of not_placed_projects) {
             editor += `<div id="galacticEditorToPlace${proj.id}" class="galactic-editor-to-place" data-project-number="${proj.id}"
-                    style="border-color: ${this.data.categories[key][0]}; background-color: ${this.data.categories2[key]};"
+                    style="border-color: ${this.settings.data.categories.categories[key][0]}; background-color: ${this.settings.data.categories.categories2[key]};"
                     >${proj.name}</div>`
         }
         editor += '</div>'
@@ -648,23 +646,25 @@ export class Strategy {
      * */
     __galactic_display_HTML() {
         let galactics = '';
-        const len = Object.keys(this.data.categories).length;
+        console.log(this.settings.data.categories.categories)
+        console.log(this.settings.data.categories.categories2)
+        const len = Object.keys(this.settings.data.categories.categories).length;
         const height = Math.floor(100 / Math.ceil((len - 1) / 5));
         $('<style>')
             .prop('type', 'text/css')
             .html(`.galacticBox {height: ${height}%; }`)
             .appendTo('head');
-        let counts = this.data.divide_to_boxes(len);
+        let counts = this.settings.data.divide_to_boxes(len);
         let boxes = [];
         for (let i = 0; i < counts.length; i++) {
             boxes.push(`<div class='galacticBox' id='galacticBox${i + 1}' style='grid-template-columns: repeat(${counts[i]}, 1fr)'>`)
         }
         let pointer = 0;
         let box_counter = 0;
-        for (const key in this.data.categories) {
-            boxes[pointer] += `<div class='galactic' id="galactic${key}" style='border-color: ${this.data.categories2[key]}'>
+        for (const key in this.settings.data.categories.categories) {
+            boxes[pointer] += `<div class='galactic' id="galactic${key}" style='border-color: ${this.settings.data.categories.categories2[key]}'>
             <svg id="galactic-canv${key}" width="100%" height="100%" preserveAspectRatio="none"></svg>`
-            for (const proj of this.data.projects) {
+            for (const proj of this.settings.data.projects.projects) {
                 if (proj.category == key) {
                     if (proj.x !== null && proj.y !== null) {
                         boxes[pointer] += `<div class="galactic-project-icon" id="galactic${key}Project-${proj.id}"
@@ -673,7 +673,7 @@ export class Strategy {
                     }
                 }
             }
-            boxes[pointer] +=`<span class='galactic-text' style='color: ${this.data.categories2[key]}'>${this.data.categories[key][1]}</span></div>`
+            boxes[pointer] +=`<span class='galactic-text' style='color: ${this.settings.data.categories.categories2[key]}'>${this.settings.data.categories.categories[key][1]}</span></div>`
             box_counter++;
             if (box_counter === counts[pointer]) {
                 pointer++;
