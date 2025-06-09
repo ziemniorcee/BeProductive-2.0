@@ -72,7 +72,6 @@ export class NewProject {
                     let color = this.app.settings.data.categories.categories[category_id][0]
                     let new_icon_path = this.app.settings.data.projects.get_project_icon_path(new_project["id"])
 
-                    console.log(new_icon_path)
                     $('.projectDecider').css('border', `2px solid ${color}`)
                     $('.projectDeciderIcon img').attr('src', new_icon_path)
                     $('.projectDeciderName').text(name)
@@ -82,6 +81,11 @@ export class NewProject {
                 }, 0)
             }
             $selected_vignette.css('display', 'none')
+
+            setTimeout(() => {
+                let is_less = $('#dashStrategyMore').text() === 'Less'
+                this.app.controller.appDashboard.projects.build(is_less)
+            }, 0)
         }
     }
 
@@ -127,6 +131,7 @@ export class NewProject {
             let result = await window.electronAPI.saveFile(fileName, base64Data, "project_icons");
             await this.app.settings.data.projects.loadProjectIcons()
             this.app.settings.data.projects.set_projects_options()
+            console.log("CHUJ1")
         }
     }
 

@@ -37,13 +37,24 @@ export class DecisionMaker {
         $(document).on('click', '#decisionWhenFuture', () => {
             $('#decisionWhenFuture').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
             $('#decisionWhenASAP').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionWhenNow').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
             $('#decisionFuture').css('display', 'flex')
             $('#decisionEnd').css('display', 'flex')
         })
 
+        $(document).on('click', '#decisionWhenNow', () => {
+            $('#decisionWhenNow').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
+            $('#decisionWhenFuture').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionWhenASAP').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionFuture').css('display', 'none')
+            $('#decisionEnd').css('display', 'flex')
+        })
+
+
         $(document).on('click', '#decisionWhenASAP', () => {
             $('#decisionWhenASAP').removeClass('deciderButtonEmpty').addClass('deciderButtonFilled')
             $('#decisionWhenFuture').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
+            $('#decisionWhenNow').removeClass('deciderButtonFilled').addClass('deciderButtonEmpty')
             $('#decisionFuture').css('display', 'none')
             $('#decisionEnd').css('display', 'flex')
         })
@@ -93,6 +104,8 @@ export class DecisionMaker {
                 date = this.app.settings.date.get_edit_sql_format($("#decisionFutureDate").text())
             } else if ($('#decisionWhenASAP').attr('class') === 'deciderButtonFilled') {
                 date_type = 2
+            } else if ($('#decisionWhenNow').attr('class') === 'deciderButtonFilled') {
+                date_type = 3
             }
 
             let inbox_id = this.goal_id

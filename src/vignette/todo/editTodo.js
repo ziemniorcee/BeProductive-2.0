@@ -285,12 +285,18 @@ export class TodoEdit {
         let deadline_label = ""
         let asap_label = ""
         let border_color = this.app.settings.data.check_border[changes['importance']]
-        if (changes['date_type'] === 0) {
+        if (changes['date_type'] === 0 && changes['addDate'] !== "") {
             deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         } else if (changes['date_type'] === 1) {
-            deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+            if (changes['addDate'] === this.app.settings.date.today_sql) {
+                deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
+            } else {
+                deadline_label = `<img src="images/goals/hourglass2.png" class="todoDeadline">`
+            }
         } else if (changes['date_type'] === 2) {
             asap_label = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
+        } else if (changes['date_type'] === 0) {
+            border_color = "white"
         }
 
         selected_goal.find('.task').html(`

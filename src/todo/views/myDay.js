@@ -124,7 +124,12 @@ class MyDayViewTemplates {
 
     view() {
         return `
-            <div id="MyDayHeader">My Day</div>
+            <div id="MyDayHeader">
+                <div id="dashOpen">
+                    <img src="images/goals/back.png" alt="">
+                </div>
+                My Day
+            </div>
             <div id="MyDayBody">
                 <div id="MyDayList">
                     

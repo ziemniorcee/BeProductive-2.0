@@ -401,7 +401,6 @@ class DaySetupTemplates {
     }
 
     async deadlines(setup_deadlines) {
-        console.log(setup_deadlines)
         let deadlines_HTML = ""
 
         let goals = await window.goalsAPI.getDeadlines({date: this.app.settings.date.today_sql})
@@ -450,12 +449,13 @@ class DaySetupTemplates {
     priority(setup_projects) {
         let projects = this.app.settings.data.projects.projects
         let categories = this.app.settings.data.categories.categories
-
         let priorities_HTML = ""
         for (let i = 0; i < setup_projects.length; i++) {
-            let project = projects.find(project => project.id === Number(setup_projects[i]))
-            let color = categories[project.category][0]
-            priorities_HTML += `<div class="daySetupQueueProject" data-project-id="${setup_projects[i]}">
+
+            if (projects.some(item => item.id === Number(setup_projects[i]))) {
+                let project = projects.find(project => project.id === Number(setup_projects[i]))
+                let color = categories[project.category][0]
+                priorities_HTML += `<div class="daySetupQueueProject" data-project-id="${setup_projects[i]}">
                                     <div class="daySetupQueueProjectDrag">
                                         <img src="images/goals/drag.png" alt="">
                                     </div>
@@ -466,8 +466,15 @@ class DaySetupTemplates {
                                         ${project.name}
                                     </div>
                                 </div>`
+            }
+
         }
         return priorities_HTML
+    }
+
+    hasAnyMatch(items, idsToCheck) {
+        const idSet = new Set(items.map(item => String(item.id)));
+        return idsToCheck.some(id => idSet.has(id));
     }
 
     priority_project(project_id) {
