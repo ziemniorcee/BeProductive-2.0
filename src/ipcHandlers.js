@@ -1164,6 +1164,18 @@ function todoHandlers(db) {
         db.run(`DELETE FROM habit_logs WHERE habit_id=${params.id}`);
     })
 
+    ipcMain.on('remove-habit-logs', (event, params) => {
+        db.run(
+            `DELETE FROM habit_logs WHERE habit_id = ? AND date = ?`,
+            [params.id, params.date],
+            function(err) {
+                if (err) {
+                console.error('Błąd podczas usuwania:', err.message);
+                } 
+            }
+        );
+    })
+
 
     
 
