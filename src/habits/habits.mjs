@@ -9,14 +9,14 @@ export class Habits {
 
     initEventListeners() {
 
-        $(document).on('input', '.customTimePickerHoursPicker', function () {
+        $(document).on('input', '.customTimePickerHoursPicker', (e) => {
             console.log('hours')
-            $(this).closest(".customTimePickerHours").children().first().text($(this).val());
+            $(e.target).closest(".customTimePickerHours").children().first().text($(this).val());
         })
 
-        $(document).on('input', '.customTimePickerMinutesPicker', function () {
+        $(document).on('input', '.customTimePickerMinutesPicker', (e) => {
             console.log('minutes')
-            $(this).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
+            $(e.target).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
         })
 
         $(document).on('click', '#habit-new-btn', () => {
@@ -43,18 +43,19 @@ export class Habits {
             }
         })
 
-        $(document).on('click', '#habit-today-save', () => {
-            $('#habit-today-to-do').children().each((index, element) => {
-                if ($(element).children(":last-child").is(':checked')) {
-                    this.add_habit_log($(element).data('habit-id'))
-                    let clone = $(element).clone()
-                    clone.removeClass('habitToDo');
-                    clone.children().last().remove();
-                    $('#habit-today-done').append(clone);
-                    $(element).remove();
-                }
-            });
-        }) 
+        $(document).on('click', '#habit-mode-today', (e) => {
+            $('#habit-mode-tomorrow').css('display', 'block');
+            $(e.target).css('display', 'none');
+            $('#habit-mode-title').children('span').eq(0).text('today');
+            this.refresh_today_habits();
+        })
+
+        $(document).on('click', '#habit-mode-tomorrow', (e) => {
+            $('#habit-mode-today').css('display', 'block');
+            $(e.target).css('display', 'none');
+            $('#habit-mode-title').children('span').eq(0).text('tomorrow');
+            this.refresh_tomorrow_habits();
+        })
 
         $(document).on('click', '#newHabitCreate', async () => {
             let mode = $('input[name="newHabitPicker"]:checked').val();
@@ -152,7 +153,7 @@ export class Habits {
             if ($(e.target).prop('checked')) {
                 $(element).data('type', '3')
                 $(element).children('.habitBlocksName').first().css('text-decoration', 'line-through');
-                $(element).appendTo('#habit-container');
+                $(element).insertBefore($('#habit-new-btn'));
                 await this.add_habit_log(id);
                 console.log('checked')
             } else {
@@ -168,10 +169,11 @@ export class Habits {
         })
     }
 
-    __HTML_habit_block(id, name, start_date, end_date, opt_button, type) {
+    __HTML_habit_block(id, name, start_date, end_date, opt_button, type, opt_name_styles) {
         if (type === undefined) type = "";
+        if (opt_name_styles === undefined) opt_name_styles = "";
         let habit_block = `<div class="habitBlocks" data-habit-id="${id}" data-type="${type}">
-        <span class="habitBlocksName">${name}</span>`
+        <span class="habitBlocksName" style="${opt_name_styles}">${name}</span>`
         if (start_date && end_date) habit_block += `<span class="habitBlocksDate">${start_date} - ${end_date}</span>`
         if (opt_button) habit_block += '' + opt_button
         habit_block += '</div>'
@@ -239,7 +241,10 @@ export class Habits {
                         if (log.habit_id === habit.id && log.date === today_date) {
                             flag = false;
                             habits_done += this.__HTML_habit_block(habit.id, habit.name, 
-                                day.start_date, day.end_date, '<input type="checkbox" class="habitBlocksTodayCheckbox" checked>', "3")
+                                day.start_date, day.end_date, 
+                                '<input type="checkbox" class="habitBlocksTodayCheckbox" checked>', "3",
+                                'text-decoration: line-through;'
+                            )
                             break;
                         }
                     }
@@ -261,6 +266,7 @@ export class Habits {
         $('#habit-container').append(habits_to_do);
         $('#habit-container').append(habits_later);
         $('#habit-container').append(habits_done);
+        $('#habit-container').append('<div class="habitBlocks" id="habit-new-btn">New habit</div>');
     }
 
     refresh_tomorrow_habits() {
@@ -272,11 +278,12 @@ export class Habits {
             for (const day of habit.days) {
                 if (day.day_of_week === weekdayTomorrow) {
                     let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
-                        day.start_date, day.end_date, false)
-                    $('#habit-info-tomorrow').append(habit_block)
+                        day.start_date, day.end_date, false);
+                    $('#habit-container').append(habit_block);
                 }
             }
         }
+        $('#habit-container').append('<div class="habitBlocks" id="habit-new-btn">New habit</div>');
     }
 
     get_custom_time_data(element) {

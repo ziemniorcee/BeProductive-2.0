@@ -150,9 +150,7 @@
 }
 
 #habit-new-btn {
-    margin-top: auto;
     font-size: 28px;
-    width: calc(100% - 40px);
     justify-content: center !important;
 }
 
