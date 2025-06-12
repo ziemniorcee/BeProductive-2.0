@@ -2,8 +2,9 @@ export class Habits {
     constructor (app_settings) {
         this.settings = app_settings;
         this.initEventListeners();
-        // this.chart = undefined;
-        // this.create_chart();
+        this.chart = undefined;
+        this.is_today = true;
+        this.create_chart();
         console.log('lol')
     }
 
@@ -46,6 +47,7 @@ export class Habits {
         $(document).on('click', '#habit-mode-today', (e) => {
             $('#habit-mode-tomorrow').css('display', 'block');
             $(e.target).css('display', 'none');
+            this.is_today = true;
             $('#habit-mode-title').children('span').eq(0).text('today');
             this.refresh_today_habits();
         })
@@ -53,6 +55,7 @@ export class Habits {
         $(document).on('click', '#habit-mode-tomorrow', (e) => {
             $('#habit-mode-today').css('display', 'block');
             $(e.target).css('display', 'none');
+            this.is_today = false;
             $('#habit-mode-title').children('span').eq(0).text('tomorrow');
             this.refresh_tomorrow_habits();
         })
@@ -293,6 +296,10 @@ export class Habits {
     }
 
     create_chart() {
+        const $canvas = $("#habit-info-canv");
+        const $parent = $canvas.parent();
+        $canvas.attr("width", $parent.width());
+        $canvas.attr("height", $parent.height());
         const ctx = document.getElementById('habit-info-canv').getContext('2d');
         const dni = ['2025-05-01', '2025-05-02', '2025-05-03', '2025-05-04', '2025-05-05', '2025-05-06', '2025-05-07'];
         const procenty = [0.2, 0.5, 0.8, 0.6, 1.0, 0.7, 0.3];
@@ -346,6 +353,9 @@ export class Habits {
                         }
                 },
                 plugins: {
+                    customCanvasBackgroundColor: {
+                        color: '#1E1E1E',
+                    },
                     legend: {
                         labels: {
                             color: 'white',

@@ -81,7 +81,9 @@ export class AppDashboard {
         $(document).on('click', '#habitButton', () => {
             $('#galactics').css('display', 'none');
             $('#habit').css('display', 'flex');
-            this.app.habits.refresh_today_habits();
+            if (this.app.habits.is_today) this.app.habits.refresh_today_habits();
+            else this.app.habits.refresh_tomorrow_habits();
+            this.app.habits.update_chart();
         })
 
         $(document).on('click', '#dashClose, #dashOpen', () => {
