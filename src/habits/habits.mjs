@@ -11,17 +11,27 @@ export class Habits {
     initEventListeners() {
 
         $(document).on('input', '.customTimePickerHoursPicker', (e) => {
-            console.log('hours')
-            $(e.target).closest(".customTimePickerHours").children().first().text($(this).val());
+            $(e.target).closest(".customTimePickerHours").children().first().text($(e.target).val());
         })
 
         $(document).on('input', '.customTimePickerMinutesPicker', (e) => {
-            console.log('minutes')
-            $(e.target).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
+            $(e.target).closest(".customTimePickerMinutes").children().first().text($(e.target).val().padStart(2, '0'));
         })
 
         $(document).on('click', '#habit-new-btn', () => {
             this.create_new_habit_window();
+        })
+
+        $(document).on('click', '#habit-all-btn', () => {
+            $('#vignette').html(`<div id="habit-all-box" class="vignetteWindow1">
+                <div id="removeHabitContent" class="vignetteWindow1Content">
+                <div id="removeHabitTitle" class="vignetteWindow1Title">Remove habit</div></div></div>`)
+            for (const habit of this.settings.data.habits) {
+                let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
+                    undefined, undefined, '<div class="habitAllButton">Delete</div>')
+                $('#habit-all-box').append(habit_block)
+            }
+            $('#vignette').css('display', 'block');
         })
 
         $(document).on('change', 'input[class="newHabitOption4Checkbox"]', (e) => {
@@ -147,6 +157,10 @@ export class Habits {
             $("#vignette").css('display', 'none');
         })
 
+        $(document).on('click', '#removeHabitDiscard', () => {
+            $("#vignette").css('display', 'none');
+        })
+
         $(document).on('change', '.habitBlocksTodayCheckbox', async (e) => {
             let element = $(e.target).parent()
             let today = new Date();
@@ -238,6 +252,10 @@ export class Habits {
         let habits_done = "";
         for (const habit of this.settings.data.habits) {
             for (const day of habit.days) {
+                if (day.start_date && day.end_date) {
+                    let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+                    console.log(day.start_date, time_now, this.settings.data.compare_times(day.start_date, time_now));
+                }
                 if (day.day_of_week === weekday) {
                     let flag = true;
                     for (const log of this.settings.data.habits_logs) {
@@ -258,7 +276,8 @@ export class Habits {
                             this.settings.data.compare_times(time_now, day.end_date) >= 0)) {
                             habits_to_do += this.__HTML_habit_block(habit.id, habit.name,
                                 day.start_date, day.end_date, '<input type="checkbox" class="habitBlocksTodayCheckbox">', "1")
-                        } else if (this.settings.data.compare_times(day.end_date, time_now) > 0) {
+                        } else if (this.settings.data.compare_times(time_now, day.start_date) > 0 &&
+                                    this.settings.data.compare_times(time_now, day.end_date) >= 0) {
                             habits_later += this.__HTML_habit_block(habit.id, habit.name,
                                 day.start_date, day.end_date, false, "2")
                         }
