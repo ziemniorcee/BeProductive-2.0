@@ -53,12 +53,29 @@
 }
 
 .habitBlocks span {
-    width: 40%;
+    position: absolute;
     font-size: 24px;
     text-align: left;
     padding-left: 10px;
     overflow-x: hidden;
     letter-spacing: 0;
+}
+
+.habitBlocksName {
+    left: 40px;
+}
+
+.habitBlocksDate {
+    left: 50%;
+}
+
+.habitBlocksIcon {
+    position: absolute;
+    right: 45px;
+}
+
+.habitBlocksStreak {
+    right: 25px;
 }
 
 .habitBlocks input[type="checkbox"] {
@@ -68,7 +85,7 @@
     background-color: transparent;
     border-radius: 5px;
     position: absolute;
-    right: 7px;
+    left: 7px;
     box-sizing: border-box;
     margin: 0;
 }

@@ -185,14 +185,50 @@ export class Habits {
             }
         })
     }
+    
+    getHabitStreak(habit_id) {
+        let today = new Date();
+        const today_date = today.toISOString().split('T')[0];
+        const habit_logs = this.settings.data.habits_logs
+            .filter(l => l.habit_id === habit_id)
+            .map(l => l.date)
+            .sort((a, b) => b.localeCompare(a));
+        console.log(habit_id)
+        console.log(habit_logs)
+        let streak = 0;
+        let currentDate = new Date(today_date);
+        currentDate.setDate(currentDate.getDate() - 1);
+        
+        while (true) {
+            const currentDateStr = currentDate.toISOString().split('T')[0];
+            if (habit_logs.includes(currentDateStr)) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
 
-    __HTML_habit_block(id, name, start_date, end_date, opt_button, type, opt_name_styles) {
+        return streak;
+    }
+
+    __HTML_habit_block(id, name, start_date, end_date, 
+                        opt_button, 
+                        type, 
+                        opt_name_styles, 
+                        opt_div_styles,
+                        streak) {
         if (type === undefined) type = "";
         if (opt_name_styles === undefined) opt_name_styles = "";
-        let habit_block = `<div class="habitBlocks" data-habit-id="${id}" data-type="${type}">
+        if (opt_div_styles === undefined) opt_div_styles = "";
+        let habit_block = `<div class="habitBlocks" data-habit-id="${id}" data-type="${type}" style="${opt_div_styles}">
         <span class="habitBlocksName" style="${opt_name_styles}">${name}</span>`
         if (start_date && end_date) habit_block += `<span class="habitBlocksDate">${start_date} - ${end_date}</span>`
         if (opt_button) habit_block += '' + opt_button
+        if (streak !== undefined && !isNaN(streak) && streak >= 3) {
+            habit_block += `<img src="images/goals/fire1.png" width="32px" height="32px" alt="" class="habitBlocksIcon">
+            <span class="habitBlocksStreak">${(streak <= 7) ? streak : '7+'}</span>`
+        }
         habit_block += '</div>'
         return habit_block
     }
@@ -247,39 +283,39 @@ export class Habits {
         let today = new Date();
         const weekday = (today.getDay() + 6) % 7;
         const today_date = today.toISOString().split('T')[0];
+        let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
         let habits_to_do = "";
         let habits_later = "";
         let habits_done = "";
         for (const habit of this.settings.data.habits) {
             for (const day of habit.days) {
-                if (day.start_date && day.end_date) {
-                    let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
-                    console.log(day.start_date, time_now, this.settings.data.compare_times(day.start_date, time_now));
-                }
                 if (day.day_of_week === weekday) {
                     let flag = true;
                     for (const log of this.settings.data.habits_logs) {
-                        if (log.habit_id === habit.id && log.date === today_date) {
+                        if (log.habit_id === habit.id && log.date === today_date && 
+                            this.settings.data.compare_times(time_now, day.end_date) >= 0) {
                             flag = false;
+                            let streak = this.getHabitStreak(habit.id);
                             habits_done += this.__HTML_habit_block(habit.id, habit.name, 
                                 day.start_date, day.end_date, 
                                 '<input type="checkbox" class="habitBlocksTodayCheckbox" checked>', "3",
-                                'text-decoration: line-through;'
+                                'text-decoration: line-through;', '', streak
                             )
                             break;
                         }
                     }
                     if (flag) {
-                        let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+                        let streak = this.getHabitStreak(habit.id);
                         if (!day.start_date || !day.end_date || 
                             (this.settings.data.compare_times(day.start_date, time_now) >= 0 && 
                             this.settings.data.compare_times(time_now, day.end_date) >= 0)) {
                             habits_to_do += this.__HTML_habit_block(habit.id, habit.name,
-                                day.start_date, day.end_date, '<input type="checkbox" class="habitBlocksTodayCheckbox">', "1")
+                                day.start_date, day.end_date, '<input type="checkbox" class="habitBlocksTodayCheckbox">', "1",
+                            '', '', streak)
                         } else if (this.settings.data.compare_times(time_now, day.start_date) > 0 &&
                                     this.settings.data.compare_times(time_now, day.end_date) >= 0) {
                             habits_later += this.__HTML_habit_block(habit.id, habit.name,
-                                day.start_date, day.end_date, false, "2")
+                                day.start_date, day.end_date, false, "2", '', 'filter: brightness(0.5);', streak)
                         }
                     }
                 } 
