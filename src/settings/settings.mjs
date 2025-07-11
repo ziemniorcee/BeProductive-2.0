@@ -4,12 +4,12 @@ import {Data} from "./data/data.js";
 export class AppSettings {
     constructor(app) {
         this.app = app
-        this.data = new Data()
-        this.date = new CurrentDate(this.app)
+        this.data = new Data(app)
+        this.date = new CurrentDate(app)
     }
 
-    async init() {
-        await this.data.init()
+    async init(hard = false) {
+        await this.data.init(hard)
     }
 }
 

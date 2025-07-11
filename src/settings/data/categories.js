@@ -1,6 +1,6 @@
 export class CategoriesSettings {
-    constructor(app_data) {
-        this.app_data = app_data
+    constructor(app) {
+        this.app = app
         this.categories = {}
         this.categories2 = {}
     }
@@ -9,13 +9,13 @@ export class CategoriesSettings {
         this.categories = {};
         this.categories2 = {};
 
-        let categories_data = await window.dataAPI.getCategories();
+        let categories_data = await this.app.services.data_getter2('get-categories', {})
         this.set_categories(categories_data)
     }
 
     set_categories(categories_data) {
         for (let category of categories_data) {
-            this.categories[category.id] = [
+            this.categories[category.publicId] = [
                 `rgb(${category.r}, ${category.g}, ${category.b})`,
                 category.name
             ]

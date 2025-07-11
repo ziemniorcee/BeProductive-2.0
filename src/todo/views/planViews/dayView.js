@@ -1,7 +1,6 @@
 export class DayView {
-    constructor(todo) {
-        this.todo = todo
-
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
     }
 
@@ -19,7 +18,7 @@ export class DayView {
 
         $(document).on('click', '#todosAll .stepCheck', (event) => {
             event.stopPropagation()
-            this.todo.todoComponents.steps.change_step_check(event.currentTarget)
+            this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
             this.dragula_day_view()
         });
 
@@ -68,15 +67,15 @@ export class DayView {
          */
         window.goalsAPI.removingFollowing(() => {
             let id = $(this.todo_to_remove).find('.todoId').text()
-            let date = this.todo.appSettings.date.day_sql
+            let date = this.app.settings.date.day_sql
             if ($('#monthGrid').length) {
                 id = $(this.todo_to_remove).find('.monthTodoId').text()
                 let day = Number($(this.todo_to_remove).closest('.monthDay').find('.monthDate').text()) //returns wrong day
-                date = this.todo.appSettings.date.get_sql_month_day(day)
+                date = this.app.settings.date.get_sql_month_day(day)
             } else if ($('.weekDay').length) {
                 let day = $(this.todo_to_remove).closest('.weekDay').find('.weekDayText').text()
-                let index = this.todo.appSettings.data.weekdays2.indexOf(day)
-                date = this.todo.appSettings.date.week_current[index]
+                let index = this.app.settings.data.weekdays2.indexOf(day)
+                date = this.app.settings.date.week_current[index]
             }
 
             window.goalsAPI.followingRemoved({id: id, date: date})
@@ -134,7 +133,7 @@ export class DayView {
 
         $(document).on('click', '#todosAll .projectEmblem', async (event) => {
             event.stopPropagation()
-            await this.todo.todoViews.projectView.display(event.currentTarget)
+            await this.app.todo.todoViews.projectView.display(event.currentTarget)
         });
     }
 
@@ -143,7 +142,8 @@ export class DayView {
      * builds view, gets goals, allows drag&drop and closes edit
      */
     async display() {
-        let goals = await window.goalsAPI.getDayView({date: this.todo.appSettings.date.day_sql})
+        let params = {date: this.app.settings.date.today_sql}
+        let goals = await this.app.services.data_getter('get-day-view', params)
         this.set_day_html()
         this.set_goals(goals)
 
@@ -151,12 +151,12 @@ export class DayView {
         rightbar.html(rightbar.html())
 
         this.dragula_day_view()
-        this.todo.appSettings.data.projects.set_projects_options()
+        this.app.settings.data.projects.set_projects_options()
     }
 
     set_day_html() {
-        let main_title = this.todo.appSettings.date.get_day_view_header()
-        let date = this.todo.appSettings.date.get_display_format(this.todo.appSettings.date.day_sql)
+        let main_title = this.app.settings.date.get_day_view_header()
+        let date = this.app.settings.date.get_display_format(this.app.settings.date.day_sql)
 
         const header_template = $('#viewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
@@ -181,9 +181,9 @@ export class DayView {
                 onSelect: async (dateText, inst) => {
                     const $input = inst.input;
                     const selectedDate = $input.datepicker('getDate');
-                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    this.app.settings.date.set_attributes(selectedDate)
                     await this.display()
-                    $('#mainTitle').text(this.todo.appSettings.date.get_day_view_header())
+                    $('#mainTitle').text(this.app.settings.date.get_day_view_header())
 
                     $('#selectDate').text(selectedDate)
                     $('#planDateSelector').css('display', 'none')
@@ -204,10 +204,10 @@ export class DayView {
      */
     set_goals(goals) {
         for (let i = 0; i < goals.length; i++) {
-            goals[i]['steps'] = this.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].category)
-            goals[i]['goal'] = this.todo.appSettings.data.decode_text(goals[i]['goal'])
+            goals[i]['steps'] = this.app.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].category)
+            goals[i]['name'] = this.app.settings.data.decode_text(goals[i]['name'])
 
-            let todo_area = goals[i]['check_state'] ? "#todosFinished" : "#todosArea";
+            let todo_area = goals[i]['checkState'] ? "#todosFinished" : "#todosArea";
             $(todo_area).append(this.build_goal(goals[i]))
         }
 
@@ -220,32 +220,30 @@ export class DayView {
      * @returns {string} HTML of built goal
      */
     build_goal(goal) {
-        console.log(goal)
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
         let date_label = ""
         let deadline_label = ""
 
-        if (goal.category !== 0) {
-            category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
+        if (goal.categoryPublicId !== null) {
+            category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
 
-        if(goal.date_type === 0){
+        if(goal.dateType === 0){
             date_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
-        else if(goal.date_type === 1){
+        else if(goal.dateType === 1){
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         }
-
-        let check_state = goal.check_state ? "checked" : "";
-        let project_emblem = this.todo.appSettings.data.projects.project_emblem_html(goal["pr_id"])
-        let check_color = this.todo.appSettings.data.check_border[goal.importance]
-        let goal_text = this.todo.appSettings.data.decode_text(goal["goal"])
+        let check_state = goal.checkState ? "checked" : "";
+        let project_emblem = this.app.settings.data.projects.project_emblem_html(goal["projectPublicId"])
+        let check_color = this.app.settings.data.check_border[goal.importance]
+        let goal_text = this.app.settings.data.decode_text(goal["name"])
 
         return `
             <div class='todo' style="${category_border}">
-                <div class="todoId">${goal["id"]}</div>
+                <div class="todoId">${goal["publicId"]}</div>
                 <div class='todoCheck'>
                     <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
                 </div>
@@ -338,7 +336,7 @@ export class DayView {
      * @param dragged_task dragged history task
      */
     _get_from_history(dragged_task) {
-        window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(dragged_task), date: this.todo.appSettings.date.day_sql})
+        window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(dragged_task), date: this.app.settings.date.day_sql})
 
         if (dragged_task.closest('.historyTasks').children().length > 1) dragged_task.closest('.sidebarTask').remove()
         else dragged_task.closest('.day').remove()
@@ -354,8 +352,8 @@ export class DayView {
         let sidebar_pos = dragged_task.find('.todoId').text()
 
         let project_pos = $('#sideProjectId').text()
-        todos.eq(new_goal_index).append(this.todo.appSettings.data.projects.project_emblem_html(project_pos))
-        window.projectsAPI.getFromProject({date: this.todo.appSettings.date.day_sql, sidebar_id: sidebar_pos, main_pos: new_goal_index})
+        todos.eq(new_goal_index).append(this.app.settings.data.projects.project_emblem_html(project_pos))
+        window.projectsAPI.getFromProject({date: this.app.settings.date.day_sql, sidebar_id: sidebar_pos, main_pos: new_goal_index})
 
         $(dragged_task).remove()
     }
@@ -377,7 +375,7 @@ export class DayView {
         let id = $(this.todo_to_remove).find('.todoId').text()
         if ($('#monthGrid').length) id = $(this.todo_to_remove).find('.monthTodoId').text()
 
-        window.goalsAPI.goalRemoved({id: id, date: this.todo.appSettings.date.day_sql})
+        window.goalsAPI.goalRemoved({id: id, date: this.app.settings.date.day_sql})
         if ($('#todosAll').length) {
             if ($(this.todo_to_remove).find('.check_task').prop('checked')) {
                 let finished_count = $('#todosFinished .todo').length

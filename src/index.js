@@ -32,6 +32,8 @@ const createWindow = () => {
         titleBarStyle: 'hidden',
         titleBarOverlay: true,
         autoHideMenuBar: true,
+        // transparent: true,
+        frame: false,
         width: 1920,
         // width: 2320,
         height: 1080,

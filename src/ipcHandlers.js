@@ -18,86 +18,6 @@ function todoHandlers(db) {
     let ids_array_previous = []
 
 
-    ipcMain.handle('get-my-day', async (event, params) => {
-        try {
-            return await new Promise((resolve, reject) => {
-                db.all(`SELECT G.id,
-                               G.goal,
-                               G.check_state,
-                               G.goal_pos,
-                               G.category,
-                               G.importance,
-                               G.project_id as pr_id,
-                               G.addDate,
-                               G.date_type
-                        FROM goals G
-                        WHERE (addDate = "${params.date}" and check_state = 0 and (date_type = 0 or date_type = 1))
-                        or (check_state = 0 and (date_type = 2 or date_type = 3))
-                        ORDER BY date_type DESC, goal_pos`, (err, goals) => {
-                    if (err) reject(err)
-                    else {
-                        let rows_ids = goals.map((goal) => goal.id)
-                        let ids_string = `( ${rows_ids} )`
-                        db.all(`SELECT id, goal_id, step_text, step_check
-                                FROM steps
-                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
-                            if (err2) reject(err);
-                            else {
-                                let safe_goals = get_safe_goals2(goals, steps)
-                                resolve(safe_goals);
-                            }
-                        })
-                    }
-                })
-            });
-        } catch (error) {
-            console.error(error);
-            return {error: 'An error occurred while fetching categories.'};
-        }
-    });
-
-    ipcMain.handle('get-day-view', async (event, params) => {
-        try {
-            return await new Promise((resolve, reject) => {
-                db.all(`SELECT G.id,
-                               G.goal,
-                               G.check_state,
-                               G.goal_pos,
-                               G.category,
-                               G.importance,
-                               G.date_type,
-                               PR.category  as pr_category,
-                               G.project_id as pr_id,
-                               PR.icon      as pr_icon,
-                               KN.knot_id
-                        FROM goals G
-                                 LEFT JOIN knots KN ON KN.goal_id = G.id
-                                 LEFT JOIN projects PR ON PR.id = G.project_id
-                        WHERE addDate = "${params.date}"
-                          and (date_type = 0 or date_type = 1)
-                        ORDER BY goal_pos`, (err, goals) => {
-                    if (err) reject(err)
-                    else {
-                        let rows_ids = goals.map((goal) => goal.id)
-                        let ids_string = `( ${rows_ids} )`
-                        db.all(`SELECT id, goal_id, step_text, step_check
-                                FROM steps
-                                WHERE goal_id IN ${ids_string}`, (err2, steps) => {
-                            if (err2) reject(err);
-                            else {
-                                let safe_goals = get_safe_goals2(goals, steps)
-                                resolve(safe_goals);
-                            }
-                        })
-                    }
-                })
-            });
-        } catch (error) {
-            console.error(error);
-            return {error: 'An error occurred while fetching categories.'};
-        }
-    });
-
     ipcMain.handle('get-week-view', async (event, params) => {
         try {
             return await new Promise((resolve, reject) => {
@@ -219,7 +139,9 @@ function todoHandlers(db) {
                                G.addDate,
                                CASE WHEN G.addDate IN (${current_dates_str}) THEN 1 ELSE 0 END as "already"
                         FROM goals G
-                        WHERE G.project_id = ${params.id} AND G.check_state = 0 AND G.addDate = ''
+                        WHERE G.project_id = ${params.id}
+                          AND G.check_state = 0
+                          AND G.addDate = ''
                         ORDER BY goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -553,13 +475,13 @@ function todoHandlers(db) {
             return await new Promise((resolve, reject) => {
                 db.run(`UPDATE goals
                         SET check_state = ${params.changes['check_state']},
-                            goal       = '${params.changes['goal']}',
-                            category   = ${params.changes['category']},
-                            importance = ${params.changes['importance']},
-                            note       = '${params.changes['note']}',
-                            project_id = ${params.changes['pr_id']},
-                            addDate    = '${params.changes['addDate']}',
-                            date_type  = ${params.changes['date_type']}
+                            goal        = '${params.changes['goal']}',
+                            category    = ${params.changes['category']},
+                            importance  = ${params.changes['importance']},
+                            note        = '${params.changes['note']}',
+                            project_id  = ${params.changes['pr_id']},
+                            addDate     = '${params.changes['addDate']}',
+                            date_type   = ${params.changes['date_type']}
                         WHERE id = ${params.id}`)
 
                 db.run(`DELETE
@@ -1128,7 +1050,10 @@ function todoHandlers(db) {
                 VALUES ("${params.name}", "${3}")`)
         try {
             return await new Promise((resolve, reject) => {
-                db.all(`SELECT * FROM habits ORDER BY id DESC LIMIT 1`, (err, rows) => {
+                db.all(`SELECT *
+                        FROM habits
+                        ORDER BY id DESC
+                        LIMIT 1`, (err, rows) => {
                     if (err) reject(err);
                     else {
                         resolve(rows);
@@ -1145,10 +1070,10 @@ function todoHandlers(db) {
         params.days.forEach(day => {
             if (day.start_date !== undefined && day.end_date !== undefined) {
                 db.run(`INSERT INTO habit_days (habit_id, day_of_week, start_date, end_date)
-                VALUES ("${params.id}", "${day.day_of_week}", "${day.start_date}", "${day.end_date}")`)
+                        VALUES ("${params.id}", "${day.day_of_week}", "${day.start_date}", "${day.end_date}")`)
             } else {
                 db.run(`INSERT INTO habit_days (habit_id, day_of_week)
-                    VALUES ("${params.id}", "${day.day_of_week}")`)
+                        VALUES ("${params.id}", "${day.day_of_week}")`)
             }
         })
     })
@@ -1159,13 +1084,17 @@ function todoHandlers(db) {
     })
 
     ipcMain.on('remove-habit', (event, params) => {
-        db.run(`DELETE FROM habits WHERE id=${params.id}`);
-        db.run(`DELETE FROM habit_days WHERE habit_id=${params.id}`);
-        db.run(`DELETE FROM habit_logs WHERE habit_id=${params.id}`);
+        db.run(`DELETE
+                FROM habits
+                WHERE id = ${params.id}`);
+        db.run(`DELETE
+                FROM habit_days
+                WHERE habit_id = ${params.id}`);
+        db.run(`DELETE
+                FROM habit_logs
+                WHERE habit_id = ${params.id}`);
     })
 
-
-    
 
     ipcMain.handle('get-ASAP', async (event, params) => {
         try {
@@ -1311,7 +1240,8 @@ function todoHandlers(db) {
                                G.date_type,
                                G.addDate
                         FROM goals G
-                        WHERE G.addDate > "${params.date}" and G.date_type = 1
+                        WHERE G.addDate > "${params.date}"
+                          and G.date_type = 1
                         ORDER BY addDate, goal_pos`, (err, goals) => {
                     if (err) reject(err)
                     else {
@@ -1353,6 +1283,39 @@ function todoHandlers(db) {
                     deadlines_ids = `CASE G2.id ${params.deadlines_order} END, `
                 }
 
+                console.log(`
+                    Select *
+                    from (SELECT G.id,
+                                 G.goal,
+                                 G.check_state,
+                                 G.goal_pos,
+                                 G.category,
+                                 G.importance,
+                                 G.project_id as pr_id,
+                                 G.date_type,
+                                 G.addDate
+                          FROM goals G
+                          WHERE (addDate = "${date}" and check_state = 0 and (date_type = 0) and
+                                 G.project_id IN ${project_ids})
+                          ORDER BY ${queue_ids}G.importance DESC, G.goal_pos
+                          LIMIT 10)
+
+                    UNION ALL
+
+                    Select *
+                    from (SELECT G2.id,
+                                 G2.goal,
+                                 G2.check_state,
+                                 G2.goal_pos,
+                                 G2.category,
+                                 G2.importance,
+                                 G2.project_id as pr_id,
+                                 G2.date_type,
+                                 G2.addDate
+                          FROM goals G2
+                          WHERE (G2.addDate >= "${params.date}" and G2.check_state = 0 and (G2.date_type = 1))
+                          ORDER BY ${deadlines_ids}G2.addDate
+                          LIMIT 10)`)
 
                 db.all(`
                     Select *
@@ -1368,7 +1331,7 @@ function todoHandlers(db) {
                           FROM goals G
                           WHERE (addDate = "${date}" and check_state = 0 and (date_type = 0) and
                                  G.project_id IN ${project_ids})
-                          ORDER BY ${queue_ids}G.importance DESC, G.goal_pos 
+                          ORDER BY ${queue_ids}G.importance DESC, G.goal_pos
                           LIMIT 10)
 
                     UNION ALL

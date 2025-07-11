@@ -1,6 +1,6 @@
 export class ProjectsSettings {
-    constructor(app_data) {
-        this.app_data = app_data
+    constructor(app) {
+        this.app = app
         this.projects = []
         this.project_conn = []
 
@@ -27,12 +27,11 @@ export class ProjectsSettings {
 
     }
 
-    async init() {
-        this.projects = await window.dataAPI.getProjects()
-        this.project_conn = await window.dataAPI.getGalacticConnections()
-
-        await this.loadIcons()
-        await this.loadProjectIcons()
+    async init(hard = false) {
+        this.projects = await this.app.services.data_getter2('get-projects', {})
+        // this.project_conn = await window.dataAPI.getGalacticConnections()
+        // await this.loadIcons()
+        // await this.loadProjectIcons()
     }
 
     async loadProjectIcons() {
@@ -76,14 +75,15 @@ export class ProjectsSettings {
      * @returns {string} returns HTML
      */
     project_emblem_html(project_id) {
-        const project = this.projects.find(item => item.id === project_id);
+        console.log(project_id)
         let project_emblem = ''
-        if (project_id !== -1 && project_id !== null) {
-            let project_icon = this.findProjectPathByName(`project${project_id}`)
-
+        if (project_id !== undefined && project_id !== null) {
+            let selected_project = this.projects.find(project => project.publicId === project_id)
+            console.log(selected_project)
+            let project_color = this.app.settings.data.categories.categories[selected_project.categoryPublicId][0]
             project_emblem = `
-            <div class="projectEmblem" >
-                <img src="${project_icon}" alt="">
+            <div class="projectEmblem" style="color: ${project_color}">
+                ${selected_project['svgIcon']}
                 <div class="projectPos">${project_id}</div>
             </div>
         `
@@ -98,11 +98,7 @@ export class ProjectsSettings {
     set_projects_options() {
         let project_types_HTML = ""
         for (let i = 0; i < this.projects.length; i++) {
-            let current_project = this.projects[i]
-            let icon_color = this.app_data.categories.categories[current_project.category][0]
-            let icon_path = this.findProjectPathByName(`project${current_project.id}`)
-
-            project_types_HTML += this._type_project_HTML(icon_color, icon_path, current_project["name"], current_project["id"])
+            project_types_HTML += this._type_project_HTML(this.projects[i])
         }
         $('#projectTypes').html(project_types_HTML)
     }
@@ -115,13 +111,15 @@ export class ProjectsSettings {
      * @returns {string} HTML format
      * @private
      */
-    _type_project_HTML(icon_color, icon, name, id) {
+    _type_project_HTML(project) {
+        let project_color = this.app.settings.data.categories.categories[project.categoryPublicId][0]
+
         return `
-        <div class="projectType" style="border: 1px solid ${icon_color}">
-            <div class="projectTypeId">${id}</div>
-            <img class="projectTypeImg" src="${icon}" alt="">
-            <div class="projectName" style="border: 1px solid ${icon_color}">
-                ${name}
+        <div class="projectType" style="border: 1px solid ${project_color}; color: ${project_color}">
+            <div class="projectTypeId">${project.publicId}</div>
+            ${project.svgIcon}
+            <div class="projectName" style="border: 1px solid ${project_color}">
+                ${project.name}
             </div>
         </div>`
     }

@@ -27,8 +27,12 @@ export class Vignette {
                 this.todoVignette.day_setup.save_setup()
                 await this.app.todo.todoViews.myDayView.display()
             }
-            $('#vignette').css('display', 'none');
-            $('#vignette').html('')
+
+            if (!($('#login').length && this.app.vignette.loginVignette.is_logged === false)) {
+                $('#vignette').css('display', 'none');
+                $('#vignette').html('')
+            }
+
         })
 
         $(document).on('click', '#taskEdit', function (event){

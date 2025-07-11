@@ -1,8 +1,8 @@
 
 export class Categories {
-    constructor(app_settings) {
+    constructor(app) {
         this.initEventListeners()
-        this.settings = app_settings
+        this.app = app
     }
 
     initEventListeners() {

@@ -3,12 +3,12 @@ import {WeekView} from "./weekView.mjs";
 import {MonthView} from "./monthView.mjs";
 
 export class PlanViews {
-    constructor(todo) {
-        this.todo = todo
+    constructor(app) {
+        this.app = app
 
-        this.dayView = new DayView(todo)
-        this.weekView = new WeekView(todo)
-        this.monthView = new MonthView(todo)
+        this.dayView = new DayView(this.app)
+        this.weekView = new WeekView(this.app)
+        this.monthView = new MonthView(this.app)
 
         this.initEventListeners()
     }
@@ -40,7 +40,7 @@ export class PlanViews {
         });
 
         $(document).on('click', '.projectType', async (event) => {
-            await this.todo.project.show_project_sidebar(event.currentTarget)
+            await this.app.settings.data.project.show_project_sidebar(event.currentTarget)
         });
 
         $(document).on('click', '#date', (event) => {
@@ -55,7 +55,7 @@ export class PlanViews {
     }
 
     async change_date(direction) {
-        this.todo.appSettings.date.get_next_date(direction)
+        this.app.settings.date.get_next_date(direction)
         if($('#todosAll').length) await this.dayView.display()
         else if ($('.weekDay').length) await this.weekView.display()
         else if ($('#monthGrid').length) await this.monthView.display()
