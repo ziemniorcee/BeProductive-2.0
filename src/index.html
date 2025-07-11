@@ -315,8 +315,25 @@
     <div id="habit">
         <div id="habit-header" class="habitSector">
             <div id="habit-title">Habits</div>
+            <div id="habit-mode-title">
+                <p id="habit-mode-today">&lt;</p>
+                <span>today</span>
+                <p id="habit-mode-tomorrow">&gt;</p>
+            </div>
+            <div id="habit-btn-box">
+            <div id="habit-all-btn" class="habitButton">All habits</div>
+            <div id="habit-chart-btn" class="habitButton">
+                Chart
+                <div id="habit-chart-box">
+                    <canvas id="habit-info-canv"></canvas>
+                </div>
+            </div>
         </div>
-        <div id="habit-info" class="habitSector">
+        </div>
+        <div id="habit-container">
+            
+        </div>
+        <!-- <div id="habit-info" class="habitSector">
             <h2>Habits done in last 7 days</h2>
             <canvas id="habit-info-canv"></canvas>
             <h2>Habits to do tomorrow</h2>
@@ -333,7 +350,7 @@
             <h2>All habits list</h2>
             <div id="habit-menu-all" class="habitSubsector"></div>
             <div class="habitBlocks habitSubsector" id="habit-new-btn">+</div>
-        </div>
+        </div> -->
     </div>
 
     <template id="customTimePicker">

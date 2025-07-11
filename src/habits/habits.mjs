@@ -3,24 +3,35 @@ export class Habits {
         this.settings = app_settings;
         this.initEventListeners();
         this.chart = undefined;
+        this.is_today = true;
         this.create_chart();
-
+        console.log('lol')
     }
 
     initEventListeners() {
 
-        $(document).on('input', '.customTimePickerHoursPicker', function () {
-            console.log('hours')
-            $(this).closest(".customTimePickerHours").children().first().text($(this).val());
+        $(document).on('input', '.customTimePickerHoursPicker', (e) => {
+            $(e.target).closest(".customTimePickerHours").children().first().text($(e.target).val());
         })
 
-        $(document).on('input', '.customTimePickerMinutesPicker', function () {
-            console.log('minutes')
-            $(this).closest(".customTimePickerMinutes").children().first().text($(this).val().padStart(2, '0'));
+        $(document).on('input', '.customTimePickerMinutesPicker', (e) => {
+            $(e.target).closest(".customTimePickerMinutes").children().first().text($(e.target).val().padStart(2, '0'));
         })
 
         $(document).on('click', '#habit-new-btn', () => {
             this.create_new_habit_window();
+        })
+
+        $(document).on('click', '#habit-all-btn', () => {
+            $('#vignette').html(`<div id="habit-all-box" class="vignetteWindow1">
+                <div id="removeHabitContent" class="vignetteWindow1Content">
+                <div id="removeHabitTitle" class="vignetteWindow1Title">Remove habit</div></div></div>`)
+            for (const habit of this.settings.data.habits) {
+                let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
+                    undefined, undefined, '<div class="habitAllButton">Delete</div>')
+                $('#habit-all-box').append(habit_block)
+            }
+            $('#vignette').css('display', 'block');
         })
 
         $(document).on('change', 'input[class="newHabitOption4Checkbox"]', (e) => {
@@ -43,18 +54,21 @@ export class Habits {
             }
         })
 
-        $(document).on('click', '#habit-today-save', () => {
-            $('#habit-today-to-do').children().each((index, element) => {
-                if ($(element).children(":last-child").is(':checked')) {
-                    this.add_habit_log($(element).data('habit-id'))
-                    let clone = $(element).clone()
-                    clone.removeClass('habitToDo');
-                    clone.children().last().remove();
-                    $('#habit-today-done').append(clone);
-                    $(element).remove();
-                }
-            });
-        }) 
+        $(document).on('click', '#habit-mode-today', (e) => {
+            $('#habit-mode-tomorrow').css('display', 'block');
+            $(e.target).css('display', 'none');
+            this.is_today = true;
+            $('#habit-mode-title').children('span').eq(0).text('today');
+            this.refresh_today_habits();
+        })
+
+        $(document).on('click', '#habit-mode-tomorrow', (e) => {
+            $('#habit-mode-today').css('display', 'block');
+            $(e.target).css('display', 'none');
+            this.is_today = false;
+            $('#habit-mode-title').children('span').eq(0).text('tomorrow');
+            this.refresh_tomorrow_habits();
+        })
 
         $(document).on('click', '#newHabitCreate', async () => {
             let mode = $('input[name="newHabitPicker"]:checked').val();
@@ -138,17 +152,83 @@ export class Habits {
             }
         })
 
-        $(document).on('click', '#newHabitDiscard', function () {
+        $(document).on('click', '#newHabitDiscard', () => {
             $("#newHabit").css('display', 'none');
             $("#vignette").css('display', 'none');
         })
+
+        $(document).on('click', '#removeHabitDiscard', () => {
+            $("#vignette").css('display', 'none');
+        })
+
+        $(document).on('change', '.habitBlocksTodayCheckbox', async (e) => {
+            let element = $(e.target).parent()
+            let today = new Date();
+            let date = today.toISOString().split('T')[0];
+            let id = parseInt($(element).data('habit-id'));
+            
+            if ($(e.target).prop('checked')) {
+                $(element).data('type', '3')
+                $(element).children('.habitBlocksName').first().css('text-decoration', 'line-through');
+                $(element).insertBefore($('#habit-new-btn'));
+                await this.add_habit_log(id);
+                console.log('checked')
+            } else {
+                $(element).data('type', '1')
+                $(element).children('.habitBlocksName').first().css('text-decoration', 'none');
+                $(element).prependTo('#habit-container');
+                this.settings.data.habits_logs = this.settings.data.habits_logs.filter(
+                    obj => !(obj.habit_id === id && obj.date === date));
+                await window.goalsAPI.removeHabitLogs({id: id, date: date});
+                console.log(this.settings.data.habits_logs)
+                console.log('unchecked')
+            }
+        })
+    }
+    
+    getHabitStreak(habit_id) {
+        let today = new Date();
+        const today_date = today.toISOString().split('T')[0];
+        const habit_logs = this.settings.data.habits_logs
+            .filter(l => l.habit_id === habit_id)
+            .map(l => l.date)
+            .sort((a, b) => b.localeCompare(a));
+        console.log(habit_id)
+        console.log(habit_logs)
+        let streak = 0;
+        let currentDate = new Date(today_date);
+        currentDate.setDate(currentDate.getDate() - 1);
+        
+        while (true) {
+            const currentDateStr = currentDate.toISOString().split('T')[0];
+            if (habit_logs.includes(currentDateStr)) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+
+        return streak;
     }
 
-    __HTML_habit_block(id, name, start_date, end_date, opt_button, opt_classes) {
-        if (opt_classes === undefined) opt_classes = "";
-        let habit_block = `<div class="habitBlocks habitHabit ${opt_classes}" data-habit-id="${id}"><span>${name}</span>`
-        if (start_date && end_date) habit_block += `<span>${start_date} - ${end_date}</span>`
+    __HTML_habit_block(id, name, start_date, end_date, 
+                        opt_button, 
+                        type, 
+                        opt_name_styles, 
+                        opt_div_styles,
+                        streak) {
+        if (type === undefined) type = "";
+        if (opt_name_styles === undefined) opt_name_styles = "";
+        if (opt_div_styles === undefined) opt_div_styles = "";
+        let habit_block = `<div class="habitBlocks" data-habit-id="${id}" data-type="${type}" style="${opt_div_styles}">
+        <span class="habitBlocksName" style="${opt_name_styles}">${name}</span>`
+        if (start_date && end_date) habit_block += `<span class="habitBlocksDate">${start_date} - ${end_date}</span>`
         if (opt_button) habit_block += '' + opt_button
+        if (streak !== undefined && !isNaN(streak) && streak >= 3) {
+            habit_block += `<img src="images/goals/fire1.png" width="32px" height="32px" alt="" class="habitBlocksIcon">
+            <span class="habitBlocksStreak">${(streak <= 7) ? streak : '7+'}</span>`
+        }
         habit_block += '</div>'
         return habit_block
     }
@@ -166,6 +246,7 @@ export class Habits {
         const today_date = today.toISOString().split('T')[0];
         window.goalsAPI.addHabitLogs({id: id, date: today_date})
         this.settings.data.habits_logs.push({habit_id: id, date: today_date})
+        console.log(this.settings.data.habits_logs)
     }
 
     create_new_habit_window() {
@@ -197,52 +278,70 @@ export class Habits {
         }
     }
 
-    
-
     refresh_today_habits() {
-        $('#habit-today-to-do').empty();
-        $('#habit-today-done').empty();
-        $('#habit-menu-all').empty();
-        $('#habit-info-tomorrow').empty();
+        $('#habit-container').empty();
         let today = new Date();
         const weekday = (today.getDay() + 6) % 7;
         const today_date = today.toISOString().split('T')[0];
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const weekdayTomorrow = (tomorrow.getDay() + 6) % 7;
+        let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+        let habits_to_do = "";
+        let habits_later = "";
+        let habits_done = "";
         for (const habit of this.settings.data.habits) {
-            let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
-                undefined, undefined, '<div class="habitAllButton">Delete</div>')
-            $('#habit-menu-all').append(habit_block)
             for (const day of habit.days) {
                 if (day.day_of_week === weekday) {
                     let flag = true;
                     for (const log of this.settings.data.habits_logs) {
-                        if (log.habit_id === habit.id && log.date === today_date) {
+                        if (log.habit_id === habit.id && log.date === today_date && 
+                            this.settings.data.compare_times(time_now, day.end_date) >= 0) {
                             flag = false;
-                            let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
-                                day.start_date, day.end_date, false)
-                            $('#habit-today-done').append(habit_block)
+                            let streak = this.getHabitStreak(habit.id);
+                            habits_done += this.__HTML_habit_block(habit.id, habit.name, 
+                                day.start_date, day.end_date, 
+                                '<input type="checkbox" class="habitBlocksTodayCheckbox" checked>', "3",
+                                'text-decoration: line-through;', '', streak
+                            )
+                            break;
                         }
                     }
                     if (flag) {
-                        let time_now = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+                        let streak = this.getHabitStreak(habit.id);
                         if (!day.start_date || !day.end_date || 
-                            (this.settings.data.compare_times(day.start_date, time_now) > 0 && 
-                            this.settings.data.compare_times(time_now, day.end_date) > 0)) {
-                            let habit_block = this.__HTML_habit_block(habit.id, habit.name,
-                                day.start_date, day.end_date, '<input type="checkbox">', "habitToDo")
-                            $('#habit-today-to-do').append(habit_block)
+                            (this.settings.data.compare_times(day.start_date, time_now) >= 0 && 
+                            this.settings.data.compare_times(time_now, day.end_date) >= 0)) {
+                            habits_to_do += this.__HTML_habit_block(habit.id, habit.name,
+                                day.start_date, day.end_date, '<input type="checkbox" class="habitBlocksTodayCheckbox">', "1",
+                            '', '', streak)
+                        } else if (this.settings.data.compare_times(time_now, day.start_date) > 0 &&
+                                    this.settings.data.compare_times(time_now, day.end_date) >= 0) {
+                            habits_later += this.__HTML_habit_block(habit.id, habit.name,
+                                day.start_date, day.end_date, false, "2", '', 'filter: brightness(0.5);', streak)
                         }
                     }
-                } else if (day.day_of_week === weekdayTomorrow) {
+                } 
+            }
+        }
+        $('#habit-container').append(habits_to_do);
+        $('#habit-container').append(habits_later);
+        $('#habit-container').append(habits_done);
+        $('#habit-container').append('<div class="habitBlocks" id="habit-new-btn">New habit</div>');
+    }
+
+    refresh_tomorrow_habits() {
+        $('#habit-container').empty();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const weekdayTomorrow = (tomorrow.getDay() + 6) % 7;
+        for (const habit of this.settings.data.habits) {
+            for (const day of habit.days) {
+                if (day.day_of_week === weekdayTomorrow) {
                     let habit_block = this.__HTML_habit_block(habit.id, habit.name, 
-                        day.start_date, day.end_date, false)
-                    $('#habit-info-tomorrow').append(habit_block)
+                        day.start_date, day.end_date, false);
+                    $('#habit-container').append(habit_block);
                 }
             }
         }
-        this.update_chart();
+        $('#habit-container').append('<div class="habitBlocks" id="habit-new-btn">New habit</div>');
     }
 
     get_custom_time_data(element) {
@@ -252,6 +351,10 @@ export class Habits {
     }
 
     create_chart() {
+        const $canvas = $("#habit-info-canv");
+        const $parent = $canvas.parent();
+        $canvas.attr("width", $parent.width());
+        $canvas.attr("height", $parent.height());
         const ctx = document.getElementById('habit-info-canv').getContext('2d');
         const dni = ['2025-05-01', '2025-05-02', '2025-05-03', '2025-05-04', '2025-05-05', '2025-05-06', '2025-05-07'];
         const procenty = [0.2, 0.5, 0.8, 0.6, 1.0, 0.7, 0.3];
@@ -305,6 +408,9 @@ export class Habits {
                         }
                 },
                 plugins: {
+                    customCanvasBackgroundColor: {
+                        color: '#1E1E1E',
+                    },
                     legend: {
                         labels: {
                             color: 'white',
