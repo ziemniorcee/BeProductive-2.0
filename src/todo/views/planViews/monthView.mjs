@@ -1,6 +1,6 @@
 export class MonthView {
-    constructor(todo) {
-        this.todo = todo
+    constructor(app) {
+        this.app = app
 
         this.initEventListeners()
 
@@ -15,8 +15,8 @@ export class MonthView {
         $(document).on('mouseup', '.monthDay', async (event) => {
             if (event.which === 1 && event.target.className === "monthGoals") {
                 let day_index = Number($(event.currentTarget).find('.monthDate').text())
-                this.todo.appSettings.date.set_sql_month(day_index)
-                await this.todo.todoViews.planViews.dayView.display()
+                this.app.settings.date.set_sql_month(day_index)
+                await this.app.todo.todoViews.planViews.dayView.display()
             }
         })
 
@@ -27,11 +27,12 @@ export class MonthView {
      * launches month view
      */
     async display() {
-        let goals = await window.goalsAPI.getMonthView({
-            dates: this.todo.appSettings.date.get_sql_month(this.todo.appSettings.date.day_sql),
-            goal_check: 0
-        })
+        let params = {
+            dates: this.app.settings.date.get_sql_month(this.app.settings.date.day_sql),
+        }
 
+        let goals = await this.app.services.data_getter('get-month-view', params)
+        console.log(goals)
         $("#main").html('')
         this._month_header_HTML()
         $("#main").append(this._month_content_HTML())
@@ -78,7 +79,7 @@ export class MonthView {
      * @returns {string} HTML of month content
      */
     _month_content_HTML() {
-        let month_params = this.todo.appSettings.date.get_format_month()
+        let month_params = this.app.settings.date.get_format_month()
         let month_days_limit = month_params[1] - month_params[0]
         let month_counter = 0;
 
@@ -86,7 +87,7 @@ export class MonthView {
         for (let i = 0; i < 7; i++) {
             header += `
             <div class="monthWeekDay">
-                ${this.todo.appSettings.data.weekdays2[i]}
+                ${this.app.settings.data.weekdays2[i]}
             </div>`
         }
 
@@ -140,7 +141,7 @@ export class MonthView {
      * if it does, day is marked
      */
     set_today() {
-        let today_day = this.todo.appSettings.date.is_today_monthview()
+        let today_day = this.app.settings.date.is_today_monthview()
         if (today_day) {
             let monthDate = $('.monthDate')
             for (let i = 0; i < monthDate.length; i++) {
@@ -160,8 +161,8 @@ export class MonthView {
      * @returns {string} HTML of month header
      */
     _month_header_HTML() {
-        let date = this.todo.appSettings.date.get_month_display_format(this.todo.appSettings.date.day_sql)
-        let main_title = this.todo.appSettings.date.get_fixed_header_month()
+        let date = this.app.settings.date.get_month_display_format(this.app.settings.date.day_sql)
+        let main_title = this.app.settings.date.get_fixed_header_month()
 
         const header_template = $('#viewHeaderTemplate').prop('content');
         let $header_clone = $(header_template).clone()
@@ -183,7 +184,7 @@ export class MonthView {
                 onSelect: async (dateText, inst) => {
                     const $input = inst.input;
                     const selectedDate = $input.datepicker('getDate');
-                    this.todo.appSettings.date.set_attributes(selectedDate)
+                    this.app.settings.date.set_attributes(selectedDate)
                     await this.display()
 
                     $('#selectDate').text(selectedDate)
@@ -200,25 +201,24 @@ export class MonthView {
      * @returns {string}
      */
     build_month_goal(goal) {
-        let converted_text = this.todo.appSettings.data.decode_text(goal['goal'])
+        let converted_text = this.app.settings.data.decode_text(goal['name'])
         let category_color = "rgb(74, 74, 74)"
         let date_label = ""
         let deadline_label = ""
-
-        if (goal.category !== 0) {
-            category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
+        if (goal.categoryPublicId !== 0 && goal.categoryPublicId !== null) {
+            category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
         }
 
-        if(goal.date_type === 0){
+        if(goal.dateType === 0){
             date_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
-        else if(goal.date_type === 1){
+        else if(goal.dateType === 1){
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
         }
 
         return `
         <div class="monthTodo" style="">
-            <div class="monthTodoId">${goal["id"]}</div>
+            <div class="monthTodoId">${goal["taskPublicId"]}</div>
             <div class="monthTodoLabel" style="background-color: ${category_color}"></div>
             <div class="monthTodoText" >
                 <div class="monthTodoTextLimit">
@@ -288,7 +288,7 @@ export class MonthView {
     _change_order(event) {
         let goal_id = $(event).find('.monthTodoId').text()
         let day = Number($(event).closest('.monthDay').find('.monthDate').text())
-        let date = this.todo.appSettings.date.get_sql_month_day(day)
+        let date = this.app.settings.date.get_sql_month_day(day)
         let day_goals = $(event).parent().children()
 
         let order = []
@@ -329,10 +329,10 @@ export class MonthView {
 
         $(dragged_task).remove()
 
-        let category_id = this.todo.appSettings.data.getIdByColor(this.todo.appSettings.data.categories.categories, $(event).find('.todoCheck').css('background-color'))
+        let category_id = this.app.settings.data.getIdByColor(this.app.settings.data.categories.categories, $(event).find('.todoCheck').css('background-color'))
         let goal_dict = {
-            goal: $(event).find('.task').text(),
-            category: category_id,
+            name: $(event).find('.task').text(),
+            categoryPublicId: category_id,
         }
         if (item_day_before === null) {
             jq_monthGoals.eq(selected_month_day).append(this.build_month_goal(goal_dict))
@@ -341,7 +341,7 @@ export class MonthView {
         }
 
         let day = Number($(event).closest('.monthDay').find('.monthDate').text())
-        let add_date = this.todo.appSettings.date.sql_sql_month_day(day)
+        let add_date = this.app.settings.date.sql_sql_month_day(day)
 
         window.projectsAPI.getFromProject({
             date: add_date,
@@ -359,7 +359,7 @@ export class MonthView {
         for (let i = 0; i < todos.length; i++) if (todos[i].className !== "monthTodo") new_goal_pos = i
 
         let month_day = Number($('.monthGoals .sidebarTask').closest('.monthDay').find('.monthDate').text())
-        let date = this.todo.appSettings.date.get_sql_month_day(month_day)
+        let date = this.app.settings.date.get_sql_month_day(month_day)
 
         window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
         if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()

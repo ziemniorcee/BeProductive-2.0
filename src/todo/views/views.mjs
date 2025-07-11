@@ -5,13 +5,13 @@ import {AsapView} from "./asapView.mjs";
 import {MyDayView} from "./myDay.js";
 
 export class TodoViews {
-    constructor(todo) {
-        this.todo = todo
-        this.planViews = new PlanViews(todo)
-        this.projectView = new ProjectView(todo)
-        this.inboxView = new InboxView(todo)
-        this.asapView = new AsapView(todo)
-        this.myDayView = new MyDayView(todo)
+    constructor(app) {
+        this.todo = app.todo
+        this.planViews = new PlanViews(app)
+        this.projectView = new ProjectView(this.todo)
+        this.inboxView = new InboxView(this.todo)
+        this.asapView = new AsapView(this.todo)
+        this.myDayView = new MyDayView(app)
 
         this.initEventListeners()
     }
