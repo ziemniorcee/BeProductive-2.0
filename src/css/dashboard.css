@@ -4,13 +4,17 @@
 
 #dashboard{
     width: var(--dashboard-size);
-    background-color: #1E1E1E;
+    /*background-color: #1E1E1E;*/
+    background-color: black;
     padding: 30px;
     color: white;
     position: relative;
     box-sizing: border-box;
     overflow-y: auto;
     scrollbar-width: none;
+    background-image: url("../images/goals/optional/dragon.png") ;
+    background-repeat: no-repeat;
+    background-position: center center;
 }
 
 #dashboard::-webkit-scrollbar {
@@ -529,4 +533,26 @@
     position: relative;
     font-size: 15px;
     top: -5px;
+}
+
+#dashTest{
+    width: 200px;
+    height: 200px;
+    font-size: 15px;
+}
+
+.dashTestCore{
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+
+}
+
+.dashTestRow{
+    display: flex;
+    margin-bottom: 5px;
+}
+
+#testResetToken{
+    background-color: red;
 }

@@ -1,9 +1,11 @@
 import {DashboardProjects} from "./projects.mjs";
+import {Tests} from "./tests.js";
 
 export class AppDashboard {
     constructor(app) {
         this.app = app
         this.projects = new DashboardProjects(app)
+        this.tests = new Tests(app)
         this.initEventListeners()
     }
 

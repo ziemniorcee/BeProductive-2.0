@@ -18,19 +18,20 @@ export class DashboardProjects {
 
         for (let i = 0; i < length; i++) {
             let project = this.app.settings.data.projects.projects[i]
-            let icon_path = this.app.settings.data.projects.get_project_icon_path(project["id"])
-            $('#dashStrategyProjects').append(this.render_project(project["name"], project["id"], icon_path))
+            $('#dashStrategyProjects').append(this.render_project(project))
         }
     }
 
-    render_project(project_name, project_id, icon_path) {
+    render_project(project) {
+        let project_color = this.app.settings.data.categories.categories[project.categoryPublicId][0]
+
         return `
             <div class="dashButton dashProject">
-                <div class="dashButtonIcon">
-                    <img src="${icon_path}" alt="">
+                <div class="dashButtonIcon" style="color: ${project_color}">
+                    ${project['svgIcon']}
                 </div>
-                <div>${project_name}</div>
-                <div class="dashProjectId">${project_id}</div>
+                <div>${project['name']}</div>
+                <div class="dashProjectId">${project['publicId']}</div>
             </div>
         `
     }

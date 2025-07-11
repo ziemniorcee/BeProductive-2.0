@@ -97,7 +97,6 @@ export class DaySetup {
         }
 
         let project_id = $target.closest('.daySetupProject').data('project-id')
-
         if ($(event.currentTarget).closest('#daySetupPickerCategories').length) {
             if ($target.prop('checked')) {
                 $('#daySetupQueueBody').append(this.templates.priority_project(project_id))
@@ -182,11 +181,10 @@ export class DaySetup {
 
     save_setup() {
         const $projects = $('.daySetupQueueProject')
-        const project_queue_ids = Array.from($projects).map(el => el.dataset.projectId);
 
+        const project_queue_ids = Array.from($projects).map(el => el.dataset.projectId);
         let $deadlines = $('#daySetupPickerDeadlines .daySetupProjectCheck:checked')
         let deadlines_ids = Array.from($deadlines).map(el => $(el).closest('.daySetupProject').data('todo-id'));
-
         let project_share = $('#daySetupShareSliderPct').val()
         let deadline_share = $('#daySetupShareSliderRemaining').val()
 
@@ -197,7 +195,9 @@ export class DaySetup {
             deadline_share
         }
         try {
+            console.log(my_day_setup)
             localStorage[this.app.settings.data.localStorage] = JSON.stringify(my_day_setup);
+
         } catch (err) {
             console.error("❌ Failed to save setup to localStorage:", err);
         }
@@ -360,10 +360,10 @@ class DaySetupTemplates {
         let projects = this.app.settings.data.projects.projects
 
         for (const key in categories) {
-            let category_id = Number(key)
+            let category_id = key
             let category_name = categories[key][1]
             let category_color = categories[key][0]
-            let projects_in_category = projects.filter(project => project.category === category_id)
+            let projects_in_category = projects.filter(project => project.categoryPublicId === category_id)
             if (projects_in_category.length) {
                 let projects_HTML = this.projects(projects_in_category, setup_categories)
 
@@ -387,10 +387,10 @@ class DaySetupTemplates {
 
         for (let i = 0; i < projects.length; i++) {
             let check = ""
-            if (setup_categories.includes(`${projects[i].id}`)) {
+            if (setup_categories.includes(`${projects[i].publicId}`)) {
                 check = "checked"
             }
-            let project_id = projects[i].id
+            let project_id = projects[i].publicId
             let project_name = projects[i].name
             projects_HTML += `<div class="daySetupProject" data-project-id="${project_id}">
                                 <input type="checkbox" class="daySetupProjectCheck" ${check}>
@@ -403,7 +403,8 @@ class DaySetupTemplates {
     async deadlines(setup_deadlines) {
         let deadlines_HTML = ""
 
-        let goals = await window.goalsAPI.getDeadlines({date: this.app.settings.date.today_sql})
+        let params = {date: this.app.settings.date.today_sql}
+        let goals = await this.app.services.data_getter('get-deadlines', params)
 
         if (goals.length === 0) return deadlines_HTML
 
@@ -412,7 +413,7 @@ class DaySetupTemplates {
         let goals_HTML = ""
         for (let i = 0; i < goals.length; i++) {
             let check = ""
-            if (setup_deadlines.includes(Number(goals[i].id))) {
+            if (setup_deadlines.includes(goals[i].taskPublicId)) {
                 check = "checked"
             }
             if (i === goals.length - 1) goals_HTML += this.date(goals[i], check)
@@ -440,9 +441,9 @@ class DaySetupTemplates {
     }
 
     date(goal, check) {
-        return `<div class="daySetupProject" data-todo-id="${goal['id']}">
+        return `<div class="daySetupProject" data-todo-id="${goal['taskPublicId']}">
                     <input type="checkbox" class="daySetupProjectCheck" ${check}>
-                    ${goal['goal']}
+                    ${goal['name']}
                 </div>`
     }
 
@@ -452,9 +453,9 @@ class DaySetupTemplates {
         let priorities_HTML = ""
         for (let i = 0; i < setup_projects.length; i++) {
 
-            if (projects.some(item => item.id === Number(setup_projects[i]))) {
-                let project = projects.find(project => project.id === Number(setup_projects[i]))
-                let color = categories[project.category][0]
+            if (projects.some(item => item.publicId === setup_projects[i])) {
+                let project = projects.find(project => project.publicId === setup_projects[i])
+                let color = categories[project.categoryPublicId][0]
                 priorities_HTML += `<div class="daySetupQueueProject" data-project-id="${setup_projects[i]}">
                                     <div class="daySetupQueueProjectDrag">
                                         <img src="images/goals/drag.png" alt="">
@@ -481,8 +482,8 @@ class DaySetupTemplates {
         let projects = this.app.settings.data.projects.projects
         let categories = this.app.settings.data.categories.categories
 
-        let project = projects.find(project => project.id === project_id)
-        let color = categories[project.category][0]
+        let project = projects.find(project => project.publicId === project_id)
+        let color = categories[project.categoryPublicId][0]
 
         let index = $('.daySetupQueueProject').length + 1
         return `<div class="daySetupQueueProject" data-project-id="${project_id}">

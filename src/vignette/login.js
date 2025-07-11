@@ -2,7 +2,10 @@ export class LoginVignette {
     constructor(app) {
         this.app = app
         this.initEventListeners()
+
         this.templates = new LoginTemplates(app)
+        this.is_logged = false
+        console.log("init login")
     }
 
     initEventListeners() {
@@ -21,32 +24,22 @@ export class LoginVignette {
         const data = Object.fromEntries(
             new FormData($('.login-form')[0]).entries()
         );
-        try {
-            const res = await fetch('https://todo-api-965384144322.europe-west1.run.app/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const json = await res.json();
-            output.textContent = JSON.stringify(json, null, 2);
+        this.is_logged = await this.app.services.login(data)
 
-            // if success, store token and show example of using it
-            if (json.success && json.token) {
-                localStorage.setItem('jwt', json.token);
-                output.textContent += '\n\n✅ Token saved to localStorage.';
-            }
-        } catch (err) {
-            console.log("CHUJ")
-            output.textContent = '❌ Error:\n' + err;
+        if (this.is_logged === true){
+            await this.app.init.hard_init()
+            $('#vignette').css('display', 'none')
         }
+        console.log(this.is_logged)
+
     }
+
 
 }
 
 class LoginTemplates {
     constructor(app) {
         this.app = app
-
     }
 
     render() {

@@ -2,9 +2,10 @@ import {ProjectsSettings} from "./project.js";
 import {CategoriesSettings} from "./categories.js";
 
 export class Data {
-    constructor() {
-        this.projects = new ProjectsSettings(this)
-        this.categories = new CategoriesSettings(this)
+    constructor(app) {
+        this.app = app
+        this.projects = new ProjectsSettings(app)
+        this.categories = new CategoriesSettings(app)
 
         this.month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         this.weekdays2 = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -18,9 +19,9 @@ export class Data {
         // this.localStorage = "myDaySetupStateREAL"
     }
 
-    async init() {
+    async init(hard = false) {
         await this.categories.init()
-        await this.projects.init()
+        await this.projects.init(hard)
 
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()

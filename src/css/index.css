@@ -2324,3 +2324,18 @@ body {
 .helper-text a:hover {
     text-decoration: underline;
 }
+
+.projectEmblem svg{
+    height: 35px;
+    width: 35px;
+}
+
+.dashButtonIcon svg {
+    height: 30px;
+    width: 30px;
+}
+
+.projectType svg {
+    height: 35px;
+    width: 35px;
+}

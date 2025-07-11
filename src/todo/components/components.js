@@ -2,8 +2,8 @@ import {Categories} from "./category.mjs";
 import {Steps} from "./steps.mjs";
 
 export class TodoComponents {
-    constructor(appSettings) {
-        this.steps = new Steps(appSettings)
-        this.categories = new Categories(appSettings)
+    constructor(app) {
+        this.steps = new Steps(app)
+        this.categories = new Categories(app)
     }
 }

@@ -1,9 +1,8 @@
 
 export class Steps {
-    constructor(app_settings) {
+    constructor(app) {
         this.initEventListeners()
-
-        this.appSettings = app_settings
+        this.app = app
     }
 
     initEventListeners() {
@@ -89,16 +88,16 @@ export class Steps {
     _steps_HTML(steps, category_id) {
         let steps_HTML = ""
         if (steps.length > 0) {
-            let checks_counter = steps.reduce((total, step) => total + step.step_check, 0);
+            let checks_counter = steps.reduce((total, step) => total + step.stepCheck, 0);
             let steps_elements = ""
             for (let i = 0; i < steps.length; i++) {
-                let step_check = steps[i].step_check ? "checked" : ""
-                let converted_step = this.appSettings.data.decode_text(steps[i].step_text)
+                let step_check = steps[i]['stepCheck'] ? "checked" : ""
+                let converted_step = this.app.settings.data.decode_text(steps[i]['name'])
                 steps_elements +=
                     `<div class='step'>
                         <input type='checkbox' ${step_check} class='stepCheck'> 
                         <span class="step_text">${converted_step}</span>
-                        <div class="stepId">${steps[i].id}</div>
+                        <div class="stepId">${steps[i]['publicId']}</div>
                     </div>`
             }
 
