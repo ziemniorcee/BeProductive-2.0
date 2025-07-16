@@ -5,46 +5,13 @@ const {contextBridge, ipcRenderer} = require('electron')
 
 
 contextBridge.exposeInMainWorld('goalsAPI', {
-    // getMyDay: (params) => ipcRenderer.invoke('get-my-day', params),
-    // getDayView: (params) => ipcRenderer.invoke('get-day-view', params),
-    // getWeekView: (params) => ipcRenderer.invoke('get-week-view', params),
-    getMonthView: (params) => ipcRenderer.invoke('get-month-view', params),
-    getProjectView: (params) => ipcRenderer.invoke('get-project-view', params),
-
-    getDaySetupGoals: (params) => ipcRenderer.invoke('get-day-setup-goals', params),
-    test: (params) => ipcRenderer.send('test', params),
-    newGoal: (params) => ipcRenderer.send('new-goal', params),
-    removingGoal: (callback) => ipcRenderer.on("removing-goal", callback),
-    removingFollowing: (callback) => ipcRenderer.on("removing-following", callback),
-    goalRemoved: (params) => ipcRenderer.send('goal-removed', params),
-    followingRemoved: (params) => ipcRenderer.send('following-removed', params),
-    getFollowingRemoved: (func) => ipcRenderer.on('get-following-removed', (event, positions) => func(positions)),
-    rowsChange: (params) => ipcRenderer.send('rows-change', params),
-    changeChecksGoal: (params) => ipcRenderer.send('change-checks-goal', params),
-
-    changeChecksStep2: (params) => ipcRenderer.send('change-checks-step2', params),
-
-    editGoal: (params) => ipcRenderer.invoke('edit-goal', params),
-
-    changeDate: (params) => ipcRenderer.send('change-date', params),
-    askEditGoal: (params) => ipcRenderer.invoke('ask-edit-goal', params),
-    changeWeekGoalCheck: (params) => ipcRenderer.send('change-week-goal-check', params),
-
-    askMonthGoals: (params) => ipcRenderer.send('ask-month-goals', params),
-    getMonthGoalsDone: (func) => ipcRenderer.on('get-month-goals-done', (event, goals_dict) => func(goals_dict)),
-
-    goalRemoveDate: (params) => ipcRenderer.send('goal-remove-date', params),
+    removingGoal: (callback) => ipcRenderer.on("removing-goal", callback), // must stay
 
     askProductivity: (params) => ipcRenderer.send('ask-productivity', params),
     getProductivity: (func) => ipcRenderer.on('get-productivity', (event, productivities) => func(productivities)),
 
     askCategoriesCounts: () => ipcRenderer.send('ask-categories-counts'),
     getCategoriesCounts: (func) => ipcRenderer.on('get-categories-counts', (event, counts) => func(counts)),
-
-
-
-    addCategory: (params) => ipcRenderer.send('add-category', params),
-    removeCategory: (params) => ipcRenderer.send('remove-category', params),
 
     // askGalacticConnections: () => ipcRenderer.send('ask-galactic-conn'),
     // getGalacticConnections: (func) => ipcRenderer.on('get-galactic-conn', (event, connections) => func(connections)),
@@ -67,19 +34,10 @@ contextBridge.exposeInMainWorld('goalsAPI', {
 
     // askHabitsLogs: () => ipcRenderer.send('ask-habits-logs'),
     // getHabitsLogs: (func) => ipcRenderer.on('get-habits-logs', (event, days) => func(days)),
-    newGoal2: (params) => ipcRenderer.invoke('new-goal-2', params),
-    getDeadlines: (params) => ipcRenderer.invoke('get-deadlines', params),
 })
 
 contextBridge.exposeInMainWorld('projectsAPI', {
-    askProjectSidebar: (params) => ipcRenderer.invoke('ask-project-sidebar', params),
-    getFromProject: (params) => ipcRenderer.send('get-from-project', params),
-    projectToGoal: (func) => ipcRenderer.on('project-to-goal', (event, steps, position) => func(steps, position)),
-    newProject: (params) => ipcRenderer.invoke('new-project', params),
-
-
-    deleteProject: (params) => ipcRenderer.send('delete-project', params),
-    removeProject: (params) => ipcRenderer.send('remove-project', params),
+    removeProject: (params) => ipcRenderer.send('remove-project', params), //niemoje
 })
 
 contextBridge.exposeInMainWorld('sidebarAPI', {
@@ -129,7 +87,7 @@ contextBridge.exposeInMainWorld('dataAPI', {
 });
 
 contextBridge.exposeInMainWorld('inboxAPI', {
-    getInbox: () => ipcRenderer.invoke('get-inbox'),
+    // getInbox: () => ipcRenderer.invoke('get-inbox'),
     newInboxGoal: (params) => ipcRenderer.invoke('new-inbox-goal', params),
     checkInboxGoal: (params) => ipcRenderer.send('check-inbox-goal', params),
     newGoalFromInbox: (params) => ipcRenderer.send('new-goal-from-inbox', params),

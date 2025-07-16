@@ -40,7 +40,7 @@ export class PlanViews {
         });
 
         $(document).on('click', '.projectType', async (event) => {
-            await this.app.settings.data.project.show_project_sidebar(event.currentTarget)
+            await this.app.todo.project.show_project_sidebar(event.currentTarget)
         });
 
         $(document).on('click', '#date', (event) => {

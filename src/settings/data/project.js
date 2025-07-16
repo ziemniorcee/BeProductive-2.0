@@ -4,22 +4,7 @@ export class ProjectsSettings {
         this.projects = []
         this.project_conn = []
 
-        this.icons = [{
-            name: "book",
-            path: "images/goals/projects/book.png"
-        }, {
-            name: "bug",
-            path: "images/goals/projects/bug.png"
-        }, {
-            name: "dashboard",
-            path: "images/goals/projects/dashboard.png"
-        }, {
-            name: "keys",
-            path: "images/goals/projects/keys.png"
-        }, {
-            name: "productivity",
-            path: "images/goals/projects/productivity.png"
-        }]
+        this.icons = []
 
         this.merged_icons = []
         this.project_icons = []
@@ -29,6 +14,7 @@ export class ProjectsSettings {
 
     async init(hard = false) {
         this.projects = await this.app.services.data_getter2('get-projects', {})
+        this.icons = await this.get_icons()
         // this.project_conn = await window.dataAPI.getGalacticConnections()
         // await this.loadIcons()
         // await this.loadProjectIcons()
@@ -43,6 +29,10 @@ export class ProjectsSettings {
         for (let i = 0; i < icons_imported.length; i++) {
             this.project_icons.push(icons_imported[i])
         }
+    }
+
+    async get_icons() {
+        return await this.app.services.data_getter('get-icons')
     }
 
     async loadIcons() {
@@ -75,11 +65,9 @@ export class ProjectsSettings {
      * @returns {string} returns HTML
      */
     project_emblem_html(project_id) {
-        console.log(project_id)
         let project_emblem = ''
-        if (project_id !== undefined && project_id !== null) {
+        if (project_id !== undefined && project_id !== null && project_id !== '-1') {
             let selected_project = this.projects.find(project => project.publicId === project_id)
-            console.log(selected_project)
             let project_color = this.app.settings.data.categories.categories[selected_project.categoryPublicId][0]
             project_emblem = `
             <div class="projectEmblem" style="color: ${project_color}">

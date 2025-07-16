@@ -147,8 +147,8 @@ export class Strategy {
         //     $('#selectCategory22').text(this.settings.data.categories.categories[category_element][1])
         // })
 
-        $(document).on('click', '#removeCategoryCreate', () => {
-            this.app.categories.remove_category()
+        $(document).on('click', '#removeCategoryCreate', async () => {
+            await this.app.categories.remove_category()
             if ($('#galactics').css('display') !== 'none') {
                 this.app.strategy.add_galactic_category_boxes();
             }

@@ -18,13 +18,14 @@ export class DeleteProject {
         $('#vignette').html('')
         $('#vignette').css('display', 'none')
 
-        let project_id = Number($('#projectId').text())
-        window.projectsAPI.deleteProject({id: project_id})
+        let project_id = $('#projectId').text()
+        await this.app.services.data_deleter('remove-project', {id: project_id})
         this.app.settings.data.projects.projects = this.app.settings.data.projects.projects.filter(item => item.id !== project_id);
 
-        this.app.settings.data.projects.set_projects_options()
-
+        await this.app.settings.data.projects.init()
+        await this.app.controller.init()
         await this.app.todo.todoViews.planViews.dayView.display()
+
 
         let is_less = $('#dashStrategyMore').text() === 'Less'
         this.app.controller.appDashboard.projects.build(is_less)

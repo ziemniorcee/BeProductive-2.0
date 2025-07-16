@@ -136,7 +136,7 @@ export class HistorySidebar {
      * Fixes order of goals
      * @param todos given goals
      */
-    _fix_order(todos) {
+    async _fix_order(todos) {
         let new_goal_pos = -1;
         for (let i = 0; i < todos.length; i++) if (todos[i].className === "sidebarTask") new_goal_pos = i
 
@@ -149,7 +149,7 @@ export class HistorySidebar {
             if ($(".monthDay").length) elements = $('.monthTodoId')
             for (let i = 0; i < elements.length; i++) new_tasks.push(elements.eq(i).text())
 
-            window.goalsAPI.rowsChange({after: new_tasks})
+            await this.app.services.data_updater('goals-reorder', {order: order}, 'PUT')
         }
     }
 

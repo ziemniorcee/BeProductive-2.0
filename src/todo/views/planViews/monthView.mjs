@@ -32,7 +32,6 @@ export class MonthView {
         }
 
         let goals = await this.app.services.data_getter('get-month-view', params)
-        console.log(goals)
         $("#main").html('')
         this._month_header_HTML()
         $("#main").append(this._month_content_HTML())
@@ -267,14 +266,14 @@ export class MonthView {
         }).on('drag', (event) => {
             dragged_task = $(event)
             this.is_month_drag = 0
-        }).on('drop', (event) => {
+        }).on('drop', async (event) => {
             let todos = $('#main .monthTodo')
             let new_goal_pos = todos.index($(event))
 
             if (event.className.includes("monthTodo")) {
-                this._change_order(event)
+                await this._change_order(event)
             } else if (event.className.includes("todo") && $('#main .todo').length) {
-                this._get_from_project(event, new_goal_pos, dragged_task)
+                await this._get_from_project(event, new_goal_pos, dragged_task)
             } else if (event.parentNode !== null) {
                 this._get_from_sidebar(event, dragged_task)
             }
@@ -285,7 +284,7 @@ export class MonthView {
      * Fixes order based on goals positions
      * @param event dropped goal
      */
-    _change_order(event) {
+    async _change_order(event) {
         let goal_id = $(event).find('.monthTodoId').text()
         let day = Number($(event).closest('.monthDay').find('.monthDate').text())
         let date = this.app.settings.date.get_sql_month_day(day)
@@ -293,13 +292,13 @@ export class MonthView {
 
         let order = []
         for (let i = 0; i < day_goals.length; i++) {
-            order.push(Number(day_goals.eq(i).find('.monthTodoId').text()))
+            order.push(day_goals.eq(i).find('.monthTodoId').text())
         }
 
-        window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+        await this.app.services.data_updater('change-date', {date: date, id: goal_id, order: order}, 'PATCH')
     }
 
-    _get_from_project(event, new_goal_pos, dragged_task) {
+    async _get_from_project(event, new_goal_pos, dragged_task) {
         let sidebar_pos = $('#rightbar .todo').index(dragged_task)
         let new_goal_index = 0
         let selected_month_day = 0
@@ -342,13 +341,8 @@ export class MonthView {
 
         let day = Number($(event).closest('.monthDay').find('.monthDate').text())
         let add_date = this.app.settings.date.sql_sql_month_day(day)
-
-        window.projectsAPI.getFromProject({
-            date: add_date,
-            sidebar_pos: sidebar_pos,
-            main_pos: new_goal_index,
-            to_delete: true
-        })
+        let id = dragged_task.find('.todoId').text()
+        await this.app.todo.project.get_goal_from_sidebar(add_date, id, new_goal_index)
 
         $(event).remove()
     }

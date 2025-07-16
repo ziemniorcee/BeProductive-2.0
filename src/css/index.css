@@ -2067,6 +2067,15 @@ body {
     cursor: pointer;
 }
 
+#projectSettingsIcon svg {
+    width: 40px;
+    height: 40px;
+
+    position: relative;
+    top: 4px;
+    cursor: pointer;
+}
+
 #iconUpload::-webkit-file-upload-button {
     height: 52px;
     width: 202px;
@@ -2126,7 +2135,7 @@ body {
     cursor: pointer;
 }
 
-.iconPickerListElement img {
+.iconPickerListElement svg {
     max-width: 40px;
     max-height: 40px;
     object-fit: contain; /* Ensure the image fits inside the card */

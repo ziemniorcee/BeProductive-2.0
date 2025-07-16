@@ -6,8 +6,8 @@ export class Categories {
     }
 
     initEventListeners() {
-        $(document).on('click', '#newCategoryCreate', () => {
-            this.make_new_category()
+        $(document).on('click', '#newCategoryCreate', async () => {
+            await this.make_new_category()
         })
 
         $(document).on('click', '#newCategoryDiscard', () => {
@@ -22,24 +22,23 @@ export class Categories {
         });
 
         $(document).on('input', '#newCategoryColor', (event) => {
-            let rgb = this.settings.data.hsvToRgb(event.currentTarget.value * 2, 0.7, 0.7);
+            let rgb = this.app.settings.data.hsvToRgb(event.currentTarget.value * 2, 0.7, 0.7);
             $('#newCategoryColor').css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}`);
         })
     }
 
-    make_new_category() {
+    async make_new_category() {
         let name = $('#newCategoryName').val();
         if (name !== "") {
-            this.create_new_category();
+            await this.create_new_category();
             let $vignette_layer = $('#newCategoryCreate').closest('.vignetteLayer')
 
             $("#newCategory").css('display', 'none');
             $vignette_layer.css('display', 'none');
             $vignette_layer.html('')
 
-            let category_id = Object.keys(this.settings.data.categories.categories).at(-1)
-            let category = this.settings.data.categories.categories[category_id]
-            console.log(category)
+            let category_id = Object.keys(this.app.settings.data.categories.categories).at(-1)
+            let category = this.app.settings.data.categories.categories[category_id]
 
 
             $('.categoryDecider').css('border-color', category[0])
@@ -50,40 +49,15 @@ export class Categories {
             $('#newCategoryName').css('border', '3px solid red')
         }
 
-        console.log(this.settings.data.categories.categories)
     }
     /**
      * Creates new category from newCategory box and resets categories pickers
      */
-    create_new_category() {
-        let rgb = this.settings.data.hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
-        const len = Object.keys(this.settings.data.categories.categories).length + 1;
-        let index = len;
-        for (let i = 1; i < len; i++) {
-            if (!(i in this.settings.data.categories.categories)) {
-                index = i;
-                break;
-            }
-        }
+    async create_new_category() {
+        let rgb = this.app.settings.data.hsvToRgb($('#newCategoryColor').val() * 2, 0.7, 0.55);
         let name = $('#newCategoryName').val();
-        this.settings.data.categories.categories[index] = [`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, name];
-        this.settings.data.categories.categories2[index] = `rgb(${Math.min(rgb[0] * 5 / 3, 255)}, 
-                            ${Math.min(rgb[1] * 5 / 3, 255)}, 
-                            ${Math.min(rgb[2] * 5 / 3, 255)})`;
-
-        window.goalsAPI.addCategory({id: index, name: name, r: rgb[0], g: rgb[1], b: rgb[2]});
-        $('#newCategoryName').val('');
-        let html_categories = this._categories_HTML();
-        for (let i of ['1', '22', '3', '4']) {
-            $(`#categoryPicker${i}`).empty();
-            $(`#categoryPicker${i}`).html(html_categories);
-            if ($(`#categoryPicker${i}`).css('display') === 'block') {
-                $(`#selectCategory${i}`).css('background', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
-                $(`#selectCategory${i}`).text(name);
-                $(`#categoryPicker${i}`).css('display', 'none');
-            }
-        }
-
+        await this.app.services.data_poster('add-category', {name: name, r: rgb[0], g: rgb[1], b: rgb[2]})
+        await this.app.settings.data.categories.init()
     }
 
 
@@ -113,9 +87,9 @@ export class Categories {
         } else if (id !== '0') {
             let selected_category = $(`#selectCategory${id}`)
             $(`#categoryPicker${id}`).css('display', 'none')
-            let category_element = Object.keys(this.settings.data.categories.categories)[index - 2]
-            selected_category.css('background', this.settings.data.categories.categories[category_element][0])
-            selected_category.text(this.settings.data.categories.categories[category_element][1])
+            let category_element = Object.keys(this.app.settings.data.categories.categories)[index - 2]
+            selected_category.css('background', this.app.settings.data.categories.categories[category_element][0])
+            selected_category.text(this.app.settings.data.categories.categories[category_element][1])
         }
     }
 
@@ -145,24 +119,25 @@ export class Categories {
                 <span class="categoryName">New Category</span>
             </div>`
         }
-        for (const id_key in this.settings.data.categories.categories) {
+        for (const id_key in this.app.settings.data.categories.categories) {
             categories_html +=
                 `<div class="category">
-                <span class="categoryButton" style="background: ${this.settings.data.categories.categories[id_key][0]}"></span>
-                <span class="categoryName">${this.settings.data.categories.categories[id_key][1]}</span>
+                <span class="categoryButton" style="background: ${this.app.settings.data.categories.categories[id_key][0]}"></span>
+                <span class="categoryName">${this.app.settings.data.categories.categories[id_key][1]}</span>
             </div>`
         }
         return categories_html
     }
 
-    remove_category() {
-        let category = this.settings.data.getIdByColor(this.settings.data.categories.categories, $('#selectCategory4').css('backgroundColor'))
-        delete this.settings.data.categories.categories[category];
-        let new_projects = this.settings.data.projects.projects.filter(item => item.category !== category);
-        this.settings.data.projects.projects.splice(0, this.settings.data.projects.projects.length);
+    async remove_category() {
+        let category = this.app.settings.data.getIdByColor(this.app.settings.data.categories.categories, $('#selectCategory4').css('backgroundColor'))
+        delete this.app.settings.data.categories.categories[category];
+        let new_projects = this.app.settings.data.projects.projects.filter(item => item.category !== category);
+        this.app.settings.data.projects.projects.splice(0, this.app.settings.data.projects.projects.length);
         for (let e of new_projects) {
-            this.settings.data.projects.projects.push(e);
+            this.app.settings.data.projects.projects.push(e);
         }
+        await this.app.services.data_deleter('remove-category', {id: category})
         window.goalsAPI.removeCategory({id: category});
         $("#vignette").css('display', 'none');
         $("#vignette").html('')

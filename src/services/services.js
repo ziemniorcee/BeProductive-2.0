@@ -123,7 +123,6 @@ export class AppServices {
     }
 
     async data_getter2(url, params){
-
         const params_url = new URLSearchParams(params);
         const res = await fetch(`${this.host}/api/${url}?${params_url}`, {
             method: 'GET',
@@ -143,5 +142,77 @@ export class AppServices {
         const data = rest[Object.keys(rest)[0]]
         if (!success) throw new Error(error);
         return data;
+    }
+
+    async data_deleter(url, params){
+        const params_url = new URLSearchParams(params);
+        const res = await fetch(`${this.host}/api/${url}?${params_url}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`,
+            },
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) {
+                // token expired or invalid → redirect to login, etc.
+            }
+            throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+
+        const { success, error, ...rest } = await res.json();
+        if (!success) throw new Error(error);
+
+        // server for DELETE usually returns something like { deleted: 1 }
+        return rest[Object.keys(rest)[0]];
+    }
+
+    async data_updater(url, params, type='PUT'){
+        const params_url = new URLSearchParams(params);
+        const res = await fetch(`${this.host}/api/${url}?${params_url}`, {
+            method: type,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`,
+            },
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) {
+                // token expired or invalid → redirect to login, etc.
+            }
+            throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+
+        const { success, error, ...rest } = await res.json();
+        if (!success) throw new Error(error);
+
+        // server for DELETE usually returns something like { deleted: 1 }
+        return rest[Object.keys(rest)[0]];
+    }
+
+    async data_poster(url, params){
+        const params_url = new URLSearchParams(params);
+        const res = await fetch(`${this.host}/api/${url}?${params_url}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`,
+            },
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) {
+                // token expired or invalid → redirect to login, etc.
+            }
+            throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+
+        const { success, error, ...rest } = await res.json();
+        if (!success) throw new Error(error);
+
+        // server for DELETE usually returns something like { deleted: 1 }
+        return rest[Object.keys(rest)[0]];
     }
 }

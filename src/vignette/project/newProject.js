@@ -6,6 +6,7 @@ export class NewProject {
 
     initEventListeners() {
         $(document).on('click', "#projectSettingIconSrc", async () => await this.open_icon_picker())
+        $(document).on('click', "#projectSettingsIcon svg", async () => await this.open_icon_picker())
 
         $(document).on('click', '#iconUpload', (event) => event.stopPropagation())
 
@@ -45,24 +46,21 @@ export class NewProject {
      * Builds new project based on given settings
      */
     async new_project() {
-        let project_setting_icon = $('#projectSettingsIcon')
-        let category_id = Number($('#dashNewProject').find('.categoryDeciderId').text())
+        let category_id = $('#dashNewProject').find('.categoryDeciderId').text()
         let name = $('#newProjectName').val()
 
-        let icon_path = $('#projectSettingIconSrc').attr('src')
-        let icon_name = this.app.settings.data.projects.findNameByPath(icon_path);
-
+        let icon_id = await $('#projectSettingsIcon').attr('data-icon')
+        console.log(icon_id)
         if (name === "") {
             $('#newProjectError').text("NO NAME GIVEN")
-        } else if (icon_path === "images/goals/project.png") {
+        } else if (icon_id === '0') {
             $('#newProjectError').text("NO ICON SELECTED")
-        } else if (category_id === 0) {
+        } else if (category_id === '0') {
             $('#newProjectError').text("NO CATEGORY SELECTED")
         } else {
-            let new_project = await window.projectsAPI.newProject({category: category_id, name: name, icon: "ebe"})
-
-            this.app.settings.data.projects.projects.push({id: new_project["id"], name: name, category: category_id, icon: "ebe", x: null, y: null})
-            await this.make_project_icon(new_project["id"], category_id)
+            await this.app.services.data_poster('new-project', {name: name, category: category_id, icon: icon_id})
+            await this.app.settings.data.projects.init()
+            this.app.controller.init()
 
             let $selected_vignette = $("#vignette2")
             if ($selected_vignette.css('display') !== 'block') {
@@ -137,17 +135,15 @@ export class NewProject {
 
     async open_icon_picker() {
         if ($('#iconPicker').length === 0) {
-            await this.app.settings.data.projects.loadIcons()
-            const icon_picker_template = $('#iconPickerTemplate').prop('content');
-            let $icon_picker_clone = $(icon_picker_template).clone()
+            let icon_picker_template = await $('#iconPickerTemplate').prop('content');
+            let $icon_picker_clone =  $(icon_picker_template).clone()
             $("#projectSettingsIcon").append($icon_picker_clone)
 
             let $icon_picker_list = $('#iconPickerList')
-
-            for (const key in this.app.settings.data.projects.merged_icons) {
+            for (const key in this.app.settings.data.projects.icons) {
                 $icon_picker_list.append(`
-                    <li class="iconPickerListElement">
-                        <img src="${this.app.settings.data.projects.merged_icons[key]['path']}">
+                    <li class="iconPickerListElement" data-icon="${this.app.settings.data.projects.icons[key]['id']}">
+                        ${this.app.settings.data.projects.icons[key]['svg']}
                     </li>`)
             }
         }
@@ -217,9 +213,11 @@ export class NewProject {
      * @param that selected icon
      */
     select_icon(that) {
-        let img_path = $(that).find('img').attr('src')
-
-        $("#projectSettingIconSrc").attr('src', img_path)
+        let img_path = $(that).html()
+        console.log(img_path)
+        let icon_id = $(that).attr('data-icon')
+        $("#projectSettingsIcon").html(img_path)
         $('#iconPicker').remove()
+        $('#projectSettingsIcon').attr('data-icon', icon_id)
     }
 }

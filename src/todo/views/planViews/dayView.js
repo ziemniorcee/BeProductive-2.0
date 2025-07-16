@@ -10,15 +10,15 @@ export class DayView {
             dragged_task.css('background-color', "#FFFFFF")
         })
 
-        $(document).on('click', '#todosAll .check_task', (event) => {
+        $(document).on('click', '#todosAll .check_task', async (event) => {
             event.stopPropagation()
             let position = $('.check_task').index(event.currentTarget)
-            this.change_main_check(position)
+            await this.change_main_check(position)
         });
 
-        $(document).on('click', '#todosAll .stepCheck', (event) => {
+        $(document).on('click', '#todosAll .stepCheck', async (event) => {
             event.stopPropagation()
-            this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
+            await this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
             this.dragula_day_view()
         });
 
@@ -58,50 +58,10 @@ export class DayView {
         /**
          * removes goal after context menu click
          */
-        window.goalsAPI.removingGoal(() => {
-            this.remove_goal()
+        window.goalsAPI.removingGoal(async () => {
+            await this.remove_goal()
         })
 
-        /**
-         * removes goal and asks to remove the repeat goals after context menu click
-         */
-        window.goalsAPI.removingFollowing(() => {
-            let id = $(this.todo_to_remove).find('.todoId').text()
-            let date = this.app.settings.date.day_sql
-            if ($('#monthGrid').length) {
-                id = $(this.todo_to_remove).find('.monthTodoId').text()
-                let day = Number($(this.todo_to_remove).closest('.monthDay').find('.monthDate').text()) //returns wrong day
-                date = this.app.settings.date.get_sql_month_day(day)
-            } else if ($('.weekDay').length) {
-                let day = $(this.todo_to_remove).closest('.weekDay').find('.weekDayText').text()
-                let index = this.app.settings.data.weekdays2.indexOf(day)
-                date = this.app.settings.date.week_current[index]
-            }
-
-            window.goalsAPI.followingRemoved({id: id, date: date})
-
-            this.todo_to_remove.remove()
-
-        })
-
-        /**
-         * removes repeating goals and fixes ids
-         */
-        window.goalsAPI.getFollowingRemoved((positions) => {
-            let month_grid = $('#monthGrid')
-            let elements_ids = month_grid.length ? $('.monthTodoId') : $('.todoId')
-            let todo_type = month_grid.length ? '.monthTodo' : '.todo'
-
-            for (let i = 0; i < elements_ids.length; i++) {
-                let current_id = Number(elements_ids.eq(i).text())
-                if (!positions.includes(current_id)) {
-                    let shift = this.get_shift(current_id, positions)
-                    elements_ids.eq(i).text(current_id - shift)
-                } else {
-                    elements_ids.eq(i).closest(todo_type).remove()
-                }
-            }
-        })
 
         $(document).on('click', '#testPanelRemoveHistory', () => {
             this.remove_history()
@@ -220,12 +180,13 @@ export class DayView {
      * @returns {string} HTML of built goal
      */
     build_goal(goal) {
+        console.log(goal)
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
         let date_label = ""
         let deadline_label = ""
 
-        if (goal.categoryPublicId !== null) {
+        if (goal.categoryPublicId !== null && goal.categoryPublicId !== '0') {
             category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
@@ -274,7 +235,7 @@ export class DayView {
      * if edit in not on rightbar resets
      * depends if project sidebar is on, dragula elements are selected
      */
-    dragula_day_view() {
+     dragula_day_view() {
         this.is_day_drag = 0
         let dragged_task
         let dragula_array
@@ -311,7 +272,7 @@ export class DayView {
 
             this.is_day_drag = 0
             todos_area_before = Array.from($('#todosArea').children())
-        }).on('drop', (event) => {
+        }).on('drop', async (event) => {
             dragged_task.css('background-color', "rgba(255, 255, 255, 0.05)")
 
             let new_goal_pos = $('.todo').index($(event))
@@ -320,10 +281,10 @@ export class DayView {
             if (todos_area_after.length !== todos_area_before.length) {
                 if (dragged_task.attr('class') === "sidebarTask") this._get_from_history(dragged_task)
                 else if (dragged_task.parent().attr('id') === "sideProjectGoals") {
-                    this._get_from_project(new_goal_pos, dragged_task)
+                    await this._get_from_project(new_goal_pos, dragged_task)
                 }
             } else {
-                this.change_order()
+                await this.change_order()
             }
 
         }).on('cancel', function () {
@@ -347,13 +308,14 @@ export class DayView {
      * @param new_goal_index new position of goal
      * @param dragged_task selected goal
      */
-    _get_from_project(new_goal_index, dragged_task) {
+    async _get_from_project(new_goal_index, dragged_task) {
         let todos = $('#main .todo')
-        let sidebar_pos = dragged_task.find('.todoId').text()
+        let id = dragged_task.find('.todoId').text()
 
         let project_pos = $('#sideProjectId').text()
         todos.eq(new_goal_index).append(this.app.settings.data.projects.project_emblem_html(project_pos))
-        window.projectsAPI.getFromProject({date: this.app.settings.date.day_sql, sidebar_id: sidebar_pos, main_pos: new_goal_index})
+        await this.app.todo.project.get_goal_from_sidebar(this.app.settings.date.day_sql, id, new_goal_index)
+
 
         $(dragged_task).remove()
     }
@@ -361,21 +323,22 @@ export class DayView {
     /**
      * fixes order of goals and saves it
      */
-    change_order() {
+    async change_order() {
         let goals = $('#main .todoId')
         if ($('#monthGrid').length) goals = $('#main .monthTodoId')
         let order = []
         for (let i = 0; i < goals.length; i++) order.push(goals.eq(i).text())
+        await this.app.services.data_updater('goals-reorder', {order: order}, 'PUT')
 
-        window.goalsAPI.rowsChange({after: order})
     }
 
 
-    remove_goal() {
+    async remove_goal() {
         let id = $(this.todo_to_remove).find('.todoId').text()
         if ($('#monthGrid').length) id = $(this.todo_to_remove).find('.monthTodoId').text()
 
-        window.goalsAPI.goalRemoved({id: id, date: this.app.settings.date.day_sql})
+        await this.app.services.data_deleter('delete-goal', {id: id})
+
         if ($('#todosAll').length) {
             if ($(this.todo_to_remove).find('.check_task').prop('checked')) {
                 let finished_count = $('#todosFinished .todo').length
@@ -422,7 +385,7 @@ export class DayView {
      * changes check of goals
      * @param position selected goal position
      */
-    change_main_check(position) {
+    async change_main_check(position) {
         const $check_task = $('.check_task').eq(position)
         let $todo = $('.todo').eq(position)
         let $todo_id = $('.todoId')
@@ -432,7 +395,7 @@ export class DayView {
             return $(this).prop('checked');
         })
 
-        let id = Number($todo_id.eq(position).html())
+        let id = $todo_id.eq(position).html()
         let state = Number($check_task.prop('checked'))
         let importance_color = $todo.find('.check_task').css("border-color")
 
@@ -450,13 +413,13 @@ export class DayView {
         $(state ? "#todosFinished" : "#todosArea").append($todo.prop("outerHTML"))
         $todo.remove()
 
-        let new_tasks = $todo_id.map(function () {
+        let order = $todo_id.map(function () {
             return $(this).text();
         }).get()
 
-        window.goalsAPI.changeChecksGoal({id: id, state: state})
-        if ($('#todosAll').length) window.goalsAPI.rowsChange({after: new_tasks})
-
+        await this.app.services.data_updater('change-checks-goal', {id: id, state: state}, 'PATCH')
+        console.log(order)
+        if ($('#todosAll').length) await this.app.services.data_updater('goals-reorder', {order: order}, 'PUT')
         this.build_finished_count()
         this.dragula_day_view()
     }
