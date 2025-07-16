@@ -38,15 +38,16 @@ export class TodoEdit {
             this.selected_goal_id = this.selected_goal.find('.monthTodoId').text()
         }
 
-        if (this.selected_goal.attr('class') === 'sidebarTask') {
-            this.selected_goal_id = $('.sidebarTask').index(this_todo)
-            array_option = 1
-        } else if (this.selected_goal.closest('#rightbar').length) {
-            array_option = 2
-        }
+        // if (this.selected_goal.attr('class') === 'sidebarTask') {
+        //     this.selected_goal_id = $('.sidebarTask').index(this_todo)
+        //     array_option = 1
+        // } else if (this.selected_goal.closest('#rightbar').length) {
+        //     array_option = 2
+        // }
 
-        let goals = await window.goalsAPI.askEditGoal({todo_id: this.selected_goal_id, option: array_option})
-        this.build_edit(goals[0], goals[1])
+        let goal = await this.app.services.data_getter('ask-edit-goal', {id: this.selected_goal_id})
+        console.log(goal)
+        this.build_edit(goal)
     }
 
     /**
@@ -54,7 +55,7 @@ export class TodoEdit {
      * @param goal selected goal data
      * @param steps data of steps of selected goal
      */
-    build_edit(goal, steps) {
+    build_edit(goal) {
         console.log(goal)
         let $edit_clone = $("<div id='taskEdit' class='vignetteWindow2'></div>")
         const edit_main_template = $('#editMainTemplate').prop('content');
@@ -62,34 +63,34 @@ export class TodoEdit {
         const edit_right_template = $('#editRightTemplate').prop('content');
         $edit_clone.find('#editBody').append($(edit_right_template).clone())
 
-        $edit_clone.find('#editMainEntry').val(this.app.settings.data.decode_text(goal["goal"]))
+        $edit_clone.find('#editMainEntry').val(this.app.settings.data.decode_text(goal["name"]))
         $edit_clone.find('#editNoteEntry').val(this.app.settings.data.decode_text(goal["note"]))
-        $edit_clone.find('#editMainCheck').prop("checked", goal['check_state'])
+        $edit_clone.find('#editMainCheck').prop("checked", goal['checkState'])
 
         if (goal['note'] !== "") $edit_clone.find('#editNoteImg').css('display', 'none')
-        $edit_clone.find('#editSteps2').html(this.set_steps(steps))
+        $edit_clone.find('#editSteps2').html(this.set_steps(goal['steps']))
 
         $edit_clone.find('#editImportance').val(goal["importance"])
         $edit_clone.find('#editImportance').css('background-color', this.app.settings.data.range2_backgrounds[goal["importance"]])
-        if (goal['addDate'] === "") {
+        if (goal['addDate'] === null) {
             $edit_clone.find('#selectDate').text("None")
         } else {
             $edit_clone.find('#selectDate').text(this.app.settings.date.change_to_edit_format(goal['addDate']))
         }
 
-        if (goal['date_type'] === 1) {
+        if (goal['dateType'] === 1) {
             $edit_clone.find('#editLabelDate').text('Deadline')
             $edit_clone.find('#editSwitchImg').prop('src', 'images/goals/dashboard/other.png')
-        } else if (goal['date_type'] === 2) {
+        } else if (goal['dateType'] === 2) {
             $edit_clone.find('#editLabelDate').text('Now')
             $edit_clone.find('#selectDate').text("ASAP")
-        } else if (goal['date_type'] === 3) {
+        } else if (goal['dateType'] === 3) {
             $edit_clone.find('#editLabelDate').text('Now')
             $edit_clone.find('#selectDate').text("None")
         }
 
-        this.vignette.set_category(goal['category'], $edit_clone)
-        this.vignette.set_project(goal['pr_id'], $edit_clone)
+        this.vignette.set_category(goal['categoryPublicId'], $edit_clone)
+        this.vignette.set_project(goal['projectPublicId'], $edit_clone)
 
         $("#vignette").append($edit_clone)
 
@@ -124,12 +125,13 @@ export class TodoEdit {
      */
     set_steps(steps) {
         let steps_formatted = ""
+        console.log(steps)
         for (let i = 0; i < steps.length; i++) {
             let check = ""
-            let text = this.app.settings.data.decode_text(steps[i]['step_text'])
-            if (steps[i]['step_check']) check = "checked"
+            let text = this.app.settings.data.decode_text(steps[i]['name'])
+            if (steps[i]['stepCheck']) check = "checked"
 
-            steps_formatted += this.vignette.render_step(check, text, steps[i]['id'])
+            steps_formatted += this.vignette.render_step(check, text, steps[i]['publicId'])
         }
         return steps_formatted
     }
@@ -142,11 +144,11 @@ export class TodoEdit {
         let changes = await this.vignette.get_goal_settings()
         console.log(changes)
         if (!this.selected_goal.find('.ASAPLabel').length && $("#ASAPList").length) {
-            console.log("CHUUJJ")
-            changes['date_type'] = 3
+            changes['dateType'] = 3
         }
 
-        changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
+        changes['steps'] = await this.app.services.data_updater('edit-goal', {id: this.selected_goal_id, changes: JSON.stringify(changes)}, 'PATCH')
+        // changes['steps'] = await window.goalsAPI.editGoal({id: this.selected_goal_id, changes: changes})
 
         if ($('#MyDayList').length) {
             this.asap_todo_change(changes)
@@ -171,20 +173,25 @@ export class TodoEdit {
     day_todo_change(changes) {
         if (changes['addDate'] === this.app.settings.date.day_sql) {
             this._set_todo_changes(this.selected_goal, changes)
-            this._change_project_emblem(changes['pr_id'])
+            this._change_project_emblem(changes['projectPublicId'])
             this._set_step_changes(this.selected_goal, changes)
         } else {
-            this.selected_goal.remove()
+            console.log(this.selected_goal)
+            if (!this.selected_goal.closest('#sideProjectGoals').length) {
+                this.selected_goal.remove()
+            }
+
         }
         this.app.todo.todoViews.planViews.dayView.dragula_day_view()
     }
 
     asap_todo_change(changes) {
-        if (changes['check_state'] === true) {
+        console.log(changes)
+        if (changes['checkState'] === true) {
             this.selected_goal.remove()
         } else {
             this._set_todo_changes(this.selected_goal, changes)
-            this._change_project_emblem(changes['pr_id'])
+            this._change_project_emblem(changes['projectPublicId'])
             this._set_step_changes(this.selected_goal, changes)
         }
     }
@@ -194,7 +201,7 @@ export class TodoEdit {
      * @param changes changes of goal
      */
     week_todo_change(changes) {
-        if (changes['check_state'] === true) {
+        if (changes['checkState'] === true) {
             this.selected_goal.remove()
         } else {
             let previous_day = this.selected_goal.closest('.weekDay').find('.weekDayText').text()
@@ -219,7 +226,7 @@ export class TodoEdit {
     }
 
     month_todo_change(changes) {
-        if (changes['check_state'] === true) {
+        if (changes['checkState'] === true) {
             this.selected_goal.remove()
         } else {
             let previous_day = Number(this.selected_goal.closest('.monthDay').find('.monthDate').text())
@@ -245,13 +252,12 @@ export class TodoEdit {
     }
 
     project_todo_change(changes) {
-        let current_pr_id = Number($('#projectId').text())
-        let new_pr_id = Number($('#taskEdit').find('.projectDeciderId').text())
+        let current_pr_id =$('#projectId').text()
+        let new_pr_id = $('#taskEdit').find('.projectDeciderId').text()
         if (current_pr_id !== new_pr_id) {
-            console.log("hcuj1")
             this.selected_goal.remove()
         } else {
-            let is_todo_checked = changes['check_state']
+            let is_todo_checked = changes['checkState']
 
             let is_from_todo = this.selected_goal.closest('#projectTodo').length
             let is_from_doing = this.selected_goal.closest('#projectDoing').length
@@ -285,34 +291,34 @@ export class TodoEdit {
         let deadline_label = ""
         let asap_label = ""
         let border_color = this.app.settings.data.check_border[changes['importance']]
-        if (changes['date_type'] === 0 && changes['addDate'] !== "") {
+        if (changes['dateType'] === 0 && changes['addDate'] !== "") {
             deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
-        } else if (changes['date_type'] === 1) {
+        } else if (changes['dateType'] === 1) {
             if (changes['addDate'] === this.app.settings.date.today_sql) {
                 deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
             } else {
                 deadline_label = `<img src="images/goals/hourglass2.png" class="todoDeadline">`
             }
-        } else if (changes['date_type'] === 2) {
+        } else if (changes['dateType'] === 2) {
             asap_label = `<img src="images/goals/fire1.png" class="ASAPLabel" alt="">`
-        } else if (changes['date_type'] === 0) {
+        } else if (changes['dateType'] === 0) {
             border_color = "white"
         }
 
         selected_goal.find('.task').html(`
-            ${this.app.settings.data.decode_text(changes['goal'])}
+            ${this.app.settings.data.decode_text(changes['name'])}
             ${deadline_label} 
             ${asap_label}
         `)
-
-        if (changes['category'] !== 0) {
-            let category_color = this.app.settings.data.categories.categories[changes['category']][0]
+        console.log(changes['categoryPublicId'])
+        if (changes.categoryPublicId && changes.categoryPublicId !== '0') {
+            let category_color = this.app.settings.data.categories.categories[changes['categoryPublicId']][0]
             selected_goal.css('border-right', `4px solid ${category_color}`)
 
         } else {
             selected_goal.css('border', "1px solid #444444")
         }
-        if (changes['date_type'] === 2) {
+        if (changes['dateType'] === 2) {
             border_color = "red"
         }
 
@@ -322,14 +328,14 @@ export class TodoEdit {
 
     _set_monthTodo_changes(selected_goal, changes) {
         let deadline_label = ""
-        if (changes['date_type'] === 1) {
+        if (changes['dateType'] === 1) {
             deadline_label = `<img src="images/goals/hourglass.png" class="todoDeadline">`
-        } else if (changes['date_type'] === 0) {
+        } else if (changes['dateType'] === 0) {
             deadline_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
         }
 
         selected_goal.find('.monthTodoTextLimit').html(
-            `${changes['goal']}`
+            `${changes['name']}`
         )
         selected_goal.find('.monthTodoDateLabel').html(
             `${deadline_label}`
@@ -337,8 +343,8 @@ export class TodoEdit {
 
         let category_color = "rgb(74, 74, 74)"
 
-        if (changes.category !== 0) {
-            category_color = this.app.settings.data.categories.categories[changes.category][0]
+        if (changes.categoryPublicId !== 0) {
+            category_color = this.app.settings.data.categories.categories[changes.categoryPublicId][0]
         }
         selected_goal.find('.monthTodoLabel').css('background-color', category_color)
     }
@@ -346,7 +352,7 @@ export class TodoEdit {
     _set_step_changes(selected_goal, changes) {
         selected_goal.find('.stepsShow').remove()
         selected_goal.find('.steps').remove()
-        selected_goal.find('.taskText').append(this.app.todo.todoComponents.steps._steps_HTML(changes['steps'], changes['category']))
+        selected_goal.find('.taskText').append(this.app.todo.todoComponents.steps._steps_HTML(changes['steps'], changes['categoryPublicId']))
     }
 
     change_edit_check() {

@@ -137,7 +137,7 @@ export class TodoVignette {
         let steps_array = this.get_steps()
 
         let check_state = $('#editMainCheck').prop('checked')
-        let category_id = Number($('.categoryDeciderId').eq(0).text())
+        let category_id = $('.categoryDeciderId').eq(0).text()
         let importance = $('#editImportance').val()
 
         let date_type = 0
@@ -151,21 +151,21 @@ export class TodoVignette {
         }
 
 
-        let new_date = ""
-        if ($('#selectDate').text() !== "None"){
+        let new_date = null
+        if ($('#selectDate').text() !== "None" && $('#selectDate').text() !== "ASAP"){
             new_date = this.app.settings.date.get_edit_sql_format($('#selectDate').text())
         }
-        let project_id = Number($('.projectDeciderId').text())
+        let project_id = $('.projectDeciderId').text()
 
         return {
-            'goal': this.app.settings.data.encode_text(edit_main_entry),
-            'check_state': check_state,
-            'category': category_id,
+            'name': this.app.settings.data.encode_text(edit_main_entry),
+            'checkState': check_state,
+            'categoryPublicId': category_id,
             'importance': importance,
             'steps': steps_array,
             'note': this.app.settings.data.encode_text(edit_note_entry),
-            'pr_id': project_id,
-            'date_type': date_type,
+            'projectPublicId': project_id,
+            'dateType': date_type,
             'addDate': new_date
         }
     }
@@ -179,8 +179,8 @@ export class TodoVignette {
             let step_input = edit_steps.eq(i).val()
             if (step_input !== "") {
                 steps_array.push({
-                    'step_text': this.app.settings.data.encode_text(step_input),
-                    'step_check': Number(edit_checks.eq(i).prop('checked'))
+                    'name': this.app.settings.data.encode_text(step_input),
+                    'stepCheck': Number(edit_checks.eq(i).prop('checked'))
                 })
             }
         }
@@ -247,18 +247,18 @@ export class TodoVignette {
      */
     set_project(project_id, $edit_clone) {
         if (project_id !== -1 && project_id !== null) {
-            const project = this.app.settings.data.projects.projects.find(item => item.id === project_id);
-            let icon_path = this.app.settings.data.projects.findProjectPathByName(`project${project_id}`)
+            const project = this.app.settings.data.projects.projects.find(item => item.publicId === project_id);
+            let category_color = this.app.settings.data.categories.categories[project['categoryPublicId']][0]
             $edit_clone.find('.projectDeciderName').text(project["name"])
-            $edit_clone.find('.projectDeciderIcon img').attr('src', `${icon_path}`)
-            $edit_clone.find('.projectDeciderIcon img').css('display', 'block')
+            $edit_clone.find('.projectDeciderIcon').html(project["svgIcon"])
+            $edit_clone.find('.projectDeciderIcon').css('color', category_color)
             $edit_clone.find('.projectDeciderId').text(project_id)
-            $edit_clone.find('.projectDecider').css('border', `2px solid ${this.app.settings.data.categories.categories[project['category']][0]}`)
+            $edit_clone.find('.projectDecider').css('border', `2px solid ${category_color}`)
         }
     }
 
     set_category(category_id, $edit_clone) {
-        if (category_id !== 0) {
+        if (category_id !== "" && category_id !== undefined && category_id !== null) {
             $edit_clone.find('.categoryDecider').css('border-color', this.app.settings.data.categories.categories[category_id][0])
             $edit_clone.find('.categoryDeciderName').text(this.app.settings.data.categories.categories[category_id][1])
         } else {
@@ -270,10 +270,12 @@ export class TodoVignette {
 
     async add_goal_core(){
         let changes = await this.get_goal_settings()
-        let new_goal_settings = await window.goalsAPI.newGoal2({changes: changes})
-        changes['id'] = new_goal_settings[0]
-        changes['check_state'] = 0
-        changes['steps'] = this.app.todo.todoComponents.steps._steps_HTML(new_goal_settings[1], changes['category'])
+        console.log(changes)
+
+        let new_goal_settings = await this.app.services.data_poster('add-goal', {changes: JSON.stringify(changes)})
+        changes['publicId'] = new_goal_settings[0]
+        changes['checkState'] = 0
+        changes['steps'] = this.app.todo.todoComponents.steps._steps_HTML(new_goal_settings[1], changes['categoryPublicId'])
         return changes
     }
 }

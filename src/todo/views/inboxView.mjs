@@ -1,6 +1,6 @@
 export class InboxView {
-    constructor(todo) {
-        this.todo = todo
+    constructor(app) {
+        this.app = app
         this.initEventListeners()
     }
 
@@ -37,11 +37,12 @@ export class InboxView {
     async display() {
         const main_template = $('#inboxMainTemplate').prop('content');
         let $main_clone = $(main_template).clone()
-        this.todo.appSettings.data.show_hide_sidebar(true, 1)
+        this.app.settings.data.show_hide_sidebar(true, 1)
         $('#main').html($main_clone)
 
-        let goals = await window.inboxAPI.getInbox()
-        let breaks = this.todo.appSettings.date.get_inbox_sections(goals)
+        let goals = await this.app.services.data_getter('get-inbox', {})
+        console.log(goals)
+        let breaks = this.app.settings.date.get_inbox_sections(goals)
         let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
 
         for (let i = 0; i < goals.length; i++) {
@@ -66,7 +67,7 @@ export class InboxView {
         const template = $('#inboxTodoTemplate').prop('content');
         let id = $('.inboxTodo').length
         let $clone = $(template).clone()
-        $clone.find('.inboxTodoId').text(goal['id']);
+        $clone.find('.inboxTodoId').text(goal['publicId']);
         $clone.find('.task').text(goal['name']);
 
         if (way) {
@@ -92,7 +93,7 @@ export class InboxView {
         let name = $inbox_input.val()
         $inbox_input.val("")
 
-        let new_goal = await window.inboxAPI.newInboxGoal({name: name, add_date: this.todo.appSettings.date.today_sql})
+        let new_goal = await window.inboxAPI.newInboxGoal({name: name, add_date: this.app.settings.date.today_sql})
         this.add_todo(new_goal, 0)
     }
 

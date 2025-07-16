@@ -8,9 +8,9 @@ export class TodoViews {
     constructor(app) {
         this.todo = app.todo
         this.planViews = new PlanViews(app)
-        this.projectView = new ProjectView(this.todo)
-        this.inboxView = new InboxView(this.todo)
-        this.asapView = new AsapView(this.todo)
+        this.projectView = new ProjectView(app)
+        this.inboxView = new InboxView(app)
+        this.asapView = new AsapView(app)
         this.myDayView = new MyDayView(app)
 
         this.initEventListeners()

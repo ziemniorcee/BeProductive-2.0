@@ -66,6 +66,7 @@ export class Data {
     }
 
 
+
     async loadIcons() {
         this.merged_icons = JSON.parse(JSON.stringify(this.icons));
 

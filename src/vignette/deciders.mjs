@@ -25,10 +25,10 @@ class CategoryDecider {
         })
 
         $(document).on('click', '.categoryDeciderCategory', (event) => {
-            let selected_category_id = Number($(event.currentTarget).find('.categoryDeciderCategoryId').text())
+            let selected_category_id = $(event.currentTarget).find('.categoryDeciderCategoryId').text()
             let category = ['rgb(74, 74, 74)', 'No category']
-
-            if (selected_category_id !== 0) {
+            console.log(selected_category_id)
+            if (selected_category_id !== '0'){
                 category = this.settings.data.categories.categories[selected_category_id]
             }
 
@@ -103,23 +103,22 @@ class ProjectDecider {
         })
 
         $(document).on('click', '.projectDeciderProject', (event) =>{
-            let selected_project_id = Number($(event.currentTarget).find('.projectDeciderProjectId').text())
-            if (selected_project_id === -1){
+            let selected_project_id = $(event.currentTarget).find('.projectDeciderProjectId').text()
+            console.log(selected_project_id)
+            if (selected_project_id === '-1'){
                 $('.projectDecider').css('border', 'none')
-                $('.projectDeciderIcon img').css('display', 'none')
+                $('.projectDeciderIcon').html('')
                 $('.projectDeciderName').text('No project')
                 $('.projectDeciderId').text('-1')
             } else{
-                let project = this.settings.data.projects.projects.find(item => item.id === selected_project_id)
-
-                let color = this.settings.data.categories.categories[project['category']][0]
-                let icon_path = this.settings.data.projects.findProjectPathByName(`project${project['id']}`)
+                let project = this.settings.data.projects.projects.find(item => item.publicId === selected_project_id)
+                let color = this.settings.data.categories.categories[project['categoryPublicId']][0]
 
                 $('.projectDecider').css('border', `2px solid ${color}`)
-                $('.projectDeciderIcon img').attr('src', icon_path)
+                $('.projectDeciderIcon').css('color', color)
+                $('.projectDeciderIcon').html(project['svgIcon'])
                 $('.projectDeciderName').text(project['name'])
                 $('.projectDeciderId').text(selected_project_id)
-                $('.projectDeciderIcon img').css('display', 'block')
 
             }
             $(".projectDeciderSelect").remove()
@@ -156,10 +155,11 @@ class ProjectDecider {
 
             const $decider_main = $decider.find('#projectDeciderMain')
             console.log(this.sorted_projects[0])
-            $decider_main.append(this.create_project({id:-1, name:'No project', category:0}))
+            $decider_main.append(this.create_project({publicId:-1, name:'No project', categoryPublicId:0, svgIcon:''}))
             for (let i = 0; i < this.sorted_projects.length; i++) {
-                let current_category_id = this.sorted_projects[i]['category']
-                let category_settings = this.settings.data.categories.categories[this.sorted_projects[i]['category']]
+                let current_category_id = this.sorted_projects[i]['categoryPublicId']
+                console.log(this.sorted_projects)
+                let category_settings = this.settings.data.categories.categories[this.sorted_projects[i]['categoryPublicId']]
 
                 if (current_category_id !== previous_category_id){
                     previous_category_id = current_category_id
@@ -196,17 +196,17 @@ class ProjectDecider {
     }
 
     create_project(sorted_project){
-        let icon = ''
-        if (sorted_project["id"] !== -1){
-            let icon_path = this.settings.data.projects.findProjectPathByName(`project${sorted_project['id']}`)
-            icon = `<img src="${icon_path}" alt>`
-        }
+        let color = "000000"
+        console.log(sorted_project['categoryPublicId'] )
+        if (sorted_project['categoryPublicId']){
+            color = this.app.settings.data.categories.categories[sorted_project['categoryPublicId']][0]
 
+        }
         return `
             <div class="projectDeciderProject">
-                <span class="projectDeciderProjectId">${sorted_project['id']}</span>
-                <span class="projectDeciderProjectIcon" > 
-                    ${icon}
+                <span class="projectDeciderProjectId">${sorted_project['publicId']}</span>
+                <span class="projectDeciderProjectIcon" style="color: ${color}">
+                    ${sorted_project['svgIcon']}
                 </span>
                 <span class="projectDeciderProjectName">
                     ${sorted_project['name']}

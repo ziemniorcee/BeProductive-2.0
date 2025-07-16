@@ -252,10 +252,9 @@
     margin-right: 7px;
 }
 
-.projectDeciderIcon img {
+.projectDeciderIcon svg {
     height: 35px;
     width: 35px;
-    display: none;
 }
 
 #decisionAction {
@@ -520,7 +519,7 @@
     margin-right: 10px;
 }
 
-.projectDeciderProjectIcon img {
+.projectDeciderProjectIcon svg {
     width: 30px;
     height: 30px;
 }

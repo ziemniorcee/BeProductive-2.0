@@ -107,12 +107,6 @@ ctxMenuRepeat.append(new MenuItem({
             click: () => {
                 mainWindow.webContents.send("removing-goal")
             }
-        },
-        {
-            label: 'This and all the following goals',
-            click: () => {
-                mainWindow.webContents.send("removing-following")
-            }
         }
     ]
 }))

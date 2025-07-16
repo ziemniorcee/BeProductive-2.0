@@ -407,40 +407,7 @@ function todoHandlers(db) {
                 WHERE goal_id = ${params.id}`)
     })
 
-    ipcMain.on('following-removed', (event, params) => {
-        db.all(`SELECT id
-                FROM goals
-                WHERE id IN (SELECT goal_id
-                             FROM knots
-                             WHERE knot_id = (SELECT knot_id FROM knots WHERE goal_id = ${params.id}))
-                  AND addDate >= '${params.date}'`, (err, goals) => {
-            if (err) console.error(err)
-            else {
-                let goals_repeat = []
-                let goals_format = "("
 
-                for (let i = 0; i < goals.length; i++) {
-                    goals_repeat.push(goals[i].id)
-                    goals_format += goals[i].id
-                    if (i < goals.length - 1) goals_format += ", "
-                    else goals_format += ")"
-                }
-
-                db.run(`DELETE
-                        FROM steps
-                        WHERE goal_id IN ${goals_format}`)
-                db.run(`DELETE
-                        FROM goals
-                        WHERE id IN ${goals_format}`)
-                db.run(`DELETE
-                        FROM knots
-                        WHERE goal_id IN ${goals_format}`)
-
-                console.log("!!!Nieobsługiwany")
-                event.reply('get-following-removed', goals_positions)
-            }
-        })
-    })
 
     ipcMain.on('change-checks-goal', (event, params) => {
         db.run(`UPDATE goals
