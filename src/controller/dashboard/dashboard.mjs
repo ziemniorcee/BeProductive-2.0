@@ -23,11 +23,15 @@ export class AppDashboard {
         })
 
         $(document).on('click', '#dashMyDayBtn', async () => {
+            $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'none');
             this.app.settings.date.set_attributes(this.app.settings.date.today)
             await this.app.todo.todoViews.planViews.dayView.display()
         })
 
         $(document).on('click', '#dashMyDay', async () => {
+            $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'none');
             await this.app.todo.todoViews.myDayView.display()
         })
 
@@ -45,9 +49,13 @@ export class AppDashboard {
 
         $(document).on('click', "#dashInbox", async () => {
             await this.app.todo.todoViews.inboxView.display()
+            $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'none');
         })
 
         $(document).on('click', "#dashASAP", async () => {
+            $('#galactics').css('display', 'none');
+            $('#habit').css('display', 'none');
             await this.app.todo.todoViews.asapView.display()
         })
 
@@ -74,8 +82,10 @@ export class AppDashboard {
 
         $(document).on('click', '#habitButton', () => {
             $('#galactics').css('display', 'none');
-            this.app.habits.refresh_today_habits();
-            $('#habit').css('display', 'grid');
+            $('#habit').css('display', 'flex');
+            if (this.app.habits.is_today) this.app.habits.refresh_today_habits();
+            else this.app.habits.refresh_tomorrow_habits();
+            this.app.habits.update_chart();
         })
 
         $(document).on('click', '#dashClose, #dashOpen', () => {

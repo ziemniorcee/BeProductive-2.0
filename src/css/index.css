@@ -1465,8 +1465,9 @@ body {
 .vignetteWindow1Title {
     width: 60%;
     height: 8%;
-    font-size: 25px;
+    font-size: 32px;
     text-align: center;
+    margin-top: 2%;
     margin-bottom: 7%;
 }
 
