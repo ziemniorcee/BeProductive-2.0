@@ -1,5 +1,6 @@
 export class Habits {
-    constructor (app_settings) {
+    constructor (app_settings, app) {
+        this.app = app;
         this.settings = app_settings;
         this.initEventListeners();
         this.chart = undefined;

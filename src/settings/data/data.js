@@ -23,9 +23,9 @@ export class Data {
         await this.categories.init()
         await this.projects.init(hard)
 
-        this.habits = await window.dataAPI.getHabits()
-        this.habits_days = await window.dataAPI.getHabitsDays()
-        this.habits_logs = await window.dataAPI.getHabitsLogs()
+        this.habits = await this.app.services.data_getter2('habits', {});
+        this.habits_days = await this.app.services.data_getter2('habits-days', {});
+        this.habits_logs = await this.app.services.data_getter2('habits-logs', {});
         this.habits.forEach(habit => {
             habit.days = [];
             this.habits_days.forEach(day => {

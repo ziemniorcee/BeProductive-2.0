@@ -17,8 +17,8 @@ class MainApp {
         this.init = new Init(this)
 
         this.todo = new Todo(this)
-        this.strategy = new Strategy(this.settings)
-        this.habits = new Habits(this.settings)
+        this.strategy = new Strategy(this.settings, this)
+        this.habits = new Habits(this.settings, this)
     }
 
     // async init() {

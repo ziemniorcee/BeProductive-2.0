@@ -24,7 +24,7 @@ export class CategoriesSettings {
             let new_g = Math.min(Math.floor(category.g * 3 / 2), 255)
             let new_b = Math.min(Math.floor(category.b * 3 / 2), 255)
 
-            this.categories2[category.id] = `rgb(${new_r}, ${new_g}, ${new_b})`
+            this.categories2[category.publicId] = `rgb(${new_r}, ${new_g}, ${new_b})`
         }
     }
 }

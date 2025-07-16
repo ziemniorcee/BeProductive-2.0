@@ -14,6 +14,7 @@ export class ProjectsSettings {
 
     async init(hard = false) {
         this.projects = await this.app.services.data_getter2('get-projects', {})
+        this.project_conn = await this.app.services.data_getter2('galactic-connections', {})
         this.icons = await this.get_icons()
         // this.project_conn = await window.dataAPI.getGalacticConnections()
         // await this.loadIcons()
