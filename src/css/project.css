@@ -21,7 +21,7 @@
     width: 100%;
 }
 
-#projectHeader img {
+#projectHeaderIcon svg, #projectHeader img{
     width: 40px;
     height: 40px;
     float: left;
@@ -161,7 +161,7 @@
 }
 
 
-#sideProjectIcon img{
+#sideProjectIcon svg{
     width: 55px;
     height: 55px;
 }

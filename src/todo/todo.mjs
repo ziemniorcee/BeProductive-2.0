@@ -6,7 +6,7 @@ export class Todo {
     constructor(app) {
         this.todoComponents = new TodoComponents(app)
         this.todoViews = new TodoViews(app)
-        this.project = new Project(this)
+        this.project = new Project(app)
     }
 }
 

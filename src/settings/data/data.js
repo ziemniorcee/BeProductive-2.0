@@ -38,6 +38,7 @@ export class Data {
     }
 
     decode_text(text) {
+        if (text === undefined) return ""
         return text.replace(/`@`/g, "'").replace(/`@@`/g, '"')
     }
 

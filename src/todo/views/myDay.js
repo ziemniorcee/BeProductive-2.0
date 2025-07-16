@@ -6,17 +6,17 @@ export class MyDayView {
     }
 
     bindEvents() {
-        $(document).on('click', '#MyDayList .check_task', (event) => {
+        $(document).on('click', '#MyDayList .check_task', async (event) => {
             event.stopPropagation()
             let $todo = $(event.currentTarget).closest('.todo')
             let todo_id = $todo.find('.todoId').text()
             $todo.remove()
-            window.goalsAPI.changeChecksGoal({id: todo_id, state: 1})
+            await this.app.services.data_updater('change-checks-goal', {id: todo_id, state: 1}, 'PATCH')
         })
 
-        $(document).on('click', '#MyDayList .stepCheck', (event) => {
+        $(document).on('click', '#MyDayList .stepCheck', async (event) => {
             event.stopPropagation()
-            this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
+            await this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
         })
     }
 

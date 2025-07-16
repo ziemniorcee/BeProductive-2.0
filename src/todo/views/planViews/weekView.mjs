@@ -32,7 +32,6 @@ export class WeekView {
     async display() {
         let params = {dates: this.app.settings.date.week_now}
         let goals = await this.app.services.data_getter('get-week-view', params)
-        console.log(goals)
         $('#main').html('')
         this._week_header_HTML()
         $('#main').append(this._week_content_HTML())
@@ -83,12 +82,10 @@ export class WeekView {
         let date_label = ""
         let deadline_label = ""
 
-        console.log(goal.category)
         if (goal.category !== 0 && goal.category !== undefined) {
             category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
-        console.log(goal.dateType)
 
         if(goal.dateType === 0){
             date_label = `<img src="images/goals/dateWarning.png" class="todoDeadline">`
@@ -239,7 +236,7 @@ export class WeekView {
             this.is_week_drag = 0
 
             goals_length_before = $('#main .todo').length
-        }).on('drop', (event) => {
+        }).on('drop', async (event) => {
             let todos = $('#main .todo')
             let goals_length_after = todos.length
             let new_goal_pos = todos.index($(event))
@@ -247,9 +244,9 @@ export class WeekView {
 
             if (event.className.includes("todo")) {
                 if (goals_length_before !== goals_length_after) {
-                    this._get_from_project(event, new_goal_pos, drag_sidebar_task)
+                    await this._get_from_project(event, new_goal_pos, drag_sidebar_task)
                 } else if (drag_sidebar_task.parent().attr('id') !== "sideProjectGoals") {
-                    this._change_order(event)
+                    await this._change_order(event)
                 }
             } else if (event.parentNode !== null) this._get_from_sidebar(event, drag_sidebar_task)
 
@@ -262,20 +259,17 @@ export class WeekView {
      * @param new_goal_pos new position of dropped task
      * @param dragged_task drag event of the task
      */
-    _get_from_project(event, new_goal_pos, dragged_task) {
+    async _get_from_project(event, new_goal_pos, dragged_task) {
         let sidebar_pos = $('#rightbar .todo').index(dragged_task)
         let new_goal_index = $('.weekDayGoals .todo').index(event)
+        let id = dragged_task.find('.todoId').text()
 
         let display_week_day = $('.weekDayGoals').index(event.parentNode)
         let real_week_day = this.app.settings.data.weekdays2.indexOf($('.weekDayText').eq(display_week_day).text())
         let add_date = this.app.settings.date.week_now[real_week_day]
 
-        window.projectsAPI.getFromProject({
-            date: add_date,
-            sidebar_pos: sidebar_pos,
-            main_pos: new_goal_index,
-            to_delete: true
-        })
+        await this.app.todo.project.get_goal_from_sidebar(add_date, id, new_goal_index)
+
         $(dragged_task).remove()
         $('#main .todoId').eq(new_goal_pos).text($('#main .todo').length - 1)
     }
@@ -285,7 +279,7 @@ export class WeekView {
      * Fixes order based on goals positions
      * @param event drop state of goals
      */
-    _change_order(event) {
+    async _change_order(event) {
         let day_id = this.app.settings.data.weekdays2.indexOf($(event.parentNode).attr('id'))
         let date = this.app.settings.date.week_now[day_id]
         let goal_id = $(event).find('.todoId').text()
@@ -293,10 +287,10 @@ export class WeekView {
         let order = []
         let week_day = $(event.parentNode).children()
         for (let i = 0; i < week_day.length; i++) {
-            order.push(Number(week_day.eq(i).find('.todoId').text()))
+            order.push(week_day.eq(i).find('.todoId').text())
         }
 
-        window.goalsAPI.changeDate({date: date, id: goal_id, order: order})
+        await this.app.services.data_updater('change-date', {date: date, id: goal_id, order: order}, 'PATCH')
     }
 
     /**
@@ -328,15 +322,14 @@ export class WeekView {
      */
     check_week_goal(that) {
         $(that).prop('disabled', true)
-        const goal_ids = Number($(that).closest('.todo').find('.todoId').text())
+        const goal_ids = $(that).closest('.todo').find('.todoId').text()
         const rel_id = $('.check_task').index(that)
         $('.checkDot').eq(rel_id).css('background-image', "url('images/goals/check.png')")
 
         setTimeout(() => {
-            console.log('CHUJ')
             let todos = $('#main .todo')
             todos.eq(rel_id).remove()
-            window.goalsAPI.changeWeekGoalCheck({id: goal_ids, state: 1})
+            this.app.services.data_updater('change-week-goal-check', {id: goal_ids, state: 1}, 'PATCH')
             this.dragula_week_view()
             let new_ids = $(`#main .todoId`)
             for (let i = 0; i < new_ids.length; i++) {

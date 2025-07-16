@@ -71,8 +71,8 @@ export class Steps {
      * changes check of selected step
      * @param that selected step
      */
-    change_step_check(that) {
-        let step_id = Number($(that).closest('.step').find('.stepId').text())
+    async change_step_check(that) {
+        let step_id = $(that).closest('.step').find('.stepId').text()
         let check_state = Number(that.checked)
         let counter_html = $(that).closest(".todo").find('.counter').get(0)
 
@@ -82,10 +82,10 @@ export class Steps {
             counter_html.innerText = Number(counter_html.innerText) - 1
         }
 
-        window.goalsAPI.changeChecksStep2({id: step_id, state: check_state})
+        await this.app.services.data_updater('change-checks-step', {id: step_id, state: check_state}, 'PATCH')
     }
 
-    _steps_HTML(steps, category_id) {
+    _steps_HTML(steps, category_id=null) {
         let steps_HTML = ""
         if (steps.length > 0) {
             let checks_counter = steps.reduce((total, step) => total + step.stepCheck, 0);

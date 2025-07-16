@@ -1,17 +1,17 @@
 export class ProjectView {
-    constructor(todo) {
+    constructor(app) {
         this.initEventListeners()
-        this.todo = todo
+        this.app = app
 
         this.current_goal_id = 0
         this.block_prev_drag = 0
     }
 
     initEventListeners() {
-        $(document).on('click', '#projectContent .check_task', (event) => {
+        $(document).on('click', '#projectContent .check_task', async (event) => {
             event.stopPropagation()
             let selected_goal = $(event.currentTarget).closest('.todo')
-            this.change_project_check(selected_goal)
+            await this.change_project_check(selected_goal)
         });
 
         $(document).on('click', '#projectDelete', () => {
@@ -21,9 +21,9 @@ export class ProjectView {
             $("#vignette").append($delete_clone)
         })
 
-        $(document).on('click', '#projectContent .stepCheck', (event) => {
+        $(document).on('click', '#projectContent .stepCheck', async (event) => {
             event.stopPropagation()
-            this.todo.todoComponents.steps.change_step_check(event.currentTarget)
+            await this.app.todo.todoComponents.steps.change_step_check(event.currentTarget)
             this.dragula_project_view()
         });
     }
@@ -33,20 +33,23 @@ export class ProjectView {
      */
     async display(selected_project) {
         if ($(selected_project).attr('class') === 'projectEmblem'){
-            this.project_id = Number($(selected_project).find('.projectPos').text())
+            this.project_id = $(selected_project).find('.projectPos').text()
         }
         else if ($(selected_project).hasClass('dashButton')){
-            this.project_id = Number($(selected_project).find('.dashProjectId').text())
+            this.project_id = $(selected_project).find('.dashProjectId').text()
         }
-        this.selected_project = this.todo.appSettings.data.projects.projects.find(item => item.id === this.project_id)
-        let project_color = this.todo.appSettings.data.categories.categories[this.selected_project['category']][0]
-        let project_icon = this.todo.appSettings.data.projects.findProjectPathByName(`project${this.selected_project['id']}`)
-        let project_name = this.selected_project['name']
 
-        this.todo.appSettings.data.show_hide_sidebar(true, 1)
+
+        this.selected_project = this.app.settings.data.projects.projects.find(item => item.publicId === this.project_id)
+        let project_color = this.app.settings.data.categories.categories[this.selected_project['categoryPublicId']][0]
+        let project_icon = this.selected_project['svgIcon']
+        let project_name = this.selected_project['name']
+        this.app.settings.data.show_hide_sidebar(true, 1)
         this.set_project_view(project_color, project_icon, project_name)
 
-        let goals = await window.goalsAPI.getProjectView({project_pos: this.selected_project['id']})
+        // let goals = await window.goalsAPI.getProjectView({project_pos: this.selected_project['publicId']})
+        let goals = await this.app.services.data_getter('get-project-view', {project_id: this.project_id})
+
         this.build_project_view(goals)
     }
 
@@ -58,7 +61,7 @@ export class ProjectView {
         let $header_clone = $(header_template).clone()
 
         $header_clone.find('#projectHeader').css('border-color', color)
-        $header_clone.find('#projectHeaderIcon').attr('src', icon)
+        $header_clone.find('#projectHeaderIcon').html(icon)
         $header_clone.find('#projectName').text(name)
         $header_clone.find('#projectId').text(this.project_id)
 
@@ -82,10 +85,10 @@ export class ProjectView {
     build_project_view(goals) {
         this.current_goal_id = 0
         for (let i = 0; i < goals.length; i++) {
-            goals[i]['steps'] = this.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].category)
-            goals[i]['goal'] = this.todo.appSettings.data.decode_text(goals[i]['goal'])
-            if (Number(goals[i]['check_state']) === 1) $('#projectDone .projectSectionGoals').append(this.build_project_goal(goals[i]))
-            else if (goals[i]['addDate'] !== "") $('#projectDoing .projectSectionGoals').append(this.build_project_goal(goals[i]))
+            goals[i]['steps'] = this.app.todo.todoComponents.steps._steps_HTML(goals[i].steps, goals[i].categoryPublicId)
+            goals[i]['name'] = this.app.settings.data.decode_text(goals[i]['name'])
+            if (Number(goals[i]['checkState']) === 1) $('#projectDone .projectSectionGoals').append(this.build_project_goal(goals[i]))
+            else if (goals[i]['addDate']) $('#projectDoing .projectSectionGoals').append(this.build_project_goal(goals[i]))
             else $('#projectTodo .projectSectionGoals').append(this.build_project_goal(goals[i]))
         }
         this.dragula_project_view()
@@ -115,14 +118,14 @@ export class ProjectView {
         }).on('drag', (event) => {
             this.block_prev_drag = 0
             dragged_task = $(event)
-        }).on('drop', (event) => {
+        }).on('drop', async (event) => {
             let drag_parent_id = dragged_task.closest('.projectSection').attr('id')
             let drop_parent_id = $(event).closest('.projectSection').attr('id')
 
             if (drag_parent_id !== 'projectDone' && drop_parent_id === 'projectDone') {
-                this.move_to_done(event, dragged_task)
+                await this.move_to_done(event, dragged_task)
             } else if (drag_parent_id !== 'projectTodo' && drop_parent_id === 'projectTodo') {
-                this.move_to_todo(event, dragged_task)
+                await this.move_to_todo(event, dragged_task)
             }
         })
     }
@@ -132,10 +135,10 @@ export class ProjectView {
      * @param new_goal_pos new position of moved goal
      * @param dragged_task pressed task
      */
-    move_to_done(new_goal, dragged_task) {
+    async move_to_done(new_goal, dragged_task) {
         let goal_id = $(dragged_task).find('.todoId').text()
         $(dragged_task).remove()
-        window.goalsAPI.changeChecksGoal({id: goal_id, state: 1, option: 0})
+        await this.app.services.data_updater('change-checks-goal', {id: goal_id, state: 1}, 'PATCH')
         $(new_goal).find('.check_task').prop('checked', true)
     }
 
@@ -144,10 +147,10 @@ export class ProjectView {
      * @param new_goal_pos new position of moved goal
      * @param dragged_task pressed task
      */
-    move_to_todo(new_goal, dragged_task) {
+    async move_to_todo(new_goal, dragged_task) {
         let goal_id = $(dragged_task).find('.todoId').text()
         $(dragged_task).remove()
-        window.goalsAPI.goalRemoveDate({id: goal_id})
+        await this.app.services.data_updater('goal-remove-date', {id: goal_id}, 'PATCH')
         $(new_goal).find('.check_task').prop('checked', false)
     }
 
@@ -160,18 +163,18 @@ export class ProjectView {
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
 
-        if (goal.category !== 0) {
-            category_color = this.todo.appSettings.data.categories.categories[goal.category][0]
+        if (goal.categoryPublicId !== 0) {
+            category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
 
-        let check_state = goal.check_state ? "checked" : "";
-        let check_color = this.todo.appSettings.data.check_border[goal.importance]
-        let goal_text = this.todo.appSettings.data.decode_text(goal["goal"])
+        let check_state = goal.checkState ? "checked" : "";
+        let check_color = this.app.settings.data.check_border[goal.importance]
+        let goal_text = this.app.settings.data.decode_text(goal["name"])
 
         return `
             <div class='todo' style="${category_border}">
-                <div class="todoId">${goal["id"]}</div>
+                <div class="todoId">${goal["publicId"]}</div>
                 <div class='todoCheck'>
                     <input type='checkbox' class='check_task' ${check_state} style="border-color:${check_color}; color:${check_color}">
                 </div>
@@ -186,18 +189,18 @@ export class ProjectView {
      * changes check of project goal on checkbox click
      * @param that pressed checkbox of goal
      */
-    change_project_check(selected_goal) {
+    async change_project_check(selected_goal) {
         let check_state = !selected_goal.find('.check_task').prop('checked')
         let goal_id = selected_goal.find('.todoId').text()
 
         if (check_state) {
             selected_goal.find('.checkDot').css('background-image', ``)
             $('#projectTodo .projectSectionGoals').append(selected_goal)
-            window.goalsAPI.goalRemoveDate({id: goal_id})
+            await this.app.services.data_updater('goal-remove-date', {id: goal_id}, 'PATCH')
         } else {
             selected_goal.find('.checkDot').css('background-image', `url('images/goals/check.png')`)
             $('#projectDone .projectSectionGoals').append(selected_goal)
-            window.goalsAPI.changeChecksGoal({id: goal_id, state: 1})
+            await this.app.services.data_updater('change-checks-goal', {id: goal_id, state: 1}, 'PATCH')
         }
         this.dragula_project_view()
     }
