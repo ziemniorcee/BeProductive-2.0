@@ -15,9 +15,9 @@ export class InboxView {
             }
         });
 
-        $(document).on('click', '#inboxList .check_task', (event) => {
+        $(document).on('click', '#inboxList .check_task', async (event) => {
             event.stopPropagation()
-            this.check_goal(event.currentTarget)
+            await this.check_goal(event.currentTarget)
         });
 
         $(document).on('focus', '#inboxInput', function (){
@@ -41,7 +41,6 @@ export class InboxView {
         $('#main').html($main_clone)
 
         let goals = await this.app.services.data_getter('get-inbox', {})
-        console.log(goals)
         let breaks = this.app.settings.date.get_inbox_sections(goals)
         let titles = ['Today', 'Last 7 days', 'Last 30 days', 'Later']
 
@@ -93,7 +92,7 @@ export class InboxView {
         let name = $inbox_input.val()
         $inbox_input.val("")
 
-        let new_goal = await window.inboxAPI.newInboxGoal({name: name, add_date: this.app.settings.date.today_sql})
+        let new_goal = await this.app.services.data_poster('new-inbox-goal', {name: name, addDate: this.app.settings.date.today_sql})
         this.add_todo(new_goal, 0)
     }
 
@@ -105,11 +104,11 @@ export class InboxView {
      *      it changes id to its id - 1
      * @param selected_check event current target
      */
-    check_goal(selected_check) {
+    async check_goal(selected_check) {
         let $selected_todo = $(selected_check).closest('.inboxTodo')
         let selected_todo_id = $selected_todo.find('.inboxTodoId').text()
 
-        window.inboxAPI.checkInboxGoal({'id': selected_todo_id})
+        await this.app.services.data_updater('check-inbox-goal', {id: selected_todo_id, state: 1}, 'PATCH')
 
         let $previous_element = $selected_todo.prev()
         let $next_element = $selected_todo.next()

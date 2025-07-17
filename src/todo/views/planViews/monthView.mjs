@@ -355,7 +355,6 @@ export class MonthView {
         let month_day = Number($('.monthGoals .sidebarTask').closest('.monthDay').find('.monthDate').text())
         let date = this.app.settings.date.get_sql_month_day(month_day)
 
-        window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
         if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
         else drag_sidebar_task.closest('.day').remove()
     }

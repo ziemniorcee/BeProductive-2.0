@@ -163,7 +163,7 @@ export class ProjectView {
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
 
-        if (goal.categoryPublicId !== 0) {
+        if (goal.categoryPublicId !== 0 && goal.categoryPublicId !== null) {
             category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }

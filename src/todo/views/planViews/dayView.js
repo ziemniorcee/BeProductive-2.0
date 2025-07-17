@@ -67,25 +67,19 @@ export class DayView {
             this.remove_history()
         })
 
-        window.sidebarAPI.removingHistory(() => {
-            this.remove_history()
-        })
 
         $(document).on('click', '#testPanelRemoveIdea', () => {
-            this.remove_idea()
-        })
-
-        window.sidebarAPI.removingIdea(() => {
             this.remove_idea()
         })
 
         /**
          * removes project goal
          */
-        window.sidebarAPI.removingProjectGoal(() => {
-            window.sidebarAPI.projectGoalRemoved({id: $(Number(this.todo_to_remove).find('.todoId').text())})
-            this.todo_to_remove.remove()
-        })
+        // window.sidebarAPI.removingProjectGoal(() => {
+        //     console.log("CHUJ")
+        //     window.sidebarAPI.projectGoalRemoved({id: $(Number(this.todo_to_remove).find('.todoId').text())})
+        //     this.todo_to_remove.remove()
+        // })
 
         $(document).on('click', '.sidebarTask', function () {
             this.is_day_drag = 0
@@ -297,7 +291,6 @@ export class DayView {
      * @param dragged_task dragged history task
      */
     _get_from_history(dragged_task) {
-        window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(dragged_task), date: this.app.settings.date.day_sql})
 
         if (dragged_task.closest('.historyTasks').children().length > 1) dragged_task.closest('.sidebarTask').remove()
         else dragged_task.closest('.day').remove()
@@ -362,24 +355,9 @@ export class DayView {
         return new_arr.indexOf(value)
     }
 
-    /**
-     * removes history goal
-     */
-    remove_history() {
-        window.sidebarAPI.historyRemoved({id: $('.sidebarTask').index(this.todo_to_remove)})
-        if ($(this.todo_to_remove).closest('.historyTasks').children().length === 1) {
-            this.todo_to_remove = $(this.todo_to_remove).closest('.day')
-        }
-        this.todo_to_remove.remove()
-    }
 
-    /**
-     * removes idea goal
-     */
-    remove_idea() {
-        window.sidebarAPI.ideaRemoved({id: $('.sidebarTask').index(this.todo_to_remove)})
-        this.todo_to_remove.remove()
-    }
+
+
 
     /**
      * changes check of goals

@@ -111,7 +111,6 @@ export class HistorySidebar {
      * Adding goal to main from history by clicking plus on goal
      */
     get_history_goal(that) {
-        window.sidebarAPI.deleteHistory({id: $('.historyAdd').index(that), date: this.date.day_sql})
         if ($(that).closest('.historyTasks').children().length > 1) $(that).closest('.sidebarTask').remove()
         else $(that).closest('.day').remove()
     }

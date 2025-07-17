@@ -13,13 +13,13 @@ export class AsapView {
             $('#ASAPEntry').css('background-color', "#2A2A2A")
         })
 
-        $(document).on('click', '#ASAPList .check_task', (event) => {
+        $(document).on('click', '#ASAPList .check_task', async (event) => {
             event.stopPropagation()
             let $todo = $(event.currentTarget).closest('.todo')
             let todo_id = $todo.find('.todoId').text()
 
             $todo.remove()
-            window.asapAPI.checkASAPGoal({'id': todo_id})
+            await this.app.services.data_updater('check-asap-goal', {id: todo_id}, 'PATCH')
         })
 
         $(document).on('click', '#ASAPFire', async () => {
@@ -67,7 +67,8 @@ export class AsapView {
     build_goal(goal) {
         let category_color = "rgb(74, 74, 74)"
         let category_border = ""
-        if (goal.category !== 0 && goal.category !== undefined) {
+        console.log(goal.categoryPublicId)
+        if ( goal.categoryPublicId !== null) {
             category_color = this.app.settings.data.categories.categories[goal.categoryPublicId][0]
             category_border = `border-right: 4px solid ${category_color}`
         }
@@ -106,7 +107,7 @@ export class AsapView {
 
         if ($('#ASAPFire img').attr('src') === 'images/goals/fire1.png') date_type = 2
 
-        let new_goal = await window.asapAPI.newASAPGoal({name: name, add_date: this.app.settings.date.today_sql, date_type: date_type})
+        let new_goal = await this.app.services.data_poster('new-asap-goal', {name: name, addDate: this.app.settings.date.today_sql, dateType: date_type})
         new_goal['steps'] = ""
 
         if (date_type === 2) {

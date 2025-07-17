@@ -29,8 +29,6 @@ export class Data {
     }
 
     async init() {
-        let categories_data = await window.dataAPI.getCategories();
-        this.projects = await window.dataAPI.getProjects()
         this.project_conn = await window.dataAPI.getGalacticConnections()
         this.habits = await window.dataAPI.getHabits()
         this.habits_days = await window.dataAPI.getHabitsDays()
@@ -62,18 +60,6 @@ export class Data {
             let new_b = Math.min(Math.floor(category.b * 3 / 2), 255)
 
             this.categories2[category.id] = `rgb(${new_r}, ${new_g}, ${new_b})`
-        }
-    }
-
-
-
-    async loadIcons() {
-        this.merged_icons = JSON.parse(JSON.stringify(this.icons));
-
-        const result = await window.electronAPI.getIcons();
-        let icons_imported = result['files']
-        for (let i = 0; i < icons_imported.length; i++) {
-            this.merged_icons.push(icons_imported[i])
         }
     }
 

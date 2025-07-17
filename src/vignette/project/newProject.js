@@ -87,51 +87,6 @@ export class NewProject {
         }
     }
 
-    async make_project_icon(project_id, category_id) {
-        let category = this.app.settings.data.categories.categories[category_id]
-        let category_rgb = category[0]
-        const [var_r, var_g, var_b] = category_rgb.match(/\d+/g).map(Number);
-
-        let name = $('#newProjectName').val()
-
-        let icon_path = $('#projectSettingIconSrc').attr('src')
-        let icon_name = this.app.settings.data.projects.findNameByPath(icon_path);
-
-        const img = new Image();
-        img.src = icon_path;
-        img.onload = async () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            ctx.drawImage(img, 0, 0);
-
-            const imageData = ctx.getImageData(0, 0, img.width, img.height);
-            const pixels = imageData.data;
-
-            for (let i = 0; i < pixels.length; i += 4) {
-                if (pixels[i + 3] > 0) {
-                    pixels[i] = var_r;   // Red
-                    pixels[i + 1] = var_g; // Green
-                    pixels[i + 2] = var_b; // Blue
-                }
-            }
-
-            ctx.putImageData(imageData, 0, 0);
-
-            const processedImageSrc = canvas.toDataURL();
-
-            const base64Data = processedImageSrc.split(',')[1];
-            const fileName = `project${project_id}.png`;
-
-            let result = await window.electronAPI.saveFile(fileName, base64Data, "project_icons");
-            await this.app.settings.data.projects.loadProjectIcons()
-            this.app.settings.data.projects.set_projects_options()
-            console.log("CHUJ1")
-        }
-    }
 
     async open_icon_picker() {
         if ($('#iconPicker').length === 0) {
@@ -153,60 +108,6 @@ export class NewProject {
      * Gets icon from user and changes it to white color
      * @param event change event of file uploading
      */
-    async icon_upload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = async () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-
-                    ctx.drawImage(img, 0, 0);
-
-                    const imageData = ctx.getImageData(0, 0, img.width, img.height);
-                    const pixels = imageData.data;
-
-                    for (let i = 0; i < pixels.length; i += 4) {
-                        const r = pixels[i];
-                        const g = pixels[i + 1];
-                        const b = pixels[i + 2];
-                        const alpha = pixels[i + 3];
-
-                        if (r < 50 && g < 50 && b < 50 && alpha > 0) {
-                            pixels[i] = 255;
-                            pixels[i + 1] = 255;
-                            pixels[i + 2] = 255;
-                        }
-                    }
-
-                    ctx.putImageData(imageData, 0, 0);
-
-                    const processedImageSrc = canvas.toDataURL();
-
-                    const base64Data = processedImageSrc.split(',')[1];
-                    const fileName = file.name;
-
-                    const result = await window.electronAPI.saveFile(fileName, base64Data, "icons");
-                    $('#projectSettingIconSrc').attr('src', result['path']);
-                    if (result.success) {
-                        await this.app.settings.data.projects.loadIcons()
-
-                    } else {
-                        alert(`Error: ${result.error}`);
-                    }
-                };
-            };
-
-            reader.readAsDataURL(file);
-        }
-        $('#iconPicker').remove()
-    }
 
     /**
      * event of selecting icon

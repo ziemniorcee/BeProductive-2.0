@@ -349,7 +349,7 @@ export class CurrentDate {
         let state_before = -1
         for (let i = 0; i < goals.length; i++) {
             let new_state = state_before
-            let current_date = new Date(goals[i]['add_date'])
+            let current_date = new Date(goals[i]['addDate'])
 
             if (current_date > today_yesterday) {
                 new_state = 0

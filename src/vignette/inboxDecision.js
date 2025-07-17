@@ -86,16 +86,15 @@ export class DecisionMaker {
             }
         })
 
-        $(document).on('click', '#decisionSave', () => {
+        $(document).on('click', '#decisionSave', async () => {
             let decision_main_entry = $('#editMainEntry').val()
             let decision_note_entry = $('#editNoteEntry').val()
             let steps_array = this.app.vignette.todoVignette.get_steps()
-            let category_id = Number($('.categoryDeciderId').text())
-            console.log("pr id", $('.projectDeciderId').text())
-            let project_id = Number($('.projectDeciderId').text())
+            let category_id = $('.categoryDeciderId').text()
+            let project_id = $('.projectDeciderId').text()
 
             let date_type = 0
-            let date = ""
+            let date = null
 
             if ($('#decisionWhenFuture').attr('class') === 'deciderButtonFilled') {
                 if ($("#decisionFutureTypeDeadline").css('display') === 'flex') {
@@ -110,18 +109,17 @@ export class DecisionMaker {
 
             let inbox_id = this.goal_id
             let goal = {
-                inbox_id: inbox_id,
-                goal: decision_main_entry,
+                name: decision_main_entry,
                 note: decision_note_entry,
                 steps: steps_array,
-                category_id: category_id,
-                project_id: project_id,
-                date: date,
-                date_type: date_type,
+                categoryPublicId: category_id,
+                projectPublicId: project_id,
+                addDate: date,
+                dateType: date_type,
             }
 
-
-            window.inboxAPI.newGoalFromInbox(goal)
+            console.log(inbox_id)
+            await this.app.services.data_poster('new-goal-from-inbox', {changes: JSON.stringify(goal), id: inbox_id})
             $('#vignette').css('display', 'none');
             $('#vignette').html('')
 

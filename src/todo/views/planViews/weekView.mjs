@@ -309,7 +309,6 @@ export class WeekView {
         let week_day = $('.weekDayGoals .sidebarTask').closest('.weekDayGoals').attr("id")
         let date = this.app.settings.date.week_current[this.app.settings.data.weekdays2.indexOf(week_day)]
 
-        window.sidebarAPI.deleteHistory({id: $('#rightbar .sidebarTask').index(drag_sidebar_task), date: date})
 
         if (drag_sidebar_task.closest('.historyTasks').children().length > 1) drag_sidebar_task.closest('.sidebarTask').remove()
         else drag_sidebar_task.closest('.day').remove()
@@ -336,7 +335,6 @@ export class WeekView {
                 new_ids.eq(i).text(i)
             }
 
-            if (this.app.settings.date.week_now !== this.app.settings.date.week_current) window.sidebarAPI.askHistory({date: this.app.settings.date.week_current[0]})
         }, 1000);
 
     }

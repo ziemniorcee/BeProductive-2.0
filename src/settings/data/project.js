@@ -20,30 +20,12 @@ export class ProjectsSettings {
         // await this.loadProjectIcons()
     }
 
-    async loadProjectIcons() {
-        this.project_icons = []
-        const result = await window.electronAPI.getProjectIcons();
-        let icons_imported = result['files']
-
-        this.appDataPath = result['appDataPath']
-        for (let i = 0; i < icons_imported.length; i++) {
-            this.project_icons.push(icons_imported[i])
-        }
-    }
 
     async get_icons() {
         return await this.app.services.data_getter('get-icons')
     }
 
-    async loadIcons() {
-        this.merged_icons = JSON.parse(JSON.stringify(this.icons));
 
-        const result = await window.electronAPI.getIcons();
-        let icons_imported = result['files']
-        for (let i = 0; i < icons_imported.length; i++) {
-            this.merged_icons.push(icons_imported[i])
-        }
-    }
 
     get_project_icon_path(project_id) {
         return `${this.appDataPath}\\project${project_id}.png`
